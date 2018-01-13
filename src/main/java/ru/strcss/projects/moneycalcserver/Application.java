@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc;
+package ru.strcss.projects.moneycalcserver;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.SpringApplication;

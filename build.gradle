@@ -1,4 +1,4 @@
-group 'ru.strcss.projects.moneycalc'
+group 'ru.strcss.projects.moneycalcserver'
 version '1.0-SNAPSHOT'
 
 buildscript {
