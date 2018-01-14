@@ -12,8 +12,19 @@ public class Person{
     public String ID;
 
     private Access access;
+
     private PersonalIdentifications personalIdentifications;
     private PersonalSettings personalSettings;
     private PersonalFinance personalFinance;
 
+    @Override
+    public String toString() {
+        return "Person{" +
+                "ID='" + ID + '\'' +
+                ", access=" + access +
+                ", personalIdentifications=" + personalIdentifications +
+                ", personalSettings=" + personalSettings +
+                ", personalFinance=" + personalFinance +
+                '}';
+    }
 }

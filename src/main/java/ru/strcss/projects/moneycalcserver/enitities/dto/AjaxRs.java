@@ -5,12 +5,12 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class AjaxRs {
+public class AjaxRs<E extends Object> {
     private Status status;
-    private Object payload;
+    private E payload;
     private String message;
 
-    public AjaxRs(Status status, Object payload, String message) {
+    public AjaxRs(Status status, E payload, String message) {
         this.status = status;
         this.payload = payload;
         this.message = message;

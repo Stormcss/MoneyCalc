@@ -26,4 +26,9 @@ public class ApiControllerRegisterTest {
         AjaxRs ajaxRs = apiControllerRegister.addPerson(person);
         Assert.assertTrue(ajaxRs.getStatus().equals(Status.SUCCESS));
     }
+
+    @Test
+    public void checkAddedPerson(){
+
+    }
 }
