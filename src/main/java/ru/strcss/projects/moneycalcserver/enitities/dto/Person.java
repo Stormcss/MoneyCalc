@@ -9,7 +9,7 @@ import org.springframework.data.annotation.Id;
 public class Person{
 
     @Id
-    public String ID;
+    public String iD;
 
     private Access access;
 
@@ -20,7 +20,7 @@ public class Person{
     @Override
     public String toString() {
         return "Person{" +
-                "ID='" + ID + '\'' +
+                "iD='" + iD + '\'' +
                 ", access=" + access +
                 ", personalIdentifications=" + personalIdentifications +
                 ", personalSettings=" + personalSettings +

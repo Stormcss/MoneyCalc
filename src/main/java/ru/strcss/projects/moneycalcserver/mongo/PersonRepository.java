@@ -6,6 +6,9 @@ import ru.strcss.projects.moneycalcserver.enitities.dto.Person;
 public interface PersonRepository extends MongoRepository<Person, String> {
 
     Person findPersonByID(String id);
+    Person findPersonByAccess_Login(String login);
+    Person findPersonByAccess_Email(String email);
+
 //    String findByName(String name);
 //
 //    List<String> findByNameStartingWith(String nameStart);

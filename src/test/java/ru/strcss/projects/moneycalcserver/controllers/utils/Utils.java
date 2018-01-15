@@ -1,0 +1,23 @@
+package ru.strcss.projects.moneycalcserver.controllers.utils;
+
+import lombok.extern.slf4j.Slf4j;
+import org.testng.Assert;
+import retrofit2.Call;
+import retrofit2.Response;
+import ru.strcss.projects.moneycalcserver.enitities.dto.AjaxRs;
+
+import java.io.IOException;
+
+@Slf4j
+public class Utils {
+    public static Response<AjaxRs> sendRequest(Call<AjaxRs> call) throws IOException {
+
+        Response<AjaxRs> response = call.execute();
+
+        Assert.assertTrue(response != null, "response is null!");
+        Assert.assertTrue(response.body() != null, "response body is null!");
+        log.debug("{} - {}", response.body().getMessage(), response.body().getStatus().name());
+        return response;
+    }
+
+}
