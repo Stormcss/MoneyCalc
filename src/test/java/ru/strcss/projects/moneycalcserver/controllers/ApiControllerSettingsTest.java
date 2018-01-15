@@ -1,8 +1,9 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
-import org.junit.Test;
+import lombok.extern.slf4j.Slf4j;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
+import org.testng.annotations.Test;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -15,8 +16,8 @@ import ru.strcss.projects.moneycalcserver.enitities.dto.Status;
 
 import java.io.IOException;
 
+@Slf4j
 public class ApiControllerSettingsTest {
-
     private MoneyCalcClient service;
 
     @BeforeClass
@@ -29,19 +30,17 @@ public class ApiControllerSettingsTest {
         service = retrofit.create(MoneyCalcClient.class);
     }
 
-
     @Test
     public void getSettings() throws IOException {
 
         Person person = Generator.personGenerator();
+        //saving Person
+        Response<AjaxRs> rsSave = Utils.sendRequest(service.registerPerson(person));
+        Assert.assertEquals(rsSave.body().getStatus(), Status.SUCCESS, rsSave.body().getMessage());
 
-        person.getAccess().getLogin();
-
-        Response<AjaxRs> response =
-                Utils.sendRequest(
-                        service.getSettings(
-                                person.getAccess().getLogin()));
-
-        Assert.assertTrue(response.body().getStatus().equals(Status.SUCCESS));
+        //requesting his Settings
+        Response<AjaxRs> rsGetSettings = Utils.sendRequest(service.getSettings(person.getAccess().getLogin()));
+        Assert.assertEquals(rsGetSettings.body().getStatus(), Status.SUCCESS, rsGetSettings.body().getMessage());
+        log.debug("PersonalSettings: {}", rsGetSettings.body().getPayload());
     }
 }

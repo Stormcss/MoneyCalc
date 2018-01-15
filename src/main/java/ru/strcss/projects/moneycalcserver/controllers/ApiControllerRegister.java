@@ -1,7 +1,6 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,14 +10,13 @@ import ru.strcss.projects.moneycalcserver.controllers.Utils.ValidationResult;
 import ru.strcss.projects.moneycalcserver.controllers.entities.AbstractApiController;
 import ru.strcss.projects.moneycalcserver.enitities.dto.AjaxRs;
 import ru.strcss.projects.moneycalcserver.enitities.dto.Person;
-import ru.strcss.projects.moneycalcserver.mongo.PersonRepository;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/registration/")
 public class ApiControllerRegister extends AbstractApiController {
-    @Autowired
-    PersonRepository repository;
+//    @Autowired
+//    PersonRepository repository;
 
     /**
      * 1) We check if person has required fields filled

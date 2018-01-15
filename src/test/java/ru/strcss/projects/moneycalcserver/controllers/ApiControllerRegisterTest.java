@@ -23,6 +23,8 @@ public class ApiControllerRegisterTest {
 
     @BeforeClass
     public void init() {
+        log.error("WTF");
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://localhost:8080/")
                 .addConverterFactory(GsonConverterFactory.create())

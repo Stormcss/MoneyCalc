@@ -35,8 +35,7 @@ public class Generator {
     }
 
     public static String generateDatePlus(TemporalUnit unit, int count) {
-        LocalDate now = LocalDate.now();
-        now.plus(count,unit);
+        LocalDate now = LocalDate.now().plus(count,unit);
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return now.format(formatter);
     }
