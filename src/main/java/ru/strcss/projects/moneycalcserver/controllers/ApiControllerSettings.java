@@ -8,7 +8,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalcserver.controllers.Utils.ControllerUtils;
 import ru.strcss.projects.moneycalcserver.controllers.entities.AbstractApiController;
 import ru.strcss.projects.moneycalcserver.enitities.dto.AjaxRs;
-import ru.strcss.projects.moneycalcserver.enitities.dto.Person;
+import ru.strcss.projects.moneycalcserver.enitities.dto.PersonalSettings;
 
 @Slf4j
 @RestController
@@ -29,11 +29,11 @@ public class ApiControllerSettings extends AbstractApiController {
 
         login = login.replace("\"","");
 
-        Person person = repository.findPersonByAccess_Login(login);
+        PersonalSettings settings = repository.findPersonByAccess_Login(login).getPersonalSettings();
 
-        if (person != null) {
-            log.debug("returning PersonalSettings for login {}: {}", login, person.getPersonalSettings());
-            return ControllerUtils.responseSuccess(RETURN_SETTINGS, person.getPersonalSettings());
+        if (settings != null) {
+            log.debug("returning PersonalSettings for login {}: {}", login, settings);
+            return ControllerUtils.responseSuccess(RETURN_SETTINGS, settings);
         } else {
             log.error("Can not return PersonalSettings for login {} - no Person found", login);
             return ControllerUtils.responseError(NO_PERSON_EXIST);

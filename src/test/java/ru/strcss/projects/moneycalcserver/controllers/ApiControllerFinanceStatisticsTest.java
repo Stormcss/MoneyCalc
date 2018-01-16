@@ -11,14 +11,14 @@ import ru.strcss.projects.moneycalcserver.controllers.api.MoneyCalcClient;
 import ru.strcss.projects.moneycalcserver.controllers.utils.Generator;
 import ru.strcss.projects.moneycalcserver.controllers.utils.Utils;
 import ru.strcss.projects.moneycalcserver.enitities.dto.AjaxRs;
+import ru.strcss.projects.moneycalcserver.enitities.dto.FinanceStatistics;
 import ru.strcss.projects.moneycalcserver.enitities.dto.Person;
-import ru.strcss.projects.moneycalcserver.enitities.dto.PersonalSettings;
 import ru.strcss.projects.moneycalcserver.enitities.dto.Status;
 
 import java.io.IOException;
 
 @Slf4j
-public class ApiControllerSettingsTest {
+public class ApiControllerFinanceStatisticsTest {
     private MoneyCalcClient service;
 
     @BeforeClass
@@ -32,16 +32,16 @@ public class ApiControllerSettingsTest {
     }
 
     @Test
-    public void getSettings() throws IOException {
-
+    public void getFinanceStats() throws IOException {
         Person person = Generator.personGenerator();
+
         //saving Person
         Response<AjaxRs<Person>> rsSave = Utils.sendRequest(service.registerPerson(person));
         Assert.assertEquals(rsSave.body().getStatus(), Status.SUCCESS, rsSave.body().getMessage());
 
-        //requesting his Settings
-        Response<AjaxRs<PersonalSettings>> rsGetSettings = Utils.sendRequest(service.getSettings(person.getAccess().getLogin()));
-        Assert.assertEquals(rsGetSettings.body().getStatus(), Status.SUCCESS, rsGetSettings.body().getMessage());
-        log.debug("PersonalSettings: {}", rsGetSettings.body().getPayload());
+        //requesting his FinanceStatistics
+        Response<AjaxRs<FinanceStatistics>> rsGetStats = Utils.sendRequest(service.getFinanceStats(person.getAccess().getLogin()));
+        Assert.assertEquals(rsGetStats.body().getStatus(), Status.SUCCESS, rsGetStats.body().getMessage());
+        log.debug("FinanceStatistics: {}", rsGetStats.body().getPayload());
     }
 }

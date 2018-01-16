@@ -2,14 +2,17 @@ package ru.strcss.projects.moneycalcserver.enitities.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
-import java.util.Date;
-
-@Builder
 @Getter
+@Builder
+@ToString
 public class Transaction {
-    private Date date;
+    private String date;
     private int sum;
+    private String currency;
     private String description;
     private String sectionID;
 }
+
+

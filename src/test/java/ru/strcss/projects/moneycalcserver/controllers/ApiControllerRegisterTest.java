@@ -23,8 +23,6 @@ public class ApiControllerRegisterTest {
 
     @BeforeClass
     public void init() {
-        log.error("WTF");
-
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://localhost:8080/")
                 .addConverterFactory(GsonConverterFactory.create())
@@ -35,14 +33,14 @@ public class ApiControllerRegisterTest {
 
     @Test(priority = -2)
     public void registerCorrectPerson() throws IOException {
-        Response<AjaxRs> response = Utils.sendRequest(service.registerPerson(savedPerson));
+        Response<AjaxRs<Person>> response = Utils.sendRequest(service.registerPerson(savedPerson));
 
         Assert.assertEquals(response.body().getStatus(), Status.SUCCESS, response.body().getMessage());
     }
 
     @Test(priority = -1)
     public void registerExistingLoginPerson() throws IOException {
-        Response<AjaxRs> response = Utils.sendRequest(service.registerPerson(savedPerson));
+        Response<AjaxRs<Person>> response = Utils.sendRequest(service.registerPerson(savedPerson));
 
         Assert.assertEquals(response.body().getStatus(), Status.ERROR, response.body().getMessage());
     }
@@ -51,7 +49,7 @@ public class ApiControllerRegisterTest {
     public void registerExistingEmailPerson() throws IOException {
         savedPerson.getAccess().setLogin(Generator.UUID());
 
-        Response<AjaxRs> response = Utils.sendRequest(service.registerPerson(savedPerson));
+        Response<AjaxRs<Person>> response = Utils.sendRequest(service.registerPerson(savedPerson));
 
         Assert.assertEquals(response.body().getStatus(), Status.ERROR, response.body().getMessage());
     }
@@ -60,7 +58,7 @@ public class ApiControllerRegisterTest {
     public void registerIncorrectPassword() throws IOException {
         Person person = Generator.personGenerator();
         person.getAccess().setPassword("");
-        Response<AjaxRs> response = Utils.sendRequest(service.registerPerson(person));
+        Response<AjaxRs<Person>> response = Utils.sendRequest(service.registerPerson(person));
 
         Assert.assertEquals(response.body().getStatus(), Status.ERROR, response.body().getMessage());
     }
@@ -69,7 +67,7 @@ public class ApiControllerRegisterTest {
     public void registerIncorrectEmail() throws IOException {
         Person person = Generator.personGenerator();
         person.getAccess().setEmail("");
-        Response<AjaxRs> response = Utils.sendRequest(service.registerPerson(person));
+        Response<AjaxRs<Person>> response = Utils.sendRequest(service.registerPerson(person));
 
         Assert.assertEquals(response.body().getStatus(), Status.ERROR, response.body().getMessage());
     }
@@ -79,7 +77,7 @@ public class ApiControllerRegisterTest {
 
         Person person = Generator.personGenerator();
         person.getAccess().setLogin("");
-        Response<AjaxRs> response = Utils.sendRequest(service.registerPerson(person));
+        Response<AjaxRs<Person>> response = Utils.sendRequest(service.registerPerson(person));
 
         Assert.assertEquals(response.body().getStatus(), Status.ERROR);
     }
@@ -91,7 +89,7 @@ public class ApiControllerRegisterTest {
         person.getAccess().setLogin("");
         person.getAccess().setEmail("");
         person.getPersonalIdentifications().setName("");
-        Response<AjaxRs> response = Utils.sendRequest(service.registerPerson(person));
+        Response<AjaxRs<Person>> response = Utils.sendRequest(service.registerPerson(person));
 
         Assert.assertEquals(response.body().getStatus(), Status.ERROR);
     }

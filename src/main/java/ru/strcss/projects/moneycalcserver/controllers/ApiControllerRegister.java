@@ -15,9 +15,6 @@ import ru.strcss.projects.moneycalcserver.enitities.dto.Person;
 @RestController
 @RequestMapping("/api/registration/")
 public class ApiControllerRegister extends AbstractApiController {
-//    @Autowired
-//    PersonRepository repository;
-
     /**
      * 1) We check if person has required fields filled
      * 2) We check if the same login exists

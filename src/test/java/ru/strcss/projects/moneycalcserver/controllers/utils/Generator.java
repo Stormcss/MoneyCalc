@@ -7,7 +7,11 @@ import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
+import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ThreadLocalRandom;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class Generator {
     public static Person personGenerator() {
@@ -27,6 +31,23 @@ public class Generator {
                         .sections(Arrays.asList(SettingsSection.builder().name("Авто").build(),
                                 SettingsSection.builder().name("Семья").build()))
                         .build())
+                .financeStatistics(new FinanceStatistics(generateTransactions(5)))
+                .build();
+    }
+
+    public static List<Transaction> generateTransactions(int count){
+        return Stream.generate(Generator::generateTransaction)
+                .limit(count)
+                .collect(Collectors.toList());
+    }
+
+    static Transaction generateTransaction(){
+        return Transaction.builder()
+                .date(createDate())
+                .sum(ThreadLocalRandom.current().nextInt(10,2000))
+                .currency("RUR")
+                .description("5ка")
+                .sectionID("0")
                 .build();
     }
 

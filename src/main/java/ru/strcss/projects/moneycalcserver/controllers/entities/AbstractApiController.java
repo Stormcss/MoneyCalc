@@ -12,6 +12,7 @@ public class AbstractApiController {
     public final String REGISTER_SUCCESSFULL = "Person successfully registered";
     public final String NO_PERSON_EXIST = "Required Person does not exist!";
     public final String RETURN_SETTINGS = "Settings successfully returned";
+    public final String RETURN_STATISTICS = "Statistics successfully returned";
 
     public final String FIND_SUCCESSFULL = "Found successfully";
 

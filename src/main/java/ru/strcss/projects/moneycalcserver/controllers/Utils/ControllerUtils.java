@@ -18,8 +18,8 @@ public class ControllerUtils {
 
     private static ValidationResult proccessValidaionResults(ValidationResult... validationResults){
         boolean status = true;
-        List reasons = new ArrayList();
 
+        List reasons = new ArrayList();
         for (ValidationResult vr : validationResults){
             if (!vr.isValidated()) {
                 status = false;
@@ -48,8 +48,7 @@ public class ControllerUtils {
 
     public static <E> AjaxRs<E> responseSuccess(String message, E payload) {
 
-        // FIXME: 14.01.2018 WTF IS THAT
-        return (AjaxRs<E>) AjaxRs.builder()
+        return AjaxRs.<E>builder()
                 .message(message)
                 .status(Status.SUCCESS)
                 .payload(payload)

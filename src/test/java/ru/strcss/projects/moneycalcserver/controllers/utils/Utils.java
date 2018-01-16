@@ -10,9 +10,9 @@ import java.io.IOException;
 
 @Slf4j
 public class Utils {
-    public static Response<AjaxRs> sendRequest(Call<AjaxRs> call) throws IOException {
+     public static <T> Response<AjaxRs<T>> sendRequest(Call<AjaxRs<T>> call) throws IOException {
 
-        Response<AjaxRs> response = call.execute();
+        Response<AjaxRs<T>> response = call.execute();
 
         Assert.assertTrue(response != null, "response is null!");
         Assert.assertTrue(response.body() != null, "response body is null!");

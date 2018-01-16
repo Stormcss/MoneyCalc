@@ -7,4 +7,11 @@ import java.util.List;
 @Data
 public class FinanceStatistics {
     private List<Transaction> transactions;
+
+    public FinanceStatistics() {
+    }
+
+    public FinanceStatistics(List<Transaction> transactions) {
+        this.transactions = transactions;
+    }
 }

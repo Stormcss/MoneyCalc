@@ -12,7 +12,7 @@ public class Person{
     public String iD;
 
     private Access access;
-
+    private FinanceStatistics financeStatistics;
     private PersonalIdentifications personalIdentifications;
     private PersonalSettings personalSettings;
     private PersonalFinance personalFinance;
@@ -22,6 +22,7 @@ public class Person{
         return "Person{" +
                 "iD='" + iD + '\'' +
                 ", access=" + access +
+                ", financeStatistics=" + financeStatistics +
                 ", personalIdentifications=" + personalIdentifications +
                 ", personalSettings=" + personalSettings +
                 ", personalFinance=" + personalFinance +
