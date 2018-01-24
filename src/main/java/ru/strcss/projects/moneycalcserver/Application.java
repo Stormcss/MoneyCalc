@@ -7,10 +7,10 @@ import org.springframework.context.ApplicationContext;
 
 @Slf4j
 @SpringBootApplication
+//@EnableAutoConfiguration(exclude = {DataSourceAutoConfiguration.class, HibernateJpaAutoConfiguration.class})
 public class Application {
     public static void main(String[] args) {
         ApplicationContext ctx = SpringApplication.run(Application.class, args);
-        log.info("Application has started");
-
+        log.info("MoneyCalcServer has started");
     }
 }

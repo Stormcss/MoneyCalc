@@ -7,7 +7,6 @@
 
     <logger name="deng" level="DEBUG"/>
     <logger name="ru.strcss.projects.moneycalcserver" level="TRACE" />
-    <!--<logger name="ru.sbt.strs.crosses" level="ERROR" />-->
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

@@ -1,31 +1,37 @@
 package ru.strcss.projects.moneycalcserver.enitities.dto;
 
 import lombok.Builder;
-import lombok.Getter;
+import lombok.Data;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
+@Data
 @Builder
-@Getter
+@Document(collection="Person")
 public class Person{
-
     @Id
-    public String iD;
+    private String ID;
 
+    //    @DBRef
     private Access access;
-    private FinanceStatistics financeStatistics;
-    private PersonalIdentifications personalIdentifications;
-    private PersonalSettings personalSettings;
-    private PersonalFinance personalFinance;
+
+//    @DBRef
+//    private FinanceStatistics financeStatistics;
+//    @DBRef
+    private Identifications identifications;
+//    @DBRef
+    private Settings settings;
+//    @DBRef
+    private Finance finance;
 
     @Override
     public String toString() {
         return "Person{" +
-                "iD='" + iD + '\'' +
+                "_id='" + ID + '\'' +
                 ", access=" + access +
-                ", financeStatistics=" + financeStatistics +
-                ", personalIdentifications=" + personalIdentifications +
-                ", personalSettings=" + personalSettings +
-                ", personalFinance=" + personalFinance +
+                ", identifications=" + identifications +
+                ", settings=" + settings +
+                ", finance=" + finance +
                 '}';
     }
 }

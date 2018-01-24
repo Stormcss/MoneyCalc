@@ -4,21 +4,19 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-@Getter
 @Builder
+@Getter
+@Document
 @ToString
-@Document(collection = "Transactions")
-public class Transaction {
+public class Finance {
+
     @Id
     private String _id;
-
-    private String date;
-    private int sum;
-    private String currency;
-    private String description;
-    private int sectionID;
+//    @DBRef
+    private FinanceSummary financeSummary;
+    @DBRef
+    private FinanceStatistics financeStatistics;
 }
-
-
