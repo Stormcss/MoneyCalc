@@ -68,24 +68,10 @@ public class RegisterController extends AbstractController {
                         .build())
                 .build();
 
+
+
         return responseSuccess(REGISTER_SUCCESSFUL, repository.save(person));
 
-//            if (!ControllerUtils.isPersonLoginExists(personIncome.getAccess().getLogin(), repository)) {
-//                if (!ControllerUtils.isPersonEmailExists(personIncome.getAccess().getEmail(), repository)) {
-//                    log.debug("Registering new Person: {}", personIncome);
-//                    return ControllerUtils.responseSuccess(REGISTER_SUCCESSFULL, repository.save(personIncome));
-//                } else {
-//                    log.error("Person with email {} already exists", personIncome.getAccess().getEmail());
-//                    return ControllerUtils.responseError("Person with email " + personIncome.getAccess().getEmail() + " already exists!");
-//                }
-//            } else {
-//                log.error("Person with login {} already exists", personIncome.getAccess().getLogin());
-//                return ControllerUtils.responseError("Person with login " + personIncome.getAccess().getLogin() + " already exists!");
-//            }
-//        } else {
-//            log.error("Person registration failed - required fields are empty: {}", validationResult.getReasons());
-//            return ControllerUtils.responseError("Required fields are empty: " + validationResult.getReasons());
-//        }
     }
 
 }

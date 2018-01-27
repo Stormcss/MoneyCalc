@@ -12,16 +12,10 @@ public class Person{
     @Id
     private String ID;
 
-    //    @DBRef
     private Access access;
 
-//    @DBRef
-//    private FinanceStatistics financeStatistics;
-//    @DBRef
     private Identifications identifications;
-//    @DBRef
     private Settings settings;
-//    @DBRef
     private Finance finance;
 
     @Override

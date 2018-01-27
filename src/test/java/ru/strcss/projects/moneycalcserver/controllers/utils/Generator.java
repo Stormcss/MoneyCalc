@@ -15,8 +15,7 @@ import java.util.stream.Stream;
 
 public class Generator {
 
-//    @Autowired
-//    MongoOperations mongoOperations;
+    private static String[] names = {"Вася", "Петя", "Вова", "Дуся", "Дима", "Ваня", "Митя", "Шура"};
 
     public static Person personGenerator(String login) {
         return generatePerson(login);
@@ -36,7 +35,7 @@ public class Generator {
                         .build())
                 .identifications(Identifications.builder()
                         ._id(login)
-                        .name("Вася")
+                        .name(names[ThreadLocalRandom.current().nextInt(names.length)])
                         .build())
                 .settings(generateSettings(login))
                 .finance(Finance.builder()

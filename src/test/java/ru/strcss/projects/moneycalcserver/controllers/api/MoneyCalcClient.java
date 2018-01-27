@@ -5,17 +5,12 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 import ru.strcss.projects.moneycalcserver.enitities.dto.*;
 
-public interface MoneyCalcClient {
+import java.util.List;
 
-    /**
-     *  Settings
-     */
+public interface MoneyCalcClient {
 
     @POST("/api/registration/registerPerson")
     Call<AjaxRs<Person>> registerPerson(@Body Credentials credentials);
-
-    @POST("/api/financeStatistics/getFinanceStats")
-    Call<AjaxRs<FinanceStatistics>> getFinanceStats(@Body String login);
 
 
     /**
@@ -36,4 +31,21 @@ public interface MoneyCalcClient {
     @POST("/api/identifications/getIdentifications")
     Call<AjaxRs<Identifications>> getIdentifications(@Body String login);
 
+    /**
+     *  FinanceStatistics
+     */
+    @POST("/api/finance/financeStats/getTransactions")
+    Call<AjaxRs<List<Transaction>>> getTransactions(@Body String login);
+
+    @POST("/api/finance/financeStats/addTransaction")
+    Call<AjaxRs<List<Transaction>>> addTransaction(@Body Transaction transaction);
+
+    @POST("/api/finance/financeStats/deleteTransaction")
+    Call<AjaxRs<List<Transaction>>> deleteTransaction(@Body Transaction transaction);
+
+    @POST("/api/finance/financeStats/updateTransaction")
+    Call<AjaxRs<List<Transaction>>> updateTransaction(@Body Transaction transaction);
+
+    @POST("/api/finance/financeStats/dropStatistics")
+    Call<AjaxRs<List<Transaction>>> dropTransactions(@Body String login);
 }

@@ -10,7 +10,7 @@ import java.io.IOException;
 
 @Slf4j
 public class Utils {
-     public static <T> Response<AjaxRs<T>> sendRequest(Call<AjaxRs<T>> call) throws IOException {
+    public static <T> Response<AjaxRs<T>> sendRequest(Call<AjaxRs<T>> call) throws IOException {
 
         Response<AjaxRs<T>> response = call.execute();
 

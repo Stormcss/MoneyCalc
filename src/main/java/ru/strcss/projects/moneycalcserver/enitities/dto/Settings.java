@@ -10,7 +10,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-//@Document(collection = "Settings")
 @Document
 @Builder
 public class Settings {
@@ -26,33 +25,5 @@ public class Settings {
         if (_id.isEmpty()) reasons.add("id is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
-
-
-//    public PersonalSettings() {
-//    }
-
-//    public PersonalSettings(String _id) {
-//        this._id = _id;
-//    }
-//
-//    public PersonalSettings withPeriodFrom(String periodFrom){
-//        this.periodFrom = periodFrom;
-//        return this;
-//    }
-//
-//    public PersonalSettings withPeriodTo(String periodTo){
-//        this.periodTo = periodTo;
-//        return this;
-//    }
-//
-//    public PersonalSettings withSections(List<SettingsSection> sections){
-//        this.sections = sections;
-//        return this;
-//    }
-//
-//    public PersonalSettings withID(String id){
-//        this._id = id;
-//        return this;
-//    }
 
 }

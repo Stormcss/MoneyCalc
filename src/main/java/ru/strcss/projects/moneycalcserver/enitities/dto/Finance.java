@@ -15,7 +15,7 @@ public class Finance {
 
     @Id
     private String _id;
-//    @DBRef
+
     private FinanceSummary financeSummary;
     @DBRef
     private FinanceStatistics financeStatistics;
