@@ -4,24 +4,24 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalcserver.controllers.Utils.ValidationResult;
-import ru.strcss.projects.moneycalcserver.enitities.dto.AjaxRs;
-import ru.strcss.projects.moneycalcserver.enitities.dto.Person;
-import ru.strcss.projects.moneycalcserver.enitities.dto.Settings;
+import ru.strcss.projects.moneycalcserver.controllers.api.SettingsAPIService;
+import ru.strcss.projects.moneycalcserver.controllers.dto.AjaxRs;
+import ru.strcss.projects.moneycalcserver.controllers.dto.ValidationResult;
+import ru.strcss.projects.moneycalcserver.enitities.Person;
+import ru.strcss.projects.moneycalcserver.enitities.Settings;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
-import static ru.strcss.projects.moneycalcserver.controllers.Utils.ControllerUtils.responseError;
-import static ru.strcss.projects.moneycalcserver.controllers.Utils.ControllerUtils.responseSuccess;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/settings/")
-public class SettingsController extends AbstractController {
+public class SettingsController extends AbstractController implements SettingsAPIService {
 
     /**
      * Save Settings object using user's login stored inside
@@ -29,7 +29,6 @@ public class SettingsController extends AbstractController {
      * @param settings - income Settings object
      * @return response object
      */
-    @PostMapping(value = "/saveSettings")
     public AjaxRs saveSettings(@RequestBody Settings settings) {
 
         ValidationResult validationResult = settings.isValid();
@@ -48,6 +47,10 @@ public class SettingsController extends AbstractController {
 
         person.setSettings(settings);
         DBObject dbObject = new BasicDBObject();
+
+
+        // FIXME: 02.02.2018 HOLY SHIT! I OVERWRITE THIS FUCKING PERSON!
+
         mongoOperations.getConverter().write(person, dbObject);
 
         mongoOperations.upsert(query(where("_id").is(settings.get_id())), Update.fromDBObject(dbObject, "_id"), Person.class);
@@ -60,14 +63,13 @@ public class SettingsController extends AbstractController {
      * @param login - user's login
      * @return response object
      */
-    @PostMapping(value = "/getSettings")
     public AjaxRs getSettings(@RequestBody String login) {
-
-        // TODO: 14.01.2018 return Settings from DB, not whole Person
 
         login = login.replace("\"", "");
 
-        Person person = repository.findPersonByAccess_Login(login);
+        Person person = repository.findSettingsByAccess_Login(login);
+
+        log.error("===== {} ======", person);
 
         if (person == null) {
             log.error("Person with login {} is not found!", login);

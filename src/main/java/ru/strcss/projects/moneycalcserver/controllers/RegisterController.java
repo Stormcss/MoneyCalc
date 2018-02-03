@@ -1,22 +1,28 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalcserver.controllers.Utils.ValidationResult;
-import ru.strcss.projects.moneycalcserver.enitities.dto.*;
+import ru.strcss.projects.moneycalcserver.controllers.api.RegisterAPIService;
+import ru.strcss.projects.moneycalcserver.controllers.dto.AjaxRs;
+import ru.strcss.projects.moneycalcserver.controllers.dto.Credentials;
+import ru.strcss.projects.moneycalcserver.controllers.dto.ValidationResult;
+import ru.strcss.projects.moneycalcserver.enitities.*;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 
-import static ru.strcss.projects.moneycalcserver.controllers.Utils.ControllerUtils.*;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.*;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ValidationUtils.isPersonExists;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ValidationUtils.validateRegisterPerson;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/registration/")
-public class RegisterController extends AbstractController {
+public class RegisterController extends AbstractController implements RegisterAPIService {
     /**
      * 1) Checking if person has required fields filled
      * 2) Checking if the same login and email exists
@@ -25,7 +31,6 @@ public class RegisterController extends AbstractController {
      * @return AjaxRs
      */
 
-    @PostMapping(value = "/registerPerson")
     public AjaxRs registerPerson(@RequestBody Credentials credentials) {
 
         ValidationResult validationResult = validateRegisterPerson(credentials.getAccess(), credentials.getIdentifications());
@@ -54,8 +59,9 @@ public class RegisterController extends AbstractController {
                 .access(credentials.getAccess())
                 .identifications(credentials.getIdentifications())
                 .settings(Settings.builder()
-                        .periodFrom(createDate())
-                        .periodTo(generateDatePlus(ChronoUnit.MONTHS, 1))
+                        ._id(login)
+                        .periodFrom(formatDateToString(currentDate()))
+                        .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
                         .sections(new ArrayList<>())
                         .build())
                 .finance(Finance.builder()
@@ -64,13 +70,24 @@ public class RegisterController extends AbstractController {
                                 ._id(login)
                                 .financeSections(new ArrayList<>())
                                 .build())
-                        .financeStatistics(null)
+                        .financeStatistics(FinanceStatistics.builder()
+                                .build())
                         .build())
                 .build();
 
+        PersonTransactions personTransactions = PersonTransactions.builder()
+                .login(login)
+                .transactions(new ArrayList<>())
+                .build();
 
+        // TODO: 02.02.2018 TRANSACTIONS REQUIRED!
 
-        return responseSuccess(REGISTER_SUCCESSFUL, repository.save(person));
+        mongoOperations.save(personTransactions, "Transactions");
+        mongoOperations.save(person, "Person");
+
+        // TODO: 02.02.2018 validate if save is successful
+
+        return responseSuccess(REGISTER_SUCCESSFUL, null);
 
     }
 

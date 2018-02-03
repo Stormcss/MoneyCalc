@@ -1,11 +1,10 @@
-package ru.strcss.projects.moneycalcserver.enitities.dto;
+package ru.strcss.projects.moneycalcserver.enitities;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import ru.strcss.projects.moneycalcserver.controllers.Utils.ValidationResult;
+import ru.strcss.projects.moneycalcserver.controllers.dto.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,15 +12,19 @@ import java.util.List;
 @Getter
 @Builder
 @ToString
-@Document(collection = "Transactions")
+@Document
 public class Transaction {
-    @Id
+//    @Id
     private String _id;
 
-    //should it be object containing login with month/year?
-    private String identifier;
+//    @Indexed
+//    private String login;
 
+//    @Indexed
+//    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
     private String date;
+//    private LocalDate date;
+
     private int sum;
     private String currency;
     private String description;
@@ -29,7 +32,7 @@ public class Transaction {
 
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (identifier.isEmpty()) reasons.add("identifier is empty");
+//        if (login == null || login.isEmpty()) reasons.add("login is empty");
         if (sum == 0) reasons.add("Transaction sum can not be 0!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }

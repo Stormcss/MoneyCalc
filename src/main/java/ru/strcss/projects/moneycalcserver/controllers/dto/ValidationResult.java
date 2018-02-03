@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalcserver.controllers.Utils;
+package ru.strcss.projects.moneycalcserver.controllers.dto;
 
 import lombok.Data;
 

@@ -1,10 +1,9 @@
-package ru.strcss.projects.moneycalcserver.enitities.dto;
+package ru.strcss.projects.moneycalcserver.enitities;
 
 import lombok.Builder;
 import lombok.Getter;
 import lombok.ToString;
 import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 @Builder
@@ -17,6 +16,5 @@ public class Finance {
     private String _id;
 
     private FinanceSummary financeSummary;
-    @DBRef
     private FinanceStatistics financeStatistics;
 }

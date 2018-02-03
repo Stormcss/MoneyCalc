@@ -4,24 +4,24 @@ import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.query.Update;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalcserver.controllers.Utils.ValidationResult;
-import ru.strcss.projects.moneycalcserver.enitities.dto.AjaxRs;
-import ru.strcss.projects.moneycalcserver.enitities.dto.Identifications;
-import ru.strcss.projects.moneycalcserver.enitities.dto.Person;
+import ru.strcss.projects.moneycalcserver.controllers.api.IdentificationsAPIService;
+import ru.strcss.projects.moneycalcserver.controllers.dto.AjaxRs;
+import ru.strcss.projects.moneycalcserver.controllers.dto.ValidationResult;
+import ru.strcss.projects.moneycalcserver.enitities.Identifications;
+import ru.strcss.projects.moneycalcserver.enitities.Person;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
-import static ru.strcss.projects.moneycalcserver.controllers.Utils.ControllerUtils.responseError;
-import static ru.strcss.projects.moneycalcserver.controllers.Utils.ControllerUtils.responseSuccess;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/identifications/")
-public class IdentificationsController extends AbstractController {
+public class IdentificationsController extends AbstractController implements IdentificationsAPIService {
 
     /**
      * Save Identifications object using user's login
@@ -29,7 +29,6 @@ public class IdentificationsController extends AbstractController {
      * @param identifications - user's login
      * @return response object with Identifications payload
      */
-    @PostMapping(value = "/saveIdentifications")
     public AjaxRs saveIdentifications(@RequestBody Identifications identifications) {
 
         ValidationResult validationResult = identifications.isValid();
@@ -57,12 +56,11 @@ public class IdentificationsController extends AbstractController {
      * @param login - user's login
      * @return response object with Identifications payload
      */
-    @PostMapping(value = "/getIdentifications")
     public AjaxRs getIdentifications(@RequestBody String login) {
 
         login = login.replace("\"", "");
 
-        Identifications identifications = repository.findPersonByAccess_Login(login).getIdentifications();
+        Identifications identifications = repository.findIdentificationsByAccess_Login(login).getIdentifications();
 
         if (identifications != null) {
             log.debug("returning Identifications for login {}: {}", login, identifications);

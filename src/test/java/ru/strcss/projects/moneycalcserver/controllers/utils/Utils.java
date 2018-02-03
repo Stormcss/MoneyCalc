@@ -4,7 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.testng.Assert;
 import retrofit2.Call;
 import retrofit2.Response;
-import ru.strcss.projects.moneycalcserver.enitities.dto.AjaxRs;
+import ru.strcss.projects.moneycalcserver.controllers.dto.AjaxRs;
 
 import java.io.IOException;
 
@@ -14,10 +14,12 @@ public class Utils {
 
         Response<AjaxRs<T>> response = call.execute();
 
-        Assert.assertTrue(response != null, "response is null!");
-        Assert.assertTrue(response.body() != null, "response body is null!");
+        Assert.assertTrue(response != null, "Response is null!");
+        Assert.assertTrue(response.body() != null, "Response body is null!");
         log.debug("{} - {}", response.body().getMessage(), response.body().getStatus().name());
         return response;
     }
+
+
 
 }

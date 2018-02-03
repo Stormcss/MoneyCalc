@@ -1,10 +1,9 @@
-package ru.strcss.projects.moneycalcserver.enitities.dto;
+package ru.strcss.projects.moneycalcserver.enitities;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
-import ru.strcss.projects.moneycalcserver.controllers.Utils.ValidationResult;
+import ru.strcss.projects.moneycalcserver.controllers.dto.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -14,7 +13,7 @@ import java.util.List;
 @Builder
 public class Settings {
 
-    @Id
+//    @Id
     private String _id;
     private String periodFrom;
     private String periodTo;

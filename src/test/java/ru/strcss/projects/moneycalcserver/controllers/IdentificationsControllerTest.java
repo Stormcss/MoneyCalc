@@ -1,14 +1,21 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import ru.strcss.projects.moneycalcserver.controllers.api.MoneyCalcClient;
+import ru.strcss.projects.moneycalcserver.controllers.dto.AjaxRs;
+import ru.strcss.projects.moneycalcserver.controllers.dto.Credentials;
+import ru.strcss.projects.moneycalcserver.controllers.dto.Status;
 import ru.strcss.projects.moneycalcserver.controllers.utils.Generator;
-import ru.strcss.projects.moneycalcserver.enitities.dto.*;
+import ru.strcss.projects.moneycalcserver.enitities.Identifications;
+import ru.strcss.projects.moneycalcserver.enitities.Person;
 
 import java.io.IOException;
 
@@ -18,19 +25,19 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.UUI
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.personGenerator;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Slf4j
-public class IdentificationsControllerTest {
+public class IdentificationsControllerTest  extends AbstractTestNGSpringContextTests {
     private MoneyCalcClient service;
 
-//    private String login = Generator.UUID();
-//    private Identifications identifications = Generator.generateIdentifications(login);
-//     newIdentifications used to update existing identifications
-//    private Identifications newIdentifications = Generator.generateIdentifications(login);
+    @LocalServerPort
+    public int SpringBootPort;
 
     @BeforeClass
-    public void init() {
+    public void init(){
+        // Setup Retrofit
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://localhost:8080/")
+                .baseUrl("http://localhost:" + SpringBootPort + "/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -93,7 +100,7 @@ public class IdentificationsControllerTest {
 
         assertEquals(response.body().getStatus(), Status.SUCCESS, response.body().getMessage());
         assertEquals(response.body().getPayload().get_id(), login, "returned Identifications object has wrong login!");
-        assertEquals(response.body().getPayload().getName(), responseCreatePerson.body().getPayload().getIdentifications().getName(), "returned Identifications object has wrong name!");
+        assertEquals(response.body().getPayload().getName(), person.getIdentifications().getName(), "returned Identifications object has wrong name!");
     }
 
 }

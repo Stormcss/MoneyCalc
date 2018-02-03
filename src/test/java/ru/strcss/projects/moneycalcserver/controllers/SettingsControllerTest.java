@@ -1,14 +1,21 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.embedded.LocalServerPort;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import ru.strcss.projects.moneycalcserver.controllers.api.MoneyCalcClient;
+import ru.strcss.projects.moneycalcserver.controllers.dto.AjaxRs;
+import ru.strcss.projects.moneycalcserver.controllers.dto.Credentials;
+import ru.strcss.projects.moneycalcserver.controllers.dto.Status;
 import ru.strcss.projects.moneycalcserver.controllers.utils.Generator;
-import ru.strcss.projects.moneycalcserver.enitities.dto.*;
+import ru.strcss.projects.moneycalcserver.enitities.Person;
+import ru.strcss.projects.moneycalcserver.enitities.Settings;
 
 import java.io.IOException;
 
@@ -17,17 +24,19 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.UUI
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.personGenerator;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
 
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Slf4j
-public class SettingsControllerTest {
+public class SettingsControllerTest extends AbstractTestNGSpringContextTests {
     private MoneyCalcClient service;
 
-    //    private String login = Generator.UUID();
-//    private Settings settings = Generator.generateSettings(login);
-//
+    @LocalServerPort
+    public int SpringBootPort;
+
     @BeforeClass
     public void init() {
+        // Setup Retrofit
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://localhost:8080/")
+                .baseUrl("http://localhost:" + SpringBootPort + "/")
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
 
@@ -36,12 +45,13 @@ public class SettingsControllerTest {
 
     @Test
     public void saveSettingsIncorrectLogin() throws IOException {
-//        Person person = personGenerator();
+        String login = UUID();
+        Person person = personGenerator(login);
+
+        Response<AjaxRs<Person>> registerPersonResponse = sendRequest(service.registerPerson(new Credentials(person.getAccess(), person.getIdentifications())));
+        assertEquals(registerPersonResponse.body().getStatus(), Status.SUCCESS, registerPersonResponse.body().getMessage());
 //
-//        Response<AjaxRs<Person>> registerPersonResponse = sendRequest(service.registerPerson(new Credentials(person.getAccess(), person.getIdentifications())));
-//        assertEquals(registerPersonResponse.body().getStatus(), Status.SUCCESS, registerPersonResponse.body().getMessage());
-//
-        Settings settingsIncorrect = Generator.generateSettings(UUID());
+        Settings settingsIncorrect = Generator.generateSettings(login);
         settingsIncorrect.set_id("");
 
         Response<AjaxRs<Settings>> response = sendRequest(service.saveSettings(settingsIncorrect));
@@ -51,23 +61,24 @@ public class SettingsControllerTest {
 
     @Test
     public void getSettings() throws IOException {
-        Person person = personGenerator();
+        String login = UUID();
+        Person person = personGenerator(login);
 
         //Registering Person
         Response<AjaxRs<Person>> responseCreatePerson = sendRequest(service.registerPerson(new Credentials(person.getAccess(), person.getIdentifications())));
         assertEquals(responseCreatePerson.body().getStatus(), Status.SUCCESS, responseCreatePerson.body().getMessage());
 
         //Saving Settings
-        Response<AjaxRs<Settings>> responseSaveSettings = sendRequest(service.saveSettings(person.getSettings()));
-        assertEquals(responseSaveSettings.body().getStatus(), Status.SUCCESS, responseSaveSettings.body().getMessage());
+//        Response<AjaxRs<Settings>> responseSaveSettings = sendRequest(service.saveSettings(person.getSettings()));
+//        assertEquals(responseSaveSettings.body().getStatus(), Status.SUCCESS, responseSaveSettings.body().getMessage());
 
         //Getting Settings
-        Response<AjaxRs<Settings>> responseGetSettings = sendRequest(service.getSettings(person.getID()));
+        Response<AjaxRs<Settings>> responseGetSettings = sendRequest(service.getSettings(login));
 
         log.debug("Settings: {}", responseGetSettings.body().getPayload());
 
         assertEquals(responseGetSettings.body().getStatus(), Status.SUCCESS, responseGetSettings.body().getMessage());
-        assertEquals(responseGetSettings.body().getPayload().get_id(), person.getID(), "returned Settings object has wrong login!");
+        assertEquals(responseGetSettings.body().getPayload().get_id(), login, "returned Settings object has wrong login!");
     }
 
     @Test

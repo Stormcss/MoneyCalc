@@ -1,6 +1,8 @@
-package ru.strcss.projects.moneycalcserver.enitities.dto;
+package ru.strcss.projects.moneycalcserver.controllers.dto;
 
 import lombok.Data;
+import ru.strcss.projects.moneycalcserver.enitities.Access;
+import ru.strcss.projects.moneycalcserver.enitities.Identifications;
 
 @Data
 public class Credentials {

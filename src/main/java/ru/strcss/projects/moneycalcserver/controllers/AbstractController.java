@@ -20,8 +20,9 @@ public abstract class AbstractController {
     public final String SAVE_IDENTIFICATIONS = "Identifications successfully saved";
     public final String RETURN_IDENTIFICATIONS = "Identifications successfully returned";
 
-    public final String NO_TRANSACTIONS = "TRANSACTIONS successfully returned";
-    public final String RETURN_TRANSACTIONS = "TRANSACTIONS successfully returned";
+    public final String TRANSACTION_SAVING_ERROR = "ERROR has occurred while saved Transaction";
+    public final String TRANSACTION_SAVED = "TRANSACTION successfully saved";
+    public final String TRANSACTIONS_RETURNED = "TRANSACTIONS successfully returned";
 
     public final String FIND_SUCCESSFUL = "Found successfully";
 }
