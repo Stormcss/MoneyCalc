@@ -1,0 +1,15 @@
+group 'ru.strcss.projects.moneycalc.dto'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compile('org.springframework.data:spring-data-mongodb:2.0.3.RELEASE')
+//    testCompile group: 'org.testng', name: 'testng', version: '6.13.1'
+}

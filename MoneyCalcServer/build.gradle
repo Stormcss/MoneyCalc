@@ -1,0 +1,47 @@
+group 'ru.strcss.projects.moneycalc.moneycalcserver'
+version '1.0-SNAPSHOT'
+
+springBoot {
+    executable = true
+    embeddedLaunchScriptProperties =
+            [mode     : 'service',
+             pidFolder: 'pid/',
+             logFolder: 'log/'
+            ]
+}
+
+repositories {
+    mavenCentral()
+}
+//    dependencies {
+//        classpath("org.springframework.boot:spring-boot-gradle-plugin:1.5.8.RELEASE")
+//    }
+//}
+
+//apply plugin: 'java'
+//apply plugin: 'org.springframework.boot'
+
+//sourceCompatibility = 1.8
+//targetCompatibility = 1.8
+
+dependencies {
+    compile project(':MoneyCalcAPI')
+
+    compile("org.springframework.boot:spring-boot-starter-web") {
+        exclude module: "spring-boot-starter-tomcat"
+    }
+    compile("org.springframework.boot:spring-boot-starter-data-mongodb")
+    compile("org.springframework.boot:spring-boot-starter-jetty")
+    compile("org.springframework.boot:spring-boot-starter-actuator")
+    compile("org.springframework.boot:spring-boot-starter-web")
+//    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.8.4'
+    compile('org.projectlombok:lombok:1.16.18')
+
+    testCompile 'com.squareup.retrofit2:retrofit:2.3.0'
+    testCompile 'com.squareup.retrofit2:converter-gson:2.3.0'
+
+    testCompile group: 'org.testng', name: 'testng', version: '6.13.1'
+    testCompile('org.springframework.boot:spring-boot-starter-test')
+    testCompile group: "de.flapdoodle.embed", name: "de.flapdoodle.embed.mongo", version: "2.0.1"
+//    testCompile('org.springframework.boot:spring-boot-starter-data-mongodb')
+}

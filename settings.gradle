@@ -1,2 +1,4 @@
-rootProject.name = 'MoneyCalcServer'
-
+rootProject.name = 'MoneyCalc'
+include 'MoneyCalcDTO'
+include 'MoneyCalcServer'
+include 'MoneyCalcAPI'
