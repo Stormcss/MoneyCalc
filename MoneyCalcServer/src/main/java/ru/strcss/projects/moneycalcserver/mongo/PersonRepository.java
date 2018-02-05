@@ -8,6 +8,7 @@ import ru.strcss.projects.moneycalc.enitities.Person;
 @Repository
 public interface PersonRepository extends MongoRepository<Person, String> {
     Person findPersonByID(String id);
+
     Person findPersonByAccess_Login(String login);
     Person findPersonByAccess_Email(String email);
 

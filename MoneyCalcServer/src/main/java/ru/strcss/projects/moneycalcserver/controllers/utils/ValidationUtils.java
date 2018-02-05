@@ -1,7 +1,6 @@
 package ru.strcss.projects.moneycalcserver.controllers.utils;
 
-import ru.strcss.projects.moneycalc.dto.TransactionContainer;
-import ru.strcss.projects.moneycalc.dto.ValidationResult;
+import ru.strcss.projects.moneycalc.dto.*;
 import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalcserver.mongo.PersonRepository;
@@ -42,14 +41,70 @@ public class ValidationUtils {
         return new ValidationResult(!loginExists && !emailExists, reasons);
     }
 
-    public static ValidationResult validateTransactionContainer(TransactionContainer container) {
+
+    public static ValidationResult validateAbstractTransactionContainer(AbstractTransactionContainer container) {
+        // FIXME: 05.02.2018 WTF IS HAPPENING HERE
 
         if (container == null)
             return new ValidationResult(false, Collections.singletonList("Empty request"));
 
-        if (container.getTransaction() == null)
-            return new ValidationResult(false, Collections.singletonList("Transaction is empty"));
-
-        return container.getTransaction().isValid();
+        if (container instanceof TransactionContainer) {
+            if (((TransactionContainer) container).getTransaction() == null) {
+                return new ValidationResult(false, Collections.singletonList("Transaction is empty"));
+            }
+        } else if (container instanceof TransactionUpdateContainer) {
+            if (((TransactionUpdateContainer) container).getTransaction() == null) {
+                return new ValidationResult(false, Collections.singletonList("Transaction is empty"));
+            }
+        } else if (container instanceof TransactionDeleteContainer) {
+            if (((TransactionDeleteContainer) container).getID() == null) {
+                return new ValidationResult(false, Collections.singletonList("Transaction ID is empty"));
+            }
+        }
+        return new ValidationResult(true, Collections.emptyList());
     }
+
+//    public static ValidationResult validateTransactionContainer(TransactionContainer container) {
+//        return validateAbstractTransactionContainer(container);
+//    }
+//
+//    public static ValidationResult validateTransactionUpdateContainer(TransactionUpdateContainer container) {
+//        return validateAbstractTransactionContainer(container);
+//    }
+//
+//    public static ValidationResult validateTransactionDeleteContainer(TransactionDeleteContainer container) {
+//        return validateAbstractTransactionContainer(container);
+//    }
+//    public static ValidationResult validateTransactionContainer(TransactionContainer container) {
+//
+//        if (container == null)
+//            return new ValidationResult(false, Collections.singletonList("Empty request"));
+//
+//        if (container.getTransaction() == null)
+//            return new ValidationResult(false, Collections.singletonList("Transaction is empty"));
+//
+//        return container.getTransaction().isValid();
+//    }
+//
+//    public static ValidationResult validateTransactionUpdateContainer(TransactionUpdateContainer container) {
+//
+//        if (container == null)
+//            return new ValidationResult(false, Collections.singletonList("Empty request"));
+//
+//        if (container.getTransaction() == null)
+//            return new ValidationResult(false, Collections.singletonList("Transaction is empty"));
+//
+//        return container.isValid();
+//    }
+//
+//    public static ValidationResult validateTransactionDeleteContainer(TransactionDeleteContainer container) {
+//
+//        if (container == null)
+//            return new ValidationResult(false, Collections.singletonList("Empty request"));
+//
+//        if (container.getID() == null)
+//            return new ValidationResult(false, Collections.singletonList("Transaction ID is empty"));
+//
+//        return container.isValid();
+//    }
 }

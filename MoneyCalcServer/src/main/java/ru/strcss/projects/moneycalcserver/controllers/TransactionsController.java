@@ -12,10 +12,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.TransactionsAPIService;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
-import ru.strcss.projects.moneycalc.dto.TransactionContainer;
-import ru.strcss.projects.moneycalc.dto.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.dto.ValidationResult;
+import ru.strcss.projects.moneycalc.dto.*;
 import ru.strcss.projects.moneycalc.enitities.PersonTransactions;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalcserver.mongo.PersonTransactionsRepository;
@@ -26,12 +23,12 @@ import java.util.List;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.formatDateFromString;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.ValidationUtils.validateTransactionContainer;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ValidationUtils.validateAbstractTransactionContainer;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/finance/financeStats")
-public class FinanceStatisticsController extends AbstractController implements TransactionsAPIService {
+public class TransactionsController extends AbstractController implements TransactionsAPIService {
 
     @Autowired
     MongoTemplate mongoTemplate;
@@ -39,7 +36,7 @@ public class FinanceStatisticsController extends AbstractController implements T
     private PersonTransactionsRepository personTransactionsRepository;
 
     @Autowired
-    public FinanceStatisticsController(PersonTransactionsRepository personTransactionsRepository) {
+    public TransactionsController(PersonTransactionsRepository personTransactionsRepository) {
         this.personTransactionsRepository = personTransactionsRepository;
     }
 
@@ -77,7 +74,7 @@ public class FinanceStatisticsController extends AbstractController implements T
     @PostMapping(value = "/addTransaction")
     public AjaxRs addTransaction(@RequestBody TransactionContainer transactionContainer) {
 
-        ValidationResult validationResult = validateTransactionContainer(transactionContainer);
+        ValidationResult validationResult = validateAbstractTransactionContainer(transactionContainer);
 
         if (!validationResult.isValidated()) {
             log.error("Transaction validation has failed - required fields are empty: {}", validationResult.getReasons());
@@ -91,6 +88,8 @@ public class FinanceStatisticsController extends AbstractController implements T
 
         WriteResult writeResult = mongoTemplate.updateFirst(query, update, PersonTransactions.class);
 
+        // TODO: 05.02.2018 Statistics recalculation
+
         if (writeResult.wasAcknowledged()) {
             log.debug("Saved new Transaction for login {} : {}", transactionContainer.getLogin(), transactionContainer.getTransaction());
             return responseSuccess(TRANSACTION_SAVED, transactionContainer.getTransaction());
@@ -99,6 +98,22 @@ public class FinanceStatisticsController extends AbstractController implements T
             log.error("Saving Transaction for login {} has failed", transactionContainer.getLogin(), transactionContainer.getTransaction());
             return responseError(TRANSACTION_SAVING_ERROR);
         }
+    }
+
+    @PostMapping(value = "/updateTransaction")
+    public AjaxRs updateTransaction(TransactionUpdateContainer transactionContainer) {
+
+        // TODO: 05.02.2018 Statistics recalculation
+
+        return null;
+    }
+
+    @PostMapping(value = "/deleteTransaction")
+    public AjaxRs deleteTransaction(TransactionDeleteContainer transactionContainer) {
+
+        // TODO: 05.02.2018 Statistics recalculation
+
+        return null;
     }
 
 

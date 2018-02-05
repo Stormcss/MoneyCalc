@@ -8,24 +8,19 @@ import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Getter
 @Builder
 @ToString
 @Document
 public class Transaction {
-//    @Id
-    private String _id;
+    private String id;
 
-//    @Indexed
-//    private String login;
-
-//    @Indexed
-//    @DateTimeFormat(iso = DateTimeFormat.ISO.DATE)
+    //    private String login;
     private String date;
-//    private LocalDate date;
-
     private int sum;
+
     private String currency;
     private String description;
     private int sectionID;
@@ -35,6 +30,10 @@ public class Transaction {
 //        if (login == null || login.isEmpty()) reasons.add("login is empty");
         if (sum == 0) reasons.add("Transaction sum can not be 0!");
         return new ValidationResult(reasons.isEmpty(), reasons);
+    }
+
+    public static TransactionBuilder builder() {
+        return new TransactionBuilder().id(UUID.randomUUID().toString().replace("-","").toUpperCase());
     }
 }
 

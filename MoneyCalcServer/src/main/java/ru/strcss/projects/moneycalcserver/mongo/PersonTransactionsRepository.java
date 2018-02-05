@@ -18,6 +18,14 @@ public interface PersonTransactionsRepository extends MongoRepository<PersonTran
     // FIXME: 03.02.2018 Possible performance issues here
     List<PersonTransactions> findByLogin(String login);
 
+    // FIXME: 05.02.2018 Possible performance issues here
+//    PersonTransactions deleteByLoginAnd_id(String login, String id);
+
+//    default Transaction deleteTransactionByLoginAnd_id(String login, String id){
+//
+//    }
+
+
     default List<Transaction> findTransactionsBetween(String login, LocalDate dateFrom, LocalDate dateTo){
         List<PersonTransactions> personTransactions = findByLogin(login);
         return personTransactions.stream()
@@ -29,8 +37,6 @@ public interface PersonTransactionsRepository extends MongoRepository<PersonTran
 
     default boolean isBetween(Transaction transaction, LocalDate dateFrom, LocalDate dateTo){
         LocalDate date = formatDateFromString(transaction.getDate());
-        return date.isAfter(dateFrom) && date.isBefore(dateTo);
+        return (date.isAfter(dateFrom) || date.isEqual(dateFrom)) && (date.isBefore(dateTo) || date.isEqual(dateTo));
     }
-
-    Transaction deleteByLogin(String login);
 }

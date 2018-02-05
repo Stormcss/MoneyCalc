@@ -6,8 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class TransactionsSearchContainer {
-    private String login;
+public class TransactionsSearchContainer extends AbstractTransactionContainer{
     private String rangeFrom;
     private String rangeTo;
 

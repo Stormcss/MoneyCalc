@@ -1,20 +1,13 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.embedded.LocalServerPort;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalcserver.controllers.testapi.MoneyCalcClient;
 import ru.strcss.projects.moneycalcserver.controllers.utils.Generator;
 
 import java.io.IOException;
@@ -25,24 +18,8 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.UUI
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.personGenerator;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Slf4j
-public class IdentificationsControllerTest  extends AbstractTestNGSpringContextTests {
-    private MoneyCalcClient service;
-
-    @LocalServerPort
-    public int SpringBootPort;
-
-    @BeforeClass
-    public void init(){
-        // Setup Retrofit
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://localhost:" + SpringBootPort + "/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        service = retrofit.create(MoneyCalcClient.class);
-    }
+public class IdentificationsControllerTest  extends AbstractControllerTest {
 
     @Test
     public void saveIdentifications() throws IOException {

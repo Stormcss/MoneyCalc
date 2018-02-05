@@ -4,9 +4,8 @@ import lombok.Data;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 
 @Data
-public class TransactionContainer {
+public class TransactionContainer extends AbstractTransactionContainer{
     private Transaction transaction;
-    private String login;
 
     public TransactionContainer(Transaction transaction, String login) {
         this.transaction = transaction;

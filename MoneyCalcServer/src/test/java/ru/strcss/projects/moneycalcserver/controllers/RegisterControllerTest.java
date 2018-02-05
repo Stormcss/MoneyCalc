@@ -1,19 +1,12 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.boot.context.embedded.LocalServerPort;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
-import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalcserver.controllers.testapi.MoneyCalcClient;
 
 import java.io.IOException;
 
@@ -22,25 +15,9 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.UUI
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.personGenerator;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @Slf4j
-public class ApiControllerRegisterTest extends AbstractTestNGSpringContextTests {
-    private MoneyCalcClient service;
+public class RegisterControllerTest extends AbstractControllerTest {
     private Person savedPerson = personGenerator();
-
-    @LocalServerPort
-    public int SpringBootPort;
-
-    @BeforeClass
-    public void init(){
-        // Setup Retrofit
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl("http://localhost:" + SpringBootPort + "/")
-                .addConverterFactory(GsonConverterFactory.create())
-                .build();
-
-        service = retrofit.create(MoneyCalcClient.class);
-    }
 
     @Test(priority = -2)
     public void registerCorrectPerson() throws IOException {

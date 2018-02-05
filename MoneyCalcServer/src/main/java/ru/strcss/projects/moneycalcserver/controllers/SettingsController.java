@@ -44,14 +44,13 @@ public class SettingsController extends AbstractController implements SettingsAP
 
         if (person == null) {
             log.error("Person with login {} is not found!", settings.get_id());
-            return responseError("Person with login "+ settings.get_id() +" is not found!");
+            return responseError("Person with login " + settings.get_id() + " is not found!");
         }
 
         person.setSettings(settings);
         DBObject dbObject = new BasicDBObject();
 
-
-        // FIXME: 02.02.2018 HOLY SHIT! I OVERWRITE THIS FUCKING PERSON!
+        // TODO: 05.02.2018 I smell bad practice here
 
         mongoOperations.getConverter().write(person, dbObject);
 
@@ -76,7 +75,7 @@ public class SettingsController extends AbstractController implements SettingsAP
 
         if (person == null) {
             log.error("Person with login {} is not found!", login);
-            return responseError("Person with login "+ login +" is not found!");
+            return responseError("Person with login " + login + " is not found!");
         }
 
         Settings settings = person.getSettings();
