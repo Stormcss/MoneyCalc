@@ -11,7 +11,7 @@ public class TransactionsSearchContainer extends AbstractTransactionContainer{
     private String rangeTo;
 
     public ValidationResult isValid() {
-        List reasons = new ArrayList<>();
+        List<String> reasons = new ArrayList<>();
         if (login.isEmpty()) reasons.add("login is empty");
         if (rangeFrom.isEmpty()) reasons.add("rangeFrom is empty");
         if (rangeTo.isEmpty()) reasons.add("rangeTo is empty");

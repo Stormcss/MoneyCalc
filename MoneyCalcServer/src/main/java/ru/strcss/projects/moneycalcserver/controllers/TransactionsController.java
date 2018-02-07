@@ -23,7 +23,7 @@ import java.util.List;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.formatDateFromString;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.ValidationUtils.validateAbstractTransactionContainer;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.generateTransactionID;
 
 @Slf4j
 @RestController
@@ -74,131 +74,113 @@ public class TransactionsController extends AbstractController implements Transa
     @PostMapping(value = "/addTransaction")
     public AjaxRs addTransaction(@RequestBody TransactionContainer transactionContainer) {
 
-        ValidationResult validationResult = validateAbstractTransactionContainer(transactionContainer);
+        ValidationResult validationResult = transactionContainer.isValid();
 
         if (!validationResult.isValidated()) {
             log.error("TransactionContainer validation has failed - required fields are empty: {}", validationResult.getReasons());
             return responseError("Required fields are empty: " + validationResult.getReasons());
         }
 
+        Transaction savedTransaction = generateTransactionID(transactionContainer.getTransaction());
+
         Update update = new Update();
-        Query query = new Query(Criteria.where("login").is(transactionContainer.getLogin()));
+        Query addTransactionQuery = new Query(Criteria.where("login").is(transactionContainer.getLogin()));
 
-        update.push("transactions", transactionContainer.getTransaction());
+        update.push("transactions", savedTransaction);
 
-        WriteResult writeResult = mongoTemplate.updateFirst(query, update, PersonTransactions.class);
+        WriteResult writeResult = mongoTemplate.updateFirst(addTransactionQuery, update, PersonTransactions.class);
 
         // TODO: 05.02.2018 Statistics recalculation
 
         if (writeResult.wasAcknowledged()) {
-            log.debug("Saved new Transaction for login {} : {}", transactionContainer.getLogin(), transactionContainer.getTransaction());
-            return responseSuccess(TRANSACTION_SAVED, transactionContainer.getTransaction());
+            log.debug("Saved new Transaction for login {} : {}", transactionContainer.getLogin(), savedTransaction);
+            return responseSuccess(TRANSACTION_SAVED, savedTransaction);
 
         } else {
-            log.error("Saving Transaction for login {} has failed", transactionContainer.getLogin(), transactionContainer.getTransaction());
+            log.error("Saving Transaction {} for login {} has failed", savedTransaction, transactionContainer.getLogin());
             return responseError(TRANSACTION_SAVING_ERROR);
         }
     }
 
-    @PostMapping(value = "/updateTransaction")
-    public AjaxRs updateTransaction(@RequestBody TransactionUpdateContainer container) {
+    /**
+     * Update Person's Transaction
+     *
+//     * Income transaction must have the same _id as updated transaction, otherwise updated transaction won't be found
 
-//        ValidationResult validationResult = validateAbstractTransactionContainer(container);
-        ValidationResult validationResult = container.isValid();
+     * id field in Income Transaction object will be ignored and overwritten with given transactionID
+     *
+     * @param transactionContainer
+     * @return
+     */
+
+    @PostMapping(value = "/updateTransaction")
+    public AjaxRs updateTransaction(@RequestBody TransactionUpdateContainer transactionContainer) {
+
+        ValidationResult validationResult = transactionContainer.isValid();
 
         if (!validationResult.isValidated()) {
             log.error("TransactionUpdateContainer validation has failed - required fields are empty: {}", validationResult.getReasons());
             return responseError("Required fields are empty: " + validationResult.getReasons());
         }
 
+        Transaction transactionToUpdate = generateTransactionID(transactionContainer.getTransaction(), transactionContainer.getId());
+
+        Query findUpdatedTransactionQuery = Query.query(Criteria.where("login").is(transactionContainer.getLogin()))
+                .addCriteria(Criteria.where("_id").is(transactionContainer.getTransaction().get_id()));
+
+//        WriteResult deleteResult = mongoTemplate.updateFirst(findUpdatedTransactionQuery,
+//                new Update().set("transactions", getTransactionQuery), "Transactions");
+
+        WriteResult updateResult = mongoTemplate.updateFirst(findUpdatedTransactionQuery,
+                new Update().set("transactions", transactionToUpdate), "Transactions");
+
+        // FIXME: 07.02.2018 FIX Updating
+
+//        WriteResult updateResult = mongoTemplate.updateMulti(
+//                new Query(Criteria.where("login").is(transactionContainer.getLogin())),
+//                new Update().set("transactions.$", transactionContainer.getTransaction()),
+//                PersonTransactions.class
+//        );
+
+        // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
+
+        log.debug("updateResult is {}", updateResult);
+        if (updateResult.getN() == 0) {
+            log.error("Updating Transaction for login {} has failed - ", transactionContainer.getLogin());
+            return responseError("Transaction was not updated!");
+        }
         // TODO: 05.02.2018 Statistics recalculation
 
-        return null;
+        log.debug("Updated Transaction {}: for login: {}", transactionToUpdate, transactionContainer.getLogin());
+        return responseSuccess(TRANSACTION_UPDATED, transactionToUpdate);
     }
 
     @PostMapping(value = "/deleteTransaction")
-    public AjaxRs deleteTransaction(@RequestBody TransactionDeleteContainer container) {
+    public AjaxRs deleteTransaction(@RequestBody TransactionDeleteContainer transactionContainer) {
 
-//        ValidationResult validationResult = validateAbstractTransactionContainer(container);
-        ValidationResult validationResult = container.isValid();
+        ValidationResult validationResult = transactionContainer.isValid();
 
         if (!validationResult.isValidated()) {
             log.error("TransactionUpdateContainer validation has failed - required fields are empty: {}", validationResult.getReasons());
             return responseError("Required fields are empty: " + validationResult.getReasons());
         }
 
+        Query getPersonTransactionsQuery = Query.query(Criteria.where("login").is(transactionContainer.getLogin()));
+        Query getTransactionQuery = Query.query(Criteria.where("_id").is(transactionContainer.getId()));
 
-        Query removeQuery = Query.query(Criteria.where("transactions.id").is(container.getId()));
+        WriteResult deleteResult = mongoTemplate.updateFirst(getPersonTransactionsQuery,
+                new Update().pull("transactions", getTransactionQuery), "Transactions");
 
-        // TODO: 06.02.2018 НА СРЕДУ - УДАЛЕНИЕ НЕ ПАШЕТ
-
-        WriteResult deleteResult = this.mongoTemplate.updateFirst(new Query(),
-                new Update().pull("transactions", removeQuery), "Transactions");
-
-        log.error("deleteResult is {}", deleteResult);
+        // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
         if (deleteResult.getN() == 0) {
-            log.error("Deleting Transaction for login {} has failed - ", container.getLogin());
+            log.error("Deleting Transaction for login {} has failed - ", transactionContainer.getLogin());
             return responseError("Transaction was not deleted!");
         }
         // TODO: 05.02.2018 Statistics recalculation
 
-        log.debug("Deleted Transaction id {}: for login: {}", container.getId(), container.getLogin());
+        log.debug("Deleted Transaction id {}: for login: {}", transactionContainer.getId(), transactionContainer.getLogin());
         // FIXME: 06.02.2018 some payload should be returned
         return responseSuccess(TRANSACTION_DELETED, null);
     }
-
-
-//        FinanceStatistics financeStatistics = mongoOperations.findOne(query, FinanceStatistics.class, "FinanceStatistics");
-
-//        if (financeStatistics != null) {
-//
-//            List<PersonTransactions> listOfIds = financeStatistics.getTransactions();
-//
-//            Query queryTransactions = new Query(where("_id").in(listOfIds));
-//
-//            List<Transaction> transactions = mongoOperations.find(queryTransactions, Transaction.class, "Transactions");
-//
-//            if (transactions != null) {
-//                log.debug("returning Transactions for login {}: {}", login, transactions);
-//                return responseSuccess(TRANSACTIONS_RETURNED, transactions);
-//            } else {
-//                log.error("Error returning Transactions for login {}", login);
-//                return responseError("ERROR");
-//            }
-//        } else {
-//            log.error("Can not return FinanceStatistics for login {} - no Person found", login);
-//            return responseError(NO_PERSON_EXIST);
-//        }
-
-
-//    @Transactional
-//    @PostMapping(value = "/getTransactions")
-//    public AjaxRs getTransactions(@RequestBody String login) {
-//
-//        login = login.replace("\"","");
-//
-//        Query query = new Query(where("_id").is(login));
-//        FinanceStatistics financeStatistics = mongoOperations.findOne(query, FinanceStatistics.class,"FinanceStatistics");
-//
-//        if (financeStatistics != null) {
-//
-//            List<List<Transaction>> listOfIds = financeStatistics.getTransactions();
-//
-//            Query queryTransactions = new Query(where("_id").in(listOfIds));
-//
-//            List<Transaction> transactions = mongoOperations.find(queryTransactions, Transaction.class, "Transactions");
-//
-//            if (transactions != null){
-//                log.debug("returning Transactions for login {}: {}", login, transactions);
-//                return responseSuccess(TRANSACTIONS_RETURNED, transactions);
-//            } else {
-//                log.error("Error returning Transactions for login {}", login);
-//                return responseError("ERROR");
-//            }
-//        } else {
-//            log.error("Can not return FinanceStatistics for login {} - no Person found", login);
-//            return responseError(NO_PERSON_EXIST);
-//        }
-//    }
 }

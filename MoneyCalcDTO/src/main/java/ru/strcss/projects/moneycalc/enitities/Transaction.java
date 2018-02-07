@@ -1,21 +1,20 @@
 package ru.strcss.projects.moneycalc.enitities;
 
 import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.Data;
 import org.springframework.data.mongodb.core.mapping.Document;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
-@Getter
+//@Getter
 @Builder
-@ToString
+//@ToString
 @Document
+@Data
 public class Transaction {
-    private String id;
+    private String _id;
 
     //    private String login;
     private String date;
@@ -32,9 +31,9 @@ public class Transaction {
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 
-    public static TransactionBuilder builder() {
-        return new TransactionBuilder().id(UUID.randomUUID().toString().replace("-","").toUpperCase());
-    }
+//    public static TransactionBuilder builder() {
+//        return new TransactionBuilder()._id(UUID.randomUUID().toString().replace("-","").toUpperCase());
+//    }
 }
 
 

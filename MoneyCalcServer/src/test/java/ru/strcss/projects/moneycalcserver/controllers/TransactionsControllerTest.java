@@ -14,8 +14,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.*;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.*;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateTransaction;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.savePersonGetLogin;
@@ -104,30 +103,72 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .map(AjaxRs::getPayload)
                 .collect(Collectors.toList());
 
-        log.error("addedTransactions: {}", addedTransactions);
-
         assertEquals(addedTransactions.size(), numOfAddedTransactions, "Some Transactions were not created!");
 
-
         //Getting random Transactions to delete
-        String idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).getId();
-
-        log.error("idToDelete: {}", idToDelete);
+        String idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).get_id();
 
         //Deleting Transaction
-        TransactionDeleteContainer container = new TransactionDeleteContainer(login, idToDelete);
+//        TransactionDeleteContainer container = ;
 
-        AjaxRs responseDeletedTransactions
-                = sendRequest(service.deleteTransaction(container)).body();
-        assertEquals(responseDeletedTransactions.getStatus(), Status.SUCCESS, responseDeletedTransactions.getMessage());
+        AjaxRs responseDeletedTransaction
+                = sendRequest(service.deleteTransaction(new TransactionDeleteContainer(login, idToDelete))).body();
+        assertEquals(responseDeletedTransaction.getStatus(), Status.SUCCESS, responseDeletedTransaction.getMessage());
 
         //Getting Transactions list
         AjaxRs<List<Transaction>> responseGetTransactions = sendRequest(service.getTransactions(new TransactionsSearchContainer(login, formatDateToString(currentDate()),
                 formatDateToString(currentDate())))).body();
-
         assertEquals(responseGetTransactions.getStatus(), Status.SUCCESS, responseGetTransactions.getMessage());
 
         assertEquals(responseGetTransactions.getPayload().size(), numOfAddedTransactions - 1, "List size after delete has not decreased!");
-        assertFalse(responseGetTransactions.getPayload().stream().anyMatch(transaction -> transaction.getId().equals(idToDelete)), "Transaction was not deleted!");
+        assertFalse(responseGetTransactions.getPayload().stream().anyMatch(transaction -> transaction.get_id().equals(idToDelete)), "Transaction was not deleted!");
+    }
+
+    @Test
+    public void updateTransaction() {
+        int numOfAddedTransactions = 5;
+        String login = savePersonGetLogin(service);
+
+        //Adding new Transactions
+        List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
+                .mapToObj(s -> sendRequest(service.addTransaction(new TransactionContainer(generateTransaction(), login))).body())
+                .filter(Objects::nonNull)
+                .map(AjaxRs::getPayload)
+                .collect(Collectors.toList());
+
+        assertEquals(addedTransactions.size(), numOfAddedTransactions, "Some Transactions were not created!");
+
+        //Getting random Transactions to update
+        String idToUpdate = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).get_id();
+
+        //Update Transaction
+        AjaxRs<Transaction> responseUpdatedTransaction
+                = sendRequest(service.updateTransaction(new TransactionUpdateContainer(login, idToUpdate, generateTransaction()))).body();
+        assertEquals(responseUpdatedTransaction.getStatus(), Status.SUCCESS, responseUpdatedTransaction.getMessage());
+
+        //Getting Transactions list
+        AjaxRs<List<Transaction>> responseGetTransactions = sendRequest(service.getTransactions(new TransactionsSearchContainer(login, formatDateToString(currentDate()),
+                formatDateToString(currentDate())))).body();
+        assertEquals(responseGetTransactions.getStatus(), Status.SUCCESS, responseGetTransactions.getMessage());
+
+        List<Transaction> transactionsList = responseGetTransactions.getPayload();
+
+        assertTrue(transactionsList.stream()
+                .map(Transaction::get_id)
+                .anyMatch(id -> id.equals(idToUpdate)), "Id of updated Transaction has changed!");
+        assertEquals(transactionsList.size(), numOfAddedTransactions, "Size of Transactions list has changed!");
+
+
+        Transaction beforeUpdatedTransaction = transactionsList.stream()
+                .filter(transaction -> transaction.get_id().equals(idToUpdate))
+                .findFirst()
+                .get();
+        Transaction updatedTransaction = transactionsList.stream()
+                .filter(transaction -> transaction.get_id().equals(idToUpdate))
+                .findFirst()
+                .get();
+
+        assertNotEquals(updatedTransaction.getSum(), beforeUpdatedTransaction.getSum(), "Sum in Transaction after update has not changed!");
+        assertEquals(updatedTransaction.get_id(), beforeUpdatedTransaction.get_id(), "Sum in Transaction after update has not changed!");
     }
 }

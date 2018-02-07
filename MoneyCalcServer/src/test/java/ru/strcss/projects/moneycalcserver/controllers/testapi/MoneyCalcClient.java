@@ -48,7 +48,7 @@ public interface MoneyCalcClient {
     Call<AjaxRs<Void>> deleteTransaction(@Body TransactionDeleteContainer transactionContainer);
 
     @POST("/api/finance/financeStats/updateTransaction")
-    Call<AjaxRs> updateTransaction(@Body TransactionUpdateContainer transactionUpdateContainer);
+    Call<AjaxRs<Transaction>> updateTransaction(@Body TransactionUpdateContainer transactionUpdateContainer);
 
     @POST("/api/finance/financeStats/dropStatistics")
     Call<AjaxRs<List<Transaction>>> dropTransactions(@Body String login);

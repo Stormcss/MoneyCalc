@@ -15,7 +15,7 @@ public class TransactionDeleteContainer extends AbstractTransactionContainer{
     private String id;
 
     public ValidationResult isValid() {
-        List reasons = new ArrayList<>();
+        List<String> reasons = new ArrayList<>();
         if (login.isEmpty()) reasons.add("Login is empty");
         if (id == null || id.isEmpty()) reasons.add("id is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
