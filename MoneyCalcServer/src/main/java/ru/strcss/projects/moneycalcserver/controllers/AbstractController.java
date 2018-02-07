@@ -22,6 +22,7 @@ public abstract class AbstractController {
 
     public final String TRANSACTION_SAVING_ERROR = "ERROR has occurred while saved Transaction";
     public final String TRANSACTION_SAVED = "TRANSACTION successfully saved";
+    public final String TRANSACTION_DELETED = "TRANSACTION successfully deleted";
     public final String TRANSACTIONS_RETURNED = "TRANSACTIONS successfully returned";
 
     public final String FIND_SUCCESSFUL = "Found successfully";

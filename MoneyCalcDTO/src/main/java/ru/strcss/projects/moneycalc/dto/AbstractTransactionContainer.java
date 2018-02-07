@@ -5,4 +5,5 @@ import lombok.Data;
 @Data
 public abstract class AbstractTransactionContainer {
     String login;
+//    String id;
 }

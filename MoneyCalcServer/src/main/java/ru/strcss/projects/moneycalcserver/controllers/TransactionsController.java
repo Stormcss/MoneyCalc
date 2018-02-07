@@ -77,7 +77,7 @@ public class TransactionsController extends AbstractController implements Transa
         ValidationResult validationResult = validateAbstractTransactionContainer(transactionContainer);
 
         if (!validationResult.isValidated()) {
-            log.error("Transaction validation has failed - required fields are empty: {}", validationResult.getReasons());
+            log.error("TransactionContainer validation has failed - required fields are empty: {}", validationResult.getReasons());
             return responseError("Required fields are empty: " + validationResult.getReasons());
         }
 
@@ -101,7 +101,15 @@ public class TransactionsController extends AbstractController implements Transa
     }
 
     @PostMapping(value = "/updateTransaction")
-    public AjaxRs updateTransaction(TransactionUpdateContainer transactionContainer) {
+    public AjaxRs updateTransaction(@RequestBody TransactionUpdateContainer container) {
+
+//        ValidationResult validationResult = validateAbstractTransactionContainer(container);
+        ValidationResult validationResult = container.isValid();
+
+        if (!validationResult.isValidated()) {
+            log.error("TransactionUpdateContainer validation has failed - required fields are empty: {}", validationResult.getReasons());
+            return responseError("Required fields are empty: " + validationResult.getReasons());
+        }
 
         // TODO: 05.02.2018 Statistics recalculation
 
@@ -109,11 +117,35 @@ public class TransactionsController extends AbstractController implements Transa
     }
 
     @PostMapping(value = "/deleteTransaction")
-    public AjaxRs deleteTransaction(TransactionDeleteContainer transactionContainer) {
+    public AjaxRs deleteTransaction(@RequestBody TransactionDeleteContainer container) {
 
+//        ValidationResult validationResult = validateAbstractTransactionContainer(container);
+        ValidationResult validationResult = container.isValid();
+
+        if (!validationResult.isValidated()) {
+            log.error("TransactionUpdateContainer validation has failed - required fields are empty: {}", validationResult.getReasons());
+            return responseError("Required fields are empty: " + validationResult.getReasons());
+        }
+
+
+        Query removeQuery = Query.query(Criteria.where("transactions.id").is(container.getId()));
+
+        // TODO: 06.02.2018 НА СРЕДУ - УДАЛЕНИЕ НЕ ПАШЕТ
+
+        WriteResult deleteResult = this.mongoTemplate.updateFirst(new Query(),
+                new Update().pull("transactions", removeQuery), "Transactions");
+
+        log.error("deleteResult is {}", deleteResult);
+
+        if (deleteResult.getN() == 0) {
+            log.error("Deleting Transaction for login {} has failed - ", container.getLogin());
+            return responseError("Transaction was not deleted!");
+        }
         // TODO: 05.02.2018 Statistics recalculation
 
-        return null;
+        log.debug("Deleted Transaction id {}: for login: {}", container.getId(), container.getLogin());
+        // FIXME: 06.02.2018 some payload should be returned
+        return responseSuccess(TRANSACTION_DELETED, null);
     }
 
 

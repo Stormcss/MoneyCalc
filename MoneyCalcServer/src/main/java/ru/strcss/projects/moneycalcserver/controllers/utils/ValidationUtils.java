@@ -45,6 +45,8 @@ public class ValidationUtils {
     public static ValidationResult validateAbstractTransactionContainer(AbstractTransactionContainer container) {
         // FIXME: 05.02.2018 WTF IS HAPPENING HERE
 
+        System.err.println("container = " + container);
+
         if (container == null)
             return new ValidationResult(false, Collections.singletonList("Empty request"));
 
@@ -57,8 +59,8 @@ public class ValidationUtils {
                 return new ValidationResult(false, Collections.singletonList("Transaction is empty"));
             }
         } else if (container instanceof TransactionDeleteContainer) {
-            if (((TransactionDeleteContainer) container).getID() == null) {
-                return new ValidationResult(false, Collections.singletonList("Transaction ID is empty"));
+            if (((TransactionDeleteContainer) container).getId() == null) {
+                return new ValidationResult(false, Collections.singletonList("Transaction id is empty"));
             }
         }
         return new ValidationResult(true, Collections.emptyList());
@@ -102,8 +104,8 @@ public class ValidationUtils {
 //        if (container == null)
 //            return new ValidationResult(false, Collections.singletonList("Empty request"));
 //
-//        if (container.getID() == null)
-//            return new ValidationResult(false, Collections.singletonList("Transaction ID is empty"));
+//        if (container.getId() == null)
+//            return new ValidationResult(false, Collections.singletonList("Transaction id is empty"));
 //
 //        return container.isValid();
 //    }

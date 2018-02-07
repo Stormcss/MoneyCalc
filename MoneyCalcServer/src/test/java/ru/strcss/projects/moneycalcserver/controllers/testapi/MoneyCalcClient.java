@@ -3,10 +3,7 @@ package ru.strcss.projects.moneycalcserver.controllers.testapi;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.POST;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
-import ru.strcss.projects.moneycalc.dto.Credentials;
-import ru.strcss.projects.moneycalc.dto.TransactionContainer;
-import ru.strcss.projects.moneycalc.dto.TransactionsSearchContainer;
+import ru.strcss.projects.moneycalc.dto.*;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.enitities.Settings;
@@ -39,7 +36,7 @@ public interface MoneyCalcClient {
     Call<AjaxRs<Identifications>> getIdentifications(@Body String login);
 
     /**
-     *  FinanceStatistics
+     *  Transactions
      */
     @POST("/api/finance/financeStats/getTransactions")
     Call<AjaxRs<List<Transaction>>> getTransactions(@Body TransactionsSearchContainer container);
@@ -48,10 +45,10 @@ public interface MoneyCalcClient {
     Call<AjaxRs<Transaction>> addTransaction(@Body TransactionContainer transactionContainer);
 
     @POST("/api/finance/financeStats/deleteTransaction")
-    Call<AjaxRs<List<Transaction>>> deleteTransaction(@Body Transaction transaction);
+    Call<AjaxRs<Void>> deleteTransaction(@Body TransactionDeleteContainer transactionContainer);
 
     @POST("/api/finance/financeStats/updateTransaction")
-    Call<AjaxRs<List<Transaction>>> updateTransaction(@Body Transaction transaction);
+    Call<AjaxRs> updateTransaction(@Body TransactionUpdateContainer transactionUpdateContainer);
 
     @POST("/api/finance/financeStats/dropStatistics")
     Call<AjaxRs<List<Transaction>>> dropTransactions(@Body String login);

@@ -1,27 +1,31 @@
 package ru.strcss.projects.moneycalc.dto;
 
-import lombok.Data;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+//@Data
+@Getter
+@Setter
+@ToString
 public class TransactionDeleteContainer extends AbstractTransactionContainer{
-    private String ID;
+    private String id;
 
     public ValidationResult isValid() {
         List reasons = new ArrayList<>();
         if (login.isEmpty()) reasons.add("Login is empty");
-        if (ID.isEmpty()) reasons.add("ID is empty");
+        if (id == null || id.isEmpty()) reasons.add("id is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 
     public TransactionDeleteContainer() {
     }
 
-    public TransactionDeleteContainer(String login, String ID, Transaction transaction) {
+    public TransactionDeleteContainer(String login, String id) {
         this.login = login;
-        this.ID = ID;
+        this.id = id;
     }
 }
