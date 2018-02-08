@@ -17,7 +17,7 @@ public class Settings {
     private String _id;
     private String periodFrom;
     private String periodTo;
-    private List<SettingsSection> sections;
+    private List<SpendingSection> sections;
 
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();

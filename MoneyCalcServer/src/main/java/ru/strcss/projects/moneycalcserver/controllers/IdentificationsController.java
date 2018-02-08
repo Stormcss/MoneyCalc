@@ -31,7 +31,7 @@ public class IdentificationsController extends AbstractController implements Ide
      * @return response object with Identifications payload
      */
     @PostMapping(value = "/saveIdentifications")
-    public AjaxRs saveIdentifications(@RequestBody Identifications identifications) {
+    public AjaxRs<Identifications> saveIdentifications(@RequestBody Identifications identifications) {
 
         ValidationResult validationResult = identifications.isValid();
 
@@ -59,7 +59,7 @@ public class IdentificationsController extends AbstractController implements Ide
      * @return response object with Identifications payload
      */
     @PostMapping(value = "/getIdentifications")
-    public AjaxRs getIdentifications(@RequestBody String login) {
+    public AjaxRs<Identifications> getIdentifications(@RequestBody String login) {
 
         login = login.replace("\"", "");
 

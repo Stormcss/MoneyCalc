@@ -1,8 +1,9 @@
-package ru.strcss.projects.moneycalc.dto;
+package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;

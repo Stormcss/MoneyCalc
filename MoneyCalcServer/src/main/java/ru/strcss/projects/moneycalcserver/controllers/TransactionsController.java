@@ -12,7 +12,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.TransactionsAPIService;
-import ru.strcss.projects.moneycalc.dto.*;
+import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.ValidationResult;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.PersonTransactions;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalcserver.mongo.PersonTransactionsRepository;
@@ -50,7 +55,7 @@ public class TransactionsController extends AbstractController implements Transa
      * @return response object with list of Transactions
      */
     @PostMapping(value = "/getTransactions")
-    public AjaxRs getTransactions(@RequestBody TransactionsSearchContainer container) {
+    public AjaxRs<List<Transaction>> getTransactions(@RequestBody TransactionsSearchContainer container) {
 
         ValidationResult validationResult = container.isValid();
 
@@ -72,7 +77,7 @@ public class TransactionsController extends AbstractController implements Transa
     }
 
     @PostMapping(value = "/addTransaction")
-    public AjaxRs addTransaction(@RequestBody TransactionContainer transactionContainer) {
+    public AjaxRs<Transaction> addTransaction(@RequestBody TransactionContainer transactionContainer) {
 
         ValidationResult validationResult = transactionContainer.isValid();
 
@@ -90,9 +95,12 @@ public class TransactionsController extends AbstractController implements Transa
 
         WriteResult writeResult = mongoTemplate.updateFirst(addTransactionQuery, update, PersonTransactions.class);
 
-        // TODO: 05.02.2018 Statistics recalculation
-
         if (writeResult.wasAcknowledged()) {
+            // TODO: 05.02.2018 Statistics recalculation
+            // TODO: 08.02.2018 TRANSACTIONS REQUIRED
+
+
+
             log.debug("Saved new Transaction for login {} : {}", transactionContainer.getLogin(), savedTransaction);
             return responseSuccess(TRANSACTION_SAVED, savedTransaction);
 
@@ -104,9 +112,7 @@ public class TransactionsController extends AbstractController implements Transa
 
     /**
      * Update Person's Transaction
-     *
-//     * Income transaction must have the same _id as updated transaction, otherwise updated transaction won't be found
-
+     * <p>
      * id field in Income Transaction object will be ignored and overwritten with given transactionID
      *
      * @param transactionContainer
@@ -114,7 +120,7 @@ public class TransactionsController extends AbstractController implements Transa
      */
 
     @PostMapping(value = "/updateTransaction")
-    public AjaxRs updateTransaction(@RequestBody TransactionUpdateContainer transactionContainer) {
+    public AjaxRs<Transaction> updateTransaction(@RequestBody TransactionUpdateContainer transactionContainer) {
 
         ValidationResult validationResult = transactionContainer.isValid();
 
@@ -124,23 +130,16 @@ public class TransactionsController extends AbstractController implements Transa
         }
 
         Transaction transactionToUpdate = generateTransactionID(transactionContainer.getTransaction(), transactionContainer.getId());
+        log.error("transactionToUpdate is {}", transactionToUpdate);
 
-        Query findUpdatedTransactionQuery = Query.query(Criteria.where("login").is(transactionContainer.getLogin()))
-                .addCriteria(Criteria.where("_id").is(transactionContainer.getTransaction().get_id()));
+        Query findUpdatedTransactionQuery = Query.query(
+                Criteria.where("login").is(transactionContainer.getLogin()).and("transactions._id").is(transactionContainer.getId()));
 
-//        WriteResult deleteResult = mongoTemplate.updateFirst(findUpdatedTransactionQuery,
-//                new Update().set("transactions", getTransactionQuery), "Transactions");
+        WriteResult updateResult = mongoOperations.updateMulti(findUpdatedTransactionQuery,
+                new Update().set("transactions.$", transactionToUpdate), PersonTransactions.class);
 
-        WriteResult updateResult = mongoTemplate.updateFirst(findUpdatedTransactionQuery,
-                new Update().set("transactions", transactionToUpdate), "Transactions");
-
-        // FIXME: 07.02.2018 FIX Updating
-
-//        WriteResult updateResult = mongoTemplate.updateMulti(
-//                new Query(Criteria.where("login").is(transactionContainer.getLogin())),
-//                new Update().set("transactions.$", transactionContainer.getTransaction()),
-//                PersonTransactions.class
-//        );
+        List<PersonTransactions> personTransactions = mongoTemplate.find(findUpdatedTransactionQuery, PersonTransactions.class);
+        log.error("personTransactions is {}", personTransactions);
 
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
@@ -151,12 +150,12 @@ public class TransactionsController extends AbstractController implements Transa
         }
         // TODO: 05.02.2018 Statistics recalculation
 
-        log.debug("Updated Transaction {}: for login: {}", transactionToUpdate, transactionContainer.getLogin());
+        log.debug("Updated Transaction {}: for login: {}", transactionToUpdate);
         return responseSuccess(TRANSACTION_UPDATED, transactionToUpdate);
     }
 
     @PostMapping(value = "/deleteTransaction")
-    public AjaxRs deleteTransaction(@RequestBody TransactionDeleteContainer transactionContainer) {
+    public AjaxRs<Void> deleteTransaction(@RequestBody TransactionDeleteContainer transactionContainer) {
 
         ValidationResult validationResult = transactionContainer.isValid();
 

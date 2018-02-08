@@ -53,13 +53,13 @@ public class Generator {
                 ._id(login)
                 .periodFrom(formatDateToString(currentDate()))
                 .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
-                .sections(Arrays.asList(SettingsSection.builder()
+                .sections(Arrays.asList(SpendingSection.builder()
                                 .name(String.valueOf(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)))
-                                .ID(login)
+                                .ID(1)
                                 .build(),
-                        SettingsSection.builder()
+                        SpendingSection.builder()
                                 .name(String.valueOf(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)))
-                                .ID(login)
+                                .ID(2)
                                 .build()))
                 .build();
     }

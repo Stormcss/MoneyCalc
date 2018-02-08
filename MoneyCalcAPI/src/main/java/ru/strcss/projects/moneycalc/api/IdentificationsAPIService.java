@@ -5,7 +5,7 @@ import ru.strcss.projects.moneycalc.enitities.Identifications;
 
 public interface IdentificationsAPIService {
 
-    AjaxRs saveIdentifications(Identifications identifications);
+    AjaxRs<Identifications> saveIdentifications(Identifications identifications);
 
-    AjaxRs getIdentifications(String login);
+    AjaxRs<Identifications> getIdentifications(String login);
 }

@@ -3,7 +3,12 @@ package ru.strcss.projects.moneycalcserver.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
 import retrofit2.Response;
-import ru.strcss.projects.moneycalc.dto.*;
+import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.Status;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 
 import java.io.IOException;
@@ -159,7 +164,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         assertEquals(transactionsList.size(), numOfAddedTransactions, "Size of Transactions list has changed!");
 
 
-        Transaction beforeUpdatedTransaction = transactionsList.stream()
+        Transaction beforeUpdatedTransaction = addedTransactions.stream()
                 .filter(transaction -> transaction.get_id().equals(idToUpdate))
                 .findFirst()
                 .get();

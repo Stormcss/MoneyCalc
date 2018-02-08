@@ -5,7 +5,7 @@ import ru.strcss.projects.moneycalc.enitities.Settings;
 
 public interface SettingsAPIService {
 
-    AjaxRs saveSettings(Settings settings);
+    AjaxRs<Settings> saveSettings(Settings settings);
 
-    AjaxRs getSettings(String login);
+    AjaxRs<Settings> getSettings(String login);
 }

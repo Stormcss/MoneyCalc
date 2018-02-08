@@ -14,6 +14,7 @@ import ru.strcss.projects.moneycalc.enitities.*;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
@@ -35,7 +36,7 @@ public class RegisterController extends AbstractController implements RegisterAP
      */
 
     @PostMapping(value = "/registerPerson")
-    public AjaxRs registerPerson(@RequestBody Credentials credentials) {
+    public AjaxRs<Person> registerPerson(@RequestBody Credentials credentials) {
 
         ValidationResult validationResult = validateRegisterPerson(credentials.getAccess(), credentials.getIdentifications());
 
@@ -57,7 +58,6 @@ public class RegisterController extends AbstractController implements RegisterAP
 
         log.debug("Registering new Person with Login: {} and Name: {}", login, credentials.getIdentifications().getName());
 
-
         Person person = Person.builder()
                 .ID(login)
                 .access(credentials.getAccess())
@@ -66,7 +66,18 @@ public class RegisterController extends AbstractController implements RegisterAP
                         ._id(login)
                         .periodFrom(formatDateToString(currentDate()))
                         .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
-                        .sections(new ArrayList<>())
+                        .sections(Arrays.asList(SpendingSection.builder()
+                                        .ID(0)
+                                        .isAdded(true)
+                                        .budget(5000)
+                                        .name("Еда")
+                                        .build(),
+                                SpendingSection.builder()
+                                        .ID(1)
+                                        .budget(5000)
+                                        .isAdded(true)
+                                        .name("Прочее")
+                                        .build()))
                         .build())
                 .finance(Finance.builder()
                         ._id(login)

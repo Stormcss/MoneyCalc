@@ -31,7 +31,7 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @return response object
      */
     @PostMapping(value = "/saveSettings")
-    public AjaxRs saveSettings(@RequestBody Settings settings) {
+    public AjaxRs<Settings> saveSettings(@RequestBody Settings settings) {
 
         ValidationResult validationResult = settings.isValid();
 
@@ -65,7 +65,7 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @return response object
      */
     @PostMapping(value = "/getSettings")
-    public AjaxRs getSettings(@RequestBody String login) {
+    public AjaxRs<Settings> getSettings(@RequestBody String login) {
 
         login = login.replace("\"", "");
 

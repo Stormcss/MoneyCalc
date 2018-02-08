@@ -1,14 +1,21 @@
 package ru.strcss.projects.moneycalc.api;
 
-import ru.strcss.projects.moneycalc.dto.*;
+import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
+import ru.strcss.projects.moneycalc.enitities.Transaction;
+
+import java.util.List;
 
 public interface TransactionsAPIService {
 
-    AjaxRs getTransactions(TransactionsSearchContainer container);
+    AjaxRs<List<Transaction>> getTransactions(TransactionsSearchContainer container);
 
-    AjaxRs addTransaction(TransactionContainer transactionContainer);
+    AjaxRs<Transaction> addTransaction(TransactionContainer transactionContainer);
 
-    AjaxRs updateTransaction(TransactionUpdateContainer transactionContainer);
+    AjaxRs<Transaction> updateTransaction(TransactionUpdateContainer transactionContainer);
 
-    AjaxRs deleteTransaction(TransactionDeleteContainer transactionContainer);
+    AjaxRs<Void> deleteTransaction(TransactionDeleteContainer transactionContainer);
 }

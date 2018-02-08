@@ -8,8 +8,8 @@ import ru.strcss.projects.moneycalc.dto.Status;
 public class ControllerUtils {
 
 
-    public static AjaxRs responseError(String message) {
-        return AjaxRs.builder()
+    public static <E> AjaxRs<E> responseError(String message) {
+        return AjaxRs.<E>builder()
                 .message(message)
                 .status(Status.ERROR)
                 .build();

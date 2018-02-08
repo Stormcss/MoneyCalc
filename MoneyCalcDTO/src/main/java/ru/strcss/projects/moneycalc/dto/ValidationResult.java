@@ -13,7 +13,7 @@ public class ValidationResult {
     private boolean isValidated;
 
     /**
-     * List of reasons why validation failed
+     * List of reasons why validation has failed
      */
     private List<String> reasons;
 

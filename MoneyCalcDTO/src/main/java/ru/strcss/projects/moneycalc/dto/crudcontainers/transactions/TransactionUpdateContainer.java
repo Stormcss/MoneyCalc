@@ -1,6 +1,7 @@
-package ru.strcss.projects.moneycalc.dto;
+package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 
 import lombok.Data;
+import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 
 import java.util.ArrayList;
