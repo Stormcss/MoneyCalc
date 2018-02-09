@@ -35,6 +35,17 @@ public interface PersonTransactionsRepository extends MongoRepository<PersonTran
                 .collect(Collectors.toList());
     }
 
+    default List<Transaction> findTransactionsBetweenFilteredWithSection(String login, LocalDate dateFrom, LocalDate dateTo, List<Integer> sections){
+        List<PersonTransactions> personTransactions = findByLogin(login);
+        // TODO: 09.02.2018 Filter transactions using DB!
+        return personTransactions.stream()
+                .map(PersonTransactions::getTransactions)
+                .flatMap(Collection::stream)
+                .filter(transaction -> isBetween(transaction, dateFrom, dateTo))
+                .filter(transaction -> sections.stream().anyMatch(id -> id.equals(transaction.getSectionID())))
+                .collect(Collectors.toList());
+    }
+
     default boolean isBetween(Transaction transaction, LocalDate dateFrom, LocalDate dateTo){
         LocalDate date = formatDateFromString(transaction.getDate());
         return (date.isAfter(dateFrom) || date.isEqual(dateFrom)) && (date.isBefore(dateTo) || date.isEqual(dateTo));

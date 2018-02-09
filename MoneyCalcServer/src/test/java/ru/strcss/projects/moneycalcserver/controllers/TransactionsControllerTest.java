@@ -13,6 +13,7 @@ import ru.strcss.projects.moneycalc.enitities.Transaction;
 
 import java.io.IOException;
 import java.time.temporal.ChronoUnit;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
@@ -45,7 +46,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Requesting Transactions from today to tomorrow
         TransactionsSearchContainer containerToday2Tomorrow = new TransactionsSearchContainer(login, formatDateToString(currentDate()),
-                formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)));
+                formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)), Collections.emptyList());
         Response<AjaxRs<List<Transaction>>> responseToday2Tomorrow = sendRequest(service.getTransactions(containerToday2Tomorrow));
 
         assertEquals(responseToday2Tomorrow.body().getStatus(), Status.SUCCESS, responseToday2Tomorrow.body().getMessage());
@@ -53,7 +54,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Requesting Transactions from yesterday to tomorrow
         TransactionsSearchContainer containerYesterday2Today = new TransactionsSearchContainer(login, formatDateToString(generateDateMinus(ChronoUnit.DAYS, 1)),
-                formatDateToString(currentDate()));
+                formatDateToString(currentDate()), Collections.emptyList());
         Response<AjaxRs<List<Transaction>>> responseYesterday2Today = sendRequest(service.getTransactions(containerYesterday2Today));
 
         assertEquals(responseYesterday2Today.body().getStatus(), Status.SUCCESS, responseYesterday2Today.body().getMessage());
@@ -61,11 +62,23 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Requesting Transactions from yesterday to tomorrow
         TransactionsSearchContainer containerTomorrowAndLater = new TransactionsSearchContainer(login, formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)),
-                formatDateToString(generateDatePlus(ChronoUnit.DAYS, 2)));
+                formatDateToString(generateDatePlus(ChronoUnit.DAYS, 2)), Collections.emptyList());
         Response<AjaxRs<List<Transaction>>> responseTomorrowAndLater = sendRequest(service.getTransactions(containerTomorrowAndLater));
 
         assertEquals(responseTomorrowAndLater.body().getStatus(), Status.SUCCESS, responseTomorrowAndLater.body().getMessage());
         assertEquals(responseTomorrowAndLater.body().getPayload().size(), 1, "Incorrect count of transactions is returned");
+    }
+
+    /**
+     * Checks for correct Transactions returning for requested sections
+     */
+    @Test
+    public void getTransaction_SectionFilter() {
+        String login = savePersonGetLogin(service);
+
+
+
+
     }
 
     /**
@@ -84,7 +97,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Checking that it is added
         TransactionsSearchContainer container = new TransactionsSearchContainer(login, formatDateToString(generateDateMinus(ChronoUnit.DAYS, 1)),
-                formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)));
+                formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)), Collections.emptyList());
         AjaxRs<List<Transaction>> responseGetTransactions = sendRequest(service.getTransactions(container)).body();
 
         assertEquals(responseGetTransactions.getStatus(), Status.SUCCESS, responseGetTransactions.getMessage());
@@ -122,7 +135,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Getting Transactions list
         AjaxRs<List<Transaction>> responseGetTransactions = sendRequest(service.getTransactions(new TransactionsSearchContainer(login, formatDateToString(currentDate()),
-                formatDateToString(currentDate())))).body();
+                formatDateToString(currentDate()), Collections.emptyList()))).body();
         assertEquals(responseGetTransactions.getStatus(), Status.SUCCESS, responseGetTransactions.getMessage());
 
         assertEquals(responseGetTransactions.getPayload().size(), numOfAddedTransactions - 1, "List size after delete has not decreased!");
@@ -153,7 +166,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Getting Transactions list
         AjaxRs<List<Transaction>> responseGetTransactions = sendRequest(service.getTransactions(new TransactionsSearchContainer(login, formatDateToString(currentDate()),
-                formatDateToString(currentDate())))).body();
+                formatDateToString(currentDate()), Collections.emptyList()))).body();
         assertEquals(responseGetTransactions.getStatus(), Status.SUCCESS, responseGetTransactions.getMessage());
 
         List<Transaction> transactionsList = responseGetTransactions.getPayload();

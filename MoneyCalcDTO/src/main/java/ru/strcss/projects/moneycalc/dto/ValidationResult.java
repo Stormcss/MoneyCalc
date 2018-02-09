@@ -8,7 +8,7 @@ import java.util.List;
 public class ValidationResult {
 
     /**
-     * Resulf of validation
+     * Result of validation
      */
     private boolean isValidated;
 

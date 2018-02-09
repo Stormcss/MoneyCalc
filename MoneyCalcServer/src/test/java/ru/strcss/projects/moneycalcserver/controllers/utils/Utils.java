@@ -14,7 +14,7 @@ import java.io.IOException;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.UUID;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.personGenerator;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateCredentials;
 
 @Slf4j
 public class Utils {
@@ -38,10 +38,11 @@ public class Utils {
 
     public static String savePersonGetLogin(MoneyCalcClient service) {
         String login = UUID();
-        Person person = personGenerator(login);
+//        Person person = personGenerator(login);
+        Credentials credentials = generateCredentials(login);
 
         //Registering Person
-        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(new Credentials(person.getAccess(), person.getIdentifications()))).body();
+        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(credentials)).body();
         assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
 
         return login;

@@ -22,12 +22,13 @@ public class Transaction {
 
     private String currency;
     private String description;
-    private int sectionID;
+    private Integer sectionID;
 
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
 //        if (login == null || login.isEmpty()) reasons.add("login is empty");
         if (sum == 0) reasons.add("Transaction sum can not be 0!");
+        if (sectionID < 0) reasons.add("SectionID can not be < 0!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 

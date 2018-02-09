@@ -36,8 +36,8 @@ public class SettingsController extends AbstractController implements SettingsAP
         ValidationResult validationResult = settings.isValid();
 
         if (!validationResult.isValidated()) {
-            log.error("Saving Settings failed - required fields are empty: {}", validationResult.getReasons());
-            return responseError("Required fields are empty: " + validationResult.getReasons());
+            log.error("Saving Settings has failed - required fields are incorrect: {}", validationResult.getReasons());
+            return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
         Person person = repository.findPersonByAccess_Login(settings.get_id());
@@ -50,7 +50,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         person.setSettings(settings);
         DBObject dbObject = new BasicDBObject();
 
-        // TODO: 05.02.2018 I smell bad practice here
+        // FIXME: 05.02.2018 I smell bad practice here
 
         mongoOperations.getConverter().write(person, dbObject);
 

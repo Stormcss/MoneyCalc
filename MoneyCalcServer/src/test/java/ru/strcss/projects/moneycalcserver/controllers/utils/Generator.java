@@ -1,13 +1,14 @@
 package ru.strcss.projects.moneycalcserver.controllers.utils;
 
+import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.enitities.*;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -19,17 +20,15 @@ public class Generator {
 
     private static String[] names = {"Вася", "Петя", "Вова", "Дуся", "Дима", "Ваня", "Митя", "Шура"};
 
-    public static Person personGenerator() {
-        return personGenerator( UUID());
+    // FIXME: 09.02.2018 get rid of AI
+    private static AtomicInteger SpendingSectionID = new AtomicInteger();
+
+    public static Credentials generateCredentials() {
+        return generateCredentials(UUID());
     }
 
-    public static Person personGenerator(String login) {
-        return generatePerson(login);
-    }
-
-    private static Person generatePerson(String login) {
-        return Person.builder()
-                .ID(login)
+    public static Credentials generateCredentials(String login) {
+        return Credentials.builder()
                 .access(Access.builder()
                         .login(login)
                         .password("qwerty")
@@ -39,28 +38,15 @@ public class Generator {
                         ._id(login)
                         .name(names[ThreadLocalRandom.current().nextInt(names.length)])
                         .build())
-                .settings(generateSettings(login))
-                .finance(Finance.builder()
-                        ._id(login)
-                        .financeSummary(generateFinanceSummary(login))
-                        .financeStatistics(generateFinanceStatistics(login))
-                        .build())
                 .build();
     }
 
-    public static Settings generateSettings(String login) {
+    public static Settings generateSettings(String login, int numOfSections) {
         return Settings.builder()
                 ._id(login)
                 .periodFrom(formatDateToString(currentDate()))
                 .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
-                .sections(Arrays.asList(SpendingSection.builder()
-                                .name(String.valueOf(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)))
-                                .ID(1)
-                                .build(),
-                        SpendingSection.builder()
-                                .name(String.valueOf(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE)))
-                                .ID(2)
-                                .build()))
+                .sections(Stream.generate(Generator::generateSpendingSection).limit(numOfSections).collect(Collectors.toList()))
                 .build();
     }
 
@@ -71,7 +57,7 @@ public class Generator {
                 .build();
     }
 
-//    private static FinanceStatistics generateFinanceStatistics(String login, int annualTransactionsCount, int transactionsCount) {
+    //    private static FinanceStatistics generateFinanceStatistics(String login, int annualTransactionsCount, int transactionsCount) {
     private static FinanceStatistics generateFinanceStatistics(String login) {
         return FinanceStatistics.builder()
                 ._id(login)
@@ -81,8 +67,8 @@ public class Generator {
     private static FinanceSummary generateFinanceSummary(String login) {
         return FinanceSummary.builder()
                 ._id(login)
-                .daysInMonth(ThreadLocalRandom.current().nextInt(29, 31))
-                .daysSpend(ThreadLocalRandom.current().nextInt(0, 29))
+//                .daysInMonth(ThreadLocalRandom.current().nextInt(29, 31))
+//                .daysSpend(ThreadLocalRandom.current().nextInt(0, 29))
                 .financeSections(generateSettingsSectionsList(3))
                 .build();
     }
@@ -95,7 +81,7 @@ public class Generator {
 //                .collect(Collectors.toList());
 //    }
 
-    private static <T, R> Supplier<R> bind(Function<T,R> fn, T val) {
+    private static <T, R> Supplier<R> bind(Function<T, R> fn, T val) {
         return () -> fn.apply(val);
     }
 
@@ -145,18 +131,19 @@ public class Generator {
         return UUID.randomUUID().toString().toUpperCase().replace("-", "");
     }
 
-
-    //        return now.format(formatter);
-    //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-    //        LocalDate now = LocalDate.now().plus(count, unit);
-
-//    }
-
-
-
 //    public static String currentDate() {
 //        LocalDate now = LocalDate.now();
 //        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 //        return now.format(formatter);
 //    }
+
+    public static SpendingSection generateSpendingSection() {
+        return SpendingSection.builder()
+                .budget(Integer.MAX_VALUE)
+                .isAdded(true)
+                .name("Магазин" + ThreadLocalRandom.current().nextInt(1000))
+                .ID(SpendingSectionID.getAndIncrement())
+                .build();
+    }
+
 }

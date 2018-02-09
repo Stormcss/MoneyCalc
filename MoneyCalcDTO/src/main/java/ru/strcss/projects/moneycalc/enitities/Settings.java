@@ -7,6 +7,7 @@ import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Data
 @Document
@@ -22,6 +23,7 @@ public class Settings {
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
         if (_id.isEmpty()) reasons.add("id is empty");
+        if (sections.stream().map(SpendingSection::getID).distinct().collect(Collectors.toList()).size() != sections.size()) reasons.add("SpendingSections have duplicates!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 

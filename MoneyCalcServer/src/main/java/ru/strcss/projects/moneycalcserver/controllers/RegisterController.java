@@ -43,15 +43,15 @@ public class RegisterController extends AbstractController implements RegisterAP
         // TODO: 15.01.2018 add email verification
 
         if (!validationResult.isValidated()) {
-            log.error("Person registration failed - required fields are empty: {}", validationResult.getReasons());
-            return responseError("Required fields are empty: " + validationResult.getReasons());
+            log.error("Person registration has failed - required fields are incorrect: {}", validationResult.getReasons());
+            return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
         ValidationResult personExists = isPersonExists(credentials.getAccess(), repository);
 
         if (!personExists.isValidated()) {
-            log.error("Person registration failed - required fields are empty: {}", personExists.getReasons());
-            return responseError("Required fields are empty: " + personExists.getReasons());
+            log.error("Person registration has failed - required fields are incorrect: {}", personExists.getReasons());
+            return responseError("Required fields are incorrect: " + personExists.getReasons());
         }
 
         String login = credentials.getAccess().getLogin();

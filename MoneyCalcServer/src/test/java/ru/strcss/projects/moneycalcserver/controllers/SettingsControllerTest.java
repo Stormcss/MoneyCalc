@@ -12,7 +12,7 @@ import ru.strcss.projects.moneycalcserver.controllers.utils.Generator;
 
 import static org.testng.Assert.*;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.UUID;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.personGenerator;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateCredentials;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.savePersonGetLogin;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
 
@@ -23,7 +23,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
     public void saveSettingsIncorrectLogin(){
         String login = savePersonGetLogin(service);
 
-        Settings settingsIncorrect = Generator.generateSettings(login);
+        Settings settingsIncorrect = Generator.generateSettings(login, 2);
         settingsIncorrect.set_id("");
 
         AjaxRs<Settings> response = sendRequest(service.saveSettings(settingsIncorrect)).body();
@@ -32,12 +32,21 @@ public class SettingsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    public void getSettings(){
+    public void saveSettingsDuplicateSections(){
         String login = savePersonGetLogin(service);
 
-        //Saving Settings
-//        Response<AjaxRs<Settings>> responseSaveSettings = sendRequest(service.saveSettings(person.getSettings()));
-//        assertEquals(responseSaveSettings.getStatus(), Status.SUCCESS, responseSaveSettings.getMessage());
+        Settings incorrectSettings = Generator.generateSettings(login, 5);
+
+        incorrectSettings.getSections().get(0).setID(incorrectSettings.getSections().get(1).getID());
+
+        AjaxRs<Settings> response = sendRequest(service.saveSettings(incorrectSettings)).body();
+
+        assertEquals(response.getStatus(), Status.ERROR, response.getMessage());
+    }
+
+    @Test
+    public void getSettings(){
+        String login = savePersonGetLogin(service);
 
         //Getting Settings
         AjaxRs<Settings> responseGetSettings = sendRequest(service.getSettings(login)).body();
@@ -52,18 +61,13 @@ public class SettingsControllerTest extends AbstractControllerTest {
     public void saveSettingsUpdate(){
 
         String login = UUID();
-        Person person = personGenerator(login);
-        Settings newSettings = Generator.generateSettings(login);
+        Settings newSettings = Generator.generateSettings(login,2);
+        Credentials credentials = generateCredentials(login);
+
 
         //Registering Person
-        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(new Credentials(person.getAccess(), person.getIdentifications()))).body();
+        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(credentials)).body();
         assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
-
-        //Updating default Settings
-        AjaxRs<Settings> responseSaveSettings = sendRequest(service.saveSettings(person.getSettings())).body();
-        assertEquals(responseSaveSettings.getStatus(), Status.SUCCESS, responseSaveSettings.getMessage());
-        assertNotNull(responseSaveSettings.getPayload(), "Payload is null!");
-        assertNotNull(responseSaveSettings.getPayload().getSections(), "Settings object is empty!");
 
         //Requesting settings
         AjaxRs<Settings> responseGetSettings = sendRequest(service.getSettings(login)).body();
@@ -91,7 +95,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
         assertNotNull(responseGetUpdated.getPayload().getSections(), "Settings object is empty!");
         assertEquals(responseGetUpdated.getPayload().getSections().get(0).getName(), newSettings.getSections().get(0).getName(), "Settings were not updated!");
 
-        log.debug("Settings before update: {}", person.getSettings());
+        log.debug("Settings before update: {}", responseGetSettings.getPayload());
         log.debug("Settings after update: {}", responseGetUpdated.getPayload());
     }
 

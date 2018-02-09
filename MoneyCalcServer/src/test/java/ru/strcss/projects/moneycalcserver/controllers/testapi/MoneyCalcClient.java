@@ -43,18 +43,18 @@ public interface MoneyCalcClient {
     /**
      *  Transactions
      */
-    @POST("/api/finance/financeStats/getTransactions")
+    @POST("/api/finance/transactions/getTransactions")
     Call<AjaxRs<List<Transaction>>> getTransactions(@Body TransactionsSearchContainer container);
 
-    @POST("/api/finance/financeStats/addTransaction")
+    @POST("/api/finance/transactions/addTransaction")
     Call<AjaxRs<Transaction>> addTransaction(@Body TransactionContainer transactionContainer);
 
-    @POST("/api/finance/financeStats/deleteTransaction")
+    @POST("/api/finance/transactions/deleteTransaction")
     Call<AjaxRs<Void>> deleteTransaction(@Body TransactionDeleteContainer transactionContainer);
 
-    @POST("/api/finance/financeStats/updateTransaction")
+    @POST("/api/finance/transactions/updateTransaction")
     Call<AjaxRs<Transaction>> updateTransaction(@Body TransactionUpdateContainer transactionUpdateContainer);
 
-    @POST("/api/finance/financeStats/dropStatistics")
+    @POST("/api/finance/transactions/dropStatistics")
     Call<AjaxRs<List<Transaction>>> dropTransactions(@Body String login);
 }

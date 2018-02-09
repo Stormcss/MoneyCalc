@@ -20,30 +20,31 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionU
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.PersonTransactions;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
-import ru.strcss.projects.moneycalcserver.mongo.PersonTransactionsRepository;
+import ru.strcss.projects.moneycalcserver.dbconnection.TransactionsDBConnection;
 
-import java.time.LocalDate;
 import java.util.List;
 
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.formatDateFromString;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.generateTransactionID;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/finance/financeStats")
+@RequestMapping("/api/finance/transactions")
 public class TransactionsController extends AbstractController implements TransactionsAPIService {
 
     @Autowired
     MongoTemplate mongoTemplate;
 
-    private PersonTransactionsRepository personTransactionsRepository;
-
     @Autowired
-    public TransactionsController(PersonTransactionsRepository personTransactionsRepository) {
-        this.personTransactionsRepository = personTransactionsRepository;
-    }
+    TransactionsDBConnection transactionsDBConnection;
+
+//    private PersonTransactionsRepository personTransactionsRepository;
+//
+//    @Autowired
+//    public TransactionsController(PersonTransactionsRepository personTransactionsRepository) {
+//        this.personTransactionsRepository = personTransactionsRepository;
+//    }
 
     /**
      * Get list of Transactions by user's login
@@ -60,18 +61,20 @@ public class TransactionsController extends AbstractController implements Transa
         ValidationResult validationResult = container.isValid();
 
         if (!validationResult.isValidated()) {
-            log.error("Transaction validation has failed - required fields are empty: {}", validationResult.getReasons());
-            return responseError("Required fields are empty: " + validationResult.getReasons());
+            log.error("Transaction validation has failed - required fields are incorrect: {}", validationResult.getReasons());
+            return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
-        String login = container.getLogin().replace("\"", "");
+//        String login = container.getLogin().replace("\"", "");
+//
+//        LocalDate rangeFrom = formatDateFromString(container.getRangeFrom());
+//        LocalDate rangeTo = formatDateFromString(container.getRangeTo());
+//
+//        List<Transaction> transactions = personTransactionsRepository.findTransactionsBetween(login, rangeFrom, rangeTo);
 
-        LocalDate rangeFrom = formatDateFromString(container.getRangeFrom());
-        LocalDate rangeTo = formatDateFromString(container.getRangeTo());
+        List<Transaction> transactions = transactionsDBConnection.getTransactions(container);
 
-        List<Transaction> transactions = personTransactionsRepository.findTransactionsBetween(login, rangeFrom, rangeTo);
-
-        log.debug("Returning Transactions for login {}, dateFrom {}, dateTo {} : {}", login, rangeFrom, rangeTo, transactions);
+        log.debug("Returning Transactions for login {}, dateFrom {}, dateTo {} : {}", container.getLogin(), container.getRangeFrom(), container.getRangeTo(), transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }
@@ -82,8 +85,8 @@ public class TransactionsController extends AbstractController implements Transa
         ValidationResult validationResult = transactionContainer.isValid();
 
         if (!validationResult.isValidated()) {
-            log.error("TransactionContainer validation has failed - required fields are empty: {}", validationResult.getReasons());
-            return responseError("Required fields are empty: " + validationResult.getReasons());
+            log.error("TransactionContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
+            return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
         Transaction savedTransaction = generateTransactionID(transactionContainer.getTransaction());
@@ -125,8 +128,8 @@ public class TransactionsController extends AbstractController implements Transa
         ValidationResult validationResult = transactionContainer.isValid();
 
         if (!validationResult.isValidated()) {
-            log.error("TransactionUpdateContainer validation has failed - required fields are empty: {}", validationResult.getReasons());
-            return responseError("Required fields are empty: " + validationResult.getReasons());
+            log.error("TransactionUpdateContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
+            return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
         Transaction transactionToUpdate = generateTransactionID(transactionContainer.getTransaction(), transactionContainer.getId());
@@ -160,8 +163,8 @@ public class TransactionsController extends AbstractController implements Transa
         ValidationResult validationResult = transactionContainer.isValid();
 
         if (!validationResult.isValidated()) {
-            log.error("TransactionUpdateContainer validation has failed - required fields are empty: {}", validationResult.getReasons());
-            return responseError("Required fields are empty: " + validationResult.getReasons());
+            log.error("TransactionUpdateContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
+            return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
         Query getPersonTransactionsQuery = Query.query(Criteria.where("login").is(transactionContainer.getLogin()));

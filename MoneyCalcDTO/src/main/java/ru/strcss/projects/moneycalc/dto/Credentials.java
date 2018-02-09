@@ -1,10 +1,12 @@
 package ru.strcss.projects.moneycalc.dto;
 
+import lombok.Builder;
 import lombok.Data;
 import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 
 @Data
+@Builder
 public class Credentials {
     private Access access;
     private Identifications identifications;

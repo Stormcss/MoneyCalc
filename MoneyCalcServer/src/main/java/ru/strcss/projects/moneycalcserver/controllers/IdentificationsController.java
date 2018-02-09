@@ -36,7 +36,7 @@ public class IdentificationsController extends AbstractController implements Ide
         ValidationResult validationResult = identifications.isValid();
 
         if (!validationResult.isValidated()) {
-            log.error("Saving Identifications failed - required fields are empty: {}", validationResult.getReasons());
+            log.error("Saving Identifications has failed - required fields are empty: {}", validationResult.getReasons());
             return responseError("Required fields are empty: " + validationResult.getReasons());
         }
 

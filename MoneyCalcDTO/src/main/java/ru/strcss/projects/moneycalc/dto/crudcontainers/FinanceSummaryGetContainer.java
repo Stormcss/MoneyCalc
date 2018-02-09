@@ -1,5 +1,25 @@
 package ru.strcss.projects.moneycalc.dto.crudcontainers;
 
-public class FinanceSummaryGetContainer{
+import lombok.Data;
+import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
+import java.util.ArrayList;
+import java.util.List;
+
+@Data
+public class FinanceSummaryGetContainer{
+    private String login;
+    private String rangeFrom;
+    private String rangeTo;
+    private Integer sectionID;
+
+    public ValidationResult isValid() {
+        List<String> reasons = new ArrayList<>();
+        if (login.isEmpty()) reasons.add("login is empty");
+        if (rangeFrom.isEmpty()) reasons.add("rangeFrom is empty");
+        if (rangeTo.isEmpty()) reasons.add("rangeTo is empty");
+        if (sectionID < 0) reasons.add("sectionID must be > 0");
+
+        return new ValidationResult(reasons.isEmpty(), reasons);
+    }
 }

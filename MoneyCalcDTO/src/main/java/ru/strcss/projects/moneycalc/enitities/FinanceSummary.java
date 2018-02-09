@@ -15,6 +15,8 @@ public class FinanceSummary {
     private String _id;
 
     private List<FinanceSummaryBySection> financeSections;
-    private int daysSpend;
-    private int daysInMonth;
+    //these fields mustn't be stored in DB
+
+    //    private int daysSpend;
+//    private int daysInMonth;
 }
