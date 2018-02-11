@@ -9,8 +9,12 @@ import java.util.List;
 /**
  * Container encapsulating searching parameters for Transactions
  *
- * If list of filteredSections is empty then all found transactions satisfying other parameters will be returned.
+ * If list of requiredSections is empty then all found transactions satisfying other parameters will be returned.
  * Otherwise only transactions with requested sectionID will be returned
+ *
+ * login - Person's login with searched transactions
+ * rangeFrom - starting Date of range from which transactions should be received
+ * rangeTo - ending Date of range from which transactions should be received
  *
  */
 
@@ -18,7 +22,7 @@ import java.util.List;
 public class TransactionsSearchContainer extends AbstractTransactionContainer{
     private String rangeFrom;
     private String rangeTo;
-    private List<Integer> filteredSections;
+    private List<Integer> requiredSections;
 
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
@@ -35,7 +39,7 @@ public class TransactionsSearchContainer extends AbstractTransactionContainer{
         this.login = login;
         this.rangeFrom = rangeFrom;
         this.rangeTo = rangeTo;
-        this.filteredSections = sections;
+        this.requiredSections = sections;
     }
 }
 

@@ -5,7 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
@@ -47,7 +47,7 @@ public interface MoneyCalcClient {
     Call<AjaxRs<List<Transaction>>> getTransactions(@Body TransactionsSearchContainer container);
 
     @POST("/api/finance/transactions/addTransaction")
-    Call<AjaxRs<Transaction>> addTransaction(@Body TransactionContainer transactionContainer);
+    Call<AjaxRs<Transaction>> addTransaction(@Body TransactionAddContainer transactionContainer);
 
     @POST("/api/finance/transactions/deleteTransaction")
     Call<AjaxRs<Void>> deleteTransaction(@Body TransactionDeleteContainer transactionContainer);

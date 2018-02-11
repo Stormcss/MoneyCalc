@@ -8,15 +8,15 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class TransactionContainer extends AbstractTransactionContainer{
+public class TransactionAddContainer extends AbstractTransactionContainer{
     private Transaction transaction;
 
-    public TransactionContainer(Transaction transaction, String login) {
+    public TransactionAddContainer(Transaction transaction, String login) {
         this.transaction = transaction;
         this.login = login;
     }
 
-    public TransactionContainer() {
+    public TransactionAddContainer() {
     }
 
     public ValidationResult isValid() {

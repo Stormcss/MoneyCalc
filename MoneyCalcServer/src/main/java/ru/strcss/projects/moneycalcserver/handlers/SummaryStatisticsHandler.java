@@ -4,7 +4,7 @@ import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 
 public class SummaryStatisticsHandler {
 
-    public FinanceSummaryBySection calculateSummayStatisticsBySecion(){
+    public FinanceSummaryBySection calculateSummayStatisticsBySection(){
 
 
 

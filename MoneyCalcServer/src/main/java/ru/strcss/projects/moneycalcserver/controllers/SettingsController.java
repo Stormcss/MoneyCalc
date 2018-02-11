@@ -3,6 +3,7 @@ package ru.strcss.projects.moneycalcserver.controllers;
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBObject;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -13,6 +14,7 @@ import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.enitities.Settings;
+import ru.strcss.projects.moneycalcserver.dbconnection.SettingsDBConnection;
 
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
@@ -23,6 +25,13 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUti
 @RestController
 @RequestMapping("/api/settings/")
 public class SettingsController extends AbstractController implements SettingsAPIService {
+
+    private SettingsDBConnection settingsDBConnection;
+
+    @Autowired
+    public SettingsController(SettingsDBConnection settingsDBConnection) {
+        this.settingsDBConnection = settingsDBConnection;
+    }
 
     /**
      * Save Settings object using user's login stored inside
@@ -67,11 +76,7 @@ public class SettingsController extends AbstractController implements SettingsAP
     @PostMapping(value = "/getSettings")
     public AjaxRs<Settings> getSettings(@RequestBody String login) {
 
-        login = login.replace("\"", "");
-
-        Person person = repository.findSettingsByAccess_Login(login);
-
-        log.error("===== {} ======", person);
+        Person person = settingsDBConnection.getSettings(login);
 
         if (person == null) {
             log.error("Person with login {} is not found!", login);

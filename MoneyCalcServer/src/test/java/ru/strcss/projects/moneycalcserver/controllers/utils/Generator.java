@@ -114,16 +114,24 @@ public class Generator {
     }
 
     public static Transaction generateTransaction() {
-        return generateTransaction(currentDate());
+        return generateTransaction(currentDate(), ThreadLocalRandom.current().nextInt(0, 10));
     }
 
     public static Transaction generateTransaction(LocalDate date) {
+        return generateTransaction(date, ThreadLocalRandom.current().nextInt(0, 10));
+    }
+
+    public static Transaction generateTransaction(Integer sectionID) {
+        return generateTransaction(currentDate(), sectionID);
+    }
+
+    public static Transaction generateTransaction(LocalDate date, Integer sectionID) {
         return Transaction.builder()
                 .date(formatDateToString(date))
                 .sum(ThreadLocalRandom.current().nextInt(10, 2000))
                 .currency("RUR")
                 .description("5ка")
-                .sectionID(ThreadLocalRandom.current().nextInt(0, 10))
+                .sectionID(sectionID)
                 .build();
     }
 

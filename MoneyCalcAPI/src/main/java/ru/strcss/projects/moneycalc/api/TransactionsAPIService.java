@@ -1,7 +1,7 @@
 package ru.strcss.projects.moneycalc.api;
 
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
@@ -13,7 +13,7 @@ public interface TransactionsAPIService {
 
     AjaxRs<List<Transaction>> getTransactions(TransactionsSearchContainer container);
 
-    AjaxRs<Transaction> addTransaction(TransactionContainer transactionContainer);
+    AjaxRs<Transaction> addTransaction(TransactionAddContainer transactionContainer);
 
     AjaxRs<Transaction> updateTransaction(TransactionUpdateContainer transactionContainer);
 

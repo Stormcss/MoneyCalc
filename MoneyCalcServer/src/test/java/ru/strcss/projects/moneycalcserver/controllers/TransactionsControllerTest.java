@@ -2,20 +2,16 @@ package ru.strcss.projects.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
-import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 
-import java.io.IOException;
 import java.time.temporal.ChronoUnit;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -38,35 +34,35 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         String login = savePersonGetLogin(service);
 
         //Adding new Transactions
-        Response<AjaxRs<Transaction>> responseAddTransaction1 = sendRequest(service.addTransaction(new TransactionContainer(generateTransaction(), login)));
-        Response<AjaxRs<Transaction>> responseAddTransaction2 = sendRequest(service.addTransaction(
-                new TransactionContainer(generateTransaction(generateDatePlus(ChronoUnit.DAYS, 1)), login)));
-        assertEquals(responseAddTransaction1.body().getStatus(), Status.SUCCESS, responseAddTransaction1.body().getMessage());
-        assertEquals(responseAddTransaction2.body().getStatus(), Status.SUCCESS, responseAddTransaction2.body().getMessage());
+        AjaxRs<Transaction> responseAddTransaction1 = sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(), login))).body();
+        AjaxRs<Transaction> responseAddTransaction2 = sendRequest(service.addTransaction(
+                new TransactionAddContainer(generateTransaction(generateDatePlus(ChronoUnit.DAYS, 1)), login))).body();
+        assertEquals(responseAddTransaction1.getStatus(), Status.SUCCESS, responseAddTransaction1.getMessage());
+        assertEquals(responseAddTransaction2.getStatus(), Status.SUCCESS, responseAddTransaction2.getMessage());
 
         //Requesting Transactions from today to tomorrow
         TransactionsSearchContainer containerToday2Tomorrow = new TransactionsSearchContainer(login, formatDateToString(currentDate()),
                 formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)), Collections.emptyList());
-        Response<AjaxRs<List<Transaction>>> responseToday2Tomorrow = sendRequest(service.getTransactions(containerToday2Tomorrow));
+        AjaxRs<List<Transaction>> responseToday2Tomorrow = sendRequest(service.getTransactions(containerToday2Tomorrow)).body();
 
-        assertEquals(responseToday2Tomorrow.body().getStatus(), Status.SUCCESS, responseToday2Tomorrow.body().getMessage());
-        assertEquals(responseToday2Tomorrow.body().getPayload().size(), 2, "Incorrect count of transactions is returned");
+        assertEquals(responseToday2Tomorrow.getStatus(), Status.SUCCESS, responseToday2Tomorrow.getMessage());
+        assertEquals(responseToday2Tomorrow.getPayload().size(), 2, "Incorrect count of transactions is returned");
 
         //Requesting Transactions from yesterday to tomorrow
         TransactionsSearchContainer containerYesterday2Today = new TransactionsSearchContainer(login, formatDateToString(generateDateMinus(ChronoUnit.DAYS, 1)),
                 formatDateToString(currentDate()), Collections.emptyList());
-        Response<AjaxRs<List<Transaction>>> responseYesterday2Today = sendRequest(service.getTransactions(containerYesterday2Today));
+        AjaxRs<List<Transaction>> responseYesterday2Today = sendRequest(service.getTransactions(containerYesterday2Today)).body();
 
-        assertEquals(responseYesterday2Today.body().getStatus(), Status.SUCCESS, responseYesterday2Today.body().getMessage());
-        assertEquals(responseYesterday2Today.body().getPayload().size(), 1, "Incorrect count of transactions is returned");
+        assertEquals(responseYesterday2Today.getStatus(), Status.SUCCESS, responseYesterday2Today.getMessage());
+        assertEquals(responseYesterday2Today.getPayload().size(), 1, "Incorrect count of transactions is returned");
 
         //Requesting Transactions from yesterday to tomorrow
         TransactionsSearchContainer containerTomorrowAndLater = new TransactionsSearchContainer(login, formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)),
                 formatDateToString(generateDatePlus(ChronoUnit.DAYS, 2)), Collections.emptyList());
-        Response<AjaxRs<List<Transaction>>> responseTomorrowAndLater = sendRequest(service.getTransactions(containerTomorrowAndLater));
+        AjaxRs<List<Transaction>> responseTomorrowAndLater = sendRequest(service.getTransactions(containerTomorrowAndLater)).body();
 
-        assertEquals(responseTomorrowAndLater.body().getStatus(), Status.SUCCESS, responseTomorrowAndLater.body().getMessage());
-        assertEquals(responseTomorrowAndLater.body().getPayload().size(), 1, "Incorrect count of transactions is returned");
+        assertEquals(responseTomorrowAndLater.getStatus(), Status.SUCCESS, responseTomorrowAndLater.getMessage());
+        assertEquals(responseTomorrowAndLater.getPayload().size(), 1, "Incorrect count of transactions is returned");
     }
 
     /**
@@ -74,17 +70,50 @@ public class TransactionsControllerTest extends AbstractControllerTest {
      */
     @Test
     public void getTransaction_SectionFilter() {
+        int numOfAddedTransactionsPerSection = 5;
+        int numOfSections = 3;
+
         String login = savePersonGetLogin(service);
 
+        //Adding new Transactions
+        List<Transaction> addedTransactions = new ArrayList<>();
+        for (int i = 0; i < numOfSections; i++) {
+            // FIXME: 11.02.2018 I suppose it could be done better
+            int sectionID = i;
+            addedTransactions.addAll(IntStream.range(0, numOfAddedTransactionsPerSection)
+                    .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(sectionID), login))).body())
+                    .filter(Objects::nonNull)
+                    .map(AjaxRs::getPayload)
+                    .collect(Collectors.toList()));
+        }
+        assertEquals(addedTransactions.size(), numOfAddedTransactionsPerSection * numOfSections, "Some Transactions were not saved!");
 
+        //Requesting Transactions with Single Section
+        for (int sectionID = 0; sectionID < numOfSections; sectionID++) {
+            int finalSectionID = sectionID;
+            // FIXME: 11.02.2018 I suppose it could be done better
+            TransactionsSearchContainer containerSection1 = new TransactionsSearchContainer(login, formatDateToString(currentDate()),
+                    formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)), Collections.singletonList(sectionID));
+            AjaxRs<List<Transaction>> responseSingleSection = sendRequest(service.getTransactions(containerSection1)).body();
 
+            assertEquals(responseSingleSection.getStatus(), Status.SUCCESS, responseSingleSection.getMessage());
+            assertEquals(responseSingleSection.getPayload().size(), numOfAddedTransactionsPerSection, "Incorrect count of transactions has returned");
+            assertTrue(responseSingleSection.getPayload().stream().allMatch(t -> t.getSectionID() == finalSectionID), "Some of returned Transactions have wrong SectionID");
+        }
 
+        //Requesting Transactions with Multiple Sections
+        if (numOfSections > 1){
+            TransactionsSearchContainer containerSection1 = new TransactionsSearchContainer(login, formatDateToString(currentDate()),
+                    formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)), Arrays.asList(0, 1));
+            AjaxRs<List<Transaction>> responseMultipleSections = sendRequest(service.getTransactions(containerSection1)).body();
+
+            assertEquals(responseMultipleSections.getStatus(), Status.SUCCESS, responseMultipleSections.getMessage());
+            assertEquals(responseMultipleSections.getPayload().size(), numOfAddedTransactionsPerSection * 2, "Incorrect count of transactions has returned");
+        }
     }
 
     /**
      * Saving new Transaction to empty list
-     *
-     * @throws IOException
      */
 
     @Test
@@ -92,7 +121,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         String login = savePersonGetLogin(service);
 
 //        Adding new Transaction
-        AjaxRs<Transaction> responseAddTransaction = sendRequest(service.addTransaction(new TransactionContainer(generateTransaction(), login))).body();
+        AjaxRs<Transaction> responseAddTransaction = sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(), login))).body();
         assertEquals(responseAddTransaction.getStatus(), Status.SUCCESS, responseAddTransaction.getMessage());
 
         //Checking that it is added
@@ -116,7 +145,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
-                .mapToObj(s -> sendRequest(service.addTransaction(new TransactionContainer(generateTransaction(), login))).body())
+                .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(), login))).body())
                 .filter(Objects::nonNull)
                 .map(AjaxRs::getPayload)
                 .collect(Collectors.toList());
@@ -142,6 +171,9 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         assertFalse(responseGetTransactions.getPayload().stream().anyMatch(transaction -> transaction.get_id().equals(idToDelete)), "Transaction was not deleted!");
     }
 
+    /**
+     * Updating Transaction
+     */
     @Test
     public void updateTransaction() {
         int numOfAddedTransactions = 5;
@@ -149,7 +181,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
-                .mapToObj(s -> sendRequest(service.addTransaction(new TransactionContainer(generateTransaction(), login))).body())
+                .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(), login))).body())
                 .filter(Objects::nonNull)
                 .map(AjaxRs::getPayload)
                 .collect(Collectors.toList());

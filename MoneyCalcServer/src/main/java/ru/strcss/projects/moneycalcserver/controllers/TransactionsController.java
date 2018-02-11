@@ -3,10 +3,6 @@ package ru.strcss.projects.moneycalcserver.controllers;
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -14,11 +10,10 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.TransactionsAPIService;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.PersonTransactions;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalcserver.dbconnection.TransactionsDBConnection;
 
@@ -33,26 +28,17 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUti
 @RequestMapping("/api/finance/transactions")
 public class TransactionsController extends AbstractController implements TransactionsAPIService {
 
-    @Autowired
-    MongoTemplate mongoTemplate;
+    private TransactionsDBConnection transactionsDBConnection;
 
     @Autowired
-    TransactionsDBConnection transactionsDBConnection;
-
-//    private PersonTransactionsRepository personTransactionsRepository;
-//
-//    @Autowired
-//    public TransactionsController(PersonTransactionsRepository personTransactionsRepository) {
-//        this.personTransactionsRepository = personTransactionsRepository;
-//    }
+    public TransactionsController(TransactionsDBConnection transactionsDBConnection) {
+        this.transactionsDBConnection = transactionsDBConnection;
+    }
 
     /**
      * Get list of Transactions by user's login
      *
-     * @param container - TransactionsSearchContainer with following fields:
-     *                  login - Person's login with searched transactions
-     *                  rangeFrom - starting Date of range from which transactions should be received
-     *                  rangeTo - ending Date of range from which transactions should be recieved
+     * @param container - TransactionsSearchContainer
      * @return response object with list of Transactions
      */
     @PostMapping(value = "/getTransactions")
@@ -65,13 +51,6 @@ public class TransactionsController extends AbstractController implements Transa
             return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
-//        String login = container.getLogin().replace("\"", "");
-//
-//        LocalDate rangeFrom = formatDateFromString(container.getRangeFrom());
-//        LocalDate rangeTo = formatDateFromString(container.getRangeTo());
-//
-//        List<Transaction> transactions = personTransactionsRepository.findTransactionsBetween(login, rangeFrom, rangeTo);
-
         List<Transaction> transactions = transactionsDBConnection.getTransactions(container);
 
         log.debug("Returning Transactions for login {}, dateFrom {}, dateTo {} : {}", container.getLogin(), container.getRangeFrom(), container.getRangeTo(), transactions);
@@ -80,35 +59,28 @@ public class TransactionsController extends AbstractController implements Transa
     }
 
     @PostMapping(value = "/addTransaction")
-    public AjaxRs<Transaction> addTransaction(@RequestBody TransactionContainer transactionContainer) {
+    public AjaxRs<Transaction> addTransaction(@RequestBody TransactionAddContainer transactionAddContainer) {
 
-        ValidationResult validationResult = transactionContainer.isValid();
+        ValidationResult validationResult = transactionAddContainer.isValid();
 
         if (!validationResult.isValidated()) {
             log.error("TransactionContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
             return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
-        Transaction savedTransaction = generateTransactionID(transactionContainer.getTransaction());
+        generateTransactionID(transactionAddContainer.getTransaction());
 
-        Update update = new Update();
-        Query addTransactionQuery = new Query(Criteria.where("login").is(transactionContainer.getLogin()));
-
-        update.push("transactions", savedTransaction);
-
-        WriteResult writeResult = mongoTemplate.updateFirst(addTransactionQuery, update, PersonTransactions.class);
+        WriteResult writeResult = transactionsDBConnection.addTransaction(transactionAddContainer);
 
         if (writeResult.wasAcknowledged()) {
             // TODO: 05.02.2018 Statistics recalculation
             // TODO: 08.02.2018 TRANSACTIONS REQUIRED
 
-
-
-            log.debug("Saved new Transaction for login {} : {}", transactionContainer.getLogin(), savedTransaction);
-            return responseSuccess(TRANSACTION_SAVED, savedTransaction);
+            log.debug("Saved new Transaction for login {} : {}", transactionAddContainer.getLogin(), transactionAddContainer.getTransaction());
+            return responseSuccess(TRANSACTION_SAVED, transactionAddContainer.getTransaction());
 
         } else {
-            log.error("Saving Transaction {} for login {} has failed", savedTransaction, transactionContainer.getLogin());
+            log.error("Saving Transaction {} for login {} has failed", transactionAddContainer.getTransaction(), transactionAddContainer.getLogin());
             return responseError(TRANSACTION_SAVING_ERROR);
         }
     }
@@ -133,16 +105,10 @@ public class TransactionsController extends AbstractController implements Transa
         }
 
         Transaction transactionToUpdate = generateTransactionID(transactionContainer.getTransaction(), transactionContainer.getId());
-        log.error("transactionToUpdate is {}", transactionToUpdate);
 
-        Query findUpdatedTransactionQuery = Query.query(
-                Criteria.where("login").is(transactionContainer.getLogin()).and("transactions._id").is(transactionContainer.getId()));
+        transactionContainer.setTransaction(transactionToUpdate);
 
-        WriteResult updateResult = mongoOperations.updateMulti(findUpdatedTransactionQuery,
-                new Update().set("transactions.$", transactionToUpdate), PersonTransactions.class);
-
-        List<PersonTransactions> personTransactions = mongoTemplate.find(findUpdatedTransactionQuery, PersonTransactions.class);
-        log.error("personTransactions is {}", personTransactions);
+        WriteResult updateResult = transactionsDBConnection.updateTransaction(transactionContainer);
 
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
@@ -153,8 +119,8 @@ public class TransactionsController extends AbstractController implements Transa
         }
         // TODO: 05.02.2018 Statistics recalculation
 
-        log.debug("Updated Transaction {}: for login: {}", transactionToUpdate);
-        return responseSuccess(TRANSACTION_UPDATED, transactionToUpdate);
+        log.debug("Updated Transaction {}: for login: {}", transactionContainer.getTransaction());
+        return responseSuccess(TRANSACTION_UPDATED, transactionContainer.getTransaction());
     }
 
     @PostMapping(value = "/deleteTransaction")
@@ -167,11 +133,7 @@ public class TransactionsController extends AbstractController implements Transa
             return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
-        Query getPersonTransactionsQuery = Query.query(Criteria.where("login").is(transactionContainer.getLogin()));
-        Query getTransactionQuery = Query.query(Criteria.where("_id").is(transactionContainer.getId()));
-
-        WriteResult deleteResult = mongoTemplate.updateFirst(getPersonTransactionsQuery,
-                new Update().pull("transactions", getTransactionQuery), "Transactions");
+        WriteResult deleteResult = transactionsDBConnection.deleteTransaction(transactionContainer);
 
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
