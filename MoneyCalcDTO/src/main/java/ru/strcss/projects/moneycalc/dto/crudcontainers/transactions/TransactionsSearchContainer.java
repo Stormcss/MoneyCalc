@@ -2,6 +2,7 @@ package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 
 import lombok.Data;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,18 +20,10 @@ import java.util.List;
  */
 
 @Data
-public class TransactionsSearchContainer extends AbstractTransactionContainer{
+public class TransactionsSearchContainer extends AbstractContainer {
     private String rangeFrom;
     private String rangeTo;
     private List<Integer> requiredSections;
-
-    public ValidationResult isValid() {
-        List<String> reasons = new ArrayList<>();
-        if (login.isEmpty()) reasons.add("login is empty");
-        if (rangeFrom.isEmpty()) reasons.add("rangeFrom is empty");
-        if (rangeTo.isEmpty()) reasons.add("rangeTo is empty");
-        return new ValidationResult(reasons.isEmpty(), reasons);
-    }
 
     public TransactionsSearchContainer() {
     }
@@ -40,6 +33,15 @@ public class TransactionsSearchContainer extends AbstractTransactionContainer{
         this.rangeFrom = rangeFrom;
         this.rangeTo = rangeTo;
         this.requiredSections = sections;
+    }
+
+    @Override
+    public ValidationResult isValid() {
+        List<String> reasons = new ArrayList<>();
+        if (login.isEmpty()) reasons.add("login is empty");
+        if (rangeFrom.isEmpty()) reasons.add("rangeFrom is empty");
+        if (rangeTo.isEmpty()) reasons.add("rangeTo is empty");
+        return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }
 

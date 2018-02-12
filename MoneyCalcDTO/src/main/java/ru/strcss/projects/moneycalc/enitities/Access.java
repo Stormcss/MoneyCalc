@@ -13,14 +13,12 @@ import java.util.List;
 @Document
 public class Access {
 
-//    @Indexed(unique = true)
     private String login;
 
     private String password;
     private String email;
 
     public ValidationResult isValid() {
-//        List<String> reasons = Stream.of(login, password, email).filter(String::isEmpty).map(s -> s + " is empty").collect(Collectors.toList());
         List<String> reasons = new ArrayList<>();
         if (login.isEmpty()) reasons.add("login is empty");
         if (password.isEmpty()) reasons.add("password is empty");

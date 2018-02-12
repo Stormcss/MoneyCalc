@@ -7,12 +7,12 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class FinanceSummaryGetContainer{
-    private String login;
+public class FinanceSummaryGetContainer extends AbstractContainer{
     private String rangeFrom;
     private String rangeTo;
     private Integer sectionID;
 
+    @Override
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
         if (login.isEmpty()) reasons.add("login is empty");

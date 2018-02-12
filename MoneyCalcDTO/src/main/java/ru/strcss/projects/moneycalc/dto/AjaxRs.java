@@ -5,7 +5,7 @@ import lombok.Getter;
 
 @Builder
 @Getter
-public class AjaxRs<E extends Object> {
+public class AjaxRs<E> {
     private Status status;
     private E payload;
     private String message;

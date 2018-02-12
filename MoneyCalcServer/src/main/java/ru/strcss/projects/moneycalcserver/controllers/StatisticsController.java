@@ -33,7 +33,7 @@ public class StatisticsController extends AbstractController implements Statisti
 
         SummaryStatisticsHandler statisticsHandler = new SummaryStatisticsHandler();
 
-        statisticsHandler.calculateSummayStatisticsBySection();
+        statisticsHandler.calculateSummaryStatisticsBySection();
 
         return null;
     }

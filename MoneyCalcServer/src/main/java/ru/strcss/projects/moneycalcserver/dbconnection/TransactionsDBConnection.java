@@ -80,7 +80,6 @@ public class TransactionsDBConnection {
                 new Update().set("transactions.$", transactionUpdateContainer.getTransaction()), PersonTransactions.class);
     }
 
-
     /**
      * Delete Transaction from DB
      *
