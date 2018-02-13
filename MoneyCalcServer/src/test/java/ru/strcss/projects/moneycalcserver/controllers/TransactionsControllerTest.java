@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.testng.Assert.*;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.*;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateTransaction;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.savePersonGetLogin;

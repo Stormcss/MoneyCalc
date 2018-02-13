@@ -73,7 +73,6 @@ public class TransactionsController extends AbstractController implements Transa
         WriteResult writeResult = transactionsDBConnection.addTransaction(transactionAddContainer);
 
         if (writeResult.wasAcknowledged()) {
-            // TODO: 05.02.2018 Statistics recalculation
             // TODO: 08.02.2018 TRANSACTIONS REQUIRED
 
             log.debug("Saved new Transaction for login {} : {}", transactionAddContainer.getLogin(), transactionAddContainer.getTransaction());
@@ -117,7 +116,6 @@ public class TransactionsController extends AbstractController implements Transa
             log.error("Updating Transaction for login {} has failed - ", transactionContainer.getLogin());
             return responseError("Transaction was not updated!");
         }
-        // TODO: 05.02.2018 Statistics recalculation
 
         log.debug("Updated Transaction {}: for login: {}", transactionContainer.getTransaction());
         return responseSuccess(TRANSACTION_UPDATED, transactionContainer.getTransaction());
@@ -141,8 +139,6 @@ public class TransactionsController extends AbstractController implements Transa
             log.error("Deleting Transaction for login {} has failed - ", transactionContainer.getLogin());
             return responseError("Transaction was not deleted!");
         }
-        // TODO: 05.02.2018 Statistics recalculation
-
         log.debug("Deleted Transaction id {}: for login: {}", transactionContainer.getId(), transactionContainer.getLogin());
         // FIXME: 06.02.2018 some payload should be returned
         return responseSuccess(TRANSACTION_DELETED, null);

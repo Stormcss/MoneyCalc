@@ -18,7 +18,7 @@ import ru.strcss.projects.moneycalcserver.mongo.PersonTransactionsRepository;
 import java.time.LocalDate;
 import java.util.List;
 
-import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.formatDateFromString;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.formatDateFromString;
 
 @Component
 public class TransactionsDBConnection {

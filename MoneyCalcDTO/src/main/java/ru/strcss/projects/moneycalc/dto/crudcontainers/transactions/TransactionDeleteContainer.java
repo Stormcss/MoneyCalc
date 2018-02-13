@@ -1,14 +1,17 @@
 package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 
-import lombok.Data;
+import lombok.Getter;
+import lombok.Setter;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
+
 public class TransactionDeleteContainer extends AbstractContainer {
+    @Getter
+    @Setter
     private String id;
 
     public TransactionDeleteContainer() {

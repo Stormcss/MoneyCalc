@@ -14,7 +14,9 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.*;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.currentDate;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 
 public class Generator {
 
@@ -114,21 +116,25 @@ public class Generator {
     }
 
     public static Transaction generateTransaction() {
-        return generateTransaction(currentDate(), ThreadLocalRandom.current().nextInt(0, 10));
+        return generateTransaction(currentDate(), ThreadLocalRandom.current().nextInt(0, 10), ThreadLocalRandom.current().nextInt(10, 2000));
     }
 
     public static Transaction generateTransaction(LocalDate date) {
-        return generateTransaction(date, ThreadLocalRandom.current().nextInt(0, 10));
+        return generateTransaction(date, ThreadLocalRandom.current().nextInt(0, 10), ThreadLocalRandom.current().nextInt(10, 2000));
     }
 
     public static Transaction generateTransaction(Integer sectionID) {
-        return generateTransaction(currentDate(), sectionID);
+        return generateTransaction(currentDate(), sectionID, ThreadLocalRandom.current().nextInt(10, 2000));
     }
 
-    public static Transaction generateTransaction(LocalDate date, Integer sectionID) {
+    public static Transaction generateTransaction(Integer sectionID, Integer sum) {
+        return generateTransaction(currentDate(), sectionID, sum);
+    }
+
+    public static Transaction generateTransaction(LocalDate date, Integer sectionID, Integer sum) {
         return Transaction.builder()
                 .date(formatDateToString(date))
-                .sum(ThreadLocalRandom.current().nextInt(10, 2000))
+                .sum(sum)
                 .currency("RUR")
                 .description("5ка")
                 .sectionID(sectionID)
@@ -138,12 +144,6 @@ public class Generator {
     public static String UUID() {
         return UUID.randomUUID().toString().toUpperCase().replace("-", "");
     }
-
-//    public static String currentDate() {
-//        LocalDate now = LocalDate.now();
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//        return now.format(formatter);
-//    }
 
     public static SpendingSection generateSpendingSection() {
         return SpendingSection.builder()

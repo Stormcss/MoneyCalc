@@ -10,7 +10,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.formatDateFromString;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.formatDateFromString;
+
 
 @Repository
 public interface PersonTransactionsRepository extends MongoRepository<PersonTransactions, String> {

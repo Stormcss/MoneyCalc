@@ -16,9 +16,9 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.*;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.*;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.currentDate;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ValidationUtils.isPersonExists;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ValidationUtils.validateRegisterPerson;
 
@@ -27,6 +27,7 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.ValidationUti
 @RestController
 @RequestMapping("/api/registration/")
 public class RegisterController extends AbstractController implements RegisterAPIService {
+
     /**
      * 1) Checking if person has required fields filled
      * 2) Checking if the same login and email exists
@@ -34,7 +35,6 @@ public class RegisterController extends AbstractController implements RegisterAP
      * @param credentials - wrapper with Access and Identifications objects inside
      * @return AjaxRs
      */
-
     @PostMapping(value = "/registerPerson")
     public AjaxRs<Person> registerPerson(@RequestBody Credentials credentials) {
 

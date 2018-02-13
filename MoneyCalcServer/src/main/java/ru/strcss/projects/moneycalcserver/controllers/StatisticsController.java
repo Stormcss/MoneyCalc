@@ -1,26 +1,46 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.StatisticsAPIService;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.FinanceSummaryGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.enitities.SpendingSection;
+import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalcserver.dbconnection.SettingsDBConnection;
+import ru.strcss.projects.moneycalcserver.dbconnection.TransactionsDBConnection;
 import ru.strcss.projects.moneycalcserver.handlers.SummaryStatisticsHandler;
 
-import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
+import java.time.LocalDate;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.*;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/statistics/financeSummary")
 public class StatisticsController extends AbstractController implements StatisticsAPIService {
 
+    private TransactionsDBConnection transactionsDBConnection;
+    private SettingsDBConnection settingsDBConnection;
+
+    @Autowired
+    public StatisticsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection) {
+        this.transactionsDBConnection = transactionsDBConnection;
+        this.settingsDBConnection = settingsDBConnection;
+    }
+
     @Override
     @PostMapping(value = "/getFinanceSummaryBySection")
-    public AjaxRs<FinanceSummaryBySection> getFinanceSummaryBySection(FinanceSummaryGetContainer getContainer) {
+    public AjaxRs<List<FinanceSummaryBySection>> getFinanceSummaryBySection(FinanceSummaryGetContainer getContainer) {
 
         ValidationResult validationResult = getContainer.isValid();
 
@@ -29,12 +49,36 @@ public class StatisticsController extends AbstractController implements Statisti
             return responseError("Required fields are empty: " + validationResult.getReasons());
         }
 
+        List<Transaction> transactions = transactionsDBConnection.getTransactions(new TransactionsSearchContainer(getContainer.getLogin(),
+                getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getSectionIDs()));
+
+        //оставляю только те секции клиента для которых мне нужна статистика
+        List<SpendingSection> spendingSections = settingsDBConnection.getSettings(getContainer.getLogin()).getSettings().getSections().stream()
+                .filter(section -> getContainer.getSectionIDs().stream().anyMatch(id -> id.equals(section.getID())))
+                .collect(Collectors.toList());
+
+        if (spendingSections.size() != getContainer.getSectionIDs().size()) {
+            log.error("List of required IDs is not equal with list filtered Person's list");
+            return responseError("List of required IDs is not equal with list filtered Person's list");
+        }
+
         // TODO: 09.02.2018 Request list of Transactions by Section, range and login
 
         SummaryStatisticsHandler statisticsHandler = new SummaryStatisticsHandler();
 
-        statisticsHandler.calculateSummaryStatisticsBySection();
 
-        return null;
+        FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
+                .rangeFrom(formatDateFromString(getContainer.getRangeFrom()))
+                .rangeTo(formatDateFromString(getContainer.getRangeTo()))
+                .sections(getContainer.getSectionIDs())
+                .transactions(transactions)
+                .spendingSections(spendingSections)
+                .today(LocalDate.now())
+                .build();// TODO: 13.02.2018 should be client's time
+
+        List<FinanceSummaryBySection> financeSummaryResult = statisticsHandler.calculateSummaryStatisticsBySections(calculationContainer);
+
+        log.debug("Returned List of FinanceSummaryBySection for login: {} : {}", getContainer.getLogin(), financeSummaryResult);
+        return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
     }
 }

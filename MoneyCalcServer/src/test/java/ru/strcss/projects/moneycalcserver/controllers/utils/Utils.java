@@ -12,7 +12,7 @@ import ru.strcss.projects.moneycalcserver.controllers.testapi.MoneyCalcClient;
 import java.io.IOException;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.testng.Assert.assertNotNull;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.UUID;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateCredentials;
 
@@ -27,8 +27,8 @@ public class Utils {
             e.printStackTrace();
         }
 
-        assertTrue(response != null, "Response is null!");
-        assertTrue(response.body() != null, "Response body is null!");
+        assertNotNull(response, "Response is null!");
+        assertNotNull(response.body(), "Response body is null!");
 //        assertEquals(response.body().getStatus(), Status.SUCCESS, response.body().getMessage());
 
         log.debug("{} - {}", response.body().getMessage(), response.body().getStatus().name());

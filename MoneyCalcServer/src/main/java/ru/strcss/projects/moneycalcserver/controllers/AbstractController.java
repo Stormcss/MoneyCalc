@@ -17,7 +17,7 @@ public abstract class AbstractController {
     final String SAVE_SETTINGS = "Settings successfully saved";
     final String RETURN_SETTINGS = "Settings successfully returned";
 
-    public final String SAVE_IDENTIFICATIONS = "Identifications successfully saved";
+    final String SAVE_IDENTIFICATIONS = "Identifications successfully saved";
     final String RETURN_IDENTIFICATIONS = "Identifications successfully returned";
 
     final String TRANSACTION_SAVING_ERROR = "ERROR has occurred while saved Transaction";
@@ -26,5 +26,5 @@ public abstract class AbstractController {
     final String TRANSACTION_UPDATED = "TRANSACTION successfully updated";
     final String TRANSACTIONS_RETURNED = "TRANSACTIONS successfully returned";
 
-    final String FIND_SUCCESSFUL = "Found successfully";
+    final String STATISTICS_RETURNED = "Statistics successfully returned";
 }
