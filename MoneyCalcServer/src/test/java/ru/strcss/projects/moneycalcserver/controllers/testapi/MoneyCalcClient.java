@@ -5,14 +5,12 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.Identifications;
-import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalc.enitities.Settings;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.enitities.*;
 
 import java.util.List;
 
@@ -57,4 +55,10 @@ public interface MoneyCalcClient {
 
     @POST("/api/finance/transactions/dropStatistics")
     Call<AjaxRs<List<Transaction>>> dropTransactions(@Body String login);
+
+    /**
+     *  Statistics
+     */
+    @POST("/api/statistics/financeSummary/getFinanceSummaryBySection")
+    Call<AjaxRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@Body FinanceSummaryGetContainer getContainer);
 }

@@ -21,7 +21,7 @@ public class SpendingSection {
     /**
      * if Section is active in UI. It is allowed to disable unactual sections without having to delete it
      */
-    private boolean isAdded;
+    private Boolean isAdded;
 
     /**
      * Estimated budget for section. Used for Statistics calculation

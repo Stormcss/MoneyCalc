@@ -147,10 +147,18 @@ public class Generator {
 
     public static SpendingSection generateSpendingSection() {
         return SpendingSection.builder()
-                .budget(Integer.MAX_VALUE)
+                .budget(ThreadLocalRandom.current().nextInt(5000, Integer.MAX_VALUE))
                 .isAdded(true)
                 .name("Магазин" + ThreadLocalRandom.current().nextInt(1000))
                 .ID(SpendingSectionID.getAndIncrement())
+                .build();
+    }
+    public static SpendingSection generateSpendingSection(Integer budget, Integer id) {
+        return SpendingSection.builder()
+                .budget(budget)
+                .isAdded(true)
+                .name("Магазин" + ThreadLocalRandom.current().nextInt(1000))
+                .ID(id)
                 .build();
     }
 

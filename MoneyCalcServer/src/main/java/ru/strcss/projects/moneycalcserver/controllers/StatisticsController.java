@@ -3,6 +3,7 @@ package ru.strcss.projects.moneycalcserver.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.StatisticsAPIService;
@@ -40,7 +41,9 @@ public class StatisticsController extends AbstractController implements Statisti
 
     @Override
     @PostMapping(value = "/getFinanceSummaryBySection")
-    public AjaxRs<List<FinanceSummaryBySection>> getFinanceSummaryBySection(FinanceSummaryGetContainer getContainer) {
+    public AjaxRs<List<FinanceSummaryBySection>> getFinanceSummaryBySection(@RequestBody FinanceSummaryGetContainer getContainer) {
+
+        log.error("FinanceSummaryGetContainer: {}", getContainer);
 
         ValidationResult validationResult = getContainer.isValid();
 

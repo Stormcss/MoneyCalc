@@ -10,6 +10,6 @@ public class FinanceSummaryBySection {
     private Integer sectionID;
     private double todayBalance;
     private double summaryBalance;
-    private int moneySpendAll;
-    private int moneyLeftAll;
+    private Integer moneySpendAll;
+    private Integer moneyLeftAll;
 }

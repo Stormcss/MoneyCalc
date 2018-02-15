@@ -55,6 +55,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
 
         assertEquals(responseGetSettings.getStatus(), Status.SUCCESS, responseGetSettings.getMessage());
         assertEquals(responseGetSettings.getPayload().get_id(), login, "returned Settings object has wrong login!");
+        assertTrue(responseGetSettings.getPayload().getSections().stream().allMatch(section -> section.getID() != null), "Some IDs in Spending Sections are null!");
     }
 
     @Test

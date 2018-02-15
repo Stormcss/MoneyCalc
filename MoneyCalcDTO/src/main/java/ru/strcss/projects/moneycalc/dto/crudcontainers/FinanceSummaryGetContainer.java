@@ -15,11 +15,21 @@ public class FinanceSummaryGetContainer extends AbstractContainer{
     @Override
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (login.isEmpty()) reasons.add("login is empty");
-        if (rangeFrom.isEmpty()) reasons.add("rangeFrom is empty");
-        if (rangeTo.isEmpty()) reasons.add("rangeTo is empty");
+        if (login == null || login.isEmpty()) reasons.add("login is empty");
+        if (rangeFrom == null || rangeFrom.isEmpty()) reasons.add("rangeFrom is empty");
+        if (rangeTo == null || rangeTo.isEmpty()) reasons.add("rangeTo is empty");
         if (sectionIDs == null || sectionIDs.isEmpty()) reasons.add("sectionIDs can not be empty");
 
         return new ValidationResult(reasons.isEmpty(), reasons);
+    }
+
+    public FinanceSummaryGetContainer() {
+    }
+
+    public FinanceSummaryGetContainer(String login, String rangeFrom, String rangeTo, List<Integer> sectionIDs) {
+        this.login = login;
+        this.rangeFrom = rangeFrom;
+        this.rangeTo = rangeTo;
+        this.sectionIDs = sectionIDs;
     }
 }
