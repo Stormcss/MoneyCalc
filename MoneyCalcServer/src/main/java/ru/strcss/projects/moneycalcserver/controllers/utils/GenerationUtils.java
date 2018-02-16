@@ -10,7 +10,6 @@ public class GenerationUtils {
 
     public static LocalDate generateDatePlus(TemporalUnit unit, int count) {
         return LocalDate.now().plus(count, unit);
-
     }
 
     public static LocalDate generateDateMinus(TemporalUnit unit, int count) {
@@ -20,7 +19,6 @@ public class GenerationUtils {
     public static LocalDate currentDate() {
         return LocalDate.now();
     }
-
 
     public static Transaction generateTransactionID(Transaction transaction) {
         transaction.set_id(generateUUID());

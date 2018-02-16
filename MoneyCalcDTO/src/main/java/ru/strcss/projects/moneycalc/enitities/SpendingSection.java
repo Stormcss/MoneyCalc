@@ -11,9 +11,9 @@ import java.util.List;
 @Data
 public class SpendingSection {
     /**
-     * ID of SpendingSection - unique ID which is used to identify Section while calculating Statistics
+     * id of SpendingSection - unique id which is used to identify Section while calculating Statistics
      */
-    private Integer ID;
+    private Integer id;
     /**
      * Name of SpendingSection which is seen in UI
      */
@@ -32,6 +32,7 @@ public class SpendingSection {
         List<String> reasons = new ArrayList<>();
         if (name == null || name.isEmpty()) reasons.add("name is empty");
         if (budget <= 0) reasons.add("budget must be >= 0");
+        if (id == null) reasons.add("id can not be null");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

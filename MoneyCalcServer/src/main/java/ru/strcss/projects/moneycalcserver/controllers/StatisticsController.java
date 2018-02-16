@@ -57,7 +57,7 @@ public class StatisticsController extends AbstractController implements Statisti
 
         //оставляю только те секции клиента для которых мне нужна статистика
         List<SpendingSection> spendingSections = settingsDBConnection.getSettings(getContainer.getLogin()).getSettings().getSections().stream()
-                .filter(section -> getContainer.getSectionIDs().stream().anyMatch(id -> id.equals(section.getID())))
+                .filter(section -> getContainer.getSectionIDs().stream().anyMatch(id -> id.equals(section.getId())))
                 .collect(Collectors.toList());
 
         if (spendingSections.size() != getContainer.getSectionIDs().size()) {

@@ -23,7 +23,7 @@ public class Settings {
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
         if (_id.isEmpty()) reasons.add("id is empty");
-        if (sections.stream().map(SpendingSection::getID).distinct().collect(Collectors.toList()).size() != sections.size()) reasons.add("SpendingSections have duplicates!");
+        if (sections.stream().map(SpendingSection::getId).distinct().collect(Collectors.toList()).size() != sections.size()) reasons.add("SpendingSections have duplicates!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 

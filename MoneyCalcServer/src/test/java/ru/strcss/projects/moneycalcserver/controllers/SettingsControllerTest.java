@@ -37,7 +37,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
 
         Settings incorrectSettings = Generator.generateSettings(login, 5);
 
-        incorrectSettings.getSections().get(0).setID(incorrectSettings.getSections().get(1).getID());
+        incorrectSettings.getSections().get(0).setId(incorrectSettings.getSections().get(1).getId());
 
         AjaxRs<Settings> response = sendRequest(service.saveSettings(incorrectSettings)).body();
 
@@ -46,6 +46,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
 
     @Test
     public void getSettings(){
+//        String login = "2649AA313EF74CBABEC0B0E0AEF3E6A7";
         String login = savePersonGetLogin(service);
 
         //Getting Settings
@@ -55,7 +56,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
 
         assertEquals(responseGetSettings.getStatus(), Status.SUCCESS, responseGetSettings.getMessage());
         assertEquals(responseGetSettings.getPayload().get_id(), login, "returned Settings object has wrong login!");
-        assertTrue(responseGetSettings.getPayload().getSections().stream().allMatch(section -> section.getID() != null), "Some IDs in Spending Sections are null!");
+        assertTrue(responseGetSettings.getPayload().getSections().stream().allMatch(section -> section.getId() != null), "Some IDs in Spending Sections are null!");
     }
 
     @Test
