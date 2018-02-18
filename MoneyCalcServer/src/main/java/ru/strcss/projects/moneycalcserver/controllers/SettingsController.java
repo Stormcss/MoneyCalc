@@ -69,6 +69,8 @@ public class SettingsController extends AbstractController implements SettingsAP
         return responseSuccess(RETURN_SETTINGS, settings);
     }
 
+    // TODO: 18.02.2018 Add method for adding Section!
+
     /**
      * Get Setting object using user's login
      *
