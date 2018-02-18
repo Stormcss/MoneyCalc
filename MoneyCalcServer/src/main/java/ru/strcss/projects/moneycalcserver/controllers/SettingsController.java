@@ -49,6 +49,8 @@ public class SettingsController extends AbstractController implements SettingsAP
             return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
+        //whole Person must be returned
+        // FIXME: 18.02.2018 make proper update
         Person person = repository.findPersonByAccess_Login(settings.get_id());
 
         if (person == null) {

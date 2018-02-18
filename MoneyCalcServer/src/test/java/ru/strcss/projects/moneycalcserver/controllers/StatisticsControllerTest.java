@@ -30,7 +30,7 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendReq
 @Slf4j
 public class StatisticsControllerTest extends AbstractControllerTest {
 
-    private int numOfAddedTransactionsPerSection = 10;
+    private int numOfAddedTransactionsPerSection = 3;
     private int numOfSections = 3;
 
     private int budgetPerSection = 5000;
@@ -49,7 +49,7 @@ public class StatisticsControllerTest extends AbstractControllerTest {
             // FIXME: 11.02.2018 I suppose it could be done better
             int sectionID = i;
             List<Transaction> transactionsBySection = IntStream.range(0, numOfAddedTransactionsPerSection)
-                    .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(sectionID), login))).body())
+                    .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(sectionID, sectionID * 100 + 100), login))).body())
                     .filter(Objects::nonNull)
                     .map(AjaxRs::getPayload)
                     .collect(Collectors.toList());
@@ -57,8 +57,6 @@ public class StatisticsControllerTest extends AbstractControllerTest {
             IdSumMap.put(sectionID, transactionsBySection.stream().map(Transaction::getSum).mapToInt(Integer::intValue).sum());
         }
         assertEquals(IdSumMap.keySet().size(), numOfSections, "Map has wrong size!");
-
-
     }
 
     @Test
@@ -89,14 +87,14 @@ public class StatisticsControllerTest extends AbstractControllerTest {
             int moneySpendAll = IdSumMap.get(summary.getSectionID());
             int moneyLeftAll = budgetPerSection - IdSumMap.get(summary.getSectionID());
 
-            log.debug("EXPECTED: balancePerDay: {} \n spendToday: {} \n todayBalance: {} \n summaryBalance: {}", balancePerDay, spendToday, todayBalance, summaryBalance);
+            log.debug("EXPECTED: balancePerDay: {} \n spendToday: {} \n todayBalance: {} \n summaryBalance: {} \n moneySpendAll: {}",
+                    balancePerDay, spendToday, todayBalance, summaryBalance, moneySpendAll);
 
-            assertEquals((int) summary.getTodayBalance(), todayBalance, "todayBalance do not match!");
-            assertEquals((int) summary.getSummaryBalance(), summaryBalance, "summaryBalance do not match!");
+            assertEquals(summary.getTodayBalance(), todayBalance, "todayBalance do not match!");
+            assertEquals(summary.getSummaryBalance(), summaryBalance, "summaryBalance do not match!");
             assertEquals((int) summary.getMoneySpendAll(), moneySpendAll, "MoneySpendAll do not match!");
             assertEquals((int) summary.getMoneyLeftAll(), moneyLeftAll, "getMoneyLeftAll do not match!");
         }
-
     }
 
     /**

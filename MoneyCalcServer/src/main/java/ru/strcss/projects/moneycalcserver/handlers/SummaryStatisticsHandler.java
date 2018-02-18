@@ -1,17 +1,18 @@
 package ru.strcss.projects.moneycalcserver.handlers;
 
+import lombok.extern.slf4j.Slf4j;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 
-import java.time.Duration;
+import java.time.Period;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.formatDateFromString;
 
+@Slf4j
 public class SummaryStatisticsHandler {
 
     public List<FinanceSummaryBySection> calculateSummaryStatisticsBySections(FinanceSummaryCalculationContainer container) {
@@ -26,25 +27,30 @@ public class SummaryStatisticsHandler {
         for (Integer sectionID : container.getSections()) {
             FinanceSummaryBySection summaryBySection = FinanceSummaryBySection.builder()
                     .sectionID(sectionID)
+                    .todayBalance(0)
                     .moneySpendAll(0)
                     .moneyLeftAll(0)
                     .build();
             statistics.put(sectionID, summaryBySection);
         }
 
-        final AtomicInteger spendToday = new AtomicInteger();
+        final Map<Integer, Integer> spendTodayBySection = new HashMap<>();
         // FIXME: 16.02.2018 get rid of AI
+
+
 
         //Заполняем moneySpendAll
         container.getTransactions().forEach(transaction -> {
-            FinanceSummaryBySection temporary = statistics.get(transaction.getSectionID());
+            Integer sectionID = transaction.getSectionID();
+            FinanceSummaryBySection temporary = statistics.get(sectionID);
 
             temporary.setMoneySpendAll(temporary.getMoneySpendAll() + transaction.getSum());
             if (formatDateFromString(transaction.getDate()).isEqual(container.getToday())) {
-                spendToday.set(spendToday.get() + transaction.getSum());
+                spendTodayBySection.put(sectionID,   spendTodayBySection.getOrDefault(sectionID, 0) + transaction.getSum());
             }
-            statistics.put(transaction.getSectionID(), temporary);
+            statistics.put(sectionID, temporary);
         });
+
 
         //Дозаполняем данными
         statistics.forEach((id, financeSummaryBySection) -> {
@@ -55,9 +61,9 @@ public class SummaryStatisticsHandler {
                     .getBudget();
 
 
-            long daysInPeriod = Duration.between(container.getRangeTo(), container.getRangeTo()).toDays();
-            long daysPassed = Duration.between(container.getRangeTo(), container.getToday()).toDays();
-            financeSummaryBySection.setTodayBalance(budget / daysInPeriod - spendToday.get());
+            long daysInPeriod = Period.between(container.getRangeTo(), container.getRangeTo()).getDays() + 2;
+            long daysPassed = Period.between(container.getRangeTo(), container.getToday()).getDays() + 2;
+            financeSummaryBySection.setTodayBalance(budget / daysInPeriod - spendTodayBySection.get(id));
             financeSummaryBySection.setSummaryBalance(budget / daysInPeriod * daysPassed - financeSummaryBySection.getMoneySpendAll());
             financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
             // TODO: 13.02.2018 calculate rest fields

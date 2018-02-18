@@ -13,6 +13,7 @@ import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalcserver.dbconnection.SettingsDBConnection;
@@ -52,11 +53,18 @@ public class StatisticsController extends AbstractController implements Statisti
             return responseError("Required fields are empty: " + validationResult.getReasons());
         }
 
+        Person person = settingsDBConnection.getSettings(getContainer.getLogin());
+
+        if (person == null) {
+            log.error("Person with login {} is not found!", getContainer.getLogin());
+            return responseError("Person with login " + getContainer.getLogin() + " is not found!");
+        }
+
         List<Transaction> transactions = transactionsDBConnection.getTransactions(new TransactionsSearchContainer(getContainer.getLogin(),
                 getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getSectionIDs()));
 
         //оставляю только те секции клиента для которых мне нужна статистика
-        List<SpendingSection> spendingSections = settingsDBConnection.getSettings(getContainer.getLogin()).getSettings().getSections().stream()
+        List<SpendingSection> spendingSections = person.getSettings().getSections().stream()
                 .filter(section -> getContainer.getSectionIDs().stream().anyMatch(id -> id.equals(section.getId())))
                 .collect(Collectors.toList());
 
