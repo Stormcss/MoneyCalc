@@ -38,9 +38,10 @@ public class TransactionsSearchContainer extends AbstractContainer {
     @Override
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (login.isEmpty()) reasons.add("login is empty");
-        if (rangeFrom.isEmpty()) reasons.add("rangeFrom is empty");
-        if (rangeTo.isEmpty()) reasons.add("rangeTo is empty");
+        if (login == null || login.isEmpty()) reasons.add("login is empty");
+        if (rangeFrom == null || rangeFrom.isEmpty()) reasons.add("rangeFrom is empty");
+        if (rangeTo == null || rangeTo.isEmpty()) reasons.add("rangeTo is empty");
+        if (requiredSections == null) reasons.add("requiredSections are empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

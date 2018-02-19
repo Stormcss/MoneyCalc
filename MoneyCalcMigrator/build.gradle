@@ -12,6 +12,8 @@ dependencies {
     compile project(':MoneyCalcAPI')
 //    compile("org.springframework:spring-web")
 
+    compile("org.springframework.boot:spring-boot-starter")
+
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
 }

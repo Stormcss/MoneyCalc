@@ -66,6 +66,8 @@ public class SettingsController extends AbstractController implements SettingsAP
         mongoOperations.getConverter().write(person, dbObject);
 
         mongoOperations.upsert(query(where("_id").is(settings.get_id())), Update.fromDBObject(dbObject, "_id"), Person.class);
+
+        log.debug("Saving Settings {} for login {}", settings, settings.get_id());
         return responseSuccess(RETURN_SETTINGS, settings);
     }
 

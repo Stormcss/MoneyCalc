@@ -19,12 +19,24 @@ public class Config {
     @Value("${config.moneyCalcServerPort}")
     private String moneyCalcServerPort;
 
+    @Value("${config.login}")
+    private String login;
+
+    @Value("${config.name}")
+    private String name;
+
+    @Value("${config.email}")
+    private String email;
+
     @Bean
     public ConfigContainer dataConfig() {
         ConfigContainer cc = new ConfigContainer();
         cc.setDataPath(dataPath);
         cc.setMoneyCalcServerHost(moneyCalcServerHost);
         cc.setMoneyCalcServerPort(moneyCalcServerPort);
+        cc.setLogin(login);
+        cc.setName(name);
+        cc.setEmail(email);
         return cc;
     }
 

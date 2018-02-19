@@ -20,8 +20,8 @@ public class Identifications {
 
     public ValidationResult isValid() {
         List reasons = new ArrayList<>();
-        if (_id.isEmpty()) reasons.add("_id is empty");
-        if (name.isEmpty()) reasons.add("Name is empty");
+        if (_id == null || _id.isEmpty()) reasons.add("_id is empty");
+        if (name == null || name.isEmpty()) reasons.add("Name is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

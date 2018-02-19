@@ -1,0 +1,19 @@
+<configuration>
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %highlight(%-5level) %cyan(%logger{36}) - %msg%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="deng" level="DEBUG"/>
+    <logger name="ru.strcss.projects.moneycalcmigrator" level="DEBUG" />
+    <logger name="ru.strcss.projects.moneycalcmigrator.MigratorMain" level="ERROR" />
+    <logger name="org.mongodb.driver" level="ERROR" />
+    <logger name="org.springframework.context.annotation" level="ERROR" />
+    <logger name="org.springframework.jmx.export.annotation.AnnotationMBeanExporter" level="ERROR" />
+
+
+    <root level="INFO">
+        <appender-ref ref="STDOUT" />
+    </root>
+</configuration>
