@@ -129,8 +129,7 @@ class Parser {
         String[] part = line.split(" ", 4);
         return TransactionParseContainer.builder()
                 .id(Integer.parseInt(part[0]))
-                // FIXME: 19.02.2018 Date must be wrapped!
-                .date(part[1])
+                .date(formatDate(part[1]))
                 .sum(Integer.parseInt(part[2]))
                 .description(part[3].replaceFirst(".$", ""))
                 .build();
@@ -169,4 +168,9 @@ class Parser {
         return container;
     }
 
+    private String formatDate(String oldDate){
+        String[] part = oldDate.split("\\.");
+        StringJoiner joiner = new StringJoiner("-");
+        return joiner.add(part[2]).add(part[1]).add(part[0]).toString();
+    }
 }
