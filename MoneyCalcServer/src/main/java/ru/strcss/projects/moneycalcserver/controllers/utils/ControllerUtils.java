@@ -31,26 +31,9 @@ public class ControllerUtils {
         return date.format(formatter);
     }
 
-//    public static LocalDate formatDateFromString(String date) {
-//        date = "18-02-2018";
-//        System.out.println("date = " + date);
-
-//        DateTimeFormatter formatter = new DateTimeFormatterBuilder()
-//                // date/time
-//                .appendPattern("yyyyMMdd")
-//                // milliseconds (with 2 digits)
-//                .appendValue(ChronoField.MILLI_OF_SECOND, 2)
-//                // create formatter
-//                .toFormatter();
-
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd");
-//        return LocalDate.parse(date, formatter);
-//    }
     public static LocalDate formatDateFromString(String date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return LocalDate.parse(date, formatter);
-//        return LocalDate.parse(date,  DateTimeFormatter.ISO_LOCAL_DATE);
-//        return LocalDate.parse("2018-02-17",  DateTimeFormatter.ISO_LOCAL_DATE);
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+//        return LocalDate.parse(date, formatter);
+        return LocalDate.parse(date,  DateTimeFormatter.ISO_LOCAL_DATE);
     }
 }

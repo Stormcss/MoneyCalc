@@ -1,7 +1,6 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
-import lombok.extern.slf4j.Slf4j;
-import org.testng.annotations.BeforeClass;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Status;
@@ -14,91 +13,106 @@ import ru.strcss.projects.moneycalc.enitities.Transaction;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.generateDateMinus;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateSpendingSection;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateTransaction;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.savePersonGetLogin;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
+import static ru.strcss.projects.moneycalcserver.handlers.utils.StatisticsHandlerUtils.round;
 
-@Slf4j
 public class StatisticsControllerTest extends AbstractControllerTest {
 
-    private int numOfAddedTransactionsPerSection = 3;
-    private int numOfSections = 3;
-
-    private int budgetPerSection = 5000;
-    private String login;
-    private Map<Integer, Integer> IdSumMap = new HashMap<>();
-
-    @BeforeClass
-    public void preparePerson() {
-        login = savePersonGetLogin(service);
-
-        //Adding Sections if required
-        checkPersonsSections(numOfSections, login, budgetPerSection);
-
-        //Adding new Transactions
-        for (int i = 0; i < numOfSections; i++) {
-            // FIXME: 11.02.2018 I suppose it could be done better
-            int sectionID = i;
-            List<Transaction> transactionsBySection = IntStream.range(0, numOfAddedTransactionsPerSection)
-                    .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(sectionID, sectionID * 100 + 100), login))).body())
-                    .filter(Objects::nonNull)
-                    .map(AjaxRs::getPayload)
-                    .collect(Collectors.toList());
-
-            IdSumMap.put(sectionID, transactionsBySection.stream().map(Transaction::getSum).mapToInt(Integer::intValue).sum());
-        }
-        assertEquals(IdSumMap.keySet().size(), numOfSections, "Map has wrong size!");
-    }
-
-    @Test
-    public void testGetFinanceSummaryBySection() {
-
-        int daysInPeriod = 2;
-
-        //Request Statistics
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(login, formatDateToString(LocalDate.now()),
-                formatDateToString(generateDatePlus(ChronoUnit.DAYS, daysInPeriod - 1)), new ArrayList<>(IdSumMap.keySet()));
-
-        AjaxRs<List<FinanceSummaryBySection>> responseGetStats
-                = sendRequest(service.getFinanceSummaryBySection(getContainer)).body();
-        assertEquals(responseGetStats.getStatus(), Status.SUCCESS, responseGetStats.getMessage());
-
-        //Validate Statistics
-        for (FinanceSummaryBySection summary : responseGetStats.getPayload()) {
-
-            double balancePerDay = budgetPerSection / daysInPeriod;
-            int daysPassed = 1; //because only today (first day of period) is checked
-
-            int spendToday = IdSumMap.get(summary.getSectionID());
-            int spendAll = spendToday; // because all transactions are added by first day of period
-
-            double todayBalance = balancePerDay - spendToday;
-            double summaryBalance = balancePerDay * daysPassed - spendAll;
-
-            int moneySpendAll = IdSumMap.get(summary.getSectionID());
-            int moneyLeftAll = budgetPerSection - IdSumMap.get(summary.getSectionID());
-
-            log.debug("EXPECTED: balancePerDay: {} \n spendToday: {} \n todayBalance: {} \n summaryBalance: {} \n moneySpendAll: {}",
-                    balancePerDay, spendToday, todayBalance, summaryBalance, moneySpendAll);
-
-            assertEquals(summary.getTodayBalance(), todayBalance, "todayBalance do not match!");
-            assertEquals(summary.getSummaryBalance(), summaryBalance, "summaryBalance do not match!");
-            assertEquals((int) summary.getMoneySpendAll(), moneySpendAll, "MoneySpendAll do not match!");
-            assertEquals((int) summary.getMoneyLeftAll(), moneyLeftAll, "getMoneyLeftAll do not match!");
-        }
-    }
+    /**
+     * Accuracy of calculations - number of decimal places
+     * Must be the same as one in SummaryStatisticsHandler
+     */
+    private final int DIGITS = 2;
 
     /**
-     * Add Person's Sections if required (in case if Person by default has less Sections then it is required to test)
+     * Allowed inaccuracy of calculations - used while checking correctness of income data
+     */
+    private final double DELTA = 2 / StrictMath.pow(10, DIGITS);
+
+    private int budgetPerSection = 5000;
+    private int numOfSections = 3;
+    private String login;
+
+    @BeforeMethod(groups = "singleSectionCheck")
+    public void preparePersonBeforeSimpleTest() {
+        login = savePersonGetLogin(service);
+
+        checkPersonsSections(numOfSections, login, budgetPerSection);
+
+        addTransactions(0);
+    }
+
+    @Test(groups = {"singleSectionCheck"})
+    public void testFinanceSummaryBySection_simple() {
+        int rangeDays = 3;
+
+        String rangeFrom = formatDateToString(generateDateMinus(ChronoUnit.DAYS, rangeDays - 1));
+        String rangeTo = formatDateToString(LocalDate.now());
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(login, rangeFrom, rangeTo, Collections.singletonList(0));
+
+        AjaxRs<List<FinanceSummaryBySection>> responseGetStats = sendRequest(service.getFinanceSummaryBySection(getContainer)).body();
+        assertEquals(responseGetStats.getStatus(), Status.SUCCESS, responseGetStats.getMessage());
+        FinanceSummaryBySection summary = responseGetStats.getPayload().get(0);
+
+        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
+        assertEquals((int) summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getTodayBalance(), round((double) budgetPerSection / rangeDays, DIGITS) - 200, DELTA, "TodayBalance is incorrect!");
+        assertEquals(summary.getSummaryBalance(), budgetPerSection - 900, DELTA, "SummaryBalance is incorrect!");
+    }
+
+    private List<Transaction> addTransactions(int sectionID) {
+        return IntStream.range(0, 3)
+                .mapToObj(num -> new TransactionAddContainer(generateTransaction(generateDateMinus(ChronoUnit.DAYS, num), sectionID, (num + 2) * 100), login))
+                .map(transactionAddContainer -> sendRequest(service.addTransaction(transactionAddContainer)).body())
+                .filter(Objects::nonNull)
+                .map(AjaxRs::getPayload)
+                .collect(Collectors.toList());
+    }
+
+
+//    @BeforeTest
+//    public void preparePerson() {
+//        login = savePersonGetLogin(service);
+//
+//        //Adding Sections if required
+//        checkPersonsSections(numOfSections, login, budgetPerSection);
+//
+//        //Adding new Transactions
+//        for (int i = 0; i < numOfSections; i++) {
+//            // FIXME: 11.02.2018 I suppose it could be done better
+//            int sectionID = i;
+//            List<Transaction> transactionsBySection = IntStream.range(0, numOfAddedTransactionsPerSection)
+//                    .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(sectionID, sectionID * 100 + 100), login))).body())
+//                    .filter(Objects::nonNull)
+//                    .map(AjaxRs::getPayload)
+//                    .collect(Collectors.toList());
+//
+//            IdSumMap.put(sectionID, transactionsBySection.stream().map(Transaction::getSum).mapToInt(Integer::intValue).sum());
+//        }
+//        assertEquals(IdSumMap.keySet().size(), numOfSections, "Map has wrong size!");
+//    }
+//
+//    @Test
+//    public void testFinanceSummary_singleSection() {
+//
+//    }
+
+
+    /**
+     * Add Person's Sections if required (in case if Person by default has less Sections then it is required for test)
      *
      * @param numOfSections - required number of Person's sections
      * @param login         - Person's login

@@ -33,11 +33,13 @@ public class StatisticsController extends AbstractController implements Statisti
 
     private TransactionsDBConnection transactionsDBConnection;
     private SettingsDBConnection settingsDBConnection;
+    private SummaryStatisticsHandler statisticsHandler;
 
     @Autowired
-    public StatisticsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection) {
+    public StatisticsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection, SummaryStatisticsHandler statisticsHandler) {
         this.transactionsDBConnection = transactionsDBConnection;
         this.settingsDBConnection = settingsDBConnection;
+        this.statisticsHandler = statisticsHandler;
     }
 
     @Override
@@ -73,11 +75,6 @@ public class StatisticsController extends AbstractController implements Statisti
             return responseError("List of required IDs is not equal with list filtered Person's list");
         }
 
-        // TODO: 09.02.2018 Request list of Transactions by Section, range and login
-
-        SummaryStatisticsHandler statisticsHandler = new SummaryStatisticsHandler();
-
-
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
                 .rangeFrom(formatDateFromString(getContainer.getRangeFrom()))
                 .rangeTo(formatDateFromString(getContainer.getRangeTo()))
@@ -85,7 +82,8 @@ public class StatisticsController extends AbstractController implements Statisti
                 .transactions(transactions)
                 .spendingSections(spendingSections)
                 .today(LocalDate.now())
-                .build();// TODO: 13.02.2018 should be client's time
+                .build();
+        // TODO: 13.02.2018 should be client's time
 
         List<FinanceSummaryBySection> financeSummaryResult = statisticsHandler.calculateSummaryStatisticsBySections(calculationContainer);
 
