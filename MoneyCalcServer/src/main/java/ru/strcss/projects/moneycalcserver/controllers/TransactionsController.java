@@ -126,7 +126,6 @@ public class TransactionsController extends AbstractController implements Transa
 
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
-        log.debug("updateResult is {}", updateResult);
         if (updateResult.getN() == 0) {
             log.error("Updating Transaction for login {} has failed", transactionContainer.getLogin());
             return responseError("Transaction was not updated!");

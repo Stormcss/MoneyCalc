@@ -44,24 +44,13 @@ public class IdentificationsController extends AbstractController implements Ide
             return responseError("Required fields are empty: " + validationResult.getReasons());
         }
 
-        // TODO: 20.01.2018 Find out if there are ways to get rid of unnecessary find request to db
-
-//        Person person = repository.findPersonByAccess_Login(identifications.getLogin());
-//
-//        person.setIdentifications(identifications);
-
         final WriteResult updateResult = identificationsDBConnection.updateIdentifications(identifications);
 
-        log.debug("updateResult is {}", updateResult);
         if (updateResult.getN() == 0) {
             log.error("Updating Identifications for login {} has failed", identifications.getLogin());
             return responseError(IDENTIFICATIONS_SAVING_ERROR);
         }
 
-        //        DBObject dbObject = new BasicDBObject();
-//        mongoOperations.getConverter().write(person, dbObject);
-//
-//        mongoOperations.upsert(query(where("login").is(identifications.getLogin())), Update.fromDBObject(dbObject, "login"), Person.class);
         return responseSuccess(IDENTIFICATIONS_RETURNED, identifications);
     }
 

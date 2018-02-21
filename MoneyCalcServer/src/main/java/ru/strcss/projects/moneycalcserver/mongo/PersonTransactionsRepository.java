@@ -20,13 +20,6 @@ public interface PersonTransactionsRepository extends MongoRepository<PersonTran
     List<PersonTransactions> findByLogin(String login);
 
     // FIXME: 05.02.2018 Possible performance issues here
-//    PersonTransactions deleteByLoginAnd_id(String login, String id);
-
-//    default Transaction deleteTransactionByLoginAnd_id(String login, String id){
-//
-//    }
-
-
     default List<Transaction> findTransactionsBetween(String login, LocalDate dateFrom, LocalDate dateTo){
         List<PersonTransactions> personTransactions = findByLogin(login);
         return personTransactions.stream()

@@ -50,34 +50,12 @@ public class SettingsController extends AbstractController implements SettingsAP
             return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
-
-        //whole Person must be returned
-        // FIXME: 18.02.2018 make proper update
-//        Person person = repository.findPersonByAccess_Login(settings.getLogin());
-//
-//        if (person == null) {
-//            log.error("Person with login {} is not found!", settings.getLogin());
-//            return responseError("Person with login " + settings.getLogin() + " is not found!");
-//        }
-
-//        person.setSettings(settings);
-
         WriteResult updateResult = settingsDBConnection.updateSettings(settings);
 
-        log.debug("updateResult is {}", updateResult);
         if (updateResult.getN() == 0) {
             log.error("Updating Settings for login {} has failed", settings.getLogin());
             return responseError("Transaction was not updated!");
         }
-
-//        DBObject dbObject = new BasicDBObject();
-
-        // FIXME: 05.02.2018 I smell bad practice here
-
-//        mongoOperations.getConverter().write(person, dbObject);
-
-// old       mongoOperations.upsert(query(where("login").is(settings.getLogin())), Update.fromDBObject(dbObject, "login"), Person.class);
-//        mongoOperations.upsert(query(where("login").is(settings.getLogin())), Update.fromDBObject(dbObject, "login"), Person.class);
 
         log.debug("Updating Settings {} for login {}", settings, settings.getLogin());
         return responseSuccess(SETTINGS_UPDATED, settings);
