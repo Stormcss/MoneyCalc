@@ -33,7 +33,7 @@ public class Transaction {
     }
 
 //    public static TransactionBuilder builder() {
-//        return new TransactionBuilder()._id(UUID.randomUUID().toString().replace("-","").toUpperCase());
+//        return new TransactionBuilder().login(UUID.randomUUID().toString().replace("-","").toUpperCase());
 //    }
 }
 

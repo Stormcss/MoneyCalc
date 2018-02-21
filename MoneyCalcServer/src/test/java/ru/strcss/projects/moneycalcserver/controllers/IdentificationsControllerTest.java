@@ -36,7 +36,7 @@ public class IdentificationsControllerTest  extends AbstractControllerTest {
         //Requesting updated Identifications
         AjaxRs<Identifications> responseGetUpdated = sendRequest(service.getIdentifications(login)).body();
         assertEquals(responseGetUpdated.getStatus(), Status.SUCCESS, responseGetUpdated.getMessage());
-        assertEquals(responseGetUpdated.getPayload().get_id(), login, "returned Identifications object has wrong login!");
+        assertEquals(responseGetUpdated.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
         assertEquals(responseGetUpdated.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
     }
 
@@ -44,7 +44,7 @@ public class IdentificationsControllerTest  extends AbstractControllerTest {
     public void saveIdentificationsIncorrectLogin() {
         Identifications identificationsIncorrect = Generator.generateIdentifications(UUID());
 
-        identificationsIncorrect.set_id("");
+        identificationsIncorrect.setLogin("");
         AjaxRs<Identifications> response = sendRequest(service.saveIdentifications(identificationsIncorrect)).body();
 
         assertEquals(response.getStatus(), Status.ERROR, "Identifications object with incorrect Login is saved!");
@@ -73,7 +73,7 @@ public class IdentificationsControllerTest  extends AbstractControllerTest {
         AjaxRs<Identifications> response = sendRequest(service.getIdentifications(login)).body();
 
         assertEquals(response.getStatus(), Status.SUCCESS, response.getMessage());
-        assertEquals(response.getPayload().get_id(), login, "returned Identifications object has wrong login!");
+        assertEquals(response.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
         assertEquals(response.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
     }
 

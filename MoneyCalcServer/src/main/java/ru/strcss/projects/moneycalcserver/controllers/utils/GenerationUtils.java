@@ -6,6 +6,8 @@ import java.time.LocalDate;
 import java.time.temporal.TemporalUnit;
 import java.util.UUID;
 
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
+
 public class GenerationUtils {
 
     public static LocalDate generateDatePlus(TemporalUnit unit, int count) {
@@ -20,10 +22,15 @@ public class GenerationUtils {
         return LocalDate.now();
     }
 
+    public static String currentDateString() {
+        return formatDateToString(LocalDate.now());
+    }
+
     public static Transaction generateTransactionID(Transaction transaction) {
         transaction.set_id(generateUUID());
         return transaction;
     }
+
     public static Transaction generateTransactionID(Transaction transaction, String id) {
         transaction.set_id(id);
         return transaction;

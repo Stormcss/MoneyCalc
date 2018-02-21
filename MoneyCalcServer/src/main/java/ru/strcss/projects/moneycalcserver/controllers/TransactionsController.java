@@ -46,6 +46,11 @@ public class TransactionsController extends AbstractController implements Transa
 
         ValidationResult validationResult = container.isValid();
 
+        if (!isPersonExist(container)){
+            log.error("Person with login {} does not exist!", container.getLogin());
+            return responseError(NO_PERSON_EXIST);
+        }
+
         if (!validationResult.isValidated()) {
             log.error("Transaction validation has failed - required fields are incorrect: {}", validationResult.getReasons());
             return responseError("Required fields are incorrect: " + validationResult.getReasons());
@@ -62,6 +67,11 @@ public class TransactionsController extends AbstractController implements Transa
     public AjaxRs<Transaction> addTransaction(@RequestBody TransactionAddContainer transactionAddContainer) {
 
         ValidationResult validationResult = transactionAddContainer.isValid();
+
+        if (!isPersonExist(transactionAddContainer)){
+            log.error("Person with login {} does not exist!", transactionAddContainer.getLogin());
+            return responseError(NO_PERSON_EXIST);
+        }
 
         if (!validationResult.isValidated()) {
             log.error("TransactionContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
@@ -98,6 +108,11 @@ public class TransactionsController extends AbstractController implements Transa
 
         ValidationResult validationResult = transactionContainer.isValid();
 
+        if (!isPersonExist(transactionContainer)){
+            log.error("Person with login {} does not exist!", transactionContainer.getLogin());
+            return responseError(NO_PERSON_EXIST);
+        }
+
         if (!validationResult.isValidated()) {
             log.error("TransactionUpdateContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
             return responseError("Required fields are incorrect: " + validationResult.getReasons());
@@ -113,7 +128,7 @@ public class TransactionsController extends AbstractController implements Transa
 
         log.debug("updateResult is {}", updateResult);
         if (updateResult.getN() == 0) {
-            log.error("Updating Transaction for login {} has failed - ", transactionContainer.getLogin());
+            log.error("Updating Transaction for login {} has failed", transactionContainer.getLogin());
             return responseError("Transaction was not updated!");
         }
 
@@ -126,6 +141,11 @@ public class TransactionsController extends AbstractController implements Transa
 
         ValidationResult validationResult = transactionContainer.isValid();
 
+        if (!isPersonExist(transactionContainer)){
+            log.error("Person with login {} does not exist!", transactionContainer.getLogin());
+            return responseError(NO_PERSON_EXIST);
+        }
+
         if (!validationResult.isValidated()) {
             log.error("TransactionUpdateContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
             return responseError("Required fields are incorrect: " + validationResult.getReasons());
@@ -136,7 +156,7 @@ public class TransactionsController extends AbstractController implements Transa
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
         if (deleteResult.getN() == 0) {
-            log.error("Deleting Transaction for login {} has failed - ", transactionContainer.getLogin());
+            log.error("Deleting Transaction for login {} has failed", transactionContainer.getLogin());
             return responseError("Transaction was not deleted!");
         }
         log.debug("Deleted Transaction id {}: for login: {}", transactionContainer.getId(), transactionContainer.getLogin());

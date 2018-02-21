@@ -63,7 +63,7 @@ public class RegisterController extends AbstractController implements RegisterAP
                 .access(credentials.getAccess())
                 .identifications(credentials.getIdentifications())
                 .settings(Settings.builder()
-                        ._id(login)
+                        .login(login)
                         .periodFrom(formatDateToString(currentDate()))
                         .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
                         .sections(Arrays.asList(SpendingSection.builder()

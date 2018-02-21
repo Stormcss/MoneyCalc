@@ -9,6 +9,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionD
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalcserver.controllers.utils.Generator;
 
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -35,9 +36,9 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         String login = savePersonGetLogin(service);
 
         //Adding new Transactions
-        AjaxRs<Transaction> responseAddTransaction1 = sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(), login))).body();
+        AjaxRs<Transaction> responseAddTransaction1 = sendRequest(service.addTransaction(new TransactionAddContainer(login, generateTransaction()))).body();
         AjaxRs<Transaction> responseAddTransaction2 = sendRequest(service.addTransaction(
-                new TransactionAddContainer(generateTransaction(generateDatePlus(ChronoUnit.DAYS, 1)), login))).body();
+                new TransactionAddContainer(login, generateTransaction(generateDatePlus(ChronoUnit.DAYS, 1))))).body();
         assertEquals(responseAddTransaction1.getStatus(), Status.SUCCESS, responseAddTransaction1.getMessage());
         assertEquals(responseAddTransaction2.getStatus(), Status.SUCCESS, responseAddTransaction2.getMessage());
 
@@ -82,7 +83,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
             // FIXME: 11.02.2018 I suppose it could be done better
             int sectionID = i;
             addedTransactions.addAll(IntStream.range(0, numOfAddedTransactionsPerSection)
-                    .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(sectionID), login))).body())
+                    .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(login, generateTransaction(sectionID)))).body())
                     .filter(Objects::nonNull)
                     .map(AjaxRs::getPayload)
                     .collect(Collectors.toList()));
@@ -103,7 +104,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         }
 
         //Requesting Transactions with Multiple Sections
-        if (numOfSections > 1){
+        if (numOfSections > 1) {
             TransactionsSearchContainer containerSection1 = new TransactionsSearchContainer(login, formatDateToString(currentDate()),
                     formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)), Arrays.asList(0, 1));
             AjaxRs<List<Transaction>> responseMultipleSections = sendRequest(service.getTransactions(containerSection1)).body();
@@ -122,7 +123,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         String login = savePersonGetLogin(service);
 
 //        Adding new Transaction
-        AjaxRs<Transaction> responseAddTransaction = sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(), login))).body();
+        AjaxRs<Transaction> responseAddTransaction = sendRequest(service.addTransaction(new TransactionAddContainer(login, generateTransaction()))).body();
         assertEquals(responseAddTransaction.getStatus(), Status.SUCCESS, responseAddTransaction.getMessage());
 
         //Checking that it is added
@@ -132,8 +133,6 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         assertEquals(responseGetTransactions.getStatus(), Status.SUCCESS, responseGetTransactions.getMessage());
         assertEquals(responseGetTransactions.getPayload().size(), 1, "Size of returned Transactions list is not 1!");
-
-        //TODO: 26.01.2018 Add checks for Summary Statistics!!!
     }
 
     /**
@@ -146,7 +145,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
-                .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(), login))).body())
+                .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(login, generateTransaction()))).body())
                 .filter(Objects::nonNull)
                 .map(AjaxRs::getPayload)
                 .collect(Collectors.toList());
@@ -156,11 +155,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         //Getting random Transactions to delete
         String idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).get_id();
 
-        //Deleting Transaction
-//        TransactionDeleteContainer container = ;
-
-        AjaxRs responseDeletedTransaction
-                = sendRequest(service.deleteTransaction(new TransactionDeleteContainer(login, idToDelete))).body();
+        AjaxRs responseDeletedTransaction = sendRequest(service.deleteTransaction(new TransactionDeleteContainer(login, idToDelete))).body();
         assertEquals(responseDeletedTransaction.getStatus(), Status.SUCCESS, responseDeletedTransaction.getMessage());
 
         //Getting Transactions list
@@ -182,7 +177,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
-                .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(generateTransaction(), login))).body())
+                .mapToObj(s -> sendRequest(service.addTransaction(new TransactionAddContainer(login, generateTransaction()))).body())
                 .filter(Objects::nonNull)
                 .map(AjaxRs::getPayload)
                 .collect(Collectors.toList());
@@ -221,5 +216,30 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
         assertNotEquals(updatedTransaction.getSum(), beforeUpdatedTransaction.getSum(), "Sum in Transaction after update has not changed!");
         assertEquals(updatedTransaction.get_id(), beforeUpdatedTransaction.get_id(), "Sum in Transaction after update has not changed!");
+    }
+
+    @Test
+    public void saveNewTransaction_NonexistentPerson() {
+        AjaxRs<Transaction> responseAddTransaction = sendRequest(service.addTransaction(new TransactionAddContainer(Generator.UUID(), generateTransaction()))).body();
+        assertEquals(responseAddTransaction.getStatus(), Status.ERROR, responseAddTransaction.getMessage());
+    }
+
+    @Test
+    public void getTransactions_NonexistentPerson() {
+        TransactionsSearchContainer container = new TransactionsSearchContainer(Generator.UUID(), currentDateString(), currentDateString(), Collections.singletonList(0));
+        AjaxRs<List<Transaction>> responseGetTransaction = sendRequest(service.getTransactions(container)).body();
+        assertEquals(responseGetTransaction.getStatus(), Status.ERROR, responseGetTransaction.getMessage());
+    }
+
+    @Test
+    public void updateTransaction_NonexistentPerson() {
+        AjaxRs<Transaction> responseAddTransaction = sendRequest(service.updateTransaction(new TransactionUpdateContainer(Generator.UUID(), Generator.UUID(), generateTransaction()))).body();
+        assertEquals(responseAddTransaction.getStatus(), Status.ERROR, responseAddTransaction.getMessage());
+    }
+
+    @Test
+    public void deleteTransaction_NonexistentPerson() {
+        AjaxRs<Void> responseAddTransaction = sendRequest(service.deleteTransaction(new TransactionDeleteContainer(Generator.UUID(), Generator.UUID()))).body();
+        assertEquals(responseAddTransaction.getStatus(), Status.ERROR, responseAddTransaction.getMessage());
     }
 }

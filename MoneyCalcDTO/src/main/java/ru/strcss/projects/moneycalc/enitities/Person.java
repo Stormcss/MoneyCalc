@@ -21,7 +21,7 @@ public class Person{
     @Override
     public String toString() {
         return "Person{" +
-                "_id='" + ID + '\'' +
+                "login='" + ID + '\'' +
                 ", access=" + access +
                 ", identifications=" + identifications +
                 ", settings=" + settings +

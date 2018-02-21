@@ -15,14 +15,15 @@ import java.util.stream.Collectors;
 public class Settings {
 
 //    @Id
-    private String _id;
+    private String login;
     private String periodFrom;
     private String periodTo;
     private List<SpendingSection> sections;
 
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (_id.isEmpty()) reasons.add("id is empty");
+        if (login == null || login.isEmpty()) reasons.add("login is empty");
+        if (sections == null) reasons.add("sections is null!");
         if (sections.stream().map(SpendingSection::getId).distinct().collect(Collectors.toList()).size() != sections.size()) reasons.add("SpendingSections have duplicates!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }

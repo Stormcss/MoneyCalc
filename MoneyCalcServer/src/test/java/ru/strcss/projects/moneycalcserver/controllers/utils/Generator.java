@@ -37,7 +37,7 @@ public class Generator {
                         .email(login + "@mail.ru")
                         .build())
                 .identifications(Identifications.builder()
-                        ._id(login)
+                        .login(login)
                         .name(names[ThreadLocalRandom.current().nextInt(names.length)])
                         .build())
                 .build();
@@ -45,7 +45,7 @@ public class Generator {
 
     public static Settings generateSettings(String login, int numOfSections) {
         return Settings.builder()
-                ._id(login)
+                .login(login)
                 .periodFrom(formatDateToString(currentDate()))
                 .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
                 .sections(Stream.generate(Generator::generateSpendingSection).limit(numOfSections).collect(Collectors.toList()))
@@ -54,7 +54,7 @@ public class Generator {
 
     public static Identifications generateIdentifications(String login) {
         return Identifications.builder()
-                ._id(login)
+                .login(login)
                 .name(UUID())
                 .build();
     }

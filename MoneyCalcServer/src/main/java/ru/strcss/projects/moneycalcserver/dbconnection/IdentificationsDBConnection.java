@@ -7,38 +7,32 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
+import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalc.enitities.Settings;
 import ru.strcss.projects.moneycalcserver.mongo.PersonRepository;
 
 @Component
-public class SettingsDBConnection {
-
+public class IdentificationsDBConnection {
     private PersonRepository repository;
     private MongoTemplate mongoTemplate;
 
     @Autowired
-    public SettingsDBConnection(PersonRepository repository,MongoTemplate mongoTemplate) {
+    public IdentificationsDBConnection(PersonRepository repository,MongoTemplate mongoTemplate) {
         this.repository = repository;
         this.mongoTemplate = mongoTemplate;
     }
 
-    public Person getSettings(String login) {
-        login = login.replace("\"", "");
-        return repository.findSettingsByAccess_Login(login);
-    }
-
     /**
-     * Update Settings in DB
+     * Update Identification in DB
      *
-     * @param settings object
+     * @param identifications object
      * @return result of updating
      */
-    public WriteResult updateSettings(Settings settings) {
+    public WriteResult updateIdentifications(Identifications identifications) {
         Query findUpdatedSettingsQuery = Query.query(
-                Criteria.where("_id").is(settings.getLogin()));
+                Criteria.where("_id").is(identifications.getLogin()));
 
         return mongoTemplate.updateMulti(findUpdatedSettingsQuery,
-                new Update().set("settings.$", settings), Person.class);
+                new Update().set("identifications.$", identifications), Person.class);
     }
 }

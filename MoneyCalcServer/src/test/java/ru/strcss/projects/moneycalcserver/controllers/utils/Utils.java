@@ -42,7 +42,6 @@ public class Utils {
     public static String savePersonGetLogin(MoneyCalcClient service) {
         String login = UUID();
 
-        //Registering Person
         AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(generateCredentials(login))).body();
         assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
 

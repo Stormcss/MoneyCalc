@@ -1,10 +1,8 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,8 +14,6 @@ import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.enitities.Settings;
 import ru.strcss.projects.moneycalcserver.dbconnection.SettingsDBConnection;
 
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 
@@ -44,31 +40,47 @@ public class SettingsController extends AbstractController implements SettingsAP
 
         ValidationResult validationResult = settings.isValid();
 
+        if (!isPersonExist(settings.getLogin())){
+            log.error("Person with login {} does not exist!", settings.getLogin());
+            return responseError(NO_PERSON_EXIST);
+        }
+
         if (!validationResult.isValidated()) {
             log.error("Saving Settings has failed - required fields are incorrect: {}", validationResult.getReasons());
             return responseError("Required fields are incorrect: " + validationResult.getReasons());
         }
 
+
         //whole Person must be returned
         // FIXME: 18.02.2018 make proper update
-        Person person = repository.findPersonByAccess_Login(settings.get_id());
+//        Person person = repository.findPersonByAccess_Login(settings.getLogin());
+//
+//        if (person == null) {
+//            log.error("Person with login {} is not found!", settings.getLogin());
+//            return responseError("Person with login " + settings.getLogin() + " is not found!");
+//        }
 
-        if (person == null) {
-            log.error("Person with login {} is not found!", settings.get_id());
-            return responseError("Person with login " + settings.get_id() + " is not found!");
+//        person.setSettings(settings);
+
+        WriteResult updateResult = settingsDBConnection.updateSettings(settings);
+
+        log.debug("updateResult is {}", updateResult);
+        if (updateResult.getN() == 0) {
+            log.error("Updating Settings for login {} has failed", settings.getLogin());
+            return responseError("Transaction was not updated!");
         }
 
-        person.setSettings(settings);
-        DBObject dbObject = new BasicDBObject();
+//        DBObject dbObject = new BasicDBObject();
 
         // FIXME: 05.02.2018 I smell bad practice here
 
-        mongoOperations.getConverter().write(person, dbObject);
+//        mongoOperations.getConverter().write(person, dbObject);
 
-        mongoOperations.upsert(query(where("_id").is(settings.get_id())), Update.fromDBObject(dbObject, "_id"), Person.class);
+// old       mongoOperations.upsert(query(where("login").is(settings.getLogin())), Update.fromDBObject(dbObject, "login"), Person.class);
+//        mongoOperations.upsert(query(where("login").is(settings.getLogin())), Update.fromDBObject(dbObject, "login"), Person.class);
 
-        log.debug("Saving Settings {} for login {}", settings, settings.get_id());
-        return responseSuccess(RETURN_SETTINGS, settings);
+        log.debug("Updating Settings {} for login {}", settings, settings.getLogin());
+        return responseSuccess(SETTINGS_UPDATED, settings);
     }
 
     // TODO: 18.02.2018 Add method for adding Section!
@@ -93,7 +105,7 @@ public class SettingsController extends AbstractController implements SettingsAP
 
         if (settings != null) {
             log.debug("returning PersonalSettings for login {}: {}", login, settings);
-            return responseSuccess(RETURN_SETTINGS, settings);
+            return responseSuccess(SETTINGS_RETURNED, settings);
         } else {
             log.error("Can not return PersonalSettings for login {} - no Person found", login);
             return responseError(NO_PERSON_EXIST);

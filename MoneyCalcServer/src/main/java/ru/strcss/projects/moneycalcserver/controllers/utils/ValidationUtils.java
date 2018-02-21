@@ -103,7 +103,7 @@ public class ValidationUtils {
 //        if (container == null)
 //            return new ValidationResult(false, Collections.singletonList("Empty request"));
 //
-//        if (container.get_id() == null)
+//        if (container.getLogin() == null)
 //            return new ValidationResult(false, Collections.singletonList("Transaction id is empty"));
 //
 //        return container.isValid();

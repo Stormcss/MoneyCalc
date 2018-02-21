@@ -2,7 +2,6 @@ package ru.strcss.projects.moneycalc.enitities;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
@@ -14,14 +13,14 @@ import java.util.List;
 @Document
 public class Identifications {
 
-    @Id
-    private String _id;
+//    @Id
+    private String login;
     private String name;
 
     public ValidationResult isValid() {
         List reasons = new ArrayList<>();
-        if (_id == null || _id.isEmpty()) reasons.add("_id is empty");
-        if (name == null || name.isEmpty()) reasons.add("Name is empty");
+        if (login == null || login.isEmpty()) reasons.add("login is empty");
+        if (name == null || name.isEmpty()) reasons.add("name is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

@@ -50,6 +50,11 @@ public class StatisticsController extends AbstractController implements Statisti
 
         ValidationResult validationResult = getContainer.isValid();
 
+        if (!isPersonExist(getContainer)){
+            log.error("Person with login {} does not exist!", getContainer.getLogin());
+            return responseError(NO_PERSON_EXIST);
+        }
+
         if (!validationResult.isValidated()) {
             log.error("getting FinanceSummaryBySection has failed - required fields are empty: {}", validationResult.getReasons());
             return responseError("Required fields are empty: " + validationResult.getReasons());

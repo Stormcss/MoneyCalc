@@ -12,7 +12,7 @@ import java.util.List;
 public class TransactionAddContainer extends AbstractContainer {
     private Transaction transaction;
 
-    public TransactionAddContainer(Transaction transaction, String login) {
+    public TransactionAddContainer(String login, Transaction transaction) {
         this.transaction = transaction;
         this.login = login;
     }

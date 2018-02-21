@@ -27,7 +27,7 @@ public class TransactionUpdateContainer extends AbstractContainer {
         List<String> reasons = new ArrayList<>();
         if (login.isEmpty()) reasons.add("Login is empty");
         if (id == null || id.isEmpty()) reasons.add("id is empty");
-//        if (!login.equals(transaction.get_id())) reasons.add("Logins mismatch");
+//        if (!login.equals(transaction.getLogin())) reasons.add("Logins mismatch");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

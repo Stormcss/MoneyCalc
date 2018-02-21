@@ -24,7 +24,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
         String login = savePersonGetLogin(service);
 
         Settings settingsIncorrect = Generator.generateSettings(login, 2);
-        settingsIncorrect.set_id("");
+        settingsIncorrect.setLogin("");
 
         AjaxRs<Settings> response = sendRequest(service.saveSettings(settingsIncorrect)).body();
 
@@ -55,7 +55,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
         log.debug("Settings: {}", responseGetSettings.getPayload());
 
         assertEquals(responseGetSettings.getStatus(), Status.SUCCESS, responseGetSettings.getMessage());
-        assertEquals(responseGetSettings.getPayload().get_id(), login, "returned Settings object has wrong login!");
+        assertEquals(responseGetSettings.getPayload().getLogin(), login, "returned Settings object has wrong login!");
         assertTrue(responseGetSettings.getPayload().getSections().stream().allMatch(section -> section.getId() != null), "Some IDs in Spending Sections are null!");
     }
 
@@ -81,7 +81,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
         assertEquals(responseUpdate.getStatus(), Status.SUCCESS, responseUpdate.getMessage());
         assertNotNull(responseUpdate.getPayload(), "Payload is null!");
         assertNotNull(responseUpdate.getPayload().getSections(), "Settings object is empty!");
-        assertEquals(responseUpdate.getPayload().get_id(), login, "returned Settings object has wrong login!");
+        assertEquals(responseUpdate.getPayload().getLogin(), login, "returned Settings object has wrong login!");
         assertNotEquals(responseUpdate.getPayload().getSections().get(0).getName(), responseGetSettings.getPayload().getSections().get(0).getName(), "Settings were not updated!");
 
 

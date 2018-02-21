@@ -1,9 +1,8 @@
 package ru.strcss.projects.moneycalcserver.controllers;
 
-import com.mongodb.BasicDBObject;
-import com.mongodb.DBObject;
+import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.query.Update;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,10 +11,8 @@ import ru.strcss.projects.moneycalc.api.IdentificationsAPIService;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
-import ru.strcss.projects.moneycalc.enitities.Person;
+import ru.strcss.projects.moneycalcserver.dbconnection.IdentificationsDBConnection;
 
-import static org.springframework.data.mongodb.core.query.Criteria.where;
-import static org.springframework.data.mongodb.core.query.Query.query;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 
@@ -23,6 +20,13 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUti
 @RestController
 @RequestMapping("/api/identifications/")
 public class IdentificationsController extends AbstractController implements IdentificationsAPIService {
+
+    private IdentificationsDBConnection identificationsDBConnection;
+
+    @Autowired
+    public IdentificationsController(IdentificationsDBConnection identificationsDBConnection) {
+        this.identificationsDBConnection = identificationsDBConnection;
+    }
 
     /**
      * Save Identifications object using user's login
@@ -42,14 +46,23 @@ public class IdentificationsController extends AbstractController implements Ide
 
         // TODO: 20.01.2018 Find out if there are ways to get rid of unnecessary find request to db
 
-        Person person = repository.findPersonByAccess_Login(identifications.get_id());
+//        Person person = repository.findPersonByAccess_Login(identifications.getLogin());
+//
+//        person.setIdentifications(identifications);
 
-        person.setIdentifications(identifications);
-        DBObject dbObject = new BasicDBObject();
-        mongoOperations.getConverter().write(person, dbObject);
+        final WriteResult updateResult = identificationsDBConnection.updateIdentifications(identifications);
 
-        mongoOperations.upsert(query(where("_id").is(identifications.get_id())), Update.fromDBObject(dbObject, "_id"), Person.class);
-        return responseSuccess(RETURN_SETTINGS, identifications);
+        log.debug("updateResult is {}", updateResult);
+        if (updateResult.getN() == 0) {
+            log.error("Updating Identifications for login {} has failed", identifications.getLogin());
+            return responseError(IDENTIFICATIONS_SAVING_ERROR);
+        }
+
+        //        DBObject dbObject = new BasicDBObject();
+//        mongoOperations.getConverter().write(person, dbObject);
+//
+//        mongoOperations.upsert(query(where("login").is(identifications.getLogin())), Update.fromDBObject(dbObject, "login"), Person.class);
+        return responseSuccess(IDENTIFICATIONS_RETURNED, identifications);
     }
 
     /**
@@ -63,11 +76,16 @@ public class IdentificationsController extends AbstractController implements Ide
 
         login = login.replace("\"", "");
 
+        if (!isPersonExist(login)){
+            log.error("Person with login {} does not exist!", login);
+            return responseError(NO_PERSON_EXIST);
+        }
+
         Identifications identifications = repository.findIdentificationsByAccess_Login(login).getIdentifications();
 
         if (identifications != null) {
             log.debug("returning Identifications for login {}: {}", login, identifications);
-            return responseSuccess(RETURN_IDENTIFICATIONS, identifications);
+            return responseSuccess(IDENTIFICATIONS_RETURNED, identifications);
         } else {
             log.error("Can not return Identifications for login {} - no Person found", login);
             return responseError(NO_PERSON_EXIST);

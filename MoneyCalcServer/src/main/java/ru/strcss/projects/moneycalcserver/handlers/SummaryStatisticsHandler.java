@@ -17,6 +17,7 @@ import static ru.strcss.projects.moneycalcserver.handlers.utils.StatisticsHandle
 @Slf4j
 @Component
 public class SummaryStatisticsHandler {
+
     /**
      * Accuracy of calculations - number of decimal places
      */
@@ -31,9 +32,7 @@ public class SummaryStatisticsHandler {
         for (Integer sectionID : container.getSections()) {
             FinanceSummaryBySection summaryBySection = FinanceSummaryBySection.builder()
                     .sectionID(sectionID)
-                    .todayBalance(0)
                     .moneySpendAll(0)
-                    .moneyLeftAll(0)
                     .build();
             statistics.put(sectionID, summaryBySection);
         }
@@ -41,6 +40,33 @@ public class SummaryStatisticsHandler {
         final Map<Integer, Double> spendTodayBySection = new HashMap<>();
 
         //Заполняем moneySpendAll
+        fillMoneySpend(container, statistics, spendTodayBySection);
+
+        //Дозаполняем данными
+        statistics.forEach((id, financeSummaryBySection) -> {
+            int budget = container.getSpendingSections().stream()
+                    .filter(spendingSection -> spendingSection.getId().equals(id))
+                    .findAny()
+                    .get()
+                    .getBudget();
+            long daysInPeriod = Period.between(container.getRangeFrom(), container.getRangeTo()).getDays() + 1;
+            double moneyPerDay = round((double) budget / daysInPeriod, DIGITS);
+            long daysPassed;
+
+            if (container.getToday().isAfter(container.getRangeTo()))
+                daysPassed = daysInPeriod;
+            else
+                daysPassed = Period.between(container.getRangeFrom(), container.getToday()).getDays() + 1;
+
+            financeSummaryBySection.setTodayBalance(moneyPerDay - spendTodayBySection.getOrDefault(id, 0d));
+            financeSummaryBySection.setSummaryBalance(moneyPerDay * daysPassed - financeSummaryBySection.getMoneySpendAll());
+            financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
+//            log.error("todayBalance: {}; summaryBalance: {}", financeSummaryBySection.getTodayBalance(), financeSummaryBySection.getSummaryBalance());
+        });
+        return new ArrayList<>(statistics.values());
+    }
+
+    private void fillMoneySpend(FinanceSummaryCalculationContainer container, Map<Integer, FinanceSummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
         container.getTransactions().forEach(transaction -> {
             Integer sectionID = transaction.getSectionID();
             FinanceSummaryBySection temporary = statistics.get(sectionID);
@@ -51,35 +77,6 @@ public class SummaryStatisticsHandler {
             }
             statistics.put(sectionID, temporary);
         });
-
-
-        //Дозаполняем данными
-        statistics.forEach((id, financeSummaryBySection) -> {
-            int budget = container.getSpendingSections().stream()
-                    .filter(spendingSection -> spendingSection.getId().equals(id))
-                    .findAny()
-                    .get()
-                    .getBudget();
-
-            long daysInPeriod = Period.between(container.getRangeFrom(), container.getRangeTo()).getDays() + 1;
-
-            long daysPassed;
-
-            if (container.getToday().isAfter(container.getRangeTo()))
-                daysPassed = daysInPeriod;
-            else
-                daysPassed = Period.between(container.getRangeFrom(), container.getToday()).getDays() + 1;
-
-            double moneyPerDay = round((double) budget / daysInPeriod, DIGITS);
-
-            financeSummaryBySection.setTodayBalance(moneyPerDay - spendTodayBySection.getOrDefault(id, 0d));
-            financeSummaryBySection.setSummaryBalance(moneyPerDay * daysPassed - financeSummaryBySection.getMoneySpendAll());
-            financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
-
-            log.error("todayBalance: {}; summaryBalance: {}", financeSummaryBySection.getTodayBalance(), financeSummaryBySection.getSummaryBalance());
-        });
-
-        return new ArrayList<>(statistics.values());
     }
 
 }
