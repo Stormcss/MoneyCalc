@@ -1,7 +1,7 @@
 package ru.strcss.projects.moneycalc.api;
 
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.FinanceSummaryGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 
 import java.util.List;

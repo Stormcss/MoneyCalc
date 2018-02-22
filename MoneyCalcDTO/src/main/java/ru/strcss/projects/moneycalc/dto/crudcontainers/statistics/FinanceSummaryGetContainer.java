@@ -1,23 +1,23 @@
-package ru.strcss.projects.moneycalc.dto.crudcontainers;
+package ru.strcss.projects.moneycalc.dto.crudcontainers.statistics;
 
 import lombok.Data;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.ContainerValidation;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
-public class FinanceSummaryGetContainer extends AbstractContainer{
+public class FinanceSummaryGetContainer extends AbstractContainer implements ContainerValidation {
+
     private String rangeFrom;
     private String rangeTo;
     private List<Integer> sectionIDs;
 
     @Override
     public ValidationResult isValid() {
-        List<String> reasons = new ArrayList<>();
-        if (login == null || login.isEmpty()) reasons.add("login is empty");
-        if (rangeFrom == null || rangeFrom.isEmpty()) reasons.add("rangeFrom is empty");
-        if (rangeTo == null || rangeTo.isEmpty()) reasons.add("rangeTo is empty");
+        List<String> reasons = validateStringFields(new FieldPairs("login", login),
+                new FieldPairs("rangeFrom", rangeFrom), new FieldPairs("rangeTo", rangeTo));
         if (sectionIDs == null || sectionIDs.isEmpty()) reasons.add("sectionIDs can not be empty");
 
         return new ValidationResult(reasons.isEmpty(), reasons);

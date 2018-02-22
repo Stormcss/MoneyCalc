@@ -12,7 +12,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionA
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.enitities.*;
 import ru.strcss.projects.moneycalcmigrator.api.MigrationAPI;
-import ru.strcss.projects.moneycalcmigrator.utils.ConfigContainer;
+import ru.strcss.projects.moneycalcmigrator.dto.ConfigContainer;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -93,7 +93,7 @@ class Saver {
                     .build();
 
             Identifications identifications = Identifications.builder()
-                    ._id(config.getLogin())
+                    .login(config.getLogin())
                     .name(config.getName())
                     .build();
             AjaxRs<Person> registerResponse = service.registerPerson(new Credentials(access, identifications)).execute().body();
@@ -123,7 +123,7 @@ class Saver {
      * Generate SpendingSection with required fields
      *
      * @param existingSettings - used to calculate initial ID position
-     * @param offset           - offset for ID calculaion
+     * @param offset           - offset for ID calculation
      * @param section          - section name
      * @return SpendingSection object
      */
@@ -143,7 +143,7 @@ class Saver {
 
         for (Transaction transaction : transactionsToAdd) {
             try {
-                AjaxRs<Transaction> request = service.addTransaction(new TransactionAddContainer(transaction, login)).execute().body();
+                AjaxRs<Transaction> request = service.addTransaction(new TransactionAddContainer(login, transaction)).execute().body();
                 if (request == null || request.getStatus() != Status.SUCCESS || request.getPayload() == null) {
                     rollback = true;
                     break;
@@ -168,7 +168,6 @@ class Saver {
                         }
                     }
             );
-
         }
         return rollback ? Status.ERROR : Status.SUCCESS;
     }

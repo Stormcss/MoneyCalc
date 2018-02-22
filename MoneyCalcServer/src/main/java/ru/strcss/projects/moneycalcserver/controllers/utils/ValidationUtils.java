@@ -31,6 +31,7 @@ public class ValidationUtils {
 
         ArrayList<String> reasons = new ArrayList<>();
 
+        // FIXME: 22.02.2018 use proper requests to DB
         boolean loginExists = repository.findPersonByAccess_Login(access.getLogin()) != null;
         boolean emailExists = repository.findPersonByAccess_Email(access.getEmail()) != null;
 
@@ -40,6 +41,11 @@ public class ValidationUtils {
         return new ValidationResult(!loginExists && !emailExists, reasons);
     }
 
+//    public static ValidationResult validateAbstractTransactionContainer(AbstractContainer container) {
+//        switch (container instanceof )
+//            case
+//
+//    }
 
 //    public static ValidationResult validateAbstractTransactionContainer(AbstractTransactionContainer container) {
 //        // FIXME: 05.02.2018 WTF IS HAPPENING HERE

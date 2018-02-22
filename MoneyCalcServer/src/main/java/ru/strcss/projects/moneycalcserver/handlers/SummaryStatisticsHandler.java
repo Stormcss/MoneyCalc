@@ -50,7 +50,8 @@ public class SummaryStatisticsHandler {
                     .get()
                     .getBudget();
             long daysInPeriod = Period.between(container.getRangeFrom(), container.getRangeTo()).getDays() + 1;
-            double moneyPerDay = round((double) budget / daysInPeriod, DIGITS);
+            double moneyPerDay = (double) budget / daysInPeriod;
+//            double moneyPerDay = round((double) budget / daysInPeriod, DIGITS);
             long daysPassed;
 
             if (container.getToday().isAfter(container.getRangeTo()))
@@ -58,8 +59,8 @@ public class SummaryStatisticsHandler {
             else
                 daysPassed = Period.between(container.getRangeFrom(), container.getToday()).getDays() + 1;
 
-            financeSummaryBySection.setTodayBalance(moneyPerDay - spendTodayBySection.getOrDefault(id, 0d));
-            financeSummaryBySection.setSummaryBalance(moneyPerDay * daysPassed - financeSummaryBySection.getMoneySpendAll());
+            financeSummaryBySection.setTodayBalance(round(moneyPerDay, DIGITS) - spendTodayBySection.getOrDefault(id, 0d));
+            financeSummaryBySection.setSummaryBalance(round(moneyPerDay * daysPassed, DIGITS) - financeSummaryBySection.getMoneySpendAll());
             financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
 //            log.error("todayBalance: {}; summaryBalance: {}", financeSummaryBySection.getTodayBalance(), financeSummaryBySection.getSummaryBalance());
         });

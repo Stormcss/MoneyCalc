@@ -5,7 +5,6 @@ import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -24,10 +23,7 @@ public class TransactionUpdateContainer extends AbstractContainer {
 
     @Override
     public ValidationResult isValid() {
-        List<String> reasons = new ArrayList<>();
-        if (login.isEmpty()) reasons.add("Login is empty");
-        if (id == null || id.isEmpty()) reasons.add("id is empty");
-//        if (!login.equals(transaction.getLogin())) reasons.add("Logins mismatch");
+        List<String> reasons = validateStringFields(new FieldPairs("login", login), new FieldPairs("id", id));
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

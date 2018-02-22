@@ -5,7 +5,7 @@
 //import org.testng.annotations.Test;
 //import ru.strcss.projects.moneycalc.dto.AjaxRs;
 //import ru.strcss.projects.moneycalc.dto.Status;
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.FinanceSummaryGetContainer;
+//import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 //import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 //import ru.strcss.projects.moneycalc.enitities.Settings;

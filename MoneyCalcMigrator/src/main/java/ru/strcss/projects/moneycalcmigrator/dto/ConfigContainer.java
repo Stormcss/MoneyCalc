@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalcmigrator.utils;
+package ru.strcss.projects.moneycalcmigrator.dto;
 
 import lombok.Data;
 
