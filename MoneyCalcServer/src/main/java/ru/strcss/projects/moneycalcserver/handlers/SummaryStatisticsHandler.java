@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalcserver.handlers.utils.TodayPositionRange;
 
 import java.time.Period;
 import java.util.ArrayList;
@@ -12,7 +13,7 @@ import java.util.List;
 import java.util.Map;
 
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.formatDateFromString;
-import static ru.strcss.projects.moneycalcserver.handlers.utils.StatisticsHandlerUtils.round;
+import static ru.strcss.projects.moneycalcserver.handlers.utils.StatisticsHandlerUtils.*;
 
 @Slf4j
 @Component
@@ -37,34 +38,50 @@ public class SummaryStatisticsHandler {
             statistics.put(sectionID, summaryBySection);
         }
 
+        TodayPositionRange todayPositionRange = getTodayPositionRange(container);
+
         final Map<Integer, Double> spendTodayBySection = new HashMap<>();
 
         //Заполняем moneySpendAll
-        fillMoneySpend(container, statistics, spendTodayBySection);
+        if (todayPositionRange.equals(TodayPositionRange.IN))
+            fillMoneySpend(container, statistics, spendTodayBySection);
+        else
+            fillMoneySpend(container, statistics);
 
         //Дозаполняем данными
         statistics.forEach((id, financeSummaryBySection) -> {
-            int budget = container.getSpendingSections().stream()
-                    .filter(spendingSection -> spendingSection.getId().equals(id))
-                    .findAny()
-                    .get()
-                    .getBudget();
+            int budget = getBudget(container, id);
             long daysInPeriod = Period.between(container.getRangeFrom(), container.getRangeTo()).getDays() + 1;
             double moneyPerDay = (double) budget / daysInPeriod;
 //            double moneyPerDay = round((double) budget / daysInPeriod, DIGITS);
-            long daysPassed;
 
-            if (container.getToday().isAfter(container.getRangeTo()))
-                daysPassed = daysInPeriod;
-            else
-                daysPassed = Period.between(container.getRangeFrom(), container.getToday()).getDays() + 1;
+            long daysPassed = getDaysPassed(container, todayPositionRange, daysInPeriod);
 
-            financeSummaryBySection.setTodayBalance(round(moneyPerDay, DIGITS) - spendTodayBySection.getOrDefault(id, 0d));
+            financeSummaryBySection.setTodayBalance(getTodayBalance(todayPositionRange, spendTodayBySection, id, moneyPerDay));
             financeSummaryBySection.setSummaryBalance(round(moneyPerDay * daysPassed, DIGITS) - financeSummaryBySection.getMoneySpendAll());
             financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
 //            log.error("todayBalance: {}; summaryBalance: {}", financeSummaryBySection.getTodayBalance(), financeSummaryBySection.getSummaryBalance());
         });
         return new ArrayList<>(statistics.values());
+    }
+
+    private Double getTodayBalance(TodayPositionRange todayPositionRange, Map<Integer, Double> spendTodayBySection, Integer id, double moneyPerDay) {
+        if (todayPositionRange.equals(TodayPositionRange.IN))
+            return round(moneyPerDay, DIGITS) - spendTodayBySection.getOrDefault(id, 0d);
+        else
+            return 0d;
+    }
+
+    private Integer getBudget(FinanceSummaryCalculationContainer container, Integer id) {
+        return container.getSpendingSections().stream()
+                .filter(spendingSection -> spendingSection.getId().equals(id))
+                .findAny()
+                .get()
+                .getBudget();
+    }
+
+    private void fillMoneySpend(FinanceSummaryCalculationContainer container, Map<Integer, FinanceSummaryBySection> statistics) {
+        fillMoneySpend(container, statistics, null);
     }
 
     private void fillMoneySpend(FinanceSummaryCalculationContainer container, Map<Integer, FinanceSummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
@@ -73,11 +90,10 @@ public class SummaryStatisticsHandler {
             FinanceSummaryBySection temporary = statistics.get(sectionID);
 
             temporary.setMoneySpendAll(temporary.getMoneySpendAll() + transaction.getSum());
-            if (formatDateFromString(transaction.getDate()).isEqual(container.getToday())) {
+            if (spendTodayBySection != null && formatDateFromString(transaction.getDate()).isEqual(container.getToday())) {
                 spendTodayBySection.put(sectionID, spendTodayBySection.getOrDefault(sectionID, 0d) + transaction.getSum());
             }
             statistics.put(sectionID, temporary);
         });
     }
-
 }

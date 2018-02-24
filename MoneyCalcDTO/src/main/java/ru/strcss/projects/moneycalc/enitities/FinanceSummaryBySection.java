@@ -8,8 +8,8 @@ import lombok.Data;
 public class FinanceSummaryBySection {
 
     private Integer sectionID;
-    private double todayBalance;
-    private double summaryBalance;
+    private Double todayBalance;
+    private Double summaryBalance;
     private Integer moneySpendAll;
     private Integer moneyLeftAll;
 }
