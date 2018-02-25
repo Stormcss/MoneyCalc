@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalcmigrator.utils;
+package ru.strcss.projects.moneycalcmigrator.properties;
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;

@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @Data
 @Document
 @Builder
+@Deprecated
 public class FinanceStatistics {
 //    @Id
     private String _id;

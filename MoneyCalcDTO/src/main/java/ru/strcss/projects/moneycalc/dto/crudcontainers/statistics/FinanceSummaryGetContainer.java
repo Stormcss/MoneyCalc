@@ -3,12 +3,11 @@ package ru.strcss.projects.moneycalc.dto.crudcontainers.statistics;
 import lombok.Data;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.ContainerValidation;
 
 import java.util.List;
 
 @Data
-public class FinanceSummaryGetContainer extends AbstractContainer implements ContainerValidation {
+public class FinanceSummaryGetContainer extends AbstractContainer{
 
     private String rangeFrom;
     private String rangeTo;

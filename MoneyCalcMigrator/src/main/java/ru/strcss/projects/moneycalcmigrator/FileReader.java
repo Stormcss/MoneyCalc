@@ -105,7 +105,6 @@ public class FileReader {
                 .build();
     }
 
-
     private String formatDate(String oldDate) {
         String[] part = oldDate.split("\\.");
         StringJoiner joiner = new StringJoiner("-");

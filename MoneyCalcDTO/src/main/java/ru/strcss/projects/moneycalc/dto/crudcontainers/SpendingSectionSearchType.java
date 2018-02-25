@@ -1,6 +1,5 @@
 package ru.strcss.projects.moneycalc.dto.crudcontainers;
 
-public interface ContainerValidation {
-
-
+public enum SpendingSectionSearchType {
+    BY_ID, BY_NAME
 }

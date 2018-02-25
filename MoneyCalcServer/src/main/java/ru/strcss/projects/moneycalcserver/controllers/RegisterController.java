@@ -85,8 +85,8 @@ public class RegisterController extends AbstractController implements RegisterAP
                                 ._id(login)
                                 .financeSections(new ArrayList<>())
                                 .build())
-                        .financeStatistics(FinanceStatistics.builder()
-                                .build())
+//                        .financeStatistics(FinanceStatistics.builder()
+//                                .build())
                         .build())
                 .build();
 
@@ -96,6 +96,11 @@ public class RegisterController extends AbstractController implements RegisterAP
                 .build();
 
         // TODO: 02.02.2018 TRANSACTIONS REQUIRED!
+
+//        Transactional.startTransaction()
+//                .then(() -> mongoOperations.save(personTransactions, "Transactions"))
+//                .then(() -> mongoOperations.save(person, "Person"))
+//                .endTransacion();
 
         mongoOperations.save(personTransactions, "Transactions");
         mongoOperations.save(person, "Person");

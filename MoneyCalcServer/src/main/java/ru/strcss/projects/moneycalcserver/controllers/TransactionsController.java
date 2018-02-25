@@ -9,18 +9,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.TransactionsAPIService;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
-import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalcserver.controllers.validation.RequestValidation;
+import ru.strcss.projects.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalcserver.dbconnection.TransactionsDBConnection;
 
 import java.util.List;
 
-import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.*;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.generateTransactionID;
 
 @Slf4j
@@ -38,58 +38,69 @@ public class TransactionsController extends AbstractController implements Transa
     /**
      * Get list of Transactions by user's login
      *
-     * @param container - TransactionsSearchContainer
+     * @param searchContainer - TransactionsSearchContainer
      * @return response object with list of Transactions
      */
     @PostMapping(value = "/getTransactions")
-    public AjaxRs<List<Transaction>> getTransactions(@RequestBody TransactionsSearchContainer container) {
+    public AjaxRs<List<Transaction>> getTransactions(@RequestBody TransactionsSearchContainer searchContainer) {
 
-        ValidationResult validationResult = container.isValid();
+//        ValidationResult validationResult = searchContainer.isValid();
+//
+//        if (!isPersonExist(searchContainer)){
+//            log.error("Person with login {} does not exist!", searchContainer.getLogin());
+//            return responseError(NO_PERSON_EXIST);
+//        }
+//
+//        if (!validationResult.isValidated()) {
+//            log.error("Transaction validation has failed - required fields are incorrect: {}", validationResult.getReasons());
+//            return responseError("Required fields are incorrect: " + validationResult.getReasons());
+//        }
 
-        if (!isPersonExist(container)){
-            log.error("Person with login {} does not exist!", container.getLogin());
-            return responseError(NO_PERSON_EXIST);
-        }
+        RequestValidation<List<Transaction>> requestValidation = new Validator(searchContainer, "Getting Transactions")
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(searchContainer.getLogin())),
+                        () -> fillLog(NO_PERSON_EXIST, searchContainer.getLogin()))
+                .validate();
+        if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        if (!validationResult.isValidated()) {
-            log.error("Transaction validation has failed - required fields are incorrect: {}", validationResult.getReasons());
-            return responseError("Required fields are incorrect: " + validationResult.getReasons());
-        }
+        List<Transaction> transactions = transactionsDBConnection.getTransactions(searchContainer);
 
-        List<Transaction> transactions = transactionsDBConnection.getTransactions(container);
-
-        log.debug("Returning Transactions for login {}, dateFrom {}, dateTo {} : {}", container.getLogin(), container.getRangeFrom(), container.getRangeTo(), transactions);
+        log.debug("Returning Transactions for login {}, dateFrom {}, dateTo {} : {}",
+                searchContainer.getLogin(), searchContainer.getRangeFrom(), searchContainer.getRangeTo(), transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }
 
     @PostMapping(value = "/addTransaction")
-    public AjaxRs<Transaction> addTransaction(@RequestBody TransactionAddContainer transactionAddContainer) {
+    public AjaxRs<Transaction> addTransaction(@RequestBody TransactionAddContainer addContainer) {
 
-        ValidationResult validationResult = transactionAddContainer.isValid();
+//        ValidationResult validationResult = addContainer.isValid();
+//
+//        if (!isPersonExist(addContainer)){
+//            log.error("Person with login {} does not exist!", addContainer.getLogin());
+//            return responseError(NO_PERSON_EXIST);
+//        }
+//
+//        if (!validationResult.isValidated()) {
+//            log.error("TransactionContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
+//            return responseError("Required fields are incorrect: " + validationResult.getReasons());
+//        }
 
-        if (!isPersonExist(transactionAddContainer)){
-            log.error("Person with login {} does not exist!", transactionAddContainer.getLogin());
-            return responseError(NO_PERSON_EXIST);
-        }
+        RequestValidation<Transaction> requestValidation = new Validator(addContainer, "Getting Transactions")
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(addContainer.getLogin())),
+                        () -> fillLog(NO_PERSON_EXIST, addContainer.getLogin()))
+                .validate();
+        if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        if (!validationResult.isValidated()) {
-            log.error("TransactionContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
-            return responseError("Required fields are incorrect: " + validationResult.getReasons());
-        }
+        generateTransactionID(addContainer.getTransaction());
 
-        generateTransactionID(transactionAddContainer.getTransaction());
-
-        WriteResult writeResult = transactionsDBConnection.addTransaction(transactionAddContainer);
+        WriteResult writeResult = transactionsDBConnection.addTransaction(addContainer);
 
         if (writeResult.wasAcknowledged()) {
-            // TODO: 08.02.2018 TRANSACTIONS REQUIRED
-
-            log.debug("Saved new Transaction for login {} : {}", transactionAddContainer.getLogin(), transactionAddContainer.getTransaction());
-            return responseSuccess(TRANSACTION_SAVED, transactionAddContainer.getTransaction());
+            log.debug("Saved new Transaction for login {} : {}", addContainer.getLogin(), addContainer.getTransaction());
+            return responseSuccess(TRANSACTION_SAVED, addContainer.getTransaction());
 
         } else {
-            log.error("Saving Transaction {} for login {} has failed", transactionAddContainer.getTransaction(), transactionAddContainer.getLogin());
+            log.error("Saving Transaction {} for login {} has failed", addContainer.getTransaction(), addContainer.getLogin());
             return responseError(TRANSACTION_SAVING_ERROR);
         }
     }
@@ -99,66 +110,67 @@ public class TransactionsController extends AbstractController implements Transa
      * <p>
      * id field in Income Transaction object will be ignored and overwritten with given transactionID
      *
-     * @param transactionContainer
+     * @param updateContainer
      * @return
      */
 
     @PostMapping(value = "/updateTransaction")
-    public AjaxRs<Transaction> updateTransaction(@RequestBody TransactionUpdateContainer transactionContainer) {
+    public AjaxRs<Transaction> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) {
 
-        ValidationResult validationResult = transactionContainer.isValid();
+//        ValidationResult validationResult = updateContainer.isValid();
+//
+//        if (!isPersonExist(updateContainer)){
+//            log.error("Person with login {} does not exist!", updateContainer.getLogin());
+//            return responseError(NO_PERSON_EXIST);
+//        }
+//
+//        if (!validationResult.isValidated()) {
+//            log.error("TransactionUpdateContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
+//            return responseError("Required fields are incorrect: " + validationResult.getReasons());
+//        }
 
-        if (!isPersonExist(transactionContainer)){
-            log.error("Person with login {} does not exist!", transactionContainer.getLogin());
-            return responseError(NO_PERSON_EXIST);
-        }
+        RequestValidation<Transaction> requestValidation = new Validator(updateContainer, "Updating Transaction")
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(updateContainer.getLogin())),
+                        () -> fillLog(NO_PERSON_EXIST, updateContainer.getLogin()))
+                .validate();
+        if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        if (!validationResult.isValidated()) {
-            log.error("TransactionUpdateContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
-            return responseError("Required fields are incorrect: " + validationResult.getReasons());
-        }
+        Transaction transactionToUpdate = generateTransactionID(updateContainer.getTransaction(), updateContainer.getId());
 
-        Transaction transactionToUpdate = generateTransactionID(transactionContainer.getTransaction(), transactionContainer.getId());
+        updateContainer.setTransaction(transactionToUpdate);
 
-        transactionContainer.setTransaction(transactionToUpdate);
-
-        WriteResult updateResult = transactionsDBConnection.updateTransaction(transactionContainer);
+        WriteResult updateResult = transactionsDBConnection.updateTransaction(updateContainer);
 
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
         if (updateResult.getN() == 0) {
-            log.error("Updating Transaction for login {} has failed", transactionContainer.getLogin());
+            log.error("Updating Transaction for login {} has failed", updateContainer.getLogin());
             return responseError("Transaction was not updated!");
         }
 
-        log.debug("Updated Transaction {}: for login: {}", transactionContainer.getTransaction());
-        return responseSuccess(TRANSACTION_UPDATED, transactionContainer.getTransaction());
+        log.debug("Updated Transaction {}: for login: {}", updateContainer.getTransaction());
+        return responseSuccess(TRANSACTION_UPDATED, updateContainer.getTransaction());
     }
 
     @PostMapping(value = "/deleteTransaction")
-    public AjaxRs<Void> deleteTransaction(@RequestBody TransactionDeleteContainer transactionContainer) {
+    public AjaxRs<Void> deleteTransaction(@RequestBody TransactionDeleteContainer deleteContainer) {
 
-        ValidationResult validationResult = transactionContainer.isValid();
+        RequestValidation<Void> requestValidation = new Validator(deleteContainer, "Deleting Transaction")
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(deleteContainer.getLogin())),
+                        () -> fillLog(NO_PERSON_EXIST, deleteContainer.getLogin()))
+                .validate();
+        if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        if (!isPersonExist(transactionContainer)){
-            log.error("Person with login {} does not exist!", transactionContainer.getLogin());
-            return responseError(NO_PERSON_EXIST);
-        }
 
-        if (!validationResult.isValidated()) {
-            log.error("TransactionUpdateContainer validation has failed - required fields are incorrect: {}", validationResult.getReasons());
-            return responseError("Required fields are incorrect: " + validationResult.getReasons());
-        }
-
-        WriteResult deleteResult = transactionsDBConnection.deleteTransaction(transactionContainer);
+        WriteResult deleteResult = transactionsDBConnection.deleteTransaction(deleteContainer);
 
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
         if (deleteResult.getN() == 0) {
-            log.error("Deleting Transaction for login {} has failed", transactionContainer.getLogin());
+            log.error("Deleting Transaction for login {} has failed", deleteContainer.getLogin());
             return responseError("Transaction was not deleted!");
         }
-        log.debug("Deleted Transaction id {}: for login: {}", transactionContainer.getId(), transactionContainer.getLogin());
+        log.debug("Deleted Transaction id {}: for login: {}", deleteContainer.getId(), deleteContainer.getLogin());
         // FIXME: 06.02.2018 some payload should be returned
         return responseSuccess(TRANSACTION_DELETED, null);
     }

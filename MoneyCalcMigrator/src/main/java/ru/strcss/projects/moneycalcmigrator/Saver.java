@@ -85,7 +85,7 @@ class Saver {
      * @throws IOException
      */
     private void checkPersonRegistration(AjaxRs<Settings> settingsResponse) throws IOException {
-        if (settingsResponse.getStatus() == Status.ERROR && settingsResponse.getMessage().contains("is not found")) {
+        if (settingsResponse.getStatus() == Status.ERROR && settingsResponse.getMessage().contains("does not exist")) {
             Access access = Access.builder()
                     .email(config.getEmail())
                     .login(config.getLogin())

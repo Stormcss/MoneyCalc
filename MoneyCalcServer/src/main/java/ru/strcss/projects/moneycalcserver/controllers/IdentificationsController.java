@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.IdentificationsAPIService;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
-import ru.strcss.projects.moneycalc.dto.ValidationResult;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
+import ru.strcss.projects.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalcserver.dbconnection.IdentificationsDBConnection;
 
-import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseError;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
+import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.*;
 
 @Slf4j
 @RestController
@@ -37,12 +37,19 @@ public class IdentificationsController extends AbstractController implements Ide
     @PostMapping(value = "/saveIdentifications")
     public AjaxRs<Identifications> saveIdentifications(@RequestBody Identifications identifications) {
 
-        ValidationResult validationResult = identifications.isValid();
+//        ValidationResult validationResult = identifications.isValid();
+//
+//        if (!validationResult.isValidated()) {
+//            log.error("Saving Identifications has failed - required fields are empty: {}", validationResult.getReasons());
+//            return responseError("Required fields are empty: " + validationResult.getReasons());
+//        }
 
-        if (!validationResult.isValidated()) {
-            log.error("Saving Identifications has failed - required fields are empty: {}", validationResult.getReasons());
-            return responseError("Required fields are empty: " + validationResult.getReasons());
-        }
+        RequestValidation<Identifications> requestValidation = new RequestValidation.Validator(identifications, "Saving Settings")
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(identifications.getLogin())),
+                        () -> fillLog(NO_PERSON_EXIST, identifications.getLogin()))
+                .validate();
+        if (!requestValidation.isValid()) return requestValidation.getValidationError();
+
 
         final WriteResult updateResult = identificationsDBConnection.updateIdentifications(identifications);
 
@@ -50,33 +57,38 @@ public class IdentificationsController extends AbstractController implements Ide
             log.error("Updating Identifications for login {} has failed", identifications.getLogin());
             return responseError(IDENTIFICATIONS_SAVING_ERROR);
         }
-
         return responseSuccess(IDENTIFICATIONS_RETURNED, identifications);
     }
 
     /**
      * Get Identifications object using user's login
      *
-     * @param login - user's login
+     * @param getContainer - container with user's login
      * @return response object with Identifications payload
      */
     @PostMapping(value = "/getIdentifications")
-    public AjaxRs<Identifications> getIdentifications(@RequestBody String login) {
+    public AjaxRs<Identifications> getIdentifications(@RequestBody LoginGetContainer getContainer) {
 
-        login = login.replace("\"", "");
+//        // TODO: 25.02.2018 receive object and validate it
+//
+//        if (!isPersonExist(login)){
+//            log.error("Person with login {} does not exist!", login);
+//            return responseError(NO_PERSON_EXIST);
+//        }
 
-        if (!isPersonExist(login)){
-            log.error("Person with login {} does not exist!", login);
-            return responseError(NO_PERSON_EXIST);
-        }
+        RequestValidation<Identifications> requestValidation = new RequestValidation.Validator(getContainer, "Requesting Identifications")
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(getContainer.getLogin())),
+                        () -> fillLog(NO_PERSON_EXIST, getContainer.getLogin()))
+                .validate();
+        if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Identifications identifications = repository.findIdentificationsByAccess_Login(login).getIdentifications();
+        Identifications identifications = identificationsDBConnection.getIdentifications(getContainer.getLogin());
 
         if (identifications != null) {
-            log.debug("returning Identifications for login {}: {}", login, identifications);
+            log.debug("returning Identifications for login {}: {}", getContainer.getLogin(), identifications);
             return responseSuccess(IDENTIFICATIONS_RETURNED, identifications);
         } else {
-            log.error("Can not return Identifications for login {} - no Person found", login);
+            log.error("Can not return Identifications for login {} - no Person found", getContainer.getLogin());
             return responseError(NO_PERSON_EXIST);
         }
     }

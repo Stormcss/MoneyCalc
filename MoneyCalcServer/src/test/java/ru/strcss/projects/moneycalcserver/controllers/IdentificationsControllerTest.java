@@ -24,18 +24,18 @@ public class IdentificationsControllerTest  extends AbstractControllerTest {
         Credentials credentials = generateCredentials(login);
 
         //Registering Person
-        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(credentials)).body();
-        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
+        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
+//        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
 
         //Updating default Identifications
-        AjaxRs<Identifications> responseSaveIdentifications = sendRequest(service.saveIdentifications(credentials.getIdentifications())).body();
-        assertEquals(responseSaveIdentifications.getStatus(), Status.SUCCESS, responseSaveIdentifications.getMessage());
+        AjaxRs<Identifications> responseSaveIdentifications = sendRequest(service.saveIdentifications(credentials.getIdentifications()), Status.SUCCESS).body();
+//        assertEquals(responseSaveIdentifications.getStatus(), Status.SUCCESS, responseSaveIdentifications.getMessage());
         assertNotNull(responseSaveIdentifications.getPayload(), "Payload is null!");
         assertNotNull(responseSaveIdentifications.getPayload().getName(), "Identifications object is empty!");
 
         //Requesting updated Identifications
-        AjaxRs<Identifications> responseGetUpdated = sendRequest(service.getIdentifications(login)).body();
-        assertEquals(responseGetUpdated.getStatus(), Status.SUCCESS, responseGetUpdated.getMessage());
+        AjaxRs<Identifications> responseGetUpdated = sendRequest(service.getIdentifications(login), Status.SUCCESS).body();
+//        assertEquals(responseGetUpdated.getStatus(), Status.SUCCESS, responseGetUpdated.getMessage());
         assertEquals(responseGetUpdated.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
         assertEquals(responseGetUpdated.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
     }
@@ -66,13 +66,15 @@ public class IdentificationsControllerTest  extends AbstractControllerTest {
         String login = Generator.UUID();
         Credentials credentials = generateCredentials(login);
 
+        // FIXME: 25.02.2018 Update this code
+
         //Registering Person
-        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(credentials)).body();
-        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
+        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
+//        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
 
-        AjaxRs<Identifications> response = sendRequest(service.getIdentifications(login)).body();
+        AjaxRs<Identifications> response = sendRequest(service.getIdentifications(login), Status.SUCCESS).body();
 
-        assertEquals(response.getStatus(), Status.SUCCESS, response.getMessage());
+//        assertEquals(response.getStatus(), Status.SUCCESS, response.getMessage());
         assertEquals(response.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
         assertEquals(response.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
     }

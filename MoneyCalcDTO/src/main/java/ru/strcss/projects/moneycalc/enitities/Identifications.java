@@ -2,7 +2,7 @@ package ru.strcss.projects.moneycalc.enitities;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
+import ru.strcss.projects.moneycalc.Validationable;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
 import java.util.ArrayList;
@@ -10,10 +10,8 @@ import java.util.List;
 
 @Data
 @Builder
-@Document
-public class Identifications {
+public class Identifications implements Validationable {
 
-//    @Id
     private String login;
     private String name;
 

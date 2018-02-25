@@ -5,7 +5,6 @@ import retrofit2.Call;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalcserver.controllers.testapi.MoneyCalcClient;
 
 import java.io.IOException;
@@ -19,6 +18,10 @@ import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.gen
 public class Utils {
 
     public static <T> Response<AjaxRs<T>> sendRequest(Call<AjaxRs<T>> call) {
+        return sendRequest(call, null);
+    }
+
+    public static <T> Response<AjaxRs<T>> sendRequest(Call<AjaxRs<T>> call, Status expectedStatus) {
         Response<AjaxRs<T>> response = null;
         try {
             response = call.execute();
@@ -28,6 +31,7 @@ public class Utils {
 
         assertNotNull(response, "Response is null!");
         assertNotNull(response.body(), "Response body is null!");
+        if (expectedStatus != null) assertEquals(response.body().getStatus(), expectedStatus, response.body().getMessage());
 
         log.debug("{} - {}", response.body().getMessage(), response.body().getStatus().name());
         return response;
@@ -41,10 +45,7 @@ public class Utils {
      */
     public static String savePersonGetLogin(MoneyCalcClient service) {
         String login = UUID();
-
-        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(generateCredentials(login))).body();
-        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
-
+        sendRequest(service.registerPerson(generateCredentials(login)), Status.SUCCESS).body();
         return login;
     }
 }

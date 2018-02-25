@@ -16,5 +16,5 @@ public class Finance {
     private String _id;
 
     private FinanceSummary financeSummary;
-    private FinanceStatistics financeStatistics;
+//    private FinanceStatistics financeStatistics;
 }

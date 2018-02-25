@@ -10,7 +10,6 @@ import ru.strcss.projects.moneycalcserver.controllers.testapi.MoneyCalcClient;
 
 import java.util.List;
 
-import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateSpendingSection;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
@@ -24,8 +23,7 @@ public class StatisticsControllerTestUtils {
      * @return
      */
     public static FinanceSummaryBySection getFinanceSummaryBySection(FinanceSummaryGetContainer getContainer, MoneyCalcClient service) {
-        AjaxRs<List<FinanceSummaryBySection>> responseGetStats = sendRequest(service.getFinanceSummaryBySection(getContainer)).body();
-        assertEquals(responseGetStats.getStatus(), Status.SUCCESS, responseGetStats.getMessage());
+        AjaxRs<List<FinanceSummaryBySection>> responseGetStats = sendRequest(service.getFinanceSummaryBySection(getContainer), Status.SUCCESS).body();
         return responseGetStats.getPayload().get(0);
     }
 
@@ -48,8 +46,7 @@ public class StatisticsControllerTestUtils {
 
             assertTrue(personSettings.getSections().stream().allMatch(spendingSection -> spendingSection.getBudget() == budget));
 
-            AjaxRs<Settings> updateSettingsResponse = sendRequest(service.saveSettings(personSettings)).body();
-            assertEquals(updateSettingsResponse.getStatus(), Status.SUCCESS, updateSettingsResponse.getMessage());
+            sendRequest(service.saveSettings(personSettings), Status.SUCCESS).body();
         }
     }
 

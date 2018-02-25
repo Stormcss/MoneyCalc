@@ -35,4 +35,8 @@ public class IdentificationsDBConnection {
         return mongoTemplate.updateMulti(findUpdatedSettingsQuery,
                 new Update().set("identifications.$", identifications), Person.class);
     }
+
+    public Identifications getIdentifications(String login){
+        return repository.findIdentificationsByAccess_Login(login.replace("\"", "")).getIdentifications();
+    }
 }

@@ -74,7 +74,8 @@ public class TransactionsDBConnection {
      */
     public WriteResult updateTransaction(TransactionUpdateContainer transactionUpdateContainer) {
         Query findUpdatedTransactionQuery = Query.query(
-                Criteria.where("login").is(transactionUpdateContainer.getLogin()).and("transactions._id").is(transactionUpdateContainer.getId()));
+                Criteria.where("login").is(transactionUpdateContainer.getLogin())
+                        .and("transactions._id").is(transactionUpdateContainer.getId()));
 
         return mongoTemplate.updateMulti(findUpdatedTransactionQuery,
                 new Update().set("transactions.$", transactionUpdateContainer.getTransaction()), PersonTransactions.class);

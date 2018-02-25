@@ -13,12 +13,16 @@ public abstract class AbstractController {
     MongoOperations mongoOperations;
 
     final String REGISTER_SUCCESSFUL = "Person successfully registered";
-    final String NO_PERSON_EXIST = "Person does not exist!";
+    final String NO_PERSON_EXIST = "Person with login {} does not exist!";
 
     final String SETTINGS_UPDATED = "Settings successfully updated";
     final String SETTINGS_RETURNED = "Settings successfully returned";
 
-    final String SAVE_IDENTIFICATIONS = "Identifications successfully saved";
+    final String SPENDING_SECTION_ADDED = "Spending Section successfully added";
+    final String SPENDING_SECTION_DELETED = "Spending Section successfully deleted";
+    final String SPENDING_SECTION_UPDATED = "Spending Section successfully updated";
+
+    final String IDENTIFICATIONS_SAVED = "Identifications successfully saved";
     final String IDENTIFICATIONS_RETURNED = "Identifications successfully returned";
     final String IDENTIFICATIONS_SAVING_ERROR = "Identifications were not updated!";
 
@@ -30,11 +34,10 @@ public abstract class AbstractController {
 
     final String STATISTICS_RETURNED = "Statistics successfully returned";
 
-    boolean isPersonExist(AbstractContainer container){
-        return repository.existsByAccess_Login(container.getLogin());
+    boolean isPersonExist(AbstractContainer container){return repository.existsByAccess_Login(container.getLogin());}
+    boolean isPersonExist(String login){
+        return repository.existsByAccess_Login(login.replace("\"", ""));
     }
 
-    boolean isPersonExist(String login){
-        return repository.existsByAccess_Login(login);
-    }
+
 }

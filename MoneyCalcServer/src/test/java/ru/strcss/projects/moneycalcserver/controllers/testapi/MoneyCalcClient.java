@@ -5,6 +5,9 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
@@ -28,6 +31,15 @@ public interface MoneyCalcClient {
 
     @POST("/api/settings/getSettings")
     Call<AjaxRs<Settings>> getSettings(@Body String login);
+
+    @POST("/api/settings/addSpendingSection")
+    Call<AjaxRs<List<SpendingSection>>> addSpendingSection(@Body SpendingSectionAddContainer spendingSectionContainer);
+
+    @POST("/api/settings/updateSpendingSection")
+    Call<AjaxRs<List<SpendingSection>>> updateSpendingSection(@Body SpendingSectionUpdateContainer updateContainer);
+
+    @POST("/api/settings/deleteSpendingSection")
+    Call<AjaxRs<List<SpendingSection>>> deleteSpendingSection(@Body SpendingSectionDeleteContainer deleteContainer);
 
     /**
      *  Identifications
