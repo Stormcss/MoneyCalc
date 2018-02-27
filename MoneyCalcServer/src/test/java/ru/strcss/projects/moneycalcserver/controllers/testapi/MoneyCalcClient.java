@@ -5,6 +5,7 @@ import retrofit2.http.Body;
 import retrofit2.http.POST;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
@@ -30,7 +31,7 @@ public interface MoneyCalcClient {
     Call<AjaxRs<Settings>> saveSettings(@Body Settings settings);
 
     @POST("/api/settings/getSettings")
-    Call<AjaxRs<Settings>> getSettings(@Body String login);
+    Call<AjaxRs<Settings>> getSettings(@Body LoginGetContainer getContainer);
 
     @POST("/api/settings/addSpendingSection")
     Call<AjaxRs<List<SpendingSection>>> addSpendingSection(@Body SpendingSectionAddContainer spendingSectionContainer);
@@ -40,6 +41,9 @@ public interface MoneyCalcClient {
 
     @POST("/api/settings/deleteSpendingSection")
     Call<AjaxRs<List<SpendingSection>>> deleteSpendingSection(@Body SpendingSectionDeleteContainer deleteContainer);
+
+    @POST("/api/settings/getSpendingSections")
+    Call<AjaxRs<List<SpendingSection>>> getSpendingSections(@Body LoginGetContainer getContainer);
 
     /**
      *  Identifications

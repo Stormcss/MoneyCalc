@@ -2,15 +2,15 @@ package ru.strcss.projects.moneycalcserver.controllers.utils;
 
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Status;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.enitities.Settings;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalcserver.controllers.testapi.MoneyCalcClient;
 
 import java.util.List;
 
-import static org.testng.Assert.assertTrue;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateSpendingSection;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
 
@@ -34,19 +34,19 @@ public class StatisticsControllerTestUtils {
      * @param login         - Person's login
      */
     public static void checkPersonsSections(int numOfSections, String login, int budget, MoneyCalcClient service) {
-        Settings personSettings = sendRequest(service.getSettings(login)).body().getPayload();
+        List<SpendingSection> spendingSections = sendRequest(service.getSpendingSections(new LoginGetContainer(login))).body().getPayload();
 
-        if (numOfSections > personSettings.getSections().size()) {
-            for (int i = 0; i < numOfSections - personSettings.getSections().size(); i++) {
-                personSettings.getSections().add(generateSpendingSection(budget, personSettings.getSections().size() + i));
+        if (numOfSections > spendingSections.size()) {
+            for (int i = 0; i < numOfSections - spendingSections.size(); i++) {
+                sendRequest(service.addSpendingSection(new SpendingSectionAddContainer(login, generateSpendingSection(budget))), Status.SUCCESS).body();
             }
-            for (SpendingSection section : personSettings.getSections()) {
-                if (section.getBudget() != budget) section.setBudget(budget);
-            }
-
-            assertTrue(personSettings.getSections().stream().allMatch(spendingSection -> spendingSection.getBudget() == budget));
-
-            sendRequest(service.saveSettings(personSettings), Status.SUCCESS).body();
+//            for (SpendingSection section : spendingSections) {
+//                if (section.getBudget() != budget) section.setBudget(budget);
+//            }
+//
+//            assertTrue(spendingSections.stream().allMatch(spendingSection -> spendingSection.getBudget() == budget));
+//
+//            sendRequest(service.saveSettings(personSettings), Status.SUCCESS).body();
         }
     }
 

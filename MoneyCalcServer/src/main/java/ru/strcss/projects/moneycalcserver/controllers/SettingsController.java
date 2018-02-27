@@ -45,6 +45,8 @@ public class SettingsController extends AbstractController implements SettingsAP
     @PostMapping(value = "/saveSettings")
     public AjaxRs<Settings> saveSettings(@RequestBody Settings settings) {
 
+        settings.setSections(null);
+
         RequestValidation<Settings> requestValidation = new Validator(settings, "Saving Settings")
                 .addValidation(() -> repository.existsByAccess_Login(formatLogin(settings.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, settings.getLogin()))
@@ -97,15 +99,16 @@ public class SettingsController extends AbstractController implements SettingsAP
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-
         //id of income SpendingSection must be ignored and be set here
-        settingsDBConnection.getMaxSpendingSectionId(addContainer.getLogin());
+        Integer maxSpendingSectionId = settingsDBConnection.getMaxSpendingSectionId(addContainer.getLogin());
+
+        addContainer.getSpendingSection().setId(maxSpendingSectionId + 1);
 
         WriteResult writeResult = settingsDBConnection.addSpendingSection(addContainer);
 
         if (writeResult.wasAcknowledged()) {
             log.debug("Saved new SpendingSection for login {} : {}", addContainer.getLogin(), addContainer.getSpendingSection());
-            return responseSuccess(SPENDING_SECTION_ADDED, settingsDBConnection.getSettings(addContainer.getLogin()).getSettings().getSections());
+            return responseSuccess(SPENDING_SECTION_ADDED, settingsDBConnection.getSpendingSectionList(addContainer.getLogin()));
 
         } else {
             log.error("Saving Transaction {} for login {} has failed", addContainer.getSpendingSection(), addContainer.getLogin());
@@ -136,8 +139,8 @@ public class SettingsController extends AbstractController implements SettingsAP
             return responseError("SpendingSection was not updated!");
         }
 
-        log.debug("Updated SpendingSection {}: for login: {}", updateContainer.getSpendingSection());
-        return responseSuccess(SPENDING_SECTION_UPDATED, settingsDBConnection.getSettings(updateContainer.getLogin()).getSettings().getSections());
+        log.debug("Updated SpendingSection {}: for login: {}", updateContainer.getSpendingSection(), updateContainer.getLogin());
+        return responseSuccess(SPENDING_SECTION_UPDATED, settingsDBConnection.getSpendingSectionList(updateContainer.getLogin()));
     }
 
     @PostMapping(value = "/deleteSpendingSection")
@@ -166,8 +169,25 @@ public class SettingsController extends AbstractController implements SettingsAP
         log.debug("Deleted SpendingSection with SearchType: {} and query: {} for login: {}",
                 deleteContainer.getSearchType(), deleteContainer.getIdOrName(), deleteContainer.getLogin());
 
-        return responseSuccess(SPENDING_SECTION_DELETED, settingsDBConnection.getSettings(deleteContainer.getLogin()).getSettings().getSections());
+        return responseSuccess(SPENDING_SECTION_DELETED, settingsDBConnection.getSpendingSectionList(deleteContainer.getLogin()));
     }
 
 
+    /**
+     * Get list of SpendingSections for specific login
+     *
+     * @param getContainer - container with user's login
+     * @return response object
+     */
+    @PostMapping(value = "/getSpendingSections")
+    public AjaxRs<List<SpendingSection>> getSpendingSections(@RequestBody LoginGetContainer getContainer) {
+
+        RequestValidation<List<SpendingSection>> requestValidation = new Validator(getContainer, "Getting SpendingSection list")
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(getContainer.getLogin())),
+                        () -> fillLog(NO_PERSON_EXIST, getContainer.getLogin()))
+                .validate();
+        if (!requestValidation.isValid()) return requestValidation.getValidationError();
+
+        return responseSuccess(SPENDING_SECTIONS_RETURNED, settingsDBConnection.getSpendingSectionList(getContainer.getLogin()));
+    }
 }

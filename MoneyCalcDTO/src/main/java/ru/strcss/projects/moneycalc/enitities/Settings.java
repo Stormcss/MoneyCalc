@@ -8,7 +8,6 @@ import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Data
 @Document
@@ -24,8 +23,8 @@ public class Settings implements Validationable {
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
         if (login == null || login.isEmpty()) reasons.add("login is empty");
-        if (sections == null) reasons.add("sections is null!");
-        if (sections.stream().map(SpendingSection::getId).distinct().collect(Collectors.toList()).size() != sections.size()) reasons.add("SpendingSections have duplicates!");
+//        if (sections == null) reasons.add("sections is null!");
+//        if (sections.stream().map(SpendingSection::getId).distinct().collect(Collectors.toList()).size() != sections.size()) reasons.add("SpendingSections have duplicates!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 

@@ -16,6 +16,8 @@ public interface SettingsAPIService {
 
     AjaxRs<Settings> getSettings(LoginGetContainer getContainer);
 
+    AjaxRs<List<SpendingSection>> getSpendingSections(LoginGetContainer getContainer);
+
     AjaxRs<List<SpendingSection>> addSpendingSection(SpendingSectionAddContainer addContainer);
 
     AjaxRs<List<SpendingSection>> updateSpendingSection(SpendingSectionUpdateContainer sectionUpdateContainer);

@@ -12,7 +12,6 @@ import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalcserver.controllers.validation.RequestValidation;
@@ -47,38 +46,17 @@ public class StatisticsController extends AbstractController implements Statisti
     @PostMapping(value = "/getFinanceSummaryBySection")
     public AjaxRs<List<FinanceSummaryBySection>> getFinanceSummaryBySection(@RequestBody FinanceSummaryGetContainer getContainer) {
 
-//        log.error("FinanceSummaryGetContainer: {}", getContainer);
-
-//        ValidationResult validationResult = getContainer.isValid();
-//
-//        if (!validationResult.isValidated()) {
-//            log.error("getting FinanceSummaryBySection has failed - required fields are incorrect: {}", validationResult.getReasons());
-//            return responseError("Required fields are incorrect: " + validationResult.getReasons());
-//        }
-//
-//        if (!isPersonExist(getContainer)){
-//            log.error("Person with login {} does not exist!", getContainer.getLogin());
-//            return responseError(NO_PERSON_EXIST);
-//        }
-
         RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(getContainer, "Getting Finance Summary")
                 .addValidation(() -> repository.existsByAccess_Login(formatLogin(getContainer.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, getContainer.getLogin()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Person person = settingsDBConnection.getSettings(getContainer.getLogin());
-
-//        if (person == null) {
-//            log.error("Person with login {} is not found!", getContainer.getLogin());
-//            return responseError("Person with login " + getContainer.getLogin() + " is not found!");
-//        }
-
         List<Transaction> transactions = transactionsDBConnection.getTransactions(new TransactionsSearchContainer(getContainer.getLogin(),
                 getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getSectionIDs()));
 
         //оставляю только те секции клиента для которых мне нужна статистика
-        List<SpendingSection> spendingSections = person.getSettings().getSections().stream()
+        List<SpendingSection> spendingSections = settingsDBConnection.getSpendingSectionList(getContainer.getLogin()).stream()
                 .filter(section -> getContainer.getSectionIDs().stream().anyMatch(id -> id.equals(section.getId())))
                 .collect(Collectors.toList());
 
