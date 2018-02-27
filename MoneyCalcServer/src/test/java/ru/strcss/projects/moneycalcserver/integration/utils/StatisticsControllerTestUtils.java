@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalcserver.controllers.utils;
+package ru.strcss.projects.moneycalcserver.integration.utils;
 
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Status;
@@ -7,12 +7,9 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionA
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalcserver.controllers.testapi.MoneyCalcClient;
+import ru.strcss.projects.moneycalcserver.integration.testapi.MoneyCalcClient;
 
 import java.util.List;
-
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateSpendingSection;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
 
 public class StatisticsControllerTestUtils {
 
@@ -23,7 +20,7 @@ public class StatisticsControllerTestUtils {
      * @return
      */
     public static FinanceSummaryBySection getFinanceSummaryBySection(FinanceSummaryGetContainer getContainer, MoneyCalcClient service) {
-        AjaxRs<List<FinanceSummaryBySection>> responseGetStats = sendRequest(service.getFinanceSummaryBySection(getContainer), Status.SUCCESS).body();
+        AjaxRs<List<FinanceSummaryBySection>> responseGetStats = Utils.sendRequest(service.getFinanceSummaryBySection(getContainer), Status.SUCCESS).body();
         return responseGetStats.getPayload().get(0);
     }
 
@@ -34,11 +31,11 @@ public class StatisticsControllerTestUtils {
      * @param login         - Person's login
      */
     public static void checkPersonsSections(int numOfSections, String login, int budget, MoneyCalcClient service) {
-        List<SpendingSection> spendingSections = sendRequest(service.getSpendingSections(new LoginGetContainer(login))).body().getPayload();
+        List<SpendingSection> spendingSections = Utils.sendRequest(service.getSpendingSections(new LoginGetContainer(login))).body().getPayload();
 
         if (numOfSections > spendingSections.size()) {
             for (int i = 0; i < numOfSections - spendingSections.size(); i++) {
-                sendRequest(service.addSpendingSection(new SpendingSectionAddContainer(login, generateSpendingSection(budget))), Status.SUCCESS).body();
+                Utils.sendRequest(service.addSpendingSection(new SpendingSectionAddContainer(login, Generator.generateSpendingSection(budget))), Status.SUCCESS).body();
             }
 //            for (SpendingSection section : spendingSections) {
 //                if (section.getBudget() != budget) section.setBudget(budget);

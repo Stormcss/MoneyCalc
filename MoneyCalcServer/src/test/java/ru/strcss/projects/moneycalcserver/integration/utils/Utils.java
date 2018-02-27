@@ -1,18 +1,16 @@
-package ru.strcss.projects.moneycalcserver.controllers.utils;
+package ru.strcss.projects.moneycalcserver.integration.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import retrofit2.Call;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalcserver.controllers.testapi.MoneyCalcClient;
+import ru.strcss.projects.moneycalcserver.integration.testapi.MoneyCalcClient;
 
 import java.io.IOException;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.UUID;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateCredentials;
 
 @Slf4j
 public class Utils {
@@ -44,8 +42,8 @@ public class Utils {
      * @return login of generated Person
      */
     public static String savePersonGetLogin(MoneyCalcClient service) {
-        String login = UUID();
-        sendRequest(service.registerPerson(generateCredentials(login)), Status.SUCCESS).body();
+        String login = Generator.UUID();
+        sendRequest(service.registerPerson(Generator.generateCredentials(login)), Status.SUCCESS).body();
         return login;
     }
 }

@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalcserver.controllers.testapi;
+package ru.strcss.projects.moneycalcserver.integration.testapi;
 
 import retrofit2.Call;
 import retrofit2.http.Body;

@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalcserver.controllers.utils;
+package ru.strcss.projects.moneycalcserver.integration.utils;
 
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.enitities.*;

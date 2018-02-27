@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalcserver.controllers;
+package ru.strcss.projects.moneycalcserver.integration;
 
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
@@ -7,34 +7,32 @@ import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalcserver.controllers.utils.Generator;
+import ru.strcss.projects.moneycalcserver.integration.utils.Generator;
+import ru.strcss.projects.moneycalcserver.integration.utils.Utils;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.UUID;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateCredentials;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
 
 @Slf4j
-public class IdentificationsControllerTest  extends AbstractControllerTest {
+public class IdentificationsControllerIT extends AbstractControllerIT {
 
     @Test
     public void saveIdentifications() {
         String login = Generator.UUID();
-        Credentials credentials = generateCredentials(login);
+        Credentials credentials = Generator.generateCredentials(login);
 
         //Registering Person
-        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
+        AjaxRs<Person> responseCreatePerson = Utils.sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
 //        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
 
         //Updating default Identifications
-        AjaxRs<Identifications> responseSaveIdentifications = sendRequest(service.saveIdentifications(credentials.getIdentifications()), Status.SUCCESS).body();
+        AjaxRs<Identifications> responseSaveIdentifications = Utils.sendRequest(service.saveIdentifications(credentials.getIdentifications()), Status.SUCCESS).body();
 //        assertEquals(responseSaveIdentifications.getStatus(), Status.SUCCESS, responseSaveIdentifications.getMessage());
         assertNotNull(responseSaveIdentifications.getPayload(), "Payload is null!");
         assertNotNull(responseSaveIdentifications.getPayload().getName(), "Identifications object is empty!");
 
         //Requesting updated Identifications
-        AjaxRs<Identifications> responseGetUpdated = sendRequest(service.getIdentifications(login), Status.SUCCESS).body();
+        AjaxRs<Identifications> responseGetUpdated = Utils.sendRequest(service.getIdentifications(login), Status.SUCCESS).body();
 //        assertEquals(responseGetUpdated.getStatus(), Status.SUCCESS, responseGetUpdated.getMessage());
         assertEquals(responseGetUpdated.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
         assertEquals(responseGetUpdated.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
@@ -42,20 +40,20 @@ public class IdentificationsControllerTest  extends AbstractControllerTest {
 
     @Test
     public void saveIdentificationsIncorrectLogin() {
-        Identifications identificationsIncorrect = Generator.generateIdentifications(UUID());
+        Identifications identificationsIncorrect = Generator.generateIdentifications(Generator.UUID());
 
         identificationsIncorrect.setLogin("");
-        AjaxRs<Identifications> response = sendRequest(service.saveIdentifications(identificationsIncorrect)).body();
+        AjaxRs<Identifications> response = Utils.sendRequest(service.saveIdentifications(identificationsIncorrect)).body();
 
         assertEquals(response.getStatus(), Status.ERROR, "Identifications object with incorrect Login is saved!");
     }
 
     @Test
     public void saveIdentificationsIncorrectName() {
-        Identifications identificationsIncorrect = Generator.generateIdentifications(UUID());
+        Identifications identificationsIncorrect = Generator.generateIdentifications(Generator.UUID());
 
         identificationsIncorrect.setName("");
-        AjaxRs<Identifications> response = sendRequest(service.saveIdentifications(identificationsIncorrect)).body();
+        AjaxRs<Identifications> response = Utils.sendRequest(service.saveIdentifications(identificationsIncorrect)).body();
 
         assertEquals(response.getStatus(), Status.ERROR, "Identifications object with incorrect Name is saved!");
     }
@@ -64,15 +62,15 @@ public class IdentificationsControllerTest  extends AbstractControllerTest {
     public void getIdentifications() {
 
         String login = Generator.UUID();
-        Credentials credentials = generateCredentials(login);
+        Credentials credentials = Generator.generateCredentials(login);
 
         // FIXME: 25.02.2018 Update this code
 
         //Registering Person
-        AjaxRs<Person> responseCreatePerson = sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
+        AjaxRs<Person> responseCreatePerson = Utils.sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
 //        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
 
-        AjaxRs<Identifications> response = sendRequest(service.getIdentifications(login), Status.SUCCESS).body();
+        AjaxRs<Identifications> response = Utils.sendRequest(service.getIdentifications(login), Status.SUCCESS).body();
 
 //        assertEquals(response.getStatus(), Status.SUCCESS, response.getMessage());
         assertEquals(response.getPayload().getLogin(), login, "returned Identifications object has wrong login!");

@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalcserver.controllers;
+package ru.strcss.projects.moneycalcserver.integration;
 
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
@@ -7,6 +7,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummary
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalcserver.integration.utils.Generator;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -21,14 +22,13 @@ import static org.testng.Assert.assertEquals;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.generateDateMinus;
 import static ru.strcss.projects.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Generator.generateTransaction;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.StatisticsControllerTestUtils.checkPersonsSections;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.StatisticsControllerTestUtils.getFinanceSummaryBySection;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.savePersonGetLogin;
-import static ru.strcss.projects.moneycalcserver.controllers.utils.Utils.sendRequest;
 import static ru.strcss.projects.moneycalcserver.handlers.utils.StatisticsHandlerUtils.round;
+import static ru.strcss.projects.moneycalcserver.integration.utils.StatisticsControllerTestUtils.checkPersonsSections;
+import static ru.strcss.projects.moneycalcserver.integration.utils.StatisticsControllerTestUtils.getFinanceSummaryBySection;
+import static ru.strcss.projects.moneycalcserver.integration.utils.Utils.savePersonGetLogin;
+import static ru.strcss.projects.moneycalcserver.integration.utils.Utils.sendRequest;
 
-public class StatisticsControllerTest extends AbstractControllerTest {
+public class StatisticsControllerIT extends AbstractControllerIT {
 
     /**
      * Accuracy of calculations - number of decimal places
@@ -182,7 +182,7 @@ public class StatisticsControllerTest extends AbstractControllerTest {
         List<TransactionAddContainer> addContainers = new ArrayList<>();
 
         for (Integer sum : sums) {
-            addContainers.add(new TransactionAddContainer(login, generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionID, sum)));
+            addContainers.add(new TransactionAddContainer(login, Generator.generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionID, sum)));
             minusMin++;
         }
 
