@@ -27,8 +27,10 @@ public class SpendingSectionUpdateContainer extends AbstractContainer {
     @Override
     public ValidationResult isValid() {
         List<String> reasons = validateStringFields(new FieldPairs("login", login), new FieldPairs("idOrName", idOrName));
+        if (idOrName == null) reasons.add("idOrName is empty");
         if (searchType == null) reasons.add("searchType is empty");
         if (spendingSection == null) reasons.add("spendingSection is empty");
+        if (spendingSection != null && !spendingSection.isValid().isValidated()) reasons.addAll(spendingSection.isValid().getReasons());
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 

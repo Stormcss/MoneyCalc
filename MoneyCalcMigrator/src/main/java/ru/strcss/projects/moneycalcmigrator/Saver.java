@@ -8,6 +8,8 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.Status;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.enitities.*;
@@ -45,37 +47,40 @@ class Saver {
     /**
      * Save Sections with provided names in DB
      *
-     * @param sections - sections required to save in DB
+     * @param sectionsNames - sections required to save in DB
      * @return
      * @throws IOException
      */
-    List<SpendingSection> saveSections(Set<String> sections) throws IOException {
+    List<SpendingSection> saveSections(Set<String> sectionsNames) throws IOException {
 
-        AjaxRs<Settings> settingsResponse = service.getSettings(config.getLogin()).execute().body();
+        AjaxRs<List<SpendingSection>> settingsResponse = service.getSpendingSections(new LoginGetContainer(config.getLogin())).execute().body();
 
         checkPersonRegistration(settingsResponse);
 
-        Settings existingSettings = getSettings(settingsResponse);
+        List<SpendingSection> existingSectionsList = getSectionsList(settingsResponse);
 
-        int offset = 0;
-        List<SpendingSection> spendingSections = new ArrayList<>();
+        List<SpendingSection> spendingSectionsToAdd = new ArrayList<>();
 
-        for (String section : sections) {
-            if (existingSettings.getSections().stream().anyMatch(spendingSection -> spendingSection.getName().equals(section)))
+        for (String sectionName : sectionsNames) {
+            if (existingSectionsList.stream().anyMatch(spendingSection -> spendingSection.getName().equals(sectionName))) {
                 break;
-            offset++;
-            // FIXME: 19.02.2018 Section ID must be created under the hood
-            spendingSections.add(generateSpendingSection(existingSettings, offset, section));
+            }
+            spendingSectionsToAdd.add(generateSpendingSection(sectionName));
         }
 
-        existingSettings.getSections().addAll(spendingSections);
-        AjaxRs<Settings> saveSettingResponse = service.saveSettings(existingSettings).execute().body();
+        for (SpendingSection spendingSection : spendingSectionsToAdd){
+            AjaxRs<List<SpendingSection>>  addResponse = service.addSpendingSection(new SpendingSectionAddContainer(config.getLogin(), spendingSection)).execute().body();
+            if (addResponse == null || addResponse.getStatus() != Status.SUCCESS)
+                throw new RuntimeException("Error saving new Section!");
+        }
 
-        if (saveSettingResponse == null || saveSettingResponse.getStatus() != Status.SUCCESS)
-            throw new RuntimeException("Error saving new Sections!");
-        log.info("Added following sections: {}. Additional Sections found in files: {}", spendingSections, sections);
+//        existingSettings.getSections().addAll(spendingSectionsToAdd);
+//        AjaxRs<Settings> saveSettingResponse = service.saveSettings(existingSettings).execute().body();
 
-        return saveSettingResponse.getPayload().getSections();
+
+        log.info("Added following sections: {}. Additional Sections found in files: {}", spendingSectionsToAdd, sectionsNames);
+
+        return spendingSectionsToAdd;
     }
 
     /**
@@ -84,7 +89,7 @@ class Saver {
      * @param settingsResponse - response object with Status of execution
      * @throws IOException
      */
-    private void checkPersonRegistration(AjaxRs<Settings> settingsResponse) throws IOException {
+    private void checkPersonRegistration(AjaxRs<List<SpendingSection>> settingsResponse) throws IOException {
         if (settingsResponse.getStatus() == Status.ERROR && settingsResponse.getMessage().contains("does not exist")) {
             Access access = Access.builder()
                     .email(config.getEmail())
@@ -109,30 +114,27 @@ class Saver {
      * @return Settings
      * @throws IOException
      */
-    private Settings getSettings(AjaxRs<Settings> settingsResponse) throws IOException {
-        Settings existingSettings;
+    private List<SpendingSection> getSectionsList(AjaxRs<List<SpendingSection>> settingsResponse) throws IOException {
+        List<SpendingSection> existingSections;
         if (settingsResponse.getStatus().equals(Status.SUCCESS)) {
-            existingSettings = settingsResponse.getPayload();
+            existingSections = settingsResponse.getPayload();
         } else {
-            existingSettings = service.getSettings(config.getLogin()).execute().body().getPayload();
+            existingSections = service.getSpendingSections(new LoginGetContainer(config.getLogin())).execute().body().getPayload();
         }
-        return existingSettings;
+        return existingSections;
     }
 
     /**
      * Generate SpendingSection with required fields
      *
-     * @param existingSettings - used to calculate initial ID position
-     * @param offset           - offset for ID calculation
-     * @param section          - section name
+     * @param sectionName          - sectionName name
      * @return SpendingSection object
      */
-    private SpendingSection generateSpendingSection(Settings existingSettings, int offset, String section) {
+    private SpendingSection generateSpendingSection(String sectionName) {
         return SpendingSection.builder()
                 .budget(5000)
                 .isAdded(true)
-                .name(section)
-                .id(existingSettings.getSections().size() + offset)
+                .name(sectionName)
                 .build();
     }
 

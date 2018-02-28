@@ -31,7 +31,8 @@ public class SpendingSection {
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
         if (name == null || name.isEmpty()) reasons.add("name is empty");
-        if (budget <= 0) reasons.add("budget must be >= 0");
+        if (budget == null) reasons.add("budget is empty");
+        if (budget != null && budget <= 0) reasons.add("budget must be >= 0");
         if (id == null) reasons.add("id can not be null");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
