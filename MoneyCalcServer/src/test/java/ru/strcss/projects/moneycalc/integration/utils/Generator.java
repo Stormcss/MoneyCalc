@@ -55,13 +55,6 @@ public class Generator {
                 .build();
     }
 
-    //    private static FinanceStatistics generateFinanceStatistics(String login, int annualTransactionsCount, int transactionsCount) {
-    private static FinanceStatistics generateFinanceStatistics(String login) {
-        return FinanceStatistics.builder()
-                ._id(login)
-                .build();
-    }
-
     private static <T, R> Supplier<R> bind(Function<T, R> fn, T val) {
         return () -> fn.apply(val);
     }

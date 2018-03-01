@@ -1,6 +1,5 @@
 package ru.strcss.projects.moneycalc.dto.crudcontainers;
 
-import lombok.Data;
 import lombok.Getter;
 import lombok.ToString;
 import ru.strcss.projects.moneycalc.Validationable;
@@ -11,16 +10,14 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-@Data
 public abstract class AbstractContainer implements Validationable {
-    public String login;
 
     public List<String> validateStringFields(FieldPairs... fields) {
         List<String> reasons = new ArrayList<>();
         for (FieldPairs field : fields) {
             switch (field.getField()) {
                 case "login":
-                    if (field.getValue() == null || field.getValue().isEmpty()) reasons.add("Login is empty");
+                    if (field.getValue() == null || field.getValue().isEmpty()) reasons.add("login is empty");
                     break;
                 case "rangeFrom":
                 case "rangeTo":

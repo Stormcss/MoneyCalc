@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.dto.crudcontainers.settings;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
@@ -8,16 +9,11 @@ import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class SpendingSectionAddContainer extends AbstractContainer {
+
+    private String login;
     private SpendingSection spendingSection;
-
-    public SpendingSectionAddContainer(String login, SpendingSection spendingSection) {
-        this.spendingSection = spendingSection;
-        this.login = login;
-    }
-
-    public SpendingSectionAddContainer() {
-    }
 
     @Override
     public ValidationResult isValid() {
@@ -25,5 +21,4 @@ public class SpendingSectionAddContainer extends AbstractContainer {
         if (spendingSection == null) reasons.add("SpendingSection is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
-
 }

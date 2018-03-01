@@ -11,21 +11,8 @@ import org.springframework.data.mongodb.core.mapping.Document;
 public class Person{
     @Id
     private String ID;
-
     private Access access;
-
     private Identifications identifications;
     private Settings settings;
     private Finance finance;
-
-    @Override
-    public String toString() {
-        return "Person{" +
-                "login='" + ID + '\'' +
-                ", access=" + access +
-                ", identifications=" + identifications +
-                ", settings=" + settings +
-                ", finance=" + finance +
-                '}';
-    }
 }

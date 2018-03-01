@@ -2,7 +2,6 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoOperations;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 import ru.strcss.projects.moneycalc.moneycalcserver.mongo.PersonRepository;
 
 public abstract class AbstractController {
@@ -35,11 +34,4 @@ public abstract class AbstractController {
     final String TRANSACTIONS_RETURNED = "TRANSACTIONS successfully returned";
 
     final String STATISTICS_RETURNED = "Statistics successfully returned";
-
-    boolean isPersonExist(AbstractContainer container){return repository.existsByAccess_Login(container.getLogin());}
-    boolean isPersonExist(String login){
-        return repository.existsByAccess_Login(login.replace("\"", ""));
-    }
-
-
 }

@@ -13,7 +13,6 @@ import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Settings;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.integration.utils.Generator;
-import ru.strcss.projects.moneycalc.integration.utils.Utils;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -21,6 +20,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import static org.testng.Assert.*;
 import static ru.strcss.projects.moneycalc.integration.utils.Generator.generateSpendingSection;
+import static ru.strcss.projects.moneycalc.integration.utils.Utils.savePersonGetLogin;
 import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
@@ -30,7 +30,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
 
     @Test
     public void saveSettingsIncorrectLogin() {
-        String login = Utils.savePersonGetLogin(service);
+        String login = savePersonGetLogin(service);
         Settings settingsIncorrect = Generator.generateSettings(login);
         settingsIncorrect.setLogin("");
 
@@ -41,7 +41,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
 
     @Test
     public void saveDuplicateSpendingSections() {
-        String login = Utils.savePersonGetLogin(service);
+        String login = savePersonGetLogin(service);
         SpendingSection spendingSection = generateSpendingSection();
 
         sendRequest(service.addSpendingSection(new SpendingSectionAddContainer(login, spendingSection)), Status.SUCCESS).body();
@@ -52,7 +52,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
 
     @Test
     public void getSettings() {
-        String login = Utils.savePersonGetLogin(service);
+        String login = savePersonGetLogin(service);
 
         AjaxRs<Settings> responseGetSettings = sendRequest(service.getSettings(new LoginGetContainer(login)), Status.SUCCESS).body();
 
@@ -63,7 +63,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
 
     @Test
     public void settingsUpdate() {
-        String login = Utils.savePersonGetLogin(service);
+        String login = savePersonGetLogin(service);
         Settings newSettings = Generator.generateSettings(login);
         newSettings.setPeriodTo(formatDateToString(generateDatePlus(ChronoUnit.YEARS, 1)));
 
@@ -76,13 +76,13 @@ public class SettingsControllerIT extends AbstractControllerIT {
                 responseUpdated.getPayload().getPeriodTo(), "Settings were not updated!");
 
         //Checking that Person is ok after updating Settings
-        AjaxRs<Identifications> responseIdentifications = sendRequest(service.getIdentifications(login)).body();
+        AjaxRs<Identifications> responseIdentifications = sendRequest(service.getIdentifications(new LoginGetContainer(login))).body();
         assertNotNull(responseIdentifications.getPayload(), "Identifications object was overwritten!");
     }
 
     @Test
     public void addSpendingSection() {
-        String login = Utils.savePersonGetLogin(service);
+        String login = savePersonGetLogin(service);
         SpendingSection spendingSection = generateSpendingSection();
 
         SpendingSectionAddContainer spendingSectionContainer =
@@ -95,7 +95,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
 
     @Test
     public void deleteSpendingSectionByName() {
-        String login = Utils.savePersonGetLogin(service);
+        String login = savePersonGetLogin(service);
         SpendingSection spendingSection = generateSpendingSection();
 
         SpendingSectionDeleteContainer deleteContainerByName =
@@ -108,7 +108,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
 
     @Test
     public void deleteSpendingSectionById() {
-        String login = Utils.savePersonGetLogin(service);
+        String login = savePersonGetLogin(service);
         SpendingSection spendingSection = generateSpendingSection();
 
         SpendingSectionDeleteContainer deleteContainerById =
@@ -121,7 +121,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
 
     @Test
     public void updateSpendingSectionByName() {
-        String login = Utils.savePersonGetLogin(service);
+        String login = savePersonGetLogin(service);
         SpendingSection spendingSection = generateSpendingSection();
 
         log.debug("Saved SpendingSection: {}", spendingSection);
@@ -133,7 +133,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
         spendingSection.setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
 
         SpendingSectionUpdateContainer updateContainerByName =
-                new SpendingSectionUpdateContainer(login, "" + spendingSection.getName(), SpendingSectionSearchType.BY_NAME, spendingSection);
+                new SpendingSectionUpdateContainer(login, "" + spendingSection.getName(), spendingSection, SpendingSectionSearchType.BY_NAME);
 
         AjaxRs<List<SpendingSection>> responseUpdateSection = sendRequest(service.updateSpendingSection(updateContainerByName), Status.SUCCESS).body();
         assertTrue(responseUpdateSection.getPayload().stream().noneMatch(section -> section.getBudget().equals(oldBudget)),
@@ -144,7 +144,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
 
     @Test
     public void updateSpendingSectionById() {
-        String login = Utils.savePersonGetLogin(service);
+        String login = savePersonGetLogin(service);
 
         SpendingSection spendingSection = generateSpendingSection();
         Integer updatedSectionID = 0;
@@ -160,7 +160,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
         spendingSection.setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
 
         SpendingSectionUpdateContainer updateContainerById =
-                new SpendingSectionUpdateContainer(login, Integer.toString(updatedSectionID), SpendingSectionSearchType.BY_ID, spendingSection);
+                new SpendingSectionUpdateContainer(login, Integer.toString(updatedSectionID), spendingSection, SpendingSectionSearchType.BY_ID);
 
         AjaxRs<List<SpendingSection>> responseUpdateSection = sendRequest(service.updateSpendingSection(updateContainerById), Status.SUCCESS).body();
         assertTrue(responseUpdateSection.getPayload().stream().noneMatch(section -> section.getName().equals(oldName)),
@@ -170,22 +170,24 @@ public class SettingsControllerIT extends AbstractControllerIT {
     }
 
     @Test
-    public void updateSpendingSection_duplicateNames(){
-        String login = Utils.savePersonGetLogin(service);
-        SpendingSection spendingSection = generateSpendingSection();
+    public void updateSpendingSection_duplicateNames() {
+        String login = savePersonGetLogin(service);
+        SpendingSection spendingSection1 = generateSpendingSection();
+        SpendingSection spendingSection2 = generateSpendingSection();
 
-        sendRequest(service.addSpendingSection(new SpendingSectionAddContainer(login, spendingSection)), Status.SUCCESS).body();
+        sendRequest(service.addSpendingSection(new SpendingSectionAddContainer(login, spendingSection1)), Status.SUCCESS).body();
+        sendRequest(service.addSpendingSection(new SpendingSectionAddContainer(login, spendingSection2)), Status.SUCCESS).body();
 
         AjaxRs<List<SpendingSection>> responseUpdateSection =
-                sendRequest(service.updateSpendingSection(new SpendingSectionUpdateContainer(login, spendingSection.getName(),
-                SpendingSectionSearchType.BY_NAME, spendingSection))).body();
+                sendRequest(service.updateSpendingSection(new SpendingSectionUpdateContainer(login, spendingSection1.getName(),
+                        spendingSection2, SpendingSectionSearchType.BY_NAME))).body();
 
         assertEquals(responseUpdateSection.getStatus(), Status.ERROR, responseUpdateSection.getMessage());
     }
 
     @Test
-    public void getSpendingSections(){
-        String login = Utils.savePersonGetLogin(service);
+    public void getSpendingSections() {
+        String login = savePersonGetLogin(service);
         AjaxRs<List<SpendingSection>> responseGetSections = sendRequest(service.getSpendingSections(new LoginGetContainer(login)), Status.SUCCESS).body();
         assertEquals(responseGetSections.getPayload().size(), 2, "Wrong number of spending sections is returned!");
     }

@@ -122,13 +122,16 @@ public class SettingsController extends AbstractController implements SettingsAP
     @PostMapping(value = "/updateSpendingSection")
     public AjaxRs<List<SpendingSection>> updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) {
 
+        log.debug("Request for updating SpendingSection has received: {}", updateContainer);
+
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer, "Updating SpendingSection")
                 .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(updateContainer.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, updateContainer.getLogin()))
-//                .addValidation(() -> settingsDBConnection.isSpendingSectionNameNew(updateContainer.getSpendingSection().getName()),
-//                        () -> fillLog(SPENDING_SECTION_NAME_EXISTS, updateContainer.getSpendingSection().getName()))
+                .addValidation(() -> checkNewNameIsAllowed(updateContainer),
+                        () -> fillLog(SPENDING_SECTION_NAME_EXISTS, updateContainer.getSpendingSection().getName()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
+
 
         WriteResult updateResult;
         if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
@@ -141,7 +144,7 @@ public class SettingsController extends AbstractController implements SettingsAP
 
         if (updateResult.getN() == 0) {
             log.error("Updating SpendingSection for login {} has failed", updateContainer.getLogin());
-            return responseError("SpendingSection was not updated!");
+            return responseError("SpendingSection was not found");
         }
 
         log.debug("Updated SpendingSection {}: for login: {}", updateContainer.getSpendingSection(), updateContainer.getLogin());
@@ -194,5 +197,26 @@ public class SettingsController extends AbstractController implements SettingsAP
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
         return responseSuccess(SPENDING_SECTIONS_RETURNED, settingsDBConnection.getSpendingSectionList(getContainer.getLogin()));
+    }
+
+    /**
+     * Check if it is allowed to update SpendingSection's name.
+     * Returns false if update will case doubles in SpendingSection names
+     *
+     * @param updateContainer
+     * @return
+     */
+    private Boolean checkNewNameIsAllowed(SpendingSectionUpdateContainer updateContainer) {
+        if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_ID) || updateContainer.getSpendingSection().getName() == null)
+            return true;
+
+        List<SpendingSection> sectionList = settingsDBConnection.getSpendingSectionList(updateContainer.getLogin());
+
+        boolean nameIsNew = !updateContainer.getIdOrName().equals(updateContainer.getSpendingSection().getName());
+        boolean newNameExists = sectionList.stream()
+                .anyMatch(spendingSection -> spendingSection.getName().equals(updateContainer.getSpendingSection().getName()));
+        if (nameIsNew && newNameExists)
+            return false;
+        return true;
     }
 }

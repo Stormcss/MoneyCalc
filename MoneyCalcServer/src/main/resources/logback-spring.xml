@@ -6,7 +6,7 @@
     </appender>
 
     <logger name="deng" level="DEBUG"/>
-    <logger name="ru.strcss.projects.moneycalcserver" level="TRACE" />
+    <logger name="ru.strcss.projects.moneycalc.moneycalcserver" level="TRACE" />
 
     <root level="INFO">
         <appender-ref ref="STDOUT" />

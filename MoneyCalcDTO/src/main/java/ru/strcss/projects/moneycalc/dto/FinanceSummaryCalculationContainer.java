@@ -11,7 +11,6 @@ import java.util.List;
 @Data
 @Builder
 public class FinanceSummaryCalculationContainer {
-
     private List<Transaction> transactions;
     private List<Integer> sections;
     private List<SpendingSection> spendingSections;

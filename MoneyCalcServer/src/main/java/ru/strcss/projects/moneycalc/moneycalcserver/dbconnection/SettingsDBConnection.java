@@ -104,12 +104,17 @@ public class SettingsDBConnection {
      * @return
      */
     public WriteResult updateSpendingSectionById(SpendingSectionUpdateContainer updateContainer) {
+        SpendingSection existingSpendingSection = this.getSpendingSectionByID(updateContainer.getLogin(), Integer.parseInt(updateContainer.getIdOrName()));
+
+        if (existingSpendingSection == null) {
+            return new WriteResult(0, false, null);
+        }
         Query findUpdatedSpendingSectionQuery = query(
                 where("access.login").is(updateContainer.getLogin())
                         .and("settings.sections._id").is(Integer.parseInt(updateContainer.getIdOrName())));
-// FIXME: 27.02.2018 ignore updating id
+
         return mongoTemplate.updateMulti(findUpdatedSpendingSectionQuery,
-                new Update().set("settings.sections.$", updateContainer.getSpendingSection()), Person.class);
+                new Update().set("settings.sections.$", mergeSpendingSections(existingSpendingSection, updateContainer.getSpendingSection())), Person.class);
     }
 
     /**
@@ -119,15 +124,29 @@ public class SettingsDBConnection {
      * @return
      */
     public WriteResult updateSpendingSectionByName(SpendingSectionUpdateContainer updateContainer) {
+        SpendingSection existingSpendingSection = this.getSpendingSectionByName(updateContainer.getLogin(), updateContainer.getIdOrName());
+
+        if (existingSpendingSection == null)
+            return new WriteResult(0, false, null);
+
         Query findUpdatedSpendingSectionQuery = query(
                 where("access.login").is(updateContainer.getLogin())
                         .and("settings.sections.name").is(updateContainer.getIdOrName()));
 
-        // FIXME: 27.02.2018 ignore updating id
-        // FIXME: 27.02.2018 ignore empty fields
-
         return mongoTemplate.updateMulti(findUpdatedSpendingSectionQuery,
-                new Update().set("settings.sections.$", updateContainer.getSpendingSection()), Person.class);
+                new Update().set("settings.sections.$", mergeSpendingSections(existingSpendingSection, updateContainer.getSpendingSection())), Person.class);
+    }
+
+    private SpendingSection mergeSpendingSections(SpendingSection existingSpendingSection, SpendingSection newSpendingSection) {
+        newSpendingSection.setId(existingSpendingSection.getId());
+        if (newSpendingSection.getName() == null)
+            newSpendingSection.setName(existingSpendingSection.getName());
+        if (newSpendingSection.getBudget() == null)
+            newSpendingSection.setBudget(existingSpendingSection.getBudget());
+        if (newSpendingSection.getIsAdded() == null)
+            newSpendingSection.setIsAdded(existingSpendingSection.getIsAdded());
+
+        return newSpendingSection;
     }
 
     /**
@@ -148,6 +167,24 @@ public class SettingsDBConnection {
         return aggregate.getMappedResults();
     }
 
+    public SpendingSection getSpendingSectionByName(String login, String name) {
+        return getSpendingSection(login, match(where("settings.sections.name").is(name)));
+    }
+
+    public SpendingSection getSpendingSectionByID(String login, Integer id) {
+        return getSpendingSection(login, match(where("settings.sections._id").is(id)));
+    }
+
+    private SpendingSection getSpendingSection(String login, AggregationOperation matchIdOrName){
+        AggregationOperation unwind = unwind("settings.sections");
+        AggregationOperation matchLogin = match(where("access.login").is(login));
+        AggregationOperation group = group("settings.sections");
+
+        Aggregation aggregation = Aggregation.newAggregation(unwind, matchLogin, matchIdOrName, group);
+
+        return mongoTemplate.aggregate(aggregation, Person.class, SpendingSection.class).getUniqueMappedResult();
+    }
+
     /**
      * Get max SpendingSection id for specific login
      *
@@ -159,7 +196,7 @@ public class SettingsDBConnection {
         AggregationOperation unwind = unwind("settings.sections");
         AggregationOperation match = match(where("access.login").is(login));
         AggregationOperation group = group("settings.sections.id");
-        AggregationOperation sort = sort(Sort.Direction.DESC,"settings.sections.id");
+        AggregationOperation sort = sort(Sort.Direction.DESC, "settings.sections.id");
 
         Aggregation aggregation = Aggregation.newAggregation(unwind, match, group, sort, limit(1));
 
@@ -169,13 +206,13 @@ public class SettingsDBConnection {
     }
 
 
-    public boolean isSpendingSectionNameNew(String name){
+    public boolean isSpendingSectionNameNew(String name) {
         Query getSpendingSectionQuery = query(where("settings.sections.name").is(name));
         return !mongoTemplate.exists(getSpendingSectionQuery, Person.class);
     }
 
     // TODO: 28.02.2018 add isPersonExistsByLogin to super class
-    public boolean isPersonExistsByLogin(String login){
+    public boolean isPersonExistsByLogin(String login) {
         return repository.existsByAccess_Login(login);
     }
 }

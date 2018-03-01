@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.Status;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.integration.utils.Generator;
@@ -32,7 +33,7 @@ public class IdentificationsControllerIT extends AbstractControllerIT {
         assertNotNull(responseSaveIdentifications.getPayload().getName(), "Identifications object is empty!");
 
         //Requesting updated Identifications
-        AjaxRs<Identifications> responseGetUpdated = Utils.sendRequest(service.getIdentifications(login), Status.SUCCESS).body();
+        AjaxRs<Identifications> responseGetUpdated = Utils.sendRequest(service.getIdentifications(new LoginGetContainer(login)), Status.SUCCESS).body();
 //        assertEquals(responseGetUpdated.getStatus(), Status.SUCCESS, responseGetUpdated.getMessage());
         assertEquals(responseGetUpdated.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
         assertEquals(responseGetUpdated.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
@@ -70,7 +71,7 @@ public class IdentificationsControllerIT extends AbstractControllerIT {
         AjaxRs<Person> responseCreatePerson = Utils.sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
 //        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
 
-        AjaxRs<Identifications> response = Utils.sendRequest(service.getIdentifications(login), Status.SUCCESS).body();
+        AjaxRs<Identifications> response = Utils.sendRequest(service.getIdentifications(new LoginGetContainer(login)), Status.SUCCESS).body();
 
 //        assertEquals(response.getStatus(), Status.SUCCESS, response.getMessage());
         assertEquals(response.getPayload().getLogin(), login, "returned Identifications object has wrong login!");

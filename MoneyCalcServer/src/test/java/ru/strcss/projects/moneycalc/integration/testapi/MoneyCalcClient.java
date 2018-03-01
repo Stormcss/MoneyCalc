@@ -49,10 +49,10 @@ public interface MoneyCalcClient {
      *  Identifications
      */
     @POST("/api/identifications/saveIdentifications")
-    Call<AjaxRs<Identifications>> saveIdentifications(@Body Identifications settings);
+    Call<AjaxRs<Identifications>> saveIdentifications(@Body Identifications identifications);
 
     @POST("/api/identifications/getIdentifications")
-    Call<AjaxRs<Identifications>> getIdentifications(@Body String login);
+    Call<AjaxRs<Identifications>> getIdentifications(@Body LoginGetContainer getContainer);
 
     /**
      *  Transactions

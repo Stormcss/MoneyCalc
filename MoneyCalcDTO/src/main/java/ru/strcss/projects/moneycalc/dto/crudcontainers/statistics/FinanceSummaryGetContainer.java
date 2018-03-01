@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.dto.crudcontainers.statistics;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
@@ -7,8 +8,10 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 import java.util.List;
 
 @Data
+@AllArgsConstructor
 public class FinanceSummaryGetContainer extends AbstractContainer{
 
+    private String login;
     private String rangeFrom;
     private String rangeTo;
     private List<Integer> sectionIDs;
@@ -20,15 +23,5 @@ public class FinanceSummaryGetContainer extends AbstractContainer{
         if (sectionIDs == null || sectionIDs.isEmpty()) reasons.add("sectionIDs can not be empty");
 
         return new ValidationResult(reasons.isEmpty(), reasons);
-    }
-
-    public FinanceSummaryGetContainer() {
-    }
-
-    public FinanceSummaryGetContainer(String login, String rangeFrom, String rangeTo, List<Integer> sectionIDs) {
-        this.login = login;
-        this.rangeFrom = rangeFrom;
-        this.rangeTo = rangeTo;
-        this.sectionIDs = sectionIDs;
     }
 }

@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
@@ -19,20 +20,13 @@ import java.util.List;
  */
 
 @Data
+@AllArgsConstructor
 public class TransactionsSearchContainer extends AbstractContainer {
+
+    private String login;
     private String rangeFrom;
     private String rangeTo;
     private List<Integer> requiredSections;
-
-    public TransactionsSearchContainer() {
-    }
-
-    public TransactionsSearchContainer(String login, String rangeFrom, String rangeTo, List<Integer> sections) {
-        this.login = login;
-        this.rangeFrom = rangeFrom;
-        this.rangeTo = rangeTo;
-        this.requiredSections = sections;
-    }
 
     @Override
     public ValidationResult isValid() {

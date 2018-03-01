@@ -1,25 +1,18 @@
 package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 
-import lombok.Getter;
-import lombok.Setter;
+import lombok.AllArgsConstructor;
+import lombok.Data;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
 import java.util.List;
 
-
+@Data
+@AllArgsConstructor
 public class TransactionDeleteContainer extends AbstractContainer {
-    @Getter
-    @Setter
+
+    private String login;
     private String id;
-
-    public TransactionDeleteContainer() {
-    }
-
-    public TransactionDeleteContainer(String login, String id) {
-        this.login = login;
-        this.id = id;
-    }
 
     @Override
     public ValidationResult isValid() {

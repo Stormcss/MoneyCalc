@@ -6,7 +6,6 @@ import lombok.Data;
 @Builder
 @Data
 public class FinanceSummaryBySection {
-
     private Integer sectionID;
     private Double todayBalance;
     private Double summaryBalance;
