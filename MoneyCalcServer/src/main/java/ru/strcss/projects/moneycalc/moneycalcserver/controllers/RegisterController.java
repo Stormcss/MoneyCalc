@@ -13,12 +13,15 @@ import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.enitities.*;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils;
+import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
+import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ValidationUtils.isPersonExists;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ValidationUtils.validateRegisterPerson;
@@ -42,8 +45,19 @@ public class RegisterController extends AbstractController implements RegisterAP
      * @param credentials - wrapper with Access and Identifications objects inside
      * @return AjaxRs
      */
-    @PostMapping(value = "/registerPerson")
+    @PostMapping(value = "/register")
     public AjaxRs<Person> registerPerson(@RequestBody Credentials credentials) {
+
+        RequestValidation<Person> requestValidation = new Validator(credentials, "Registering Person")
+                .addValidation(() -> credentials.getAccess().isValid().isValidated(),
+                        () -> fillLog(REGISTER_ERROR, credentials.getAccess().isValid().getReasons().toString()), "Access")
+                .addValidation(() -> credentials.getIdentifications().isValid().isValidated(),
+                        () -> fillLog(REGISTER_ERROR, credentials.getIdentifications().isValid().getReasons().toString()), "Identifications")
+                .addValidation(() -> !settingsDBConnection.isPersonExistsByLogin(credentials.getAccess().getLogin()),
+                        () -> fillLog(PERSON_ALREADY_EXISTS, credentials.getAccess().getLogin()))
+                .validate();
+        if (!requestValidation.isValid()) return requestValidation.getValidationError();
+
 
         ValidationResult validationResult = validateRegisterPerson(credentials.getAccess(), credentials.getIdentifications());
 

@@ -18,4 +18,15 @@ public class ValidationResult {
      * List of reasons why validation has failed
      */
     private List<String> reasons;
+
+
+    /**
+     * Name of validated object
+     */
+    private String objectName;
+
+    public ValidationResult(boolean isValidated, List<String> reasons) {
+        this.isValidated = isValidated;
+        this.reasons = reasons;
+    }
 }

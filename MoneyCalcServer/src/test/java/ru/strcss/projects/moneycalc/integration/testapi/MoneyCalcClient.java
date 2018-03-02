@@ -6,6 +6,8 @@ import retrofit2.http.POST;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
@@ -20,7 +22,7 @@ import java.util.List;
 
 public interface MoneyCalcClient {
 
-    @POST("/api/registration/registerPerson")
+    @POST("/api/registration/register")
     Call<AjaxRs<Person>> registerPerson(@Body Credentials credentials);
 
 
@@ -28,7 +30,7 @@ public interface MoneyCalcClient {
      *  Settings
      */
     @POST("/api/settings/saveSettings")
-    Call<AjaxRs<Settings>> saveSettings(@Body Settings settings);
+    Call<AjaxRs<Settings>> saveSettings(@Body SettingsUpdateContainer updateContainer);
 
     @POST("/api/settings/getSettings")
     Call<AjaxRs<Settings>> getSettings(@Body LoginGetContainer getContainer);
@@ -49,7 +51,7 @@ public interface MoneyCalcClient {
      *  Identifications
      */
     @POST("/api/identifications/saveIdentifications")
-    Call<AjaxRs<Identifications>> saveIdentifications(@Body Identifications identifications);
+    Call<AjaxRs<Identifications>> saveIdentifications(@Body IdentificationsUpdateContainer updateContainer);
 
     @POST("/api/identifications/getIdentifications")
     Call<AjaxRs<Identifications>> getIdentifications(@Body LoginGetContainer getContainer);

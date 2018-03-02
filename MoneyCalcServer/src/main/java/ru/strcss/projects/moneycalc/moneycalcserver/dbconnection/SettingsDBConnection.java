@@ -206,8 +206,9 @@ public class SettingsDBConnection {
     }
 
 
-    public boolean isSpendingSectionNameNew(String name) {
-        Query getSpendingSectionQuery = query(where("settings.sections.name").is(name));
+    public boolean isSpendingSectionNameNew(String login, String name) {
+        Query getSpendingSectionQuery = query(where("access.login").is(login)
+                .and("settings.sections.name").is(name));
         return !mongoTemplate.exists(getSpendingSectionQuery, Person.class);
     }
 

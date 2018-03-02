@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractContainer implements Validationable {
+public abstract class AbstractContainer implements Validationable/*, Visitor*/ {
 
     public List<String> validateStringFields(FieldPairs... fields) {
         List<String> reasons = new ArrayList<>();
@@ -42,6 +42,21 @@ public abstract class AbstractContainer implements Validationable {
         return true;
     }
 
+//    @Override
+//    public String visitIdentifications(Identifications identifications) {
+//        return "identifications are empty";
+//    }
+//
+//    @Override
+//    public String visitSettings(Settings settings) {
+//        return "settings are empty";
+//    }
+//
+//    @Override
+//    public String visitTransaction(Transaction transaction) {
+//        return "transaction is empty";
+//    }
+
     @Getter
     @ToString
     protected class FieldPairs {
@@ -53,4 +68,15 @@ public abstract class AbstractContainer implements Validationable {
             this.value = value;
         }
     }
+
+//    protected String getReason(IVisitable type){
+//        return type.accept(this);
+//        return ((IVisitable) type).accept(this);
+//        return ((IVisitable) type).accept(this);
+        //        switch (type){
+//            case Transaction.class:
+//                break;
+//
+//        }
+//    }
 }

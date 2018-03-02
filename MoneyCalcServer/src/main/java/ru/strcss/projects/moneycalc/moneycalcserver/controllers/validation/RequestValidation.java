@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import ru.strcss.projects.moneycalc.Validationable;
@@ -35,7 +36,11 @@ public class RequestValidation<E> {
         }
 
         public Validator addValidation(Supplier<Boolean> supplier, Supplier<String> actionName) {
-            additionalChecks.add(new Pair(supplier, actionName));
+            additionalChecks.add(new Pair(supplier, actionName, null));
+            return this;
+        }
+        public Validator addValidation(Supplier<Boolean> supplier, Supplier<String> actionName, String objectName) {
+            additionalChecks.add(new Pair(supplier, actionName, objectName));
             return this;
         }
 
@@ -50,7 +55,14 @@ public class RequestValidation<E> {
             for (Pair pair : additionalChecks){
                 if (!pair.getAction().get()) {
                     log.error(pair.getActionName().get());
-                    return new RequestValidation<>(false, responseError(pair.getActionName().get()));
+
+                    String errorMsg;
+                    if (pair.getObjectName() != null){
+                        errorMsg = String.format("%s in object: %s", pair.getActionName().get(), pair.getObjectName());
+                    } else {
+                        errorMsg = pair.getActionName().get();
+                    }
+                    return new RequestValidation<>(false, responseError(errorMsg));
                 }
             }
             return new RequestValidation<>(true, null);
@@ -58,13 +70,15 @@ public class RequestValidation<E> {
     }
 
     @Getter
+    @AllArgsConstructor
     public static class Pair{
         private Supplier<Boolean> action;
         private Supplier<String> actionName;
+        private String objectName;
 
-        Pair(Supplier<Boolean> action, Supplier<String> actionName) {
-            this.action = action;
-            this.actionName = actionName;
-        }
+//        Pair(Supplier<Boolean> action, Supplier<String> actionName) {
+//            this.action = action;
+//            this.actionName = actionName;
+//        }
     }
 }

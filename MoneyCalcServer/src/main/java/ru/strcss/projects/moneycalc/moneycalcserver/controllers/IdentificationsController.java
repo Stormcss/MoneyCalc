@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.IdentificationsAPIService;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
@@ -32,25 +33,28 @@ public class IdentificationsController extends AbstractController implements Ide
     /**
      * Save Identifications object using user's login
      *
-     * @param identifications - user's login
+     * @param updateContainer - container with user's login and Identifications object
      * @return response object with Identifications payload
      */
     @PostMapping(value = "/saveIdentifications")
-    public AjaxRs<Identifications> saveIdentifications(@RequestBody Identifications identifications) {
+    public AjaxRs<Identifications> saveIdentifications(@RequestBody IdentificationsUpdateContainer updateContainer) {
 
-        RequestValidation<Identifications> requestValidation = new Validator(identifications, "Saving Settings")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(identifications.getLogin())),
-                        () -> fillLog(NO_PERSON_EXIST, identifications.getLogin()))
+        RequestValidation<Identifications> requestValidation = new Validator(updateContainer, "Saving Identifications")
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(updateContainer.getLogin())),
+                        () -> fillLog(NO_PERSON_EXIST, updateContainer.getLogin()))
+                .addValidation(() -> updateContainer.getIdentifications().isValid().isValidated(),
+                        () -> fillLog(IDENTIFICATIONS_INCORRECT, updateContainer.getIdentifications().isValid().getReasons().toString()))
                 .validate();
+
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        final WriteResult updateResult = identificationsDBConnection.updateIdentifications(identifications);
+        final WriteResult updateResult = identificationsDBConnection.updateIdentifications(updateContainer.getIdentifications());
 
         if (updateResult.getN() == 0) {
-            log.error("Updating Identifications for login {} has failed", identifications.getLogin());
+            log.error("Updating Identifications for login {} has failed", updateContainer.getLogin());
             return responseError(IDENTIFICATIONS_SAVING_ERROR);
         }
-        return responseSuccess(IDENTIFICATIONS_RETURNED, identifications);
+        return responseSuccess(IDENTIFICATIONS_RETURNED, updateContainer.getIdentifications());
     }
 
     /**

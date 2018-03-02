@@ -6,6 +6,7 @@ import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
@@ -34,7 +35,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
         Settings settingsIncorrect = Generator.generateSettings(login);
         settingsIncorrect.setLogin("");
 
-        AjaxRs<Settings> response = sendRequest(service.saveSettings(settingsIncorrect)).body();
+        AjaxRs<Settings> response = sendRequest(service.saveSettings(new SettingsUpdateContainer(login, settingsIncorrect))).body();
 
         assertEquals(response.getStatus(), Status.ERROR, "Incorrect Settings are saved!");
     }
@@ -68,7 +69,7 @@ public class SettingsControllerIT extends AbstractControllerIT {
         newSettings.setPeriodTo(formatDateToString(generateDatePlus(ChronoUnit.YEARS, 1)));
 
         //Updating Settings
-        AjaxRs<Settings> responseUpdated = sendRequest(service.saveSettings(newSettings), Status.SUCCESS).body();
+        AjaxRs<Settings> responseUpdated = sendRequest(service.saveSettings(new SettingsUpdateContainer(login, newSettings)), Status.SUCCESS).body();
 
         assertNotNull(responseUpdated.getPayload(), "Payload is null!");
         assertEquals(responseUpdated.getPayload().getLogin(), login, "returned Settings object has wrong login!");

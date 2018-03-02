@@ -20,9 +20,9 @@ public class Access {
 
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (login.isEmpty()) reasons.add("login is empty");
-        if (password.isEmpty()) reasons.add("password is empty");
-        if (email.isEmpty()) reasons.add("email is empty");
+        if (login == null || login.isEmpty()) reasons.add("login is empty");
+        if (password == null || password.isEmpty()) reasons.add("password is empty");
+        if (email == null  || email.isEmpty()) reasons.add("email is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

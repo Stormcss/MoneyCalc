@@ -1,12 +1,7 @@
-version 'unspecified'
+group 'ru.strcss.projects.moneycalc.migrator'
+version '1.0-SNAPSHOT'
 
-apply plugin: 'java'
-
-sourceCompatibility = 1.8
-
-repositories {
-    mavenCentral()
-}
+apply plugin: 'org.springframework.boot'
 
 dependencies {
     compile project(':MoneyCalcAPI')

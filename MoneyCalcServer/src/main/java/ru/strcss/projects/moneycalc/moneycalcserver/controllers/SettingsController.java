@@ -11,6 +11,7 @@ import ru.strcss.projects.moneycalc.api.SettingsAPIService;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
@@ -39,29 +40,30 @@ public class SettingsController extends AbstractController implements SettingsAP
     /**
      * Save Settings object using user's login stored inside
      *
-     * @param settings - income Settings object
+     * @param updateContainer - income container with Settings object
      * @return response object
      */
     @PostMapping(value = "/saveSettings")
-    public AjaxRs<Settings> saveSettings(@RequestBody Settings settings) {
+    public AjaxRs<Settings> saveSettings(@RequestBody SettingsUpdateContainer updateContainer) {
 
-        settings.setSections(null);
 
-        RequestValidation<Settings> requestValidation = new Validator(settings, "Saving Settings")
-                .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(settings.getLogin())),
-                        () -> fillLog(NO_PERSON_EXIST, settings.getLogin()))
+        RequestValidation<Settings> requestValidation = new Validator(updateContainer, "Saving Settings")
+                .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(updateContainer.getLogin())),
+                        () -> fillLog(NO_PERSON_EXIST, updateContainer.getLogin()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        WriteResult updateResult = settingsDBConnection.updateSettings(settings);
+        updateContainer.getSettings().setSections(null);
+
+        WriteResult updateResult = settingsDBConnection.updateSettings(updateContainer.getSettings());
 
         if (updateResult.getN() == 0) {
-            log.error("Updating Settings for login {} has failed", settings.getLogin());
+            log.error("Updating Settings for login {} has failed", updateContainer.getLogin());
             return responseError("Settings were not updated!");
         }
 
-        log.debug("Updating Settings {} for login {}", settings, settings.getLogin());
-        return responseSuccess(SETTINGS_UPDATED, settings);
+        log.debug("Updating Settings {} for login {}", updateContainer.getSettings(), updateContainer.getLogin());
+        return responseSuccess(SETTINGS_UPDATED, updateContainer.getSettings());
     }
 
     /**
@@ -96,7 +98,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(addContainer, "Adding SpendingSection")
                 .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(addContainer.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, addContainer.getLogin()))
-                .addValidation(() -> settingsDBConnection.isSpendingSectionNameNew(addContainer.getSpendingSection().getName()),
+                .addValidation(() -> settingsDBConnection.isSpendingSectionNameNew(addContainer.getLogin(), addContainer.getSpendingSection().getName()),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, addContainer.getSpendingSection().getName()))
                 .validate();
 

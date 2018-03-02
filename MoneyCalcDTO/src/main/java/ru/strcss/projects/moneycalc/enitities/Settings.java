@@ -12,9 +12,9 @@ import java.util.List;
 @Data
 @Document
 @Builder
-public class Settings implements Validationable {
+public class Settings implements Validationable/*, IVisitable*/ {
 
-//    @Id
+    //    @Id
     private String login;
     private String periodFrom;
     private String periodTo;
@@ -28,4 +28,8 @@ public class Settings implements Validationable {
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 
+//    @Override
+//    public String accept(Visitor visitor) {
+//        return visitor.visitSettings(this);
+//    }
 }

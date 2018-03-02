@@ -10,7 +10,6 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class ControllerUtils {
 
-
     public static <E> AjaxRs<E> responseError(String message) {
         return AjaxRs.<E>builder()
                 .message(message)
@@ -32,8 +31,6 @@ public class ControllerUtils {
     }
 
     public static LocalDate formatDateFromString(String date) {
-//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-//        return LocalDate.parse(date, formatter);
         return LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
@@ -42,12 +39,8 @@ public class ControllerUtils {
     }
 
     public static String fillLog(String template, String... data) {
-//        StringBuilder sb = new StringBuilder(template);
-//        sb.append(template);
-        // TODO: 25.02.2018 optimize algorithm
-        for (String s : data) {
-            template = template.replaceFirst("\\{\\}", s);
-        }
-        return template;
+        if (data.length == 0)
+            return template;
+        return String.format(template, data);
     }
 }

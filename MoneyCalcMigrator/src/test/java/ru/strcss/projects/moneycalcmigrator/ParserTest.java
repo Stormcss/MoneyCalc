@@ -5,6 +5,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.Test;
 
+import java.io.FileReader;
+
 //@RunWith(SpringRunner.class)
 @SpringBootTest(classes = MigratorMain.class)
 public class ParserTest extends AbstractTestNGSpringContextTests {

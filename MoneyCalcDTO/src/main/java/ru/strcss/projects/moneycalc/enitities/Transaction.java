@@ -12,7 +12,7 @@ import java.util.List;
 @Builder
 @Document
 @Data
-public class Transaction implements Validationable {
+public class Transaction implements Validationable/*, IVisitable*/ {
 
     private String _id;
     private String date;
@@ -28,6 +28,11 @@ public class Transaction implements Validationable {
         if (sectionID < 0) reasons.add("SectionID can not be < 0!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
+
+//    @Override
+//    public String accept(Visitor visitor) {
+//        return visitor.visitTransaction(this);
+//    }
 }
 
 

@@ -1,34 +1,68 @@
-buildscript {
-    ext {
-        springBootVersion = '1.5.9.RELEASE'
-    }
-    repositories {
-        mavenCentral()
-    }
-    dependencies {
-        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-
-        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
-//        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.6.2"
-    }
+plugins{
+    id 'java'
+    id 'idea'
+    id 'org.springframework.boot' version '1.5.9.RELEASE' apply false
 }
 
-
-subprojects {
-
+subprojects{
     apply plugin: 'java'
     apply plugin: 'idea'
-    apply plugin: 'org.springframework.boot'
-
 
     sourceCompatibility = 1.8
+    group 'ru.strcss.projects.moneycalc'
 
-    group 'ru.sbt.util'
+    repositories {
+        jcenter()
+        mavenCentral()
+    }
 
     dependencies {
-        compileOnly('org.projectlombok:lombok:1.16.18')
-
-        testCompileOnly('org.projectlombok:lombok:1.16.18')
-        testCompile('org.testng:testng:6.13.1')
+        compile('org.projectlombok:lombok:1.16.18')
+        testCompile group: 'org.testng', name: 'testng', version: '6.13.1'
     }
+
+    test {
+        useTestNG() {
+        }
+
+//        include 'ru/strcss/projects/moneycalc/integration/**'
+        include 'ru/strcss/projects/moneycalc/moneycalcserver/**'
+
+        maxHeapSize = "512m"
+    }
+
+
 }
+
+
+//buildscript {
+//    ext {
+//        springBootVersion = '1.5.9.RELEASE'
+//    }
+//    repositories {
+//        mavenCentral()
+//    }
+//    dependencies {
+//        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+//    }
+//}
+
+
+//subprojects {
+//
+//    apply plugin: 'java'
+//    apply plugin: 'idea'
+//    apply plugin: 'org.springframework.boot'
+//
+//
+//    sourceCompatibility = 1.8
+//
+//    group 'ru.sbt.util'
+//
+//    dependencies {
+//        compileOnly('org.projectlombok:lombok:1.16.18')
+//
+//        testCompileOnly('org.projectlombok:lombok:1.16.18')
+//        testCompile('org.testng:testng:6.13.1')
+//    }
+//}

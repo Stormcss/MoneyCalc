@@ -6,76 +6,65 @@ import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
-import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalc.integration.utils.Generator;
-import ru.strcss.projects.moneycalc.integration.utils.Utils;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
+import static ru.strcss.projects.moneycalc.integration.utils.Generator.UUID;
+import static ru.strcss.projects.moneycalc.integration.utils.Generator.generateIdentifications;
+import static ru.strcss.projects.moneycalc.integration.utils.Utils.*;
 
 @Slf4j
 public class IdentificationsControllerIT extends AbstractControllerIT {
 
     @Test
     public void saveIdentifications() {
-        String login = Generator.UUID();
-        Credentials credentials = Generator.generateCredentials(login);
-
-        //Registering Person
-        AjaxRs<Person> responseCreatePerson = Utils.sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
-//        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
+        Credentials credentials = savePersonGetCredentials(service);
+        String login = credentials.getAccess().getLogin();
 
         //Updating default Identifications
-        AjaxRs<Identifications> responseSaveIdentifications = Utils.sendRequest(service.saveIdentifications(credentials.getIdentifications()), Status.SUCCESS).body();
-//        assertEquals(responseSaveIdentifications.getStatus(), Status.SUCCESS, responseSaveIdentifications.getMessage());
+        AjaxRs<Identifications> responseSaveIdentifications =
+                sendRequest(service.saveIdentifications(new IdentificationsUpdateContainer(login, credentials.getIdentifications())), Status.SUCCESS).body();
         assertNotNull(responseSaveIdentifications.getPayload(), "Payload is null!");
         assertNotNull(responseSaveIdentifications.getPayload().getName(), "Identifications object is empty!");
 
         //Requesting updated Identifications
-        AjaxRs<Identifications> responseGetUpdated = Utils.sendRequest(service.getIdentifications(new LoginGetContainer(login)), Status.SUCCESS).body();
-//        assertEquals(responseGetUpdated.getStatus(), Status.SUCCESS, responseGetUpdated.getMessage());
+        AjaxRs<Identifications> responseGetUpdated = sendRequest(service.getIdentifications(new LoginGetContainer(login)), Status.SUCCESS).body();
         assertEquals(responseGetUpdated.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
-        assertEquals(responseGetUpdated.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
+        assertEquals(responseGetUpdated.getPayload().getName(), credentials.getIdentifications().getName(),
+                "returned Identifications object has wrong name!");
     }
 
     @Test
     public void saveIdentificationsIncorrectLogin() {
-        Identifications identificationsIncorrect = Generator.generateIdentifications(Generator.UUID());
+        Identifications identificationsIncorrect = generateIdentifications(UUID());
+        identificationsIncorrect.setLogin(null);
+        IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(UUID(), identificationsIncorrect);
 
-        identificationsIncorrect.setLogin("");
-        AjaxRs<Identifications> response = Utils.sendRequest(service.saveIdentifications(identificationsIncorrect)).body();
+        AjaxRs<Identifications> response = sendRequest(service.saveIdentifications(updateContainer)).body();
 
         assertEquals(response.getStatus(), Status.ERROR, "Identifications object with incorrect Login is saved!");
     }
 
     @Test
     public void saveIdentificationsIncorrectName() {
-        Identifications identificationsIncorrect = Generator.generateIdentifications(Generator.UUID());
+        Identifications identificationsIncorrect = generateIdentifications(UUID());
+        identificationsIncorrect.setName(null);
+        IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(UUID(), identificationsIncorrect);
 
-        identificationsIncorrect.setName("");
-        AjaxRs<Identifications> response = Utils.sendRequest(service.saveIdentifications(identificationsIncorrect)).body();
+        AjaxRs<Identifications> response = sendRequest(service.saveIdentifications(updateContainer)).body();
 
         assertEquals(response.getStatus(), Status.ERROR, "Identifications object with incorrect Name is saved!");
     }
 
     @Test
     public void getIdentifications() {
+        String login = savePersonGetLogin(service);
 
-        String login = Generator.UUID();
-        Credentials credentials = Generator.generateCredentials(login);
+        AjaxRs<Identifications> response = sendRequest(service.getIdentifications(new LoginGetContainer(login)), Status.SUCCESS).body();
 
-        // FIXME: 25.02.2018 Update this code
-
-        //Registering Person
-        AjaxRs<Person> responseCreatePerson = Utils.sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
-//        assertEquals(responseCreatePerson.getStatus(), Status.SUCCESS, responseCreatePerson.getMessage());
-
-        AjaxRs<Identifications> response = Utils.sendRequest(service.getIdentifications(new LoginGetContainer(login)), Status.SUCCESS).body();
-
-//        assertEquals(response.getStatus(), Status.SUCCESS, response.getMessage());
         assertEquals(response.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
-        assertEquals(response.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
     }
 
 }

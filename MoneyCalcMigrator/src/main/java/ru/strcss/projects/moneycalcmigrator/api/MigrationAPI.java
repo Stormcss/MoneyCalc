@@ -26,7 +26,7 @@ public interface MigrationAPI {
     Call<AjaxRs<List<SpendingSection>>> getSpendingSections(@Body LoginGetContainer getContainer);
 
 
-    @POST("/api/registration/registerPerson")
+    @POST("/api/registration/register")
     Call<AjaxRs<Person>> registerPerson(@Body Credentials credentials);
 
     @POST("/api/finance/transactions/addTransaction")

@@ -2,6 +2,7 @@ package ru.strcss.projects.moneycalc.api;
 
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
@@ -12,7 +13,7 @@ import java.util.List;
 
 public interface SettingsAPIService {
 
-    AjaxRs<Settings> saveSettings(Settings settings);
+    AjaxRs<Settings> saveSettings(SettingsUpdateContainer updateContainer);
 
     AjaxRs<Settings> getSettings(LoginGetContainer getContainer);
 
