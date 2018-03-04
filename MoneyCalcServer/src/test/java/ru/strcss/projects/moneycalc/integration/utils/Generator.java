@@ -33,7 +33,6 @@ public class Generator {
                         .email(login + "@mail.ru")
                         .build())
                 .identifications(Identifications.builder()
-                        .login(login)
                         .name(names[ThreadLocalRandom.current().nextInt(names.length)])
                         .build())
                 .build();
@@ -48,9 +47,8 @@ public class Generator {
                 .build();
     }
 
-    public static Identifications generateIdentifications(String login) {
+    public static Identifications generateIdentifications() {
         return Identifications.builder()
-                .login(login)
                 .name(UUID())
                 .build();
     }

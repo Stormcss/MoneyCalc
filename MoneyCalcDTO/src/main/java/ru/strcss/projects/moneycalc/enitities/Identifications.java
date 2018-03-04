@@ -11,13 +11,10 @@ import java.util.List;
 @Data
 @Builder
 public class Identifications implements Validationable/*, IVisitable*/ {
-
-    private String login;
     private String name;
 
     public ValidationResult isValid() {
         List reasons = new ArrayList<>();
-        if (login == null || login.isEmpty()) reasons.add("login is empty");
         if (name == null || name.isEmpty()) reasons.add("name is empty");
         return new ValidationResult(reasons.isEmpty(), reasons, "Identifications");
     }

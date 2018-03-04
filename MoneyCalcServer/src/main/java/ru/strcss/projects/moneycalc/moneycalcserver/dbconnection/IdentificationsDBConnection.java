@@ -7,6 +7,7 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Component;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.moneycalcserver.mongo.PersonRepository;
@@ -25,15 +26,15 @@ public class IdentificationsDBConnection {
     /**
      * Update Identification in DB
      *
-     * @param identifications object
+     * @param updateContainer - container with Identifications object
      * @return result of updating
      */
-    public WriteResult updateIdentifications(Identifications identifications) {
+    public WriteResult updateIdentifications(IdentificationsUpdateContainer updateContainer) {
         Query findUpdatedSettingsQuery = Query.query(
-                Criteria.where("_id").is(identifications.getLogin()));
+                Criteria.where("_id").is(updateContainer.getLogin()));
 
         return mongoTemplate.updateMulti(findUpdatedSettingsQuery,
-                new Update().set("identifications.$", identifications), Person.class);
+                new Update().set("identifications.$", updateContainer.getIdentifications()), Person.class);
     }
 
     public Identifications getIdentifications(String login){

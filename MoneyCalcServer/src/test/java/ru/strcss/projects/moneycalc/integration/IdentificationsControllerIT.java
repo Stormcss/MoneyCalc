@@ -13,7 +13,8 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static ru.strcss.projects.moneycalc.integration.utils.Generator.UUID;
 import static ru.strcss.projects.moneycalc.integration.utils.Generator.generateIdentifications;
-import static ru.strcss.projects.moneycalc.integration.utils.Utils.*;
+import static ru.strcss.projects.moneycalc.integration.utils.Utils.savePersonGetCredentials;
+import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
 
 @Slf4j
 public class IdentificationsControllerIT extends AbstractControllerIT {
@@ -31,25 +32,14 @@ public class IdentificationsControllerIT extends AbstractControllerIT {
 
         //Requesting updated Identifications
         AjaxRs<Identifications> responseGetUpdated = sendRequest(service.getIdentifications(new LoginGetContainer(login)), Status.SUCCESS).body();
-        assertEquals(responseGetUpdated.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
+//        assertEquals(responseGetUpdated.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
         assertEquals(responseGetUpdated.getPayload().getName(), credentials.getIdentifications().getName(),
                 "returned Identifications object has wrong name!");
     }
 
     @Test
-    public void saveIdentificationsIncorrectLogin() {
-        Identifications identificationsIncorrect = generateIdentifications(UUID());
-        identificationsIncorrect.setLogin(null);
-        IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(UUID(), identificationsIncorrect);
-
-        AjaxRs<Identifications> response = sendRequest(service.saveIdentifications(updateContainer)).body();
-
-        assertEquals(response.getStatus(), Status.ERROR, "Identifications object with incorrect Login is saved!");
-    }
-
-    @Test
     public void saveIdentificationsIncorrectName() {
-        Identifications identificationsIncorrect = generateIdentifications(UUID());
+        Identifications identificationsIncorrect = generateIdentifications();
         identificationsIncorrect.setName(null);
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(UUID(), identificationsIncorrect);
 
@@ -60,11 +50,12 @@ public class IdentificationsControllerIT extends AbstractControllerIT {
 
     @Test
     public void getIdentifications() {
-        String login = savePersonGetLogin(service);
+        Credentials credentials = savePersonGetCredentials(service);
+        String login = credentials.getAccess().getLogin();
 
         AjaxRs<Identifications> response = sendRequest(service.getIdentifications(new LoginGetContainer(login)), Status.SUCCESS).body();
 
-        assertEquals(response.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
+        assertEquals(response.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
     }
 
 }

@@ -48,7 +48,7 @@ public class IdentificationsController extends AbstractController implements Ide
 
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        final WriteResult updateResult = identificationsDBConnection.updateIdentifications(updateContainer.getIdentifications());
+        final WriteResult updateResult = identificationsDBConnection.updateIdentifications(updateContainer);
 
         if (updateResult.getN() == 0) {
             log.error("Updating Identifications for login {} has failed", updateContainer.getLogin());
