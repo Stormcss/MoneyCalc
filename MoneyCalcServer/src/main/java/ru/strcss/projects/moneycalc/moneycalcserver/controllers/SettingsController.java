@@ -48,7 +48,7 @@ public class SettingsController extends AbstractController implements SettingsAP
 
 
         RequestValidation<Settings> requestValidation = new Validator(updateContainer, "Saving Settings")
-                .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(updateContainer.getLogin())),
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(updateContainer.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, updateContainer.getLogin()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
@@ -76,7 +76,7 @@ public class SettingsController extends AbstractController implements SettingsAP
     public AjaxRs<Settings> getSettings(@RequestBody LoginGetContainer getContainer) {
 
         RequestValidation<Settings> requestValidation = new Validator(getContainer, "Requesting Settings")
-                .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(getContainer.getLogin())),
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(getContainer.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, getContainer.getLogin()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
@@ -96,7 +96,7 @@ public class SettingsController extends AbstractController implements SettingsAP
     public AjaxRs<List<SpendingSection>> addSpendingSection(@RequestBody SpendingSectionAddContainer addContainer) {
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(addContainer, "Adding SpendingSection")
-                .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(addContainer.getLogin())),
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(addContainer.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, addContainer.getLogin()))
                 .addValidation(() -> settingsDBConnection.isSpendingSectionNameNew(addContainer.getLogin(), addContainer.getSpendingSection().getName()),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, addContainer.getSpendingSection().getName()))
@@ -127,7 +127,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         log.debug("Request for updating SpendingSection has received: {}", updateContainer);
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer, "Updating SpendingSection")
-                .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(updateContainer.getLogin())),
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(updateContainer.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, updateContainer.getLogin()))
                 .addValidation(() -> checkNewNameIsAllowed(updateContainer),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, updateContainer.getSpendingSection().getName()))
@@ -157,7 +157,7 @@ public class SettingsController extends AbstractController implements SettingsAP
     public AjaxRs<List<SpendingSection>> deleteSpendingSection(@RequestBody SpendingSectionDeleteContainer deleteContainer) {
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(deleteContainer, "Deleting SpendingSection")
-                .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(deleteContainer.getLogin())),
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(deleteContainer.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, deleteContainer.getLogin()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
@@ -193,7 +193,7 @@ public class SettingsController extends AbstractController implements SettingsAP
     public AjaxRs<List<SpendingSection>> getSpendingSections(@RequestBody LoginGetContainer getContainer) {
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(getContainer, "Getting SpendingSection list")
-                .addValidation(() -> settingsDBConnection.isPersonExistsByLogin(formatLogin(getContainer.getLogin())),
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(getContainer.getLogin())),
                         () -> fillLog(NO_PERSON_EXIST, getContainer.getLogin()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();

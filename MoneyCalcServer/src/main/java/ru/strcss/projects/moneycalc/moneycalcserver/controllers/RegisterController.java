@@ -1,7 +1,8 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,7 +16,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Controller
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.RegistrationDBConnection;
 
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -31,11 +32,18 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Val
 @RequestMapping("/api/registration/")
 public class RegisterController extends AbstractController implements RegisterAPIService {
 
-    private SettingsDBConnection settingsDBConnection;
+    static final String CLAIM_KEY_USERNAME = "sub";
+    static final String CLAIM_KEY_USERDETAILS = "userdetails";
+    static final String CLAIM_KEY_CREATED = "created";
 
-    @Autowired
-    public RegisterController(SettingsDBConnection settingsDBConnection) {
-        this.settingsDBConnection = settingsDBConnection;
+    private RegistrationDBConnection registrationDBConnection;
+    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private AuthenticationManager authenticationManager;
+
+    public RegisterController(RegistrationDBConnection registrationDBConnection, BCryptPasswordEncoder bCryptPasswordEncoder, AuthenticationManager authenticationManager) {
+        this.registrationDBConnection = registrationDBConnection;
+        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.authenticationManager = authenticationManager;
     }
 
     /**
@@ -53,7 +61,7 @@ public class RegisterController extends AbstractController implements RegisterAP
                         () -> fillLog(REGISTER_ERROR, credentials.getAccess().isValid().getReasons().toString()), "Access")
                 .addValidation(() -> credentials.getIdentifications().isValid().isValidated(),
                         () -> fillLog(REGISTER_ERROR, credentials.getIdentifications().isValid().getReasons().toString()), "Identifications")
-                .addValidation(() -> !settingsDBConnection.isPersonExistsByLogin(credentials.getAccess().getLogin()),
+                .addValidation(() -> !registrationDBConnection.isPersonExistsByLogin(credentials.getAccess().getLogin()),
                         () -> fillLog(PERSON_ALREADY_EXISTS, credentials.getAccess().getLogin()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
@@ -74,6 +82,8 @@ public class RegisterController extends AbstractController implements RegisterAP
             log.error("Person registration has failed - required fields are incorrect: {}", personExists.getReasons());
             return ControllerUtils.responseError("Required fields are incorrect: " + personExists.getReasons());
         }
+
+        credentials.getAccess().setPassword(bCryptPasswordEncoder.encode(credentials.getAccess().getPassword()));
 
         String login = credentials.getAccess().getLogin();
 
@@ -145,7 +155,71 @@ public class RegisterController extends AbstractController implements RegisterAP
         // TODO: 02.02.2018 validate if save is successful
 
         return responseSuccess(REGISTER_SUCCESSFUL, null);
-
     }
 
+//    @PostMapping(value = "/login")
+//    public String login(@RequestBody Access access) {
+//
+//        final Authentication authentication = authenticationManager.authenticate(
+//                new UsernamePasswordAuthenticationToken(access.getLogin(), access.getPassword()));
+//
+//        SecurityContextHolder.getContext().setAuthentication(authentication);
+////        UserDetails userDetails = userAccountService.loadUserByUsername(authentication.getName());
+//        UserDetails userDetails = new UserDetails() {
+//            @Override
+//            public Collection<? extends GrantedAuthority> getAuthorities() {
+//                return Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
+//            }
+//
+//            @Override
+//            public String getPassword() {
+//                return access.getPassword();
+//            }
+//
+//            @Override
+//            public String getUsername() {
+//                return access.getLogin();
+//            }
+//
+//            @Override
+//            public boolean isAccountNonExpired() {
+//                return true;
+//            }
+//
+//            @Override
+//            public boolean isAccountNonLocked() {
+//                return true;
+//            }
+//
+//            @Override
+//            public boolean isCredentialsNonExpired() {
+//                return true;
+//            }
+//
+//            @Override
+//            public boolean isEnabled() {
+//                return true;
+//            }
+//        };
+//        String token = generateToken(userDetails);
+//        return token;
+//
+//    }
+//
+//    public String generateToken(UserDetails userDetails) {
+//        Map<String, Object> claims = new HashMap<>();
+//        claims.put(CLAIM_KEY_USERNAME, userDetails.getUsername());
+//        claims.put(CLAIM_KEY_USERDETAILS, userDetails);
+//        //claims.put(CLAIM_KEY_AUDIENCE, generateAudience());
+//        claims.put(CLAIM_KEY_CREATED, new Date());
+//        return generateToken(claims);
+//    }
+//
+//    String generateToken(Map<String, Object> claims) {
+//        return Jwts.builder()
+//                .setClaims(claims)
+//                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
+//                .signWith(SignatureAlgorithm.HS512, SECRET.getBytes())
+//                .compact();
+//    }
 }

@@ -25,7 +25,7 @@ import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
 
 @Component
-public class SettingsDBConnection {
+public class SettingsDBConnection{
 
     private PersonRepository repository;
     private MongoTemplate mongoTemplate;
@@ -210,10 +210,5 @@ public class SettingsDBConnection {
         Query getSpendingSectionQuery = query(where("access.login").is(login)
                 .and("settings.sections.name").is(name));
         return !mongoTemplate.exists(getSpendingSectionQuery, Person.class);
-    }
-
-    // TODO: 28.02.2018 add isPersonExistsByLogin to super class
-    public boolean isPersonExistsByLogin(String login) {
-        return repository.existsByAccess_Login(login);
     }
 }

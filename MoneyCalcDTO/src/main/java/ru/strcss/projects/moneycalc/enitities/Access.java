@@ -17,6 +17,7 @@ public class Access {
 
     private String password;
     private String email;
+    private List<String> roles;
 
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
