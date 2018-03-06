@@ -17,4 +17,7 @@ public interface PersonRepository extends MongoRepository<Person, String> {
 
     @Query(fields = "{identifications:1}")
     Person findIdentificationsByAccess_Login(String login);
+
+    @Query(fields = "{access:1}")
+    Person findAccessByAccess_Login(String login);
 }

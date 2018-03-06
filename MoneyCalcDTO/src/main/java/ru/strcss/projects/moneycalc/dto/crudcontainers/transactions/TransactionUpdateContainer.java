@@ -12,13 +12,13 @@ import java.util.List;
 @AllArgsConstructor
 public class TransactionUpdateContainer extends AbstractContainer {
 
-    private String login;
     private String id;
     private Transaction transaction;
 
     @Override
     public ValidationResult isValid() {
-        List<String> reasons = validateStringFields(new FieldPairs("login", login), new FieldPairs("id", id));
+        List<String> reasons = validateStringFields(new FieldPairs("id", id));
+        if (transaction == null) reasons.add("transaction is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

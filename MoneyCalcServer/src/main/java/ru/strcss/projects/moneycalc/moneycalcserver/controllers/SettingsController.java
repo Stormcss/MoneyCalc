@@ -3,13 +3,10 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.web.bind.annotation.*;
 import ru.strcss.projects.moneycalc.api.SettingsAPIService;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
@@ -45,11 +42,11 @@ public class SettingsController extends AbstractController implements SettingsAP
      */
     @PostMapping(value = "/saveSettings")
     public AjaxRs<Settings> saveSettings(@RequestBody SettingsUpdateContainer updateContainer) {
-
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Settings> requestValidation = new Validator(updateContainer, "Saving Settings")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(updateContainer.getLogin())),
-                        () -> fillLog(NO_PERSON_EXIST, updateContainer.getLogin()))
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
+                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
@@ -58,147 +55,150 @@ public class SettingsController extends AbstractController implements SettingsAP
         WriteResult updateResult = settingsDBConnection.updateSettings(updateContainer.getSettings());
 
         if (updateResult.getN() == 0) {
-            log.error("Updating Settings for login {} has failed", updateContainer.getLogin());
+            log.error("Updating Settings for login {} has failed", login);
             return responseError("Settings were not updated!");
         }
 
-        log.debug("Updating Settings {} for login {}", updateContainer.getSettings(), updateContainer.getLogin());
+        log.debug("Updating Settings {} for login {}", updateContainer.getSettings(), login);
         return responseSuccess(SETTINGS_UPDATED, updateContainer.getSettings());
     }
 
     /**
      * Get Setting object using user's login
      *
-     * @param getContainer - container with user's login
      * @return response object
      */
-    @PostMapping(value = "/getSettings")
-    public AjaxRs<Settings> getSettings(@RequestBody LoginGetContainer getContainer) {
+    @GetMapping(value = "/getSettings")
+    public AjaxRs<Settings> getSettings() {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<Settings> requestValidation = new Validator(getContainer, "Requesting Settings")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(getContainer.getLogin())),
-                        () -> fillLog(NO_PERSON_EXIST, getContainer.getLogin()))
+        RequestValidation<Settings> requestValidation = new Validator(null, "Requesting Settings")
+                .addValidation(() -> repository.existsByAccess_Login(login),
+                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Settings settings = settingsDBConnection.getSettings(getContainer.getLogin()).getSettings();
+        Settings settings = settingsDBConnection.getSettings(login).getSettings();
 
         if (settings != null) {
-            log.debug("returning PersonalSettings for login {}: {}", getContainer.getLogin(), settings);
+            log.debug("returning PersonalSettings for login {}: {}", login, settings);
             return responseSuccess(SETTINGS_RETURNED, settings);
         } else {
-            log.error("Can not return PersonalSettings for login {} - no Person found", getContainer.getLogin());
+            log.error("Can not return PersonalSettings for login {} - no Person found", login);
             return responseError(NO_PERSON_EXIST);
         }
     }
 
     @PostMapping(value = "/addSpendingSection")
     public AjaxRs<List<SpendingSection>> addSpendingSection(@RequestBody SpendingSectionAddContainer addContainer) {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(addContainer, "Adding SpendingSection")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(addContainer.getLogin())),
-                        () -> fillLog(NO_PERSON_EXIST, addContainer.getLogin()))
-                .addValidation(() -> settingsDBConnection.isSpendingSectionNameNew(addContainer.getLogin(), addContainer.getSpendingSection().getName()),
+                .addValidation(() -> repository.existsByAccess_Login(login),
+                        () -> fillLog(NO_PERSON_EXIST, login))
+                .addValidation(() -> settingsDBConnection.isSpendingSectionNameNew(login, addContainer.getSpendingSection().getName()),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, addContainer.getSpendingSection().getName()))
                 .validate();
 
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
         //id of income SpendingSection must be ignored and be set here
-        Integer maxSpendingSectionId = settingsDBConnection.getMaxSpendingSectionId(addContainer.getLogin());
+        Integer maxSpendingSectionId = settingsDBConnection.getMaxSpendingSectionId(login);
 
         addContainer.getSpendingSection().setId(maxSpendingSectionId + 1);
 
-        WriteResult writeResult = settingsDBConnection.addSpendingSection(addContainer);
+        WriteResult writeResult = settingsDBConnection.addSpendingSection(login, addContainer);
 
         if (writeResult.wasAcknowledged()) {
-            log.debug("Saved new SpendingSection for login {} : {}", addContainer.getLogin(), addContainer.getSpendingSection());
-            return responseSuccess(SPENDING_SECTION_ADDED, settingsDBConnection.getSpendingSectionList(addContainer.getLogin()));
+            log.debug("Saved new SpendingSection for login {} : {}", login, addContainer.getSpendingSection());
+            return responseSuccess(SPENDING_SECTION_ADDED, settingsDBConnection.getSpendingSectionList(login));
 
         } else {
-            log.error("Saving Transaction {} for login {} has failed", addContainer.getSpendingSection(), addContainer.getLogin());
+            log.error("Saving Transaction {} for login {} has failed", addContainer.getSpendingSection(), login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
     }
 
     @PostMapping(value = "/updateSpendingSection")
     public AjaxRs<List<SpendingSection>> updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) {
-
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("Request for updating SpendingSection has received: {}", updateContainer);
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer, "Updating SpendingSection")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(updateContainer.getLogin())),
-                        () -> fillLog(NO_PERSON_EXIST, updateContainer.getLogin()))
-                .addValidation(() -> checkNewNameIsAllowed(updateContainer),
+                .addValidation(() -> repository.existsByAccess_Login(login),
+                        () -> fillLog(NO_PERSON_EXIST, login))
+                .addValidation(() -> checkNewNameIsAllowed(login, updateContainer),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, updateContainer.getSpendingSection().getName()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
+        // FIXME: 06.03.2018 updating via ID makes it possible to get 2 sections with the same name!
 
         WriteResult updateResult;
         if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-            updateResult = settingsDBConnection.updateSpendingSectionByName(updateContainer);
+            updateResult = settingsDBConnection.updateSpendingSectionByName(login, updateContainer);
         } else {
-            updateResult = settingsDBConnection.updateSpendingSectionById(updateContainer);
+            updateResult = settingsDBConnection.updateSpendingSectionById(login, updateContainer);
         }
 
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
         if (updateResult.getN() == 0) {
-            log.error("Updating SpendingSection for login {} has failed", updateContainer.getLogin());
+            log.error("Updating SpendingSection for login {} has failed", login);
             return responseError("SpendingSection was not found");
         }
 
-        log.debug("Updated SpendingSection {}: for login: {}", updateContainer.getSpendingSection(), updateContainer.getLogin());
-        return responseSuccess(SPENDING_SECTION_UPDATED, settingsDBConnection.getSpendingSectionList(updateContainer.getLogin()));
+        log.debug("Updated SpendingSection {}: for login: {}", updateContainer.getSpendingSection(), login);
+        return responseSuccess(SPENDING_SECTION_UPDATED, settingsDBConnection.getSpendingSectionList(login));
     }
 
     @PostMapping(value = "/deleteSpendingSection")
     public AjaxRs<List<SpendingSection>> deleteSpendingSection(@RequestBody SpendingSectionDeleteContainer deleteContainer) {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(deleteContainer, "Deleting SpendingSection")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(deleteContainer.getLogin())),
-                        () -> fillLog(NO_PERSON_EXIST, deleteContainer.getLogin()))
+                .addValidation(() -> repository.existsByAccess_Login(login),
+                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
 
         WriteResult deleteResult;
         if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-            deleteResult = settingsDBConnection.deleteSpendingSectionByName(deleteContainer);
+            deleteResult = settingsDBConnection.deleteSpendingSectionByName(login, deleteContainer);
         } else {
-            deleteResult = settingsDBConnection.deleteSpendingSectionById(deleteContainer);
+            deleteResult = settingsDBConnection.deleteSpendingSectionById(login, deleteContainer);
         }
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
         if (deleteResult.getN() == 0) {
             log.error("Deleting SpendingSection with SearchType: {} and query: {} for login: {} has failed",
-                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), deleteContainer.getLogin());
+                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
             return responseError("SpendingSection was not deleted!");
         }
         log.debug("Deleted SpendingSection with SearchType: {} and query: {} for login: {}",
-                deleteContainer.getSearchType(), deleteContainer.getIdOrName(), deleteContainer.getLogin());
+                deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
 
-        return responseSuccess(SPENDING_SECTION_DELETED, settingsDBConnection.getSpendingSectionList(deleteContainer.getLogin()));
+        return responseSuccess(SPENDING_SECTION_DELETED, settingsDBConnection.getSpendingSectionList(login));
     }
 
 
     /**
      * Get list of SpendingSections for specific login
      *
-     * @param getContainer - container with user's login
      * @return response object
      */
-    @PostMapping(value = "/getSpendingSections")
-    public AjaxRs<List<SpendingSection>> getSpendingSections(@RequestBody LoginGetContainer getContainer) {
+    @GetMapping(value = "/getSpendingSections")
+    public AjaxRs<List<SpendingSection>> getSpendingSections() {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<SpendingSection>> requestValidation = new Validator(getContainer, "Getting SpendingSection list")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(getContainer.getLogin())),
-                        () -> fillLog(NO_PERSON_EXIST, getContainer.getLogin()))
+        RequestValidation<List<SpendingSection>> requestValidation = new Validator(null, "Getting SpendingSection list")
+                .addValidation(() -> repository.existsByAccess_Login(login),
+                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        return responseSuccess(SPENDING_SECTIONS_RETURNED, settingsDBConnection.getSpendingSectionList(getContainer.getLogin()));
+        return responseSuccess(SPENDING_SECTIONS_RETURNED, settingsDBConnection.getSpendingSectionList(login));
     }
 
     /**
@@ -208,11 +208,11 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @param updateContainer
      * @return
      */
-    private Boolean checkNewNameIsAllowed(SpendingSectionUpdateContainer updateContainer) {
+    private Boolean checkNewNameIsAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
         if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_ID) || updateContainer.getSpendingSection().getName() == null)
             return true;
 
-        List<SpendingSection> sectionList = settingsDBConnection.getSpendingSectionList(updateContainer.getLogin());
+        List<SpendingSection> sectionList = settingsDBConnection.getSpendingSectionList(login);
 
         boolean nameIsNew = !updateContainer.getIdOrName().equals(updateContainer.getSpendingSection().getName());
         boolean newNameExists = sectionList.stream()

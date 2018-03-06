@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy.jwt;
+package ru.strcss.projects.moneycalc.moneycalcserver.security.jwt;
 
 import io.jsonwebtoken.Jwts;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -13,7 +13,7 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy.SecurityConstants.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.security.SecurityConstants.*;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 

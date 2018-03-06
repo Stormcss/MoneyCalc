@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy;
+package ru.strcss.projects.moneycalc.moneycalcserver.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpMethod;
@@ -12,10 +12,10 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy.jwt.JWTAuthenticationFilter;
-import ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy.jwt.JWTAuthorizationFilter;
+import ru.strcss.projects.moneycalc.moneycalcserver.security.jwt.JWTAuthenticationFilter;
+import ru.strcss.projects.moneycalc.moneycalcserver.security.jwt.JWTAuthorizationFilter;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy.SecurityConstants.SIGN_UP_URL;
+import static ru.strcss.projects.moneycalc.moneycalcserver.security.SecurityConstants.SIGN_UP_URL;
 
 @EnableWebSecurity
 public class WebSecurity extends WebSecurityConfigurerAdapter {

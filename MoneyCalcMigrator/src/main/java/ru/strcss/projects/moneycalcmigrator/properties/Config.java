@@ -23,6 +23,9 @@ public class Config {
     @Value("${config.login}")
     private String login;
 
+    @Value("${config.password}")
+    private String password;
+
     @Value("${config.name}")
     private String name;
 
@@ -36,6 +39,7 @@ public class Config {
         cc.setMoneyCalcServerHost(moneyCalcServerHost);
         cc.setMoneyCalcServerPort(moneyCalcServerPort);
         cc.setLogin(login);
+        cc.setPassword(password);
         cc.setName(name);
         cc.setEmail(email);
         return cc;

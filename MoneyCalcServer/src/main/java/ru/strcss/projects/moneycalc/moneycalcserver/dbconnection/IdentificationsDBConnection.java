@@ -29,9 +29,9 @@ public class IdentificationsDBConnection {
      * @param updateContainer - container with Identifications object
      * @return result of updating
      */
-    public WriteResult updateIdentifications(IdentificationsUpdateContainer updateContainer) {
+    public WriteResult updateIdentifications(String login, IdentificationsUpdateContainer updateContainer) {
         Query findUpdatedSettingsQuery = Query.query(
-                Criteria.where("_id").is(updateContainer.getLogin()));
+                Criteria.where("_id").is(login));
 
         return mongoTemplate.updateMulti(findUpdatedSettingsQuery,
                 new Update().set("identifications.$", updateContainer.getIdentifications()), Person.class);

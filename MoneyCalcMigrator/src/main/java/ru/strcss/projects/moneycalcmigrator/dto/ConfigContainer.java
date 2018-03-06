@@ -8,6 +8,7 @@ public class ConfigContainer {
     private String moneyCalcServerPort;
     private String dataPath;
     private String login;
+    private String password;
     private String name;
     private String email;
 }

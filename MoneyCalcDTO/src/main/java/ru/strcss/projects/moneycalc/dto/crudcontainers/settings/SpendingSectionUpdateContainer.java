@@ -14,7 +14,6 @@ import java.util.List;
 @AllArgsConstructor
 public class SpendingSectionUpdateContainer extends AbstractContainer {
 
-    private String login;
     private String idOrName;
     private SpendingSection spendingSection;
     private SpendingSectionSearchType searchType;
@@ -22,7 +21,6 @@ public class SpendingSectionUpdateContainer extends AbstractContainer {
     @Override
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (login == null) reasons.add("login is empty");
         if (idOrName == null) reasons.add("idOrName is empty");
         if (searchType == null) reasons.add("searchType is empty");
         if (spendingSection == null) reasons.add("spendingSection is empty");

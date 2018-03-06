@@ -12,7 +12,7 @@ import static org.testng.Assert.assertEquals;
 import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
 
 @Slf4j
-public class RegisterControllerIT extends AbstractControllerIT {
+public class RegisterControllerIT extends AbstractIT {
 
     @Test
     public void registerCorrectPerson() {

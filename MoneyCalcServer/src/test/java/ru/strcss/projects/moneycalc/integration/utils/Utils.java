@@ -1,11 +1,13 @@
 package ru.strcss.projects.moneycalc.integration.utils;
 
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Headers;
 import retrofit2.Call;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.Status;
+import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
 
 import java.io.IOException;
@@ -38,26 +40,59 @@ public class Utils {
     }
 
     /**
-     * Save Person with random login and return it
+     * Save Person with random login and return Token
      *
      * @param service - Retrofit configured service
-     * @return login of generated Person
+     * @return token for created and logged in person
      */
-    public static String savePersonGetLogin(MoneyCalcClient service) {
-        String login = Generator.UUID();
-        sendRequest(service.registerPerson(generateCredentials(login)), Status.SUCCESS).body();
-        return login;
+    public static String savePersonGetToken(MoneyCalcClient service) {
+        Credentials credentials = generateCredentials(Generator.UUID());
+        sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
+
+        return getToken(service, credentials.getAccess());
     }
 
     /**
-     * Save Person with random login and return it
+     * Save Person with random login and return login with token
      *
      * @param service - Retrofit configured service
-     * @return Credentials of generated Person
+     * @return login and token for created and logged in person
      */
-    public static Credentials savePersonGetCredentials(MoneyCalcClient service) {
+    public static Pair<String, String> savePersonGetLoginAndToken(MoneyCalcClient service) {
+        String login = Generator.UUID();
+        Credentials credentials = generateCredentials(login);
+        sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
+
+        return new Pair<>(login, getToken(service, credentials.getAccess()));
+    }
+
+    /**
+     * Save Person with random login and return credentials with token
+     *
+     * @param service - Retrofit configured service
+     * @return Credentials and token for created and logged in person
+     */
+    public static Pair<Credentials, String> savePersonGetCredentialsAndToken(MoneyCalcClient service) {
         Credentials credentials = generateCredentials(Generator.UUID());
         sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
-        return credentials;
+
+        Headers headers = null;
+        try {
+            headers = service.login(credentials.getAccess()).execute().headers();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new Pair<>(credentials, getToken(service, credentials.getAccess()));
+    }
+
+    public static String getToken(MoneyCalcClient service, Access access){
+        Headers headers = null;
+        try {
+            headers = service.login(access).execute().headers();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
+        }
+        return headers.get("Authorization");
     }
 }

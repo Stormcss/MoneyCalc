@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy;
+package ru.strcss.projects.moneycalc.moneycalcserver.security;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

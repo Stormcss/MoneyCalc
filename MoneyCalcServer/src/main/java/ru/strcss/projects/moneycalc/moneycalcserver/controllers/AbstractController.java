@@ -19,6 +19,8 @@ public abstract class AbstractController {
     final String SETTINGS_UPDATED = "Settings successfully updated";
     final String SETTINGS_RETURNED = "Settings successfully returned";
 
+    final String ACCESS_RETURNED = "Access object successfully returned";
+
     final String SPENDING_SECTIONS_RETURNED = "Spending Sections successfully returned";
     final String SPENDING_SECTION_ADDED = "Spending Section successfully added";
     final String SPENDING_SECTION_DELETED = "Spending Section successfully deleted";

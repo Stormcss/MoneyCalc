@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy.jwt;
+package ru.strcss.projects.moneycalc.moneycalcserver.security.jwt;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -19,7 +19,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy.SecurityConstants.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.security.SecurityConstants.*;
 
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private AuthenticationManager authenticationManager;

@@ -43,4 +43,8 @@ public class ControllerUtils {
             return template;
         return String.format(template, data);
     }
+
+    public static String getLogin(){
+        return null;
+    }
 }

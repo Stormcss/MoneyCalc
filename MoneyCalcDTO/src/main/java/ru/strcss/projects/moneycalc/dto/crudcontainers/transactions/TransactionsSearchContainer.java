@@ -23,15 +23,13 @@ import java.util.List;
 @AllArgsConstructor
 public class TransactionsSearchContainer extends AbstractContainer {
 
-    private String login;
     private String rangeFrom;
     private String rangeTo;
     private List<Integer> requiredSections;
 
     @Override
     public ValidationResult isValid() {
-        List<String> reasons = validateStringFields(new FieldPairs("login", login), new FieldPairs("rangeFrom", rangeFrom),
-                new FieldPairs("rangeTo", rangeTo));
+        List<String> reasons = validateStringFields(new FieldPairs("rangeFrom", rangeFrom), new FieldPairs("rangeTo", rangeTo));
         if (requiredSections == null) reasons.add("requiredSections are empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }

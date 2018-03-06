@@ -60,9 +60,9 @@ public class SettingsDBConnection{
      * @param spendingSectionContainer
      * @return
      */
-    public WriteResult addSpendingSection(SpendingSectionAddContainer spendingSectionContainer) {
+    public WriteResult addSpendingSection(String login, SpendingSectionAddContainer spendingSectionContainer) {
         Update update = new Update();
-        Query addSpendingSectionQuery = new Query(where("access.login").is(spendingSectionContainer.getLogin()));
+        Query addSpendingSectionQuery = new Query(where("access.login").is(login));
 
         update.push("settings.sections", spendingSectionContainer.getSpendingSection());
 
@@ -75,8 +75,8 @@ public class SettingsDBConnection{
      * @param deleteContainer
      * @return
      */
-    public WriteResult deleteSpendingSectionByName(SpendingSectionDeleteContainer deleteContainer) {
-        Query getPersonSettingsQuery = query(where("access.login").is(deleteContainer.getLogin()));
+    public WriteResult deleteSpendingSectionByName(String login, SpendingSectionDeleteContainer deleteContainer) {
+        Query getPersonSettingsQuery = query(where("access.login").is(login));
         Query getSpendingSectionQuery = query(where("name").is(deleteContainer.getIdOrName()));
 
         return mongoTemplate.updateFirst(getPersonSettingsQuery,
@@ -89,8 +89,8 @@ public class SettingsDBConnection{
      * @param deleteContainer
      * @return
      */
-    public WriteResult deleteSpendingSectionById(SpendingSectionDeleteContainer deleteContainer) {
-        Query getPersonSettingsQuery = query(where("access.login").is(deleteContainer.getLogin()));
+    public WriteResult deleteSpendingSectionById(String login, SpendingSectionDeleteContainer deleteContainer) {
+        Query getPersonSettingsQuery = query(where("access.login").is(login));
         Query getSpendingSectionQuery = query(where("_id").is(deleteContainer.getIdOrName()));
 
         return mongoTemplate.updateFirst(getPersonSettingsQuery,
@@ -103,14 +103,14 @@ public class SettingsDBConnection{
      * @param updateContainer
      * @return
      */
-    public WriteResult updateSpendingSectionById(SpendingSectionUpdateContainer updateContainer) {
-        SpendingSection existingSpendingSection = this.getSpendingSectionByID(updateContainer.getLogin(), Integer.parseInt(updateContainer.getIdOrName()));
+    public WriteResult updateSpendingSectionById(String login, SpendingSectionUpdateContainer updateContainer) {
+        SpendingSection existingSpendingSection = this.getSpendingSectionByID(login, Integer.parseInt(updateContainer.getIdOrName()));
 
         if (existingSpendingSection == null) {
             return new WriteResult(0, false, null);
         }
         Query findUpdatedSpendingSectionQuery = query(
-                where("access.login").is(updateContainer.getLogin())
+                where("access.login").is(login)
                         .and("settings.sections._id").is(Integer.parseInt(updateContainer.getIdOrName())));
 
         return mongoTemplate.updateMulti(findUpdatedSpendingSectionQuery,
@@ -123,14 +123,14 @@ public class SettingsDBConnection{
      * @param updateContainer
      * @return
      */
-    public WriteResult updateSpendingSectionByName(SpendingSectionUpdateContainer updateContainer) {
-        SpendingSection existingSpendingSection = this.getSpendingSectionByName(updateContainer.getLogin(), updateContainer.getIdOrName());
+    public WriteResult updateSpendingSectionByName(String login, SpendingSectionUpdateContainer updateContainer) {
+        SpendingSection existingSpendingSection = this.getSpendingSectionByName(login, updateContainer.getIdOrName());
 
         if (existingSpendingSection == null)
             return new WriteResult(0, false, null);
 
         Query findUpdatedSpendingSectionQuery = query(
-                where("access.login").is(updateContainer.getLogin())
+                where("access.login").is(login)
                         .and("settings.sections.name").is(updateContainer.getIdOrName()));
 
         return mongoTemplate.updateMulti(findUpdatedSpendingSectionQuery,

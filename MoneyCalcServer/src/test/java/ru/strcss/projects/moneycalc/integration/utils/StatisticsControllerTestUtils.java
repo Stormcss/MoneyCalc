@@ -2,7 +2,6 @@ package ru.strcss.projects.moneycalc.integration.utils;
 
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
@@ -10,6 +9,9 @@ import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
 
 import java.util.List;
+
+import static ru.strcss.projects.moneycalc.integration.utils.Generator.generateSpendingSection;
+import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
 
 public class StatisticsControllerTestUtils {
 
@@ -19,8 +21,8 @@ public class StatisticsControllerTestUtils {
      * @param getContainer - container with parameters of requested statistics
      * @return
      */
-    public static FinanceSummaryBySection getFinanceSummaryBySection(FinanceSummaryGetContainer getContainer, MoneyCalcClient service) {
-        AjaxRs<List<FinanceSummaryBySection>> responseGetStats = Utils.sendRequest(service.getFinanceSummaryBySection(getContainer), Status.SUCCESS).body();
+    public static FinanceSummaryBySection getFinanceSummaryBySection(FinanceSummaryGetContainer getContainer, MoneyCalcClient service, String token) {
+        AjaxRs<List<FinanceSummaryBySection>> responseGetStats = sendRequest(service.getFinanceSummaryBySection(token, getContainer), Status.SUCCESS).body();
         return responseGetStats.getPayload().get(0);
     }
 
@@ -28,14 +30,13 @@ public class StatisticsControllerTestUtils {
      * Add Person's Sections if required (in case if Person by default has less Sections then it is required for test)
      *
      * @param numOfSections - required number of Person's sections
-     * @param login         - Person's login
      */
-    public static void checkPersonsSections(int numOfSections, String login, int budget, MoneyCalcClient service) {
-        List<SpendingSection> spendingSections = Utils.sendRequest(service.getSpendingSections(new LoginGetContainer(login))).body().getPayload();
+    public static void checkPersonsSections(int numOfSections, int budget, MoneyCalcClient service, String token) {
+        List<SpendingSection> spendingSections = sendRequest(service.getSpendingSections(token)).body().getPayload();
 
         if (numOfSections > spendingSections.size()) {
             for (int i = 0; i < numOfSections - spendingSections.size(); i++) {
-                Utils.sendRequest(service.addSpendingSection(new SpendingSectionAddContainer(login, Generator.generateSpendingSection(budget))), Status.SUCCESS).body();
+                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(generateSpendingSection(budget))), Status.SUCCESS).body();
             }
 //            for (SpendingSection section : spendingSections) {
 //                if (section.getBudget() != budget) section.setBudget(budget);

@@ -1,7 +1,6 @@
 package ru.strcss.projects.moneycalc.api;
 
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.LoginGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
@@ -15,9 +14,9 @@ public interface SettingsAPIService {
 
     AjaxRs<Settings> saveSettings(SettingsUpdateContainer updateContainer);
 
-    AjaxRs<Settings> getSettings(LoginGetContainer getContainer);
+    AjaxRs<Settings> getSettings();
 
-    AjaxRs<List<SpendingSection>> getSpendingSections(LoginGetContainer getContainer);
+    AjaxRs<List<SpendingSection>> getSpendingSections();
 
     AjaxRs<List<SpendingSection>> addSpendingSection(SpendingSectionAddContainer addContainer);
 

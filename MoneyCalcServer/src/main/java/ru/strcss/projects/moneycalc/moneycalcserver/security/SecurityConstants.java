@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.configuration.securiy;
+package ru.strcss.projects.moneycalc.moneycalcserver.security;
 
 public class SecurityConstants {
     public static final String SECRET = "SecretKeyToGenJWTs";

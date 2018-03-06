@@ -133,93 +133,11 @@ public class RegisterController extends AbstractController implements RegisterAP
 //                .then(() -> mongoOperations.save(person, "Person"))
 //                .endTransaction();
 
-//        SpendingSection section1 = SpendingSection.builder()
-//                .id(0)
-//                .isAdded(true)
-//                .budget(5000)
-//                .name("Еда")
-//                .build();
-//        SpendingSection section2 = SpendingSection.builder()
-//                .id(1)
-//                .budget(5000)
-//                .isAdded(true)
-//                .name("Прочее")
-//                .build();
-
         mongoOperations.save(personTransactions, "Transactions");
         mongoOperations.save(person, "Person");
-
-//        settingsDBConnection.addSpendingSection(new SpendingSectionAddContainer(credentials.getAccess().getLogin(), section1));
-//        settingsDBConnection.addSpendingSection(new SpendingSectionAddContainer(credentials.getAccess().getLogin(), section2));
 
         // TODO: 02.02.2018 validate if save is successful
 
         return responseSuccess(REGISTER_SUCCESSFUL, null);
     }
-
-//    @PostMapping(value = "/login")
-//    public String login(@RequestBody Access access) {
-//
-//        final Authentication authentication = authenticationManager.authenticate(
-//                new UsernamePasswordAuthenticationToken(access.getLogin(), access.getPassword()));
-//
-//        SecurityContextHolder.getContext().setAuthentication(authentication);
-////        UserDetails userDetails = userAccountService.loadUserByUsername(authentication.getName());
-//        UserDetails userDetails = new UserDetails() {
-//            @Override
-//            public Collection<? extends GrantedAuthority> getAuthorities() {
-//                return Collections.singletonList(new SimpleGrantedAuthority("ROLE_ADMIN"));
-//            }
-//
-//            @Override
-//            public String getPassword() {
-//                return access.getPassword();
-//            }
-//
-//            @Override
-//            public String getUsername() {
-//                return access.getLogin();
-//            }
-//
-//            @Override
-//            public boolean isAccountNonExpired() {
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean isAccountNonLocked() {
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean isCredentialsNonExpired() {
-//                return true;
-//            }
-//
-//            @Override
-//            public boolean isEnabled() {
-//                return true;
-//            }
-//        };
-//        String token = generateToken(userDetails);
-//        return token;
-//
-//    }
-//
-//    public String generateToken(UserDetails userDetails) {
-//        Map<String, Object> claims = new HashMap<>();
-//        claims.put(CLAIM_KEY_USERNAME, userDetails.getUsername());
-//        claims.put(CLAIM_KEY_USERDETAILS, userDetails);
-//        //claims.put(CLAIM_KEY_AUDIENCE, generateAudience());
-//        claims.put(CLAIM_KEY_CREATED, new Date());
-//        return generateToken(claims);
-//    }
-//
-//    String generateToken(Map<String, Object> claims) {
-//        return Jwts.builder()
-//                .setClaims(claims)
-//                .setExpiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
-//                .signWith(SignatureAlgorithm.HS512, SECRET.getBytes())
-//                .compact();
-//    }
 }

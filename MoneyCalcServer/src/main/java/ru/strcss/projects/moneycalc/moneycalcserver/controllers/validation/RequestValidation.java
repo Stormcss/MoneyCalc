@@ -45,11 +45,12 @@ public class RequestValidation<E> {
         }
 
         public <E> RequestValidation<E> validate() {
+            if (container != null){
             ValidationResult validationResult = container.isValid();
-
-            if (!validationResult.isValidated()) {
-                log.error("{} has failed - required fields are incorrect: {}", actionName, validationResult.getReasons());
-                return new RequestValidation<>(false, responseError("Required fields are incorrect: " + validationResult.getReasons()));
+                if (!validationResult.isValidated()) {
+                    log.error("{} has failed - required fields are incorrect: {}", actionName, validationResult.getReasons());
+                    return new RequestValidation<>(false, responseError("Required fields are incorrect: " + validationResult.getReasons()));
+                }
             }
 
             for (Pair pair : additionalChecks){

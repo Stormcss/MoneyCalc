@@ -16,9 +16,6 @@ public abstract class AbstractContainer implements Validationable/*, Visitor*/ {
         List<String> reasons = new ArrayList<>();
         for (FieldPairs field : fields) {
             switch (field.getField()) {
-                case "login":
-                    if (field.getValue() == null || field.getValue().isEmpty()) reasons.add("login is empty");
-                    break;
                 case "rangeFrom":
                 case "rangeTo":
                     if (field.getValue() == null || field.getValue().isEmpty())

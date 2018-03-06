@@ -11,15 +11,14 @@ import java.util.List;
 @AllArgsConstructor
 public class FinanceSummaryGetContainer extends AbstractContainer{
 
-    private String login;
     private String rangeFrom;
     private String rangeTo;
     private List<Integer> sectionIDs;
 
     @Override
     public ValidationResult isValid() {
-        List<String> reasons = validateStringFields(new FieldPairs("login", login),
-                new FieldPairs("rangeFrom", rangeFrom), new FieldPairs("rangeTo", rangeTo));
+        List<String> reasons = validateStringFields(new FieldPairs("rangeFrom", rangeFrom),
+                new FieldPairs("rangeTo", rangeTo));
         if (sectionIDs == null || sectionIDs.isEmpty()) reasons.add("sectionIDs can not be empty");
 
         return new ValidationResult(reasons.isEmpty(), reasons);

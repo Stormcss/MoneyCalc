@@ -12,13 +12,12 @@ import java.util.List;
 @AllArgsConstructor
 public class SpendingSectionDeleteContainer extends AbstractContainer {
 
-    private String login;
     private String idOrName;
     private SpendingSectionSearchType searchType;
 
     @Override
     public ValidationResult isValid() {
-        List<String> reasons = validateStringFields(new FieldPairs("login", login), new FieldPairs("idOrName", idOrName));
+        List<String> reasons = validateStringFields(new FieldPairs("idOrName", idOrName));
         if (searchType == null) reasons.add("searchType is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }

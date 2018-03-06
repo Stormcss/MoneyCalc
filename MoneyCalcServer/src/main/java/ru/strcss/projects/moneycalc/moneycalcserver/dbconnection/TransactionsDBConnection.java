@@ -37,9 +37,7 @@ public class TransactionsDBConnection {
      * @param container with search parameters
      * @return List of Transactions
      */
-    public List<Transaction> getTransactions(TransactionsSearchContainer container) {
-
-        String login = container.getLogin().replace("\"", "");
+    public List<Transaction> getTransactions(String login, TransactionsSearchContainer container) {
 
         LocalDate rangeFrom = ControllerUtils.formatDateFromString(container.getRangeFrom());
         LocalDate rangeTo = ControllerUtils.formatDateFromString(container.getRangeTo());
@@ -56,9 +54,9 @@ public class TransactionsDBConnection {
      * @param transactionAddContainer
      * @return
      */
-    public WriteResult addTransaction(TransactionAddContainer transactionAddContainer) {
+    public WriteResult addTransaction(String login, TransactionAddContainer transactionAddContainer) {
         Update update = new Update();
-        Query addTransactionQuery = new Query(Criteria.where("login").is(transactionAddContainer.getLogin()));
+        Query addTransactionQuery = new Query(Criteria.where("login").is(login));
 
         update.push("transactions", transactionAddContainer.getTransaction());
 
@@ -71,9 +69,9 @@ public class TransactionsDBConnection {
      * @param transactionUpdateContainer
      * @return
      */
-    public WriteResult updateTransaction(TransactionUpdateContainer transactionUpdateContainer) {
+    public WriteResult updateTransaction(String login, TransactionUpdateContainer transactionUpdateContainer) {
         Query findUpdatedTransactionQuery = Query.query(
-                Criteria.where("login").is(transactionUpdateContainer.getLogin())
+                Criteria.where("login").is(login)
                         .and("transactions._id").is(transactionUpdateContainer.getId()));
 
         return mongoTemplate.updateMulti(findUpdatedTransactionQuery,
@@ -86,8 +84,8 @@ public class TransactionsDBConnection {
      * @param transactionDeleteContainer
      * @return
      */
-    public WriteResult deleteTransaction(TransactionDeleteContainer transactionDeleteContainer) {
-        Query getPersonTransactionsQuery = Query.query(Criteria.where("login").is(transactionDeleteContainer.getLogin()));
+    public WriteResult deleteTransaction(String login, TransactionDeleteContainer transactionDeleteContainer) {
+        Query getPersonTransactionsQuery = Query.query(Criteria.where("login").is(login));
         Query getTransactionQuery = Query.query(Criteria.where("_id").is(transactionDeleteContainer.getId()));
 
         return mongoTemplate.updateFirst(getPersonTransactionsQuery,

@@ -9,7 +9,6 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionA
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.integration.utils.Generator;
-import ru.strcss.projects.moneycalc.integration.utils.StatisticsControllerTestUtils;
 import ru.strcss.projects.moneycalc.integration.utils.Utils;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils;
@@ -25,8 +24,12 @@ import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import static org.testng.Assert.assertEquals;
+import static ru.strcss.projects.moneycalc.integration.utils.StatisticsControllerTestUtils.checkPersonsSections;
+import static ru.strcss.projects.moneycalc.integration.utils.StatisticsControllerTestUtils.getFinanceSummaryBySection;
+import static ru.strcss.projects.moneycalc.integration.utils.Utils.savePersonGetToken;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDateMinus;
 
-public class StatisticsControllerIT extends AbstractControllerIT {
+public class StatisticsControllerIT extends AbstractIT {
 
     /**
      * Accuracy of calculations - number of decimal places
@@ -41,21 +44,23 @@ public class StatisticsControllerIT extends AbstractControllerIT {
 
     private int budgetPerSection = 5000;
     private int numOfSections = 3;
-    private String login;
+    private String token;
 
     @BeforeGroups(groups = "inPeriodTest")
     public void preparePerson_InPeriodTest() {
         System.out.println("preparePerson_InPeriodTest!");
-        login = Utils.savePersonGetLogin(service);
-        StatisticsControllerTestUtils.checkPersonsSections(numOfSections, login, budgetPerSection, service);
+        token = savePersonGetToken(service);
+
+        checkPersonsSections(numOfSections, budgetPerSection, service, token);
         addTransactions(0, 3, 0);
     }
 
     @BeforeGroups(groups = "outPeriodTest")
     public void preparePerson_OutPeriodTest() {
         System.out.println("preparePerson_BeforePeriodTest!");
-        login = Utils.savePersonGetLogin(service);
-        StatisticsControllerTestUtils.checkPersonsSections(numOfSections, login, budgetPerSection, service);
+        token = savePersonGetToken(service);
+
+        checkPersonsSections(numOfSections, budgetPerSection, service, token);
         addTransactions(1, 5, 2);
     }
 
@@ -67,11 +72,11 @@ public class StatisticsControllerIT extends AbstractControllerIT {
     public void singleSection_outPeriod_beforePeriod() {
         System.out.println("singleSection_outPeriod_beforePeriod");
 
-        String rangeFrom = ControllerUtils.formatDateToString(GenerationUtils.generateDateMinus(ChronoUnit.DAYS, 5));
-        String rangeTo = ControllerUtils.formatDateToString(GenerationUtils.generateDateMinus(ChronoUnit.DAYS, 7));
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(login, rangeFrom, rangeTo, Collections.singletonList(1));
+        String rangeFrom = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 5));
+        String rangeTo = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 7));
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(1));
 
-        FinanceSummaryBySection summary = StatisticsControllerTestUtils.getFinanceSummaryBySection(getContainer, service);
+        FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
         assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection, "MoneyLeftAll is incorrect!");
         assertEquals((int) summary.getMoneySpendAll(), 0, "MoneySpendAll is incorrect!");
@@ -86,11 +91,11 @@ public class StatisticsControllerIT extends AbstractControllerIT {
     public void singleSection_outPeriod_afterPeriod() {
         System.out.println("singleSection_outPeriod_afterPeriod");
 
-        String rangeFrom = ControllerUtils.formatDateToString(GenerationUtils.generateDateMinus(ChronoUnit.DAYS, 4));
-        String rangeTo = ControllerUtils.formatDateToString(GenerationUtils.generateDateMinus(ChronoUnit.DAYS, 2));
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(login, rangeFrom, rangeTo, Collections.singletonList(1));
+        String rangeFrom = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 4));
+        String rangeTo = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 2));
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(1));
 
-        FinanceSummaryBySection summary = StatisticsControllerTestUtils.getFinanceSummaryBySection(getContainer, service);
+        FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
         assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
         assertEquals((int) summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
@@ -110,9 +115,9 @@ public class StatisticsControllerIT extends AbstractControllerIT {
 
         String rangeFrom = ControllerUtils.formatDateToString(LocalDate.now());
         String rangeTo = ControllerUtils.formatDateToString(GenerationUtils.generateDatePlus(ChronoUnit.DAYS, rangeDays - 1));
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(login, rangeFrom, rangeTo, Collections.singletonList(0));
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
 
-        FinanceSummaryBySection summary = StatisticsControllerTestUtils.getFinanceSummaryBySection(getContainer, service);
+        FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
         assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 200, "MoneyLeftAll is incorrect!");
         assertEquals((int) summary.getMoneySpendAll(), 200, "MoneySpendAll is incorrect!");
@@ -129,11 +134,11 @@ public class StatisticsControllerIT extends AbstractControllerIT {
         int rangeDays = 3;
         int daysPassed = 2;
 
-        String rangeFrom = ControllerUtils.formatDateToString(GenerationUtils.generateDateMinus(ChronoUnit.DAYS, 1));
+        String rangeFrom = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 1));
         String rangeTo = ControllerUtils.formatDateToString(GenerationUtils.generateDatePlus(ChronoUnit.DAYS, 1));
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(login, rangeFrom, rangeTo, Collections.singletonList(0));
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
 
-        FinanceSummaryBySection summary = StatisticsControllerTestUtils.getFinanceSummaryBySection(getContainer, service);
+        FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
         assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 500, "MoneyLeftAll is incorrect!");
         assertEquals((int) summary.getMoneySpendAll(), 500, "MoneySpendAll is incorrect!");
@@ -150,11 +155,11 @@ public class StatisticsControllerIT extends AbstractControllerIT {
         int rangeDays = 3;
         int daysPassed = 3;
 
-        String rangeFrom = ControllerUtils.formatDateToString(GenerationUtils.generateDateMinus(ChronoUnit.DAYS, rangeDays - 1));
+        String rangeFrom = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, rangeDays - 1));
         String rangeTo = ControllerUtils.formatDateToString(LocalDate.now());
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(login, rangeFrom, rangeTo, Collections.singletonList(0));
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
 
-        FinanceSummaryBySection summary = StatisticsControllerTestUtils.getFinanceSummaryBySection(getContainer, service);
+        FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
         assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
         assertEquals((int) summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
@@ -165,7 +170,7 @@ public class StatisticsControllerIT extends AbstractControllerIT {
 
     //    private List<Transaction> addTransactions(int sectionID, int minusMax, int minusMin) {
 //        return IntStream.range(minusMin, minusMax)
-//                .mapToObj(num -> new TransactionAddContainer(login, generateTransaction(generateDateMinus(ChronoUnit.DAYS, num), sectionID, (num + 2) * 100)))
+//                .mapToObj(num -> new TransactionAddContainer(generateTransaction(generateDateMinus(ChronoUnit.DAYS, num), sectionID, (num + 2) * 100)))
 //                .map(transactionAddContainer -> sendRequest(service.addTransaction(transactionAddContainer)).body())
 //                .filter(Objects::nonNull)
 //                .map(AjaxRs::getPayload)
@@ -180,12 +185,12 @@ public class StatisticsControllerIT extends AbstractControllerIT {
         List<TransactionAddContainer> addContainers = new ArrayList<>();
 
         for (Integer sum : sums) {
-            addContainers.add(new TransactionAddContainer(login, Generator.generateTransaction(GenerationUtils.generateDateMinus(ChronoUnit.DAYS, minusMin), sectionID, sum)));
+            addContainers.add(new TransactionAddContainer(Generator.generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionID, sum)));
             minusMin++;
         }
 
         return addContainers.stream()
-                .map(transactionAddContainer -> Utils.sendRequest(service.addTransaction(transactionAddContainer)).body())
+                .map(transactionAddContainer -> Utils.sendRequest(service.addTransaction(token, transactionAddContainer)).body())
                 .filter(Objects::nonNull)
                 .map(AjaxRs::getPayload)
                 .collect(Collectors.toList());

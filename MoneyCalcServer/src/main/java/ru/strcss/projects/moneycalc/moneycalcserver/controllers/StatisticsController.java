@@ -2,6 +2,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -46,18 +47,19 @@ public class StatisticsController extends AbstractController implements Statisti
     @Override
     @PostMapping(value = "/getFinanceSummaryBySection")
     public AjaxRs<List<FinanceSummaryBySection>> getFinanceSummaryBySection(@RequestBody FinanceSummaryGetContainer getContainer) {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(getContainer, "Getting Finance Summary")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(getContainer.getLogin())),
-                        () -> fillLog(NO_PERSON_EXIST, getContainer.getLogin()))
+                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
+                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        List<Transaction> transactions = transactionsDBConnection.getTransactions(new TransactionsSearchContainer(getContainer.getLogin(),
+        List<Transaction> transactions = transactionsDBConnection.getTransactions(login, new TransactionsSearchContainer(
                 getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getSectionIDs()));
 
         //оставляю только те секции клиента для которых мне нужна статистика
-        List<SpendingSection> spendingSections = settingsDBConnection.getSpendingSectionList(getContainer.getLogin()).stream()
+        List<SpendingSection> spendingSections = settingsDBConnection.getSpendingSectionList(login).stream()
                 .filter(section -> getContainer.getSectionIDs().stream().anyMatch(id -> id.equals(section.getId())))
                 .collect(Collectors.toList());
 
@@ -78,7 +80,7 @@ public class StatisticsController extends AbstractController implements Statisti
 
         List<FinanceSummaryBySection> financeSummaryResult = statisticsHandler.calculateSummaryStatisticsBySections(calculationContainer);
 
-        log.debug("Returned List of FinanceSummaryBySection for login: {} : {}", getContainer.getLogin(), financeSummaryResult);
+        log.debug("Returned List of FinanceSummaryBySection for login: {} : {}", login, financeSummaryResult);
         return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
     }
 }

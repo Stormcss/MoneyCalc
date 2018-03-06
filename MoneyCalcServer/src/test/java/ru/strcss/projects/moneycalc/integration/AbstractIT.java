@@ -10,7 +10,7 @@ import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
 import ru.strcss.projects.moneycalc.moneycalcserver.Application;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = Application.class)
-public class AbstractControllerIT extends AbstractTestNGSpringContextTests {
+public class AbstractIT extends AbstractTestNGSpringContextTests {
 
     @LocalServerPort
     private int SpringBootPort;
