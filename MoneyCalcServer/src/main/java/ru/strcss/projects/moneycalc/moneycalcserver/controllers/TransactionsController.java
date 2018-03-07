@@ -2,7 +2,6 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +16,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.Transactions
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.TransactionsDBConnection;
 
 import java.util.List;
@@ -31,10 +31,11 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Gen
 public class TransactionsController extends AbstractController implements TransactionsAPIService {
 
     private TransactionsDBConnection transactionsDBConnection;
+    private SettingsDBConnection settingsDBConnection;
 
-    @Autowired
-    public TransactionsController(TransactionsDBConnection transactionsDBConnection) {
+    public TransactionsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection) {
         this.transactionsDBConnection = transactionsDBConnection;
+        this.settingsDBConnection = settingsDBConnection;
     }
 
     /**
@@ -48,8 +49,8 @@ public class TransactionsController extends AbstractController implements Transa
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<Transaction>> requestValidation = new Validator(searchContainer, "Getting Transactions")
-                .addValidation(() -> repository.existsByAccess_Login(login),
-                        () -> fillLog(NO_PERSON_EXIST, login))
+//                .addValidation(() -> repository.existsByAccess_Login(login),
+//                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
@@ -65,13 +66,15 @@ public class TransactionsController extends AbstractController implements Transa
     public AjaxRs<Transaction> addTransaction(@RequestBody TransactionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<Transaction> requestValidation = new Validator(addContainer, "Getting Transactions")
-                .addValidation(() -> repository.existsByAccess_Login(login),
-                        () -> fillLog(NO_PERSON_EXIST, login))
+        System.out.println("addContainer = " + addContainer);
+
+        RequestValidation<Transaction> requestValidation = new Validator(addContainer, "Adding Transactions")
+//                .addValidation(() -> repository.existsByAccess_Login(login),
+//                        () -> fillLog(NO_PERSON_EXIST, login))
+                .addValidation(() -> settingsDBConnection.isSpendingSectionIDExists(login, addContainer.getTransaction().getSectionID()),
+                        () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, "" + addContainer.getTransaction().getSectionID()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
-
-        // TODO: 06.03.2018 Check that sectionID exists
 
         generateTransactionID(addContainer.getTransaction());
 
@@ -104,8 +107,8 @@ public class TransactionsController extends AbstractController implements Transa
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Transaction> requestValidation = new Validator(updateContainer, "Updating Transaction")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
-                        () -> fillLog(NO_PERSON_EXIST, login))
+//                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
+//                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
@@ -128,11 +131,14 @@ public class TransactionsController extends AbstractController implements Transa
 
     @PostMapping(value = "/deleteTransaction")
     public AjaxRs<Void> deleteTransaction(@RequestBody TransactionDeleteContainer deleteContainer) {
+//        ResponseEntity
+
+
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Void> requestValidation = new Validator(deleteContainer, "Deleting Transaction")
-                .addValidation(() -> repository.existsByAccess_Login(login),
-                        () -> fillLog(NO_PERSON_EXIST, login))
+//                .addValidation(() -> repository.existsByAccess_Login(login),
+//                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 

@@ -1,6 +1,5 @@
 package ru.strcss.projects.moneycalcmigrator;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
@@ -11,7 +10,6 @@ public class MigratorMain implements ApplicationRunner {
 
     private final Parser parser;
 
-    @Autowired
     public MigratorMain(Parser parser) {
         this.parser = parser;
     }

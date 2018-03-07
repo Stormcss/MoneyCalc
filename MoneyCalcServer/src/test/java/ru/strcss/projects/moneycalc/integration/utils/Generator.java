@@ -73,11 +73,11 @@ public class Generator {
     }
 
     public static Transaction generateTransaction() {
-        return generateTransaction(currentDate(), ThreadLocalRandom.current().nextInt(0, 10), ThreadLocalRandom.current().nextInt(10, 2000));
+        return generateTransaction(currentDate(), ThreadLocalRandom.current().nextInt(0, 1), ThreadLocalRandom.current().nextInt(10, 2000));
     }
 
     public static Transaction generateTransaction(LocalDate date) {
-        return generateTransaction(date, ThreadLocalRandom.current().nextInt(0, 10), ThreadLocalRandom.current().nextInt(10, 2000));
+        return generateTransaction(date, ThreadLocalRandom.current().nextInt(0, 1), ThreadLocalRandom.current().nextInt(10, 2000));
     }
 
     public static Transaction generateTransaction(Integer sectionID) {

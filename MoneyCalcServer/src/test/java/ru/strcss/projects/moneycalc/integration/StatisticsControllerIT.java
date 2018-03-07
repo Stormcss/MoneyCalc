@@ -10,7 +10,6 @@ import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.integration.utils.Generator;
 import ru.strcss.projects.moneycalc.integration.utils.Utils;
-import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils;
 
@@ -27,6 +26,7 @@ import static org.testng.Assert.assertEquals;
 import static ru.strcss.projects.moneycalc.integration.utils.StatisticsControllerTestUtils.checkPersonsSections;
 import static ru.strcss.projects.moneycalc.integration.utils.StatisticsControllerTestUtils.getFinanceSummaryBySection;
 import static ru.strcss.projects.moneycalc.integration.utils.Utils.savePersonGetToken;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDateMinus;
 
 public class StatisticsControllerIT extends AbstractIT {
@@ -72,8 +72,8 @@ public class StatisticsControllerIT extends AbstractIT {
     public void singleSection_outPeriod_beforePeriod() {
         System.out.println("singleSection_outPeriod_beforePeriod");
 
-        String rangeFrom = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 5));
-        String rangeTo = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 7));
+        String rangeFrom = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 5));
+        String rangeTo = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 7));
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(1));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
@@ -91,8 +91,8 @@ public class StatisticsControllerIT extends AbstractIT {
     public void singleSection_outPeriod_afterPeriod() {
         System.out.println("singleSection_outPeriod_afterPeriod");
 
-        String rangeFrom = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 4));
-        String rangeTo = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 2));
+        String rangeFrom = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 4));
+        String rangeTo = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 2));
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(1));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
@@ -113,8 +113,8 @@ public class StatisticsControllerIT extends AbstractIT {
         int rangeDays = 3;
         int daysPassed = 1;
 
-        String rangeFrom = ControllerUtils.formatDateToString(LocalDate.now());
-        String rangeTo = ControllerUtils.formatDateToString(GenerationUtils.generateDatePlus(ChronoUnit.DAYS, rangeDays - 1));
+        String rangeFrom = formatDateToString(LocalDate.now());
+        String rangeTo = formatDateToString(GenerationUtils.generateDatePlus(ChronoUnit.DAYS, rangeDays - 1));
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
@@ -134,8 +134,8 @@ public class StatisticsControllerIT extends AbstractIT {
         int rangeDays = 3;
         int daysPassed = 2;
 
-        String rangeFrom = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, 1));
-        String rangeTo = ControllerUtils.formatDateToString(GenerationUtils.generateDatePlus(ChronoUnit.DAYS, 1));
+        String rangeFrom = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 1));
+        String rangeTo = formatDateToString(GenerationUtils.generateDatePlus(ChronoUnit.DAYS, 1));
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
@@ -155,8 +155,8 @@ public class StatisticsControllerIT extends AbstractIT {
         int rangeDays = 3;
         int daysPassed = 3;
 
-        String rangeFrom = ControllerUtils.formatDateToString(generateDateMinus(ChronoUnit.DAYS, rangeDays - 1));
-        String rangeTo = ControllerUtils.formatDateToString(LocalDate.now());
+        String rangeFrom = formatDateToString(generateDateMinus(ChronoUnit.DAYS, rangeDays - 1));
+        String rangeTo = formatDateToString(LocalDate.now());
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);

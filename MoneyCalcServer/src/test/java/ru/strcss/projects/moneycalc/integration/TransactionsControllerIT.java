@@ -9,7 +9,6 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionD
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
-import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils;
 
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -22,8 +21,7 @@ import static ru.strcss.projects.moneycalc.integration.utils.Generator.generateT
 import static ru.strcss.projects.moneycalc.integration.utils.Utils.savePersonGetToken;
 import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDateMinus;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.*;
 
 @Slf4j
 public class TransactionsControllerIT extends AbstractIT {
@@ -44,7 +42,7 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(responseAddTransaction2.getStatus(), Status.SUCCESS, responseAddTransaction2.getMessage());
 
         //Requesting Transactions from today to tomorrow
-        TransactionsSearchContainer containerToday2Tomorrow = new TransactionsSearchContainer(formatDateToString(GenerationUtils.currentDate()),
+        TransactionsSearchContainer containerToday2Tomorrow = new TransactionsSearchContainer(formatDateToString(currentDate()),
                 formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)), Collections.emptyList());
         AjaxRs<List<Transaction>> responseToday2Tomorrow = sendRequest(service.getTransactions(token, containerToday2Tomorrow)).body();
 
@@ -53,7 +51,7 @@ public class TransactionsControllerIT extends AbstractIT {
 
         //Requesting Transactions from yesterday to tomorrow
         TransactionsSearchContainer containerYesterday2Today = new TransactionsSearchContainer(formatDateToString(generateDateMinus(ChronoUnit.DAYS, 1)),
-                formatDateToString(GenerationUtils.currentDate()), Collections.emptyList());
+                formatDateToString(currentDate()), Collections.emptyList());
         AjaxRs<List<Transaction>> responseYesterday2Today = sendRequest(service.getTransactions(token, containerYesterday2Today)).body();
 
         assertEquals(responseYesterday2Today.getStatus(), Status.SUCCESS, responseYesterday2Today.getMessage());
@@ -74,7 +72,7 @@ public class TransactionsControllerIT extends AbstractIT {
     @Test
     public void getTransaction_SectionFilter() {
         int numOfAddedTransactionsPerSection = 5;
-        int numOfSections = 3;
+        int numOfSections = 2; //currently Person by default has only 2 sections
 
         String token = savePersonGetToken(service);
 
@@ -95,7 +93,7 @@ public class TransactionsControllerIT extends AbstractIT {
         for (int sectionID = 0; sectionID < numOfSections; sectionID++) {
             int finalSectionID = sectionID;
             // FIXME: 11.02.2018 I suppose it could be done better
-            TransactionsSearchContainer containerSection1 = new TransactionsSearchContainer(formatDateToString(GenerationUtils.currentDate()),
+            TransactionsSearchContainer containerSection1 = new TransactionsSearchContainer(formatDateToString(currentDate()),
                     formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)), Collections.singletonList(sectionID));
             AjaxRs<List<Transaction>> responseSingleSection = sendRequest(service.getTransactions(token, containerSection1)).body();
 
@@ -106,7 +104,7 @@ public class TransactionsControllerIT extends AbstractIT {
 
         //Requesting Transactions with Multiple Sections
         if (numOfSections > 1) {
-            TransactionsSearchContainer containerSection1 = new TransactionsSearchContainer(formatDateToString(GenerationUtils.currentDate()),
+            TransactionsSearchContainer containerSection1 = new TransactionsSearchContainer(formatDateToString(currentDate()),
                     formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1)), Arrays.asList(0, 1));
             AjaxRs<List<Transaction>> responseMultipleSections = sendRequest(service.getTransactions(token, containerSection1)).body();
 
@@ -118,7 +116,6 @@ public class TransactionsControllerIT extends AbstractIT {
     /**
      * Saving new Transaction to empty list
      */
-
     @Test
     public void saveNewTransaction() {
         String token = savePersonGetToken(service);
@@ -134,6 +131,18 @@ public class TransactionsControllerIT extends AbstractIT {
 
         assertEquals(responseGetTransactions.getStatus(), Status.SUCCESS, responseGetTransactions.getMessage());
         assertEquals(responseGetTransactions.getPayload().size(), 1, "Size of returned Transactions list is not 1!");
+    }
+
+    /**
+     * Saving new Transaction with nonexistent sectionID
+     */
+    @Test
+    public void saveNewTransaction_nonExistentSectionID() {
+        String token = savePersonGetToken(service);
+
+        AjaxRs<Transaction> responseAddTransaction = sendRequest(service.addTransaction(token, new TransactionAddContainer(generateTransaction(10)))).body();
+
+        assertEquals(responseAddTransaction.getStatus(), Status.ERROR, responseAddTransaction.getMessage());
     }
 
     /**
@@ -160,8 +169,8 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(responseDeletedTransaction.getStatus(), Status.SUCCESS, responseDeletedTransaction.getMessage());
 
         //Getting Transactions list
-        AjaxRs<List<Transaction>> responseGetTransactions = sendRequest(service.getTransactions(token, new TransactionsSearchContainer(formatDateToString(GenerationUtils.currentDate()),
-                formatDateToString(GenerationUtils.currentDate()), Collections.emptyList()))).body();
+        AjaxRs<List<Transaction>> responseGetTransactions = sendRequest(service.getTransactions(token, new TransactionsSearchContainer(formatDateToString(currentDate()),
+                formatDateToString(currentDate()), Collections.emptyList()))).body();
         assertEquals(responseGetTransactions.getStatus(), Status.SUCCESS, responseGetTransactions.getMessage());
 
         assertEquals(responseGetTransactions.getPayload().size(), numOfAddedTransactions - 1, "List size after delete has not decreased!");
@@ -194,8 +203,8 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(responseUpdatedTransaction.getStatus(), Status.SUCCESS, responseUpdatedTransaction.getMessage());
 
         //Getting Transactions list
-        AjaxRs<List<Transaction>> responseGetTransactions = sendRequest(service.getTransactions(token, new TransactionsSearchContainer(formatDateToString(GenerationUtils.currentDate()),
-                formatDateToString(GenerationUtils.currentDate()), Collections.emptyList()))).body();
+        AjaxRs<List<Transaction>> responseGetTransactions = sendRequest(service.getTransactions(token, new TransactionsSearchContainer(formatDateToString(currentDate()),
+                formatDateToString(currentDate()), Collections.emptyList()))).body();
         assertEquals(responseGetTransactions.getStatus(), Status.SUCCESS, responseGetTransactions.getMessage());
 
         List<Transaction> transactionsList = responseGetTransactions.getPayload();

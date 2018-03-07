@@ -14,6 +14,8 @@ public class AccessDBConnection {
     }
 
     public Access getAccess(String login) {
-        return repository.findAccessByAccess_Login(login).getAccess();
+        Access access = repository.findAccessByAccess_Login(login).getAccess();
+        access.setPassword(null);
+        return access;
     }
 }

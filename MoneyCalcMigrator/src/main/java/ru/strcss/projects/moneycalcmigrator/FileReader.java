@@ -3,6 +3,7 @@ package ru.strcss.projects.moneycalcmigrator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalcmigrator.api.FileReaderI;
 import ru.strcss.projects.moneycalcmigrator.dto.PairFilesContainer;
 import ru.strcss.projects.moneycalcmigrator.dto.TransactionParseContainer;
 
@@ -18,9 +19,9 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Component
-public class FileReader {
+public class FileReader implements FileReaderI {
 
-    Map<String, PairFilesContainer> groupFiles(String filesPath) throws IOException {
+    public Map<String, PairFilesContainer> groupFiles(String filesPath) {
         Pattern periodPattern = Pattern.compile("MoneyCalc(Data|Info)_(.*?).txt");
         Map<String, PairFilesContainer> filesEntries = new HashMap<>(32);
 
@@ -35,6 +36,8 @@ public class FileReader {
                             filesEntries.put(matcher.group(2), generateContainer(matcher.group(1), tempContainer, path.toString()));
                         }
                     });
+        } catch (IOException e) {
+            throw new RuntimeException("Can not group Data and Info files!", e);
         }
         return filesEntries;
     }
@@ -45,12 +48,14 @@ public class FileReader {
      * @param fileName - file name
      * @return Set of SpendingSection names
      */
-    public Set<String> parseDataFile(String folderPath, String fileName) throws IOException {
+    public Set<String> parseDataFile(String folderPath, String fileName) {
         try (Stream<String> stream = Files.lines(Paths.get(folderPath + "\\" + fileName))) {
             return stream
                     .skip(14)
                     .limit(2)
                     .collect(Collectors.toSet());
+        } catch (IOException e) {
+            throw new RuntimeException("Can not parse Data File!", e);
         }
     }
 
@@ -60,12 +65,14 @@ public class FileReader {
      * @param fileName - file name
      * @return List of Transactions
      */
-    public List<Transaction> parseInfoFile(String folderPath, String fileName) throws IOException {
+    public List<Transaction> parseInfoFile(String folderPath, String fileName){
         try (Stream<String> stream = Files.lines(Paths.get(folderPath + "\\" + fileName))) {
             // TODO: 19.02.2018 add other sections as well
             return stream.map(this::buildTransaction)
-                    .peek(t -> log.debug("transaction: {}", t))
+                    .peek(t -> log.trace("transaction: {}", t))
                     .collect(Collectors.toList());
+        } catch (IOException e) {
+            throw new RuntimeException("Can not parse Info File!", e);
         }
     }
 
@@ -87,7 +94,7 @@ public class FileReader {
     private Transaction buildTransaction(String line) {
         TransactionParseContainer parseContainer = parseTransactionLine(line);
         return Transaction.builder()
-                .sectionID(parseContainer.getId() - 1) // FIXME: 19.02.2018 Only 0 and 1 are created
+                .sectionID(parseContainer.getId()) // FIXME: 19.02.2018 Only 0 and 1 are created
                 .date(parseContainer.getDate())
                 .sum(parseContainer.getSum())
                 .description(parseContainer.getDescription())

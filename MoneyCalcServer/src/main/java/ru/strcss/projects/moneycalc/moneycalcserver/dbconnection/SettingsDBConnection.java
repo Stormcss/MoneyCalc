@@ -211,4 +211,10 @@ public class SettingsDBConnection{
                 .and("settings.sections.name").is(name));
         return !mongoTemplate.exists(getSpendingSectionQuery, Person.class);
     }
+
+    public boolean isSpendingSectionIDExists(String login, Integer id) {
+        Query getSpendingSectionQuery = query(where("access.login").is(login)
+                .and("settings.sections._id").is(id));
+        return mongoTemplate.exists(getSpendingSectionQuery, Person.class);
+    }
 }

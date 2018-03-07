@@ -27,6 +27,10 @@ public class RegistrationDBConnection {
         return repository.existsByAccess_Login(login);
     }
 
+    public boolean isPersonExistsByEmail(String email) {
+        return repository.existsByAccess_Email(email);
+    }
+
     /**
      * Get Access object from DB by login
      *

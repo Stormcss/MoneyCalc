@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.TodayPositionRange;
 
 import java.time.Period;
@@ -13,6 +12,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateFromString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.*;
 
 @Slf4j
@@ -90,7 +90,7 @@ public class SummaryStatisticsHandler {
             FinanceSummaryBySection temporary = statistics.get(sectionID);
 
             temporary.setMoneySpendAll(temporary.getMoneySpendAll() + transaction.getSum());
-            if (spendTodayBySection != null && ControllerUtils.formatDateFromString(transaction.getDate()).isEqual(container.getToday())) {
+            if (spendTodayBySection != null && formatDateFromString(transaction.getDate()).isEqual(container.getToday())) {
                 spendTodayBySection.put(sectionID, spendTodayBySection.getOrDefault(sectionID, 0d) + transaction.getSum());
             }
             statistics.put(sectionID, temporary);

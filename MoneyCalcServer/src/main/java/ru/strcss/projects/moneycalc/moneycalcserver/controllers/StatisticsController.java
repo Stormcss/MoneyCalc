@@ -1,7 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -18,6 +17,7 @@ import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
+import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.TransactionsDBConnection;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
@@ -37,7 +37,6 @@ public class StatisticsController extends AbstractController implements Statisti
     private SettingsDBConnection settingsDBConnection;
     private SummaryStatisticsHandler statisticsHandler;
 
-    @Autowired
     public StatisticsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection, SummaryStatisticsHandler statisticsHandler) {
         this.transactionsDBConnection = transactionsDBConnection;
         this.settingsDBConnection = settingsDBConnection;
@@ -50,8 +49,12 @@ public class StatisticsController extends AbstractController implements Statisti
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(getContainer, "Getting Finance Summary")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
-                        () -> fillLog(NO_PERSON_EXIST, login))
+//                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
+//                        () -> fillLog(NO_PERSON_EXIST, login))
+                .addValidation(() -> ValidationUtils.isDateCorrect(getContainer.getRangeFrom()),
+                        () -> fillLog(DATE_INCORRECT, getContainer.getRangeFrom()))
+                .addValidation(() -> ValidationUtils.isDateCorrect(getContainer.getRangeTo()),
+                        () -> fillLog(DATE_INCORRECT, getContainer.getRangeTo()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
