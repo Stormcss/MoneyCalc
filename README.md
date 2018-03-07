@@ -1,0 +1,1 @@
+# MoneyCalc [![Build Status](https://travis-ci.org/Stormcss/MoneyCalc.svg?branch=master)](https://travis-ci.org/Stormcss/MoneyCalc)
