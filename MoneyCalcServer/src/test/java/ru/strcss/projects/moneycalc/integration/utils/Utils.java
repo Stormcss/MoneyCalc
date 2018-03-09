@@ -9,12 +9,13 @@ import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
+import ru.strcss.projects.moneycalc.testutils.Generator;
 
 import java.io.IOException;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static ru.strcss.projects.moneycalc.integration.utils.Generator.generateCredentials;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateCredentials;
 
 @Slf4j
 public class Utils {

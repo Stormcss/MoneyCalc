@@ -2,7 +2,6 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.strcss.projects.moneycalc.api.SettingsAPIService;
@@ -17,6 +16,7 @@ import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.mongo.PersonRepository;
 
 import java.util.List;
 
@@ -28,10 +28,11 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 public class SettingsController extends AbstractController implements SettingsAPIService {
 
     private SettingsDBConnection settingsDBConnection;
+    private PersonRepository repository;
 
-    @Autowired
-    public SettingsController(SettingsDBConnection settingsDBConnection) {
+    public SettingsController(SettingsDBConnection settingsDBConnection, PersonRepository repository) {
         this.settingsDBConnection = settingsDBConnection;
+        this.repository = repository;
     }
 
     /**
@@ -45,7 +46,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Settings> requestValidation = new Validator(updateContainer, "Saving Settings")
-                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
+                .addValidation(() -> repository.existsByAccess_Login(login),
                         () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
@@ -78,7 +79,7 @@ public class SettingsController extends AbstractController implements SettingsAP
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Settings settings = settingsDBConnection.getSettings(login).getSettings();
+        Settings settings = settingsDBConnection.getSettings(login);
 
         if (settings != null) {
             log.debug("returning PersonalSettings for login {}: {}", login, settings);
@@ -127,7 +128,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer, "Updating SpendingSection")
                 .addValidation(() -> repository.existsByAccess_Login(login),
                         () -> fillLog(NO_PERSON_EXIST, login))
-                .addValidation(() -> checkNewNameIsAllowed(login, updateContainer),
+                .addValidation(() -> isNewNameAllowed(login, updateContainer),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, updateContainer.getSpendingSection().getName()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
@@ -141,7 +142,7 @@ public class SettingsController extends AbstractController implements SettingsAP
             updateResult = settingsDBConnection.updateSpendingSectionById(login, updateContainer);
         }
 
-        // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
+        // TODO: 07.02.2018 Find out if there are more reliable ways of checking update success
 
         if (updateResult.getN() == 0) {
             log.error("Updating SpendingSection for login {} has failed", login);
@@ -208,17 +209,26 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @param updateContainer
      * @return
      */
-    private Boolean checkNewNameIsAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
+    private Boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
+
         if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_ID) || updateContainer.getSpendingSection().getName() == null)
             return true;
-
         List<SpendingSection> sectionList = settingsDBConnection.getSpendingSectionList(login);
+        boolean isNameChanges = !updateContainer.getIdOrName().equals(updateContainer.getSpendingSection().getName());
 
-        boolean nameIsNew = !updateContainer.getIdOrName().equals(updateContainer.getSpendingSection().getName());
-        boolean newNameExists = sectionList.stream()
+        boolean isNewNameExists = sectionList.stream()
                 .anyMatch(spendingSection -> spendingSection.getName().equals(updateContainer.getSpendingSection().getName()));
-        if (nameIsNew && newNameExists)
+        if (isNameChanges && isNewNameExists)
             return false;
         return true;
     }
+
+//    private Boolean isNewIdAllowed(String login, SpendingSectionUpdateContainer updateContainer, List<SpendingSection> sectionList) {
+//        boolean isIdNew = !updateContainer.getIdOrName().equals(updateContainer.getSpendingSection().getName());
+//        boolean isNewIdExists = sectionList.stream()
+//                .anyMatch(spendingSection -> spendingSection.getName().equals(updateContainer.getSpendingSection().getName()));
+//        if (isIdNew && isNewIdExists)
+//            return false;
+//        return true;
+//    }
 }

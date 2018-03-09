@@ -12,7 +12,6 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionU
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Settings;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.integration.utils.Generator;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
 
 import java.time.temporal.ChronoUnit;
@@ -20,10 +19,11 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.testng.Assert.*;
-import static ru.strcss.projects.moneycalc.integration.utils.Generator.generateSpendingSection;
 import static ru.strcss.projects.moneycalc.integration.utils.Utils.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateSettings;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSection;
 
 @Slf4j
 public class SettingsControllerIT extends AbstractIT {
@@ -34,12 +34,12 @@ public class SettingsControllerIT extends AbstractIT {
         String login = loginAndToken.getLeft();
         String token = loginAndToken.getRight();
 
-        Settings settingsIncorrect = Generator.generateSettings(login);
+        Settings settingsIncorrect = generateSettings(login, false);
         settingsIncorrect.setLogin("");
 
-        AjaxRs<Settings> response = sendRequest(service.saveSettings(token, new SettingsUpdateContainer(settingsIncorrect))).body();
+        AjaxRs<Settings> saveSettingsRs = sendRequest(service.saveSettings(token, new SettingsUpdateContainer(settingsIncorrect))).body();
 
-        assertEquals(response.getStatus(), Status.ERROR, "Incorrect Settings are saved!");
+        assertEquals(saveSettingsRs.getStatus(), Status.ERROR, "Incorrect Settings are saved!");
     }
 
     @Test
@@ -49,9 +49,9 @@ public class SettingsControllerIT extends AbstractIT {
         SpendingSection spendingSection = generateSpendingSection();
 
         sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
-        AjaxRs<List<SpendingSection>> responseAddSection = sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection))).body();
+        AjaxRs<List<SpendingSection>> addSectionRs = sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection))).body();
 
-        assertEquals(responseAddSection.getStatus(), Status.ERROR, responseAddSection.getMessage());
+        assertEquals(addSectionRs.getStatus(), Status.ERROR, addSectionRs.getMessage());
     }
 
     @Test
@@ -60,10 +60,10 @@ public class SettingsControllerIT extends AbstractIT {
         String login = loginAndToken.getLeft();
         String token = loginAndToken.getRight();
 
-        AjaxRs<Settings> responseGetSettings = sendRequest(service.getSettings(token), Status.SUCCESS).body();
+        AjaxRs<Settings> getSettingsRs = sendRequest(service.getSettings(token), Status.SUCCESS).body();
 
-        assertEquals(responseGetSettings.getPayload().getLogin(), login, "returned Settings object has wrong login!");
-        assertTrue(responseGetSettings.getPayload().getSections()
+        assertEquals(getSettingsRs.getPayload().getLogin(), login, "returned Settings object has wrong login!");
+        assertTrue(getSettingsRs.getPayload().getSections()
                 .stream().allMatch(section -> section.getId() != null), "Some IDs in Spending Sections are null!");
     }
 
@@ -72,20 +72,20 @@ public class SettingsControllerIT extends AbstractIT {
         Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
         String login = loginAndToken.getLeft();
         String token = loginAndToken.getRight();
-        Settings newSettings = Generator.generateSettings(login);
+        Settings newSettings = generateSettings(login, false);
         newSettings.setPeriodTo(formatDateToString(generateDatePlus(ChronoUnit.YEARS, 1)));
 
         //Updating Settings
-        AjaxRs<Settings> responseUpdated = sendRequest(service.saveSettings(token, new SettingsUpdateContainer(newSettings)), Status.SUCCESS).body();
+        AjaxRs<Settings> updatedRs = sendRequest(service.saveSettings(token, new SettingsUpdateContainer(newSettings)), Status.SUCCESS).body();
 
-        assertNotNull(responseUpdated.getPayload(), "Payload is null!");
-        assertEquals(responseUpdated.getPayload().getLogin(), login, "returned Settings object has wrong login!");
+        assertNotNull(updatedRs.getPayload(), "Payload is null!");
+        assertEquals(updatedRs.getPayload().getLogin(), login, "returned Settings object has wrong login!");
         assertEquals(newSettings.getPeriodTo(),
-                responseUpdated.getPayload().getPeriodTo(), "Settings were not updated!");
+                updatedRs.getPayload().getPeriodTo(), "Settings were not updated!");
 
         //Checking that Person is ok after updating Settings
-        AjaxRs<Identifications> responseIdentifications = sendRequest(service.getIdentifications(token)).body();
-        assertNotNull(responseIdentifications.getPayload(), "Identifications object was overwritten!");
+        AjaxRs<Identifications> identificationsRs = sendRequest(service.getIdentifications(token)).body();
+        assertNotNull(identificationsRs.getPayload(), "Identifications object was overwritten!");
     }
 
     @Test
@@ -96,8 +96,8 @@ public class SettingsControllerIT extends AbstractIT {
         SpendingSectionAddContainer spendingSectionContainer =
                 new SpendingSectionAddContainer(spendingSection);
 
-        AjaxRs<List<SpendingSection>> responseAddSection = sendRequest(service.addSpendingSection(token, spendingSectionContainer), Status.SUCCESS).body();
-        assertTrue(responseAddSection.getPayload().stream().anyMatch(section -> section.getName().equals(spendingSection.getName())),
+        AjaxRs<List<SpendingSection>> addSectionRs = sendRequest(service.addSpendingSection(token, spendingSectionContainer), Status.SUCCESS).body();
+        assertTrue(addSectionRs.getPayload().stream().anyMatch(section -> section.getName().equals(spendingSection.getName())),
                 "Spending Section was not added!");
     }
 
@@ -109,8 +109,8 @@ public class SettingsControllerIT extends AbstractIT {
         SpendingSectionDeleteContainer deleteContainerByName =
                 new SpendingSectionDeleteContainer(spendingSection.getName(), SpendingSectionSearchType.BY_NAME);
 
-        AjaxRs<List<SpendingSection>> responseDeleteSection = sendRequest(service.deleteSpendingSection(token, deleteContainerByName), Status.SUCCESS).body();
-        assertTrue(responseDeleteSection.getPayload().stream().noneMatch(section -> section.getName().equals(spendingSection.getName())),
+        AjaxRs<List<SpendingSection>> deleteSectionRs = sendRequest(service.deleteSpendingSection(token, deleteContainerByName), Status.SUCCESS).body();
+        assertTrue(deleteSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(spendingSection.getName())),
                 "Spending Section was not deleted!");
     }
 
@@ -122,8 +122,8 @@ public class SettingsControllerIT extends AbstractIT {
         SpendingSectionDeleteContainer deleteContainerById =
                 new SpendingSectionDeleteContainer("" + spendingSection.getId(), SpendingSectionSearchType.BY_ID);
 
-        AjaxRs<List<SpendingSection>> responseDeleteSection = sendRequest(service.deleteSpendingSection(token, deleteContainerById), Status.SUCCESS).body();
-        assertTrue(responseDeleteSection.getPayload().stream().noneMatch(section -> section.getName().equals(spendingSection.getName())),
+        AjaxRs<List<SpendingSection>> deleteSectionRs = sendRequest(service.deleteSpendingSection(token, deleteContainerById), Status.SUCCESS).body();
+        assertTrue(deleteSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(spendingSection.getName())),
                 "Spending Section was not deleted!");
     }
 
@@ -135,7 +135,7 @@ public class SettingsControllerIT extends AbstractIT {
         log.debug("Saved SpendingSection: {}", spendingSection);
 
         SpendingSectionAddContainer spendingSectionContainer = new SpendingSectionAddContainer(spendingSection);
-        AjaxRs<List<SpendingSection>> responseAddSpendingSection = sendRequest(service.addSpendingSection(token, spendingSectionContainer), Status.SUCCESS).body();
+        AjaxRs<List<SpendingSection>> addSpendingSectionRs = sendRequest(service.addSpendingSection(token, spendingSectionContainer), Status.SUCCESS).body();
 
         Integer oldBudget = spendingSection.getBudget();
         spendingSection.setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
@@ -143,11 +143,11 @@ public class SettingsControllerIT extends AbstractIT {
         SpendingSectionUpdateContainer updateContainerByName =
                 new SpendingSectionUpdateContainer("" + spendingSection.getName(), spendingSection, SpendingSectionSearchType.BY_NAME);
 
-        AjaxRs<List<SpendingSection>> responseUpdateSection = sendRequest(service.updateSpendingSection(token, updateContainerByName), Status.SUCCESS).body();
-        assertTrue(responseUpdateSection.getPayload().stream().noneMatch(section -> section.getBudget().equals(oldBudget)),
+        AjaxRs<List<SpendingSection>> updateSectionRs = sendRequest(service.updateSpendingSection(token, updateContainerByName), Status.SUCCESS).body();
+        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getBudget().equals(oldBudget)),
                 "Spending Section was not updated!");
-        assertEquals(responseAddSpendingSection.getPayload().size(), responseUpdateSection.getPayload().size(), "Number of Spending Sections has changed!");
-        assertTrue(responseUpdateSection.getPayload().stream().noneMatch(section -> section.getId() == null), "Some Section IDs are null!");
+        assertEquals(addSpendingSectionRs.getPayload().size(), updateSectionRs.getPayload().size(), "Number of Spending Sections has changed!");
+        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getId() == null), "Some Section IDs are null!");
     }
 
     @Test
@@ -156,19 +156,19 @@ public class SettingsControllerIT extends AbstractIT {
         SpendingSection spendingSection = generateSpendingSection();
         Integer updatedSectionID = 0;
 
-        AjaxRs<List<SpendingSection>> responseGetSections = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+        AjaxRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
 
-        String oldName = responseGetSections.getPayload().stream().filter(section -> section.getId().equals(updatedSectionID)).findAny().get().getName();
+        String oldName = getSectionsRs.getPayload().stream().filter(section -> section.getId().equals(updatedSectionID)).findAny().get().getName();
         spendingSection.setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
 
         SpendingSectionUpdateContainer updateContainerById =
                 new SpendingSectionUpdateContainer(Integer.toString(updatedSectionID), spendingSection, SpendingSectionSearchType.BY_ID);
 
-        AjaxRs<List<SpendingSection>> responseUpdateSection = sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body();
-        assertTrue(responseUpdateSection.getPayload().stream().noneMatch(section -> section.getName().equals(oldName)),
+        AjaxRs<List<SpendingSection>> updateSectionRs = sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body();
+        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(oldName)),
                 "Spending Section was not updated!");
-        assertEquals(responseGetSections.getPayload().size(), responseUpdateSection.getPayload().size(), "Number of Spending Sections has changed!");
-        assertTrue(responseUpdateSection.getPayload().stream().noneMatch(section -> section.getId() == null), "Some Section IDs are null!");
+        assertEquals(getSectionsRs.getPayload().size(), updateSectionRs.getPayload().size(), "Number of Spending Sections has changed!");
+        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getId() == null), "Some Section IDs are null!");
     }
 
     @Test
@@ -180,19 +180,19 @@ public class SettingsControllerIT extends AbstractIT {
         sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection1)), Status.SUCCESS).body();
         sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection2)), Status.SUCCESS).body();
 
-        AjaxRs<List<SpendingSection>> responseUpdateSection =
+        AjaxRs<List<SpendingSection>> updateSectionRs =
                 sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(spendingSection1.getName(),
                         spendingSection2, SpendingSectionSearchType.BY_NAME))).body();
 
-        assertEquals(responseUpdateSection.getStatus(), Status.ERROR, responseUpdateSection.getMessage());
+        assertEquals(updateSectionRs.getStatus(), Status.ERROR, updateSectionRs.getMessage());
     }
 
     @Test
     public void getSpendingSections() {
         String token = savePersonGetToken(service);
 
-        AjaxRs<List<SpendingSection>> responseGetSections = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+        AjaxRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
 
-        assertEquals(responseGetSections.getPayload().size(), 2, "Wrong number of spending sections is returned!");
+        assertEquals(getSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
     }
 }

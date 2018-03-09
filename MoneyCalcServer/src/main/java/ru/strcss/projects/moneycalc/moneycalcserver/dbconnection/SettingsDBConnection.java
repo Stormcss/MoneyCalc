@@ -36,8 +36,8 @@ public class SettingsDBConnection{
         this.mongoTemplate = mongoTemplate;
     }
 
-    public Person getSettings(String login) {
-        return repository.findSettingsByAccess_Login(login.replace("\"", ""));
+    public Settings getSettings(String login) {
+        return repository.findSettingsByAccess_Login(login.replace("\"", "")).getSettings();
     }
 
     /**

@@ -8,10 +8,10 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummary
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
-import ru.strcss.projects.moneycalc.integration.utils.Generator;
 import ru.strcss.projects.moneycalc.integration.utils.Utils;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils;
+import ru.strcss.projects.moneycalc.testutils.Generator;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

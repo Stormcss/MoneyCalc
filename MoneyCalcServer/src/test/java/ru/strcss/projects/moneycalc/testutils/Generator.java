@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.integration.utils;
+package ru.strcss.projects.moneycalc.testutils;
 
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.enitities.*;
@@ -38,12 +38,12 @@ public class Generator {
                 .build();
     }
 
-    public static Settings generateSettings(String login) {
+    public static Settings generateSettings(String login, boolean withSections) {
         return Settings.builder()
                 .login(login)
                 .periodFrom(formatDateToString(currentDate()))
                 .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
-//                .sections(Stream.generate(Generator::generateSpendingSection).limit(numOfSections).collect(Collectors.toList()))
+                .sections(withSections ? Stream.generate(Generator::generateSpendingSection).limit(2).collect(Collectors.toList()) : null)
                 .build();
     }
 
@@ -109,6 +109,7 @@ public class Generator {
                 .name("Магазин" + ThreadLocalRandom.current().nextInt(2000))
                 .build();
     }
+
     public static SpendingSection generateSpendingSection(Integer budget) {
         return SpendingSection.builder()
                 .budget(budget)
@@ -116,6 +117,7 @@ public class Generator {
                 .name("Магазин" + ThreadLocalRandom.current().nextInt(1000))
                 .build();
     }
+
     public static SpendingSection generateSpendingSection(Integer budget, Integer id) {
         return SpendingSection.builder()
                 .budget(budget)

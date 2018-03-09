@@ -12,7 +12,8 @@ import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.AccessDBConnection;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 
 @Slf4j
 @RestController
@@ -36,8 +37,8 @@ public class AccessController extends AbstractController implements AccessAPISer
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Access> requestValidation = new RequestValidation.Validator(null, "Requesting Access")
-                .addValidation(() -> repository.existsByAccess_Login(login),
-                        () -> fillLog(NO_PERSON_EXIST, login))
+//                .addValidation(() -> repository.existsByAccess_Login(login),
+//                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 

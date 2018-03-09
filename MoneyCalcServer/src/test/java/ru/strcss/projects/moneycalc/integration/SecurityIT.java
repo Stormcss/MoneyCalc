@@ -17,8 +17,8 @@ public class SecurityIT extends AbstractIT {
         String login = loginAndToken.getLeft();
         String token = loginAndToken.getRight();
 
-        AjaxRs<Access> responseAccess = sendRequest(service.getAccess(token), Status.SUCCESS).body();
+        AjaxRs<Access> getAccessRs = sendRequest(service.getAccess(token), Status.SUCCESS).body();
 
-        assertEquals(responseAccess.getPayload().getLogin(), login, "Login is not the same!");
+        assertEquals(getAccessRs.getPayload().getLogin(), login, "Login is not the same!");
     }
 }

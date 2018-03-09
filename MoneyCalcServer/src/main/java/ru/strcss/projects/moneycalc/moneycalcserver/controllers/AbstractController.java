@@ -1,15 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoOperations;
-import ru.strcss.projects.moneycalc.moneycalcserver.mongo.PersonRepository;
-
 public abstract class AbstractController {
-    @Autowired
-    public PersonRepository repository;
-
-    @Autowired
-    MongoOperations mongoOperations;
 
     final String REGISTER_SUCCESSFUL = "Person successfully registered";
     final String NO_PERSON_EXIST = "Person with login %s does not exist!";

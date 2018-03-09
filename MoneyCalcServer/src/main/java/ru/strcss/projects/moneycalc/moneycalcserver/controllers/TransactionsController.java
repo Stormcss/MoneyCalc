@@ -18,6 +18,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.Reque
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.TransactionsDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.mongo.PersonRepository;
 
 import java.util.List;
 
@@ -32,10 +33,12 @@ public class TransactionsController extends AbstractController implements Transa
 
     private TransactionsDBConnection transactionsDBConnection;
     private SettingsDBConnection settingsDBConnection;
+    private PersonRepository repository;
 
-    public TransactionsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection) {
+    public TransactionsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection, PersonRepository repository) {
         this.transactionsDBConnection = transactionsDBConnection;
         this.settingsDBConnection = settingsDBConnection;
+        this.repository = repository;
     }
 
     /**
@@ -131,8 +134,6 @@ public class TransactionsController extends AbstractController implements Transa
 
     @PostMapping(value = "/deleteTransaction")
     public AjaxRs<Void> deleteTransaction(@RequestBody TransactionDeleteContainer deleteContainer) {
-//        ResponseEntity
-
 
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 

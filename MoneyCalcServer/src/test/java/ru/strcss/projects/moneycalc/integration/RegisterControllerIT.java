@@ -6,45 +6,45 @@ import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalc.integration.utils.Generator;
+import ru.strcss.projects.moneycalc.testutils.Generator;
 
 import static org.testng.Assert.assertEquals;
-import static ru.strcss.projects.moneycalc.integration.utils.Generator.generateCredentials;
 import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateCredentials;
 
 @Slf4j
 public class RegisterControllerIT extends AbstractIT {
 
     @Test
     public void registerCorrectPerson() {
-        AjaxRs<Person> response = sendRequest(service.registerPerson(generateCredentials())).body();
+        AjaxRs<Person> registerRs = sendRequest(service.registerPerson(generateCredentials())).body();
 
-        assertEquals(response.getStatus(), Status.SUCCESS, response.getMessage());
+        assertEquals(registerRs.getStatus(), Status.SUCCESS, registerRs.getMessage());
     }
 
     @Test
     public void registerExistingLoginPerson() {
         String login = Generator.UUID();
 
-        AjaxRs<Person> saveNewResponse = sendRequest(service.registerPerson(generateCredentials(login))).body();
-        assertEquals(saveNewResponse.getStatus(), Status.SUCCESS, "New Person was not saved!");
+        AjaxRs<Person> registerNewRs = sendRequest(service.registerPerson(generateCredentials(login))).body();
+        assertEquals(registerNewRs.getStatus(), Status.SUCCESS, "New Person was not saved!");
 
-        AjaxRs<Person> saveExistingResponse = sendRequest(service.registerPerson(generateCredentials(login))).body();
-        assertEquals(saveExistingResponse.getStatus(), Status.ERROR, "Existing Person was saved!");
+        AjaxRs<Person> saveExistingRs = sendRequest(service.registerPerson(generateCredentials(login))).body();
+        assertEquals(saveExistingRs.getStatus(), Status.ERROR, "Existing Person was saved!");
     }
 
     @Test
     public void registerExistingEmailPerson() {
         Credentials credentials = generateCredentials();
 
-        AjaxRs<Person> saveNewResponse = sendRequest(service.registerPerson(credentials)).body();
-        assertEquals(saveNewResponse.getStatus(), Status.SUCCESS, "New Person was not saved!");
+        AjaxRs<Person> saveNewRs = sendRequest(service.registerPerson(credentials)).body();
+        assertEquals(saveNewRs.getStatus(), Status.SUCCESS, "New Person was not saved!");
 
         //Creating new Credentials with the same Email
         credentials.getAccess().setLogin(Generator.UUID());
 
-        AjaxRs<Person> saveExistingResponse = sendRequest(service.registerPerson(credentials)).body();
-        assertEquals(saveExistingResponse.getStatus(), Status.ERROR, "Person with existing email was saved!");
+        AjaxRs<Person> saveExistingRs = sendRequest(service.registerPerson(credentials)).body();
+        assertEquals(saveExistingRs.getStatus(), Status.ERROR, "Person with existing email was saved!");
     }
 
     @Test
@@ -52,9 +52,9 @@ public class RegisterControllerIT extends AbstractIT {
         Credentials credentials = generateCredentials();
         credentials.getAccess().setPassword(null);
 
-        AjaxRs<Person> response = sendRequest(service.registerPerson(credentials)).body();
+        AjaxRs<Person> saveRs = sendRequest(service.registerPerson(credentials)).body();
 
-        assertEquals(response.getStatus(), Status.ERROR, "Person with empty password was saved!");
+        assertEquals(saveRs.getStatus(), Status.ERROR, "Person with empty password was saved!");
     }
 
     @Test
@@ -62,9 +62,9 @@ public class RegisterControllerIT extends AbstractIT {
         Credentials credentials = generateCredentials();
         credentials.getAccess().setEmail(null);
 
-        AjaxRs<Person> response = sendRequest(service.registerPerson(credentials)).body();
+        AjaxRs<Person> saveRs = sendRequest(service.registerPerson(credentials)).body();
 
-        assertEquals(response.getStatus(), Status.ERROR, "Person with empty Email was saved!");
+        assertEquals(saveRs.getStatus(), Status.ERROR, "Person with empty Email was saved!");
     }
 
     @Test
@@ -72,9 +72,9 @@ public class RegisterControllerIT extends AbstractIT {
         Credentials credentials = generateCredentials();
         credentials.getAccess().setEmail("123");
 
-        AjaxRs<Person> response = sendRequest(service.registerPerson(credentials)).body();
+        AjaxRs<Person> saveRs = sendRequest(service.registerPerson(credentials)).body();
 
-        assertEquals(response.getStatus(), Status.ERROR, "Person with incorrect Email was saved!");
+        assertEquals(saveRs.getStatus(), Status.ERROR, "Person with incorrect Email was saved!");
     }
 
     @Test
@@ -82,9 +82,9 @@ public class RegisterControllerIT extends AbstractIT {
         Credentials credentials = generateCredentials();
         credentials.getAccess().setLogin(null);
 
-        AjaxRs<Person> response = sendRequest(service.registerPerson(credentials)).body();
+        AjaxRs<Person> registerRs = sendRequest(service.registerPerson(credentials)).body();
 
-        assertEquals(response.getStatus(), Status.ERROR, "Person with empty login was saved!");
+        assertEquals(registerRs.getStatus(), Status.ERROR, "Person with empty login was saved!");
     }
 
     @Test
@@ -95,8 +95,8 @@ public class RegisterControllerIT extends AbstractIT {
         credentials.getAccess().setEmail(null);
         credentials.getIdentifications().setName(null);
 
-        AjaxRs<Person> response = sendRequest(service.registerPerson(credentials)).body();
+        AjaxRs<Person> saveRs = sendRequest(service.registerPerson(credentials)).body();
 
-        assertEquals(response.getStatus(), Status.ERROR, response.getMessage());
+        assertEquals(saveRs.getStatus(), Status.ERROR, saveRs.getMessage());
     }
 }

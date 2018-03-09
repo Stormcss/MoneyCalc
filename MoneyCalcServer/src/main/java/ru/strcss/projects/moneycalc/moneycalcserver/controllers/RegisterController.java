@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -27,10 +28,12 @@ public class RegisterController extends AbstractController implements RegisterAP
 
     private RegistrationDBConnection registrationDBConnection;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private MongoTemplate mongoTemplate;
 
-    public RegisterController(RegistrationDBConnection registrationDBConnection, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public RegisterController(RegistrationDBConnection registrationDBConnection, BCryptPasswordEncoder bCryptPasswordEncoder, MongoTemplate mongoTemplate) {
         this.registrationDBConnection = registrationDBConnection;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.mongoTemplate = mongoTemplate;
     }
 
     /**
@@ -70,8 +73,8 @@ public class RegisterController extends AbstractController implements RegisterAP
 //                .then(() -> mongoOperations.save(person, "Person"))
 //                .endTransaction();
 
-        mongoOperations.save(getRegisteringPersonTransactions(login), "Transactions");
-        mongoOperations.save(getRegisteringPerson(login, credentials), "Person");
+        mongoTemplate.save(getRegisteringPersonTransactions(login), "Transactions");
+        mongoTemplate.save(getRegisteringPerson(login, credentials), "Person");
 
 
         // TODO: 02.02.2018 validate if save is successful

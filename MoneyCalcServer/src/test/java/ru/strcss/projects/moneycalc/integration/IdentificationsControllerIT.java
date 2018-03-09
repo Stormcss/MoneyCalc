@@ -11,8 +11,8 @@ import ru.strcss.projects.moneycalc.integration.utils.Pair;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static ru.strcss.projects.moneycalc.integration.utils.Generator.generateIdentifications;
 import static ru.strcss.projects.moneycalc.integration.utils.Utils.*;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateIdentifications;
 
 @Slf4j
 public class IdentificationsControllerIT extends AbstractIT {
@@ -24,15 +24,15 @@ public class IdentificationsControllerIT extends AbstractIT {
         String token = credentialsAndToken.getRight();
 
         //Updating default Identifications
-        AjaxRs<Identifications> responseSaveIdentifications =
+        AjaxRs<Identifications> saveIdentificationsRs =
                 sendRequest(service.saveIdentifications(token, new IdentificationsUpdateContainer(credentials.getIdentifications())), Status.SUCCESS).body();
-        assertNotNull(responseSaveIdentifications.getPayload(), "Payload is null!");
-        assertNotNull(responseSaveIdentifications.getPayload().getName(), "Identifications object is empty!");
+        assertNotNull(saveIdentificationsRs.getPayload(), "Payload is null!");
+        assertNotNull(saveIdentificationsRs.getPayload().getName(), "Identifications object is empty!");
 
         //Requesting updated Identifications
-        AjaxRs<Identifications> responseGetUpdated = sendRequest(service.getIdentifications(token), Status.SUCCESS).body();
-//        assertEquals(responseGetUpdated.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
-        assertEquals(responseGetUpdated.getPayload().getName(), credentials.getIdentifications().getName(),
+        AjaxRs<Identifications> getUpdatedRs = sendRequest(service.getIdentifications(token), Status.SUCCESS).body();
+//        assertEquals(getUpdatedRs.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
+        assertEquals(getUpdatedRs.getPayload().getName(), credentials.getIdentifications().getName(),
                 "returned Identifications object has wrong name!");
     }
 
@@ -43,9 +43,9 @@ public class IdentificationsControllerIT extends AbstractIT {
         identificationsIncorrect.setName(null);
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(identificationsIncorrect);
 
-        AjaxRs<Identifications> response = sendRequest(service.saveIdentifications(token, updateContainer)).body();
+        AjaxRs<Identifications> saveIdentificationsRs = sendRequest(service.saveIdentifications(token, updateContainer)).body();
 
-        assertEquals(response.getStatus(), Status.ERROR, "Identifications object with incorrect Name is saved!");
+        assertEquals(saveIdentificationsRs.getStatus(), Status.ERROR, "Identifications object with incorrect Name is saved!");
     }
 
     @Test
@@ -54,9 +54,9 @@ public class IdentificationsControllerIT extends AbstractIT {
         Credentials credentials = credentialsAndToken.getLeft();
         String token = credentialsAndToken.getRight();
 
-        AjaxRs<Identifications> response = sendRequest(service.getIdentifications(token), Status.SUCCESS).body();
+        AjaxRs<Identifications> getIdentificationsRs = sendRequest(service.getIdentifications(token), Status.SUCCESS).body();
 
-        assertEquals(response.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
+        assertEquals(getIdentificationsRs.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
     }
 
 }

@@ -14,7 +14,6 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.Transactions
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
-import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils;
@@ -72,8 +71,8 @@ public class StatisticsController extends AbstractController implements Statisti
         }
 
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
-                .rangeFrom(ControllerUtils.formatDateFromString(getContainer.getRangeFrom()))
-                .rangeTo(ControllerUtils.formatDateFromString(getContainer.getRangeTo()))
+                .rangeFrom(formatDateFromString(getContainer.getRangeFrom()))
+                .rangeTo(formatDateFromString(getContainer.getRangeTo()))
                 .sections(getContainer.getSectionIDs())
                 .transactions(transactions)
                 .spendingSections(spendingSections)
