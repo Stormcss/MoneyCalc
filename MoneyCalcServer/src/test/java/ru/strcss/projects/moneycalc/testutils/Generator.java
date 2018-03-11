@@ -11,6 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
@@ -25,13 +26,20 @@ public class Generator {
         return generateCredentials(UUID());
     }
 
+    public static Access generateAccess() {
+        return generateAccess(UUID());
+    }
+
+    public static Access generateAccess(String login) {
+        return Access.builder()
+                .login(login)
+                .password("qwerty")
+                .email(login + "@mail.ru")
+                .build();
+    }
     public static Credentials generateCredentials(String login) {
         return Credentials.builder()
-                .access(Access.builder()
-                        .login(login)
-                        .password("qwerty")
-                        .email(login + "@mail.ru")
-                        .build())
+                .access(generateAccess(login))
                 .identifications(Identifications.builder()
                         .name(names[ThreadLocalRandom.current().nextInt(names.length)])
                         .build())
@@ -98,6 +106,12 @@ public class Generator {
                 .build();
     }
 
+    public static List<Transaction> generateTransactionList(int count, List<Integer> ids) {
+        return IntStream.range(0, count)
+                .mapToObj(value -> generateTransaction(ids.get(ThreadLocalRandom.current().nextInt(ids.size()))))
+                .collect(Collectors.toList());
+    }
+
     public static String UUID() {
         return UUID.randomUUID().toString().toUpperCase().replace("-", "");
     }
@@ -107,6 +121,14 @@ public class Generator {
                 .budget(ThreadLocalRandom.current().nextInt(5000, Integer.MAX_VALUE))
                 .isAdded(true)
                 .name("Магазин" + ThreadLocalRandom.current().nextInt(2000))
+                .build();
+    }
+
+    public static SpendingSection generateSpendingSection(String name) {
+        return SpendingSection.builder()
+                .budget(ThreadLocalRandom.current().nextInt(5000, Integer.MAX_VALUE))
+                .isAdded(true)
+                .name(name)
                 .build();
     }
 
@@ -127,4 +149,22 @@ public class Generator {
                 .build();
     }
 
+    public static SpendingSection generateSpendingSection(Integer budget, Integer id, String name) {
+        return SpendingSection.builder()
+                .budget(budget)
+                .isAdded(true)
+                .name(name)
+                .id(id)
+                .build();
+    }
+
+    public static FinanceSummaryBySection generateFinanceSummaryBySection() {
+        return FinanceSummaryBySection.builder()
+                .moneyLeftAll(5000)
+                .moneySpendAll(1000)
+                .summaryBalance(3000d)
+                .todayBalance(100d)
+                .sectionID(1)
+                .build();
+    }
 }

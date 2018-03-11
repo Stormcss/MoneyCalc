@@ -3,6 +3,8 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils;
 import lombok.extern.slf4j.Slf4j;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Status;
+import ru.strcss.projects.moneycalc.enitities.SpendingSection;
+import ru.strcss.projects.moneycalc.enitities.Transaction;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -44,7 +46,26 @@ public class ControllerUtils {
         return String.format(template, data);
     }
 
-    public static String getLogin(){
-        return null;
+//    public static String getLogin(){
+//        return null;
+//    }
+
+    /**
+     * Check if Transaction is fully empty
+     */
+    public static boolean isTransactionEmpty(Transaction transaction) {
+        return isNull(transaction.getCurrency()) && isNull(transaction.getDate()) && isNull(transaction.getDescription())
+                && isNull(transaction.getSectionID()) && isNull(transaction.getSum());
+    }
+
+    /**
+     * Check if SpendingSection is fully empty
+     */
+    public static boolean isSpendingSectionEmpty(SpendingSection section) {
+        return isNull(section.getBudget()) && isNull(section.getIsAdded()) && isNull(section.getName());
+    }
+
+    private static boolean isNull(Object obj) {
+        return obj == null;
     }
 }

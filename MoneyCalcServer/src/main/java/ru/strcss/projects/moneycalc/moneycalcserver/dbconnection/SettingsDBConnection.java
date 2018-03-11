@@ -53,7 +53,6 @@ public class SettingsDBConnection{
                 new Update().set("settings.$", settings), Person.class);
     }
 
-
     /**
      * Add SpendingSection to DB
      *
@@ -192,7 +191,6 @@ public class SettingsDBConnection{
      * @return - max ID value
      */
     public Integer getMaxSpendingSectionId(String login) {
-
         AggregationOperation unwind = unwind("settings.sections");
         AggregationOperation match = match(where("access.login").is(login));
         AggregationOperation group = group("settings.sections.id");

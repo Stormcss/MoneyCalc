@@ -8,10 +8,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummary
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
-import ru.strcss.projects.moneycalc.integration.utils.Utils;
-import ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils;
-import ru.strcss.projects.moneycalc.testutils.Generator;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -26,8 +23,11 @@ import static org.testng.Assert.assertEquals;
 import static ru.strcss.projects.moneycalc.integration.utils.StatisticsControllerTestUtils.checkPersonsSections;
 import static ru.strcss.projects.moneycalc.integration.utils.StatisticsControllerTestUtils.getFinanceSummaryBySection;
 import static ru.strcss.projects.moneycalc.integration.utils.Utils.savePersonGetToken;
+import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDateMinus;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
 
 public class StatisticsControllerIT extends AbstractIT {
 
@@ -48,7 +48,6 @@ public class StatisticsControllerIT extends AbstractIT {
 
     @BeforeGroups(groups = "inPeriodTest")
     public void preparePerson_InPeriodTest() {
-        System.out.println("preparePerson_InPeriodTest!");
         token = savePersonGetToken(service);
 
         checkPersonsSections(numOfSections, budgetPerSection, service, token);
@@ -57,23 +56,20 @@ public class StatisticsControllerIT extends AbstractIT {
 
     @BeforeGroups(groups = "outPeriodTest")
     public void preparePerson_OutPeriodTest() {
-        System.out.println("preparePerson_BeforePeriodTest!");
         token = savePersonGetToken(service);
 
         checkPersonsSections(numOfSections, budgetPerSection, service, token);
         addTransactions(1, 5, 2);
     }
 
-
     /**
-     * Test case when today before the requested period
+     * Test case when today is before the requested period
      */
     @Test(groups = {"outPeriodTest"})
     public void singleSection_outPeriod_beforePeriod() {
-        System.out.println("singleSection_outPeriod_beforePeriod");
 
-        String rangeFrom = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 5));
-        String rangeTo = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 7));
+        String rangeFrom = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 7));
+        String rangeTo = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 5));
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(1));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
@@ -85,11 +81,10 @@ public class StatisticsControllerIT extends AbstractIT {
     }
 
     /**
-     * Test case when today after the requested period
+     * Test case when today is after the requested period
      */
     @Test(groups = {"outPeriodTest"})
     public void singleSection_outPeriod_afterPeriod() {
-        System.out.println("singleSection_outPeriod_afterPeriod");
 
         String rangeFrom = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 4));
         String rangeTo = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 2));
@@ -114,7 +109,7 @@ public class StatisticsControllerIT extends AbstractIT {
         int daysPassed = 1;
 
         String rangeFrom = formatDateToString(LocalDate.now());
-        String rangeTo = formatDateToString(GenerationUtils.generateDatePlus(ChronoUnit.DAYS, rangeDays - 1));
+        String rangeTo = formatDateToString(generateDatePlus(ChronoUnit.DAYS, rangeDays - 1));
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
@@ -130,12 +125,12 @@ public class StatisticsControllerIT extends AbstractIT {
      */
     @Test(groups = {"inPeriodTest"})
     public void singleSection_inPeriod_middleOfPeriod() {
-        System.out.println("singleSection_middleOfPeriod");
+
         int rangeDays = 3;
         int daysPassed = 2;
 
         String rangeFrom = formatDateToString(generateDateMinus(ChronoUnit.DAYS, 1));
-        String rangeTo = formatDateToString(GenerationUtils.generateDatePlus(ChronoUnit.DAYS, 1));
+        String rangeTo = formatDateToString(generateDatePlus(ChronoUnit.DAYS, 1));
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
@@ -151,7 +146,7 @@ public class StatisticsControllerIT extends AbstractIT {
      */
     @Test(groups = {"inPeriodTest"})
     public void singleSection_inPeriod_endOfPeriod() {
-        System.out.println("singleSection_endOfPeriod");
+
         int rangeDays = 3;
         int daysPassed = 3;
 
@@ -185,12 +180,12 @@ public class StatisticsControllerIT extends AbstractIT {
         List<TransactionAddContainer> addContainers = new ArrayList<>();
 
         for (Integer sum : sums) {
-            addContainers.add(new TransactionAddContainer(Generator.generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionID, sum)));
+            addContainers.add(new TransactionAddContainer(generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionID, sum)));
             minusMin++;
         }
 
         return addContainers.stream()
-                .map(transactionAddContainer -> Utils.sendRequest(service.addTransaction(token, transactionAddContainer)).body())
+                .map(transactionAddContainer -> sendRequest(service.addTransaction(token, transactionAddContainer)).body())
                 .filter(Objects::nonNull)
                 .map(AjaxRs::getPayload)
                 .collect(Collectors.toList());

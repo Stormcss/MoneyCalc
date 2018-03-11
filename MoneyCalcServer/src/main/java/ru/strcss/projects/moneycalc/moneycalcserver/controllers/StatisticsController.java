@@ -16,7 +16,6 @@ import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.TransactionsDBConnection;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
@@ -26,6 +25,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateCorrect;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
 
 @Slf4j
 @RestController
@@ -50,10 +51,12 @@ public class StatisticsController extends AbstractController implements Statisti
         RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(getContainer, "Getting Finance Summary")
 //                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
 //                        () -> fillLog(NO_PERSON_EXIST, login))
-                .addValidation(() -> ValidationUtils.isDateCorrect(getContainer.getRangeFrom()),
+                .addValidation(() -> isDateCorrect(getContainer.getRangeFrom()),
                         () -> fillLog(DATE_INCORRECT, getContainer.getRangeFrom()))
-                .addValidation(() -> ValidationUtils.isDateCorrect(getContainer.getRangeTo()),
+                .addValidation(() -> isDateCorrect(getContainer.getRangeTo()),
                         () -> fillLog(DATE_INCORRECT, getContainer.getRangeTo()))
+                .addValidation(() -> isDateSequenceValid(getContainer.getRangeFrom(), getContainer.getRangeTo()),
+                        () -> DATE_SEQUENCE_INCORRECT)
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 

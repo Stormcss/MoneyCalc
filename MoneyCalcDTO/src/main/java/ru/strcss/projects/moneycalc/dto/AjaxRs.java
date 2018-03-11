@@ -2,9 +2,11 @@ package ru.strcss.projects.moneycalc.dto;
 
 import lombok.Builder;
 import lombok.Getter;
+import lombok.ToString;
 
 @Builder
 @Getter
+@ToString
 public class AjaxRs<E> {
     private Status status;
     private E payload;

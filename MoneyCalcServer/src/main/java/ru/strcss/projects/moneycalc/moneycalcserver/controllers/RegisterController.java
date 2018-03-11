@@ -13,13 +13,13 @@ import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.RegistrationDBConnection;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.getRegisteringPerson;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.getRegisteringPersonTransactions;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isEmailValid;
 
 @Slf4j
 @RestController
@@ -55,7 +55,7 @@ public class RegisterController extends AbstractController implements RegisterAP
                         () -> fillLog(PERSON_LOGIN_ALREADY_EXISTS, credentials.getAccess().getLogin()))
                 .addValidation(() -> !registrationDBConnection.isPersonExistsByEmail(credentials.getAccess().getEmail()),
                         () -> fillLog(PERSON_EMAIL_ALREADY_EXISTS, credentials.getAccess().getEmail()))
-                .addValidation(() -> ValidationUtils.isEmailValid(credentials.getAccess().getEmail()),
+                .addValidation(() -> isEmailValid(credentials.getAccess().getEmail()),
                         () -> fillLog(PERSON_EMAIL_INCORRECT, credentials.getAccess().getEmail()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();

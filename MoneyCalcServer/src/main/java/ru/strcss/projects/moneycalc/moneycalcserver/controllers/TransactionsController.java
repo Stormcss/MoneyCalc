@@ -18,13 +18,13 @@ import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.Reque
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.TransactionsDBConnection;
-import ru.strcss.projects.moneycalc.moneycalcserver.mongo.PersonRepository;
 
 import java.util.List;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.currentDateString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateTransactionID;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
 
 @Slf4j
 @RestController
@@ -33,34 +33,32 @@ public class TransactionsController extends AbstractController implements Transa
 
     private TransactionsDBConnection transactionsDBConnection;
     private SettingsDBConnection settingsDBConnection;
-    private PersonRepository repository;
 
-    public TransactionsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection, PersonRepository repository) {
+    public TransactionsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection) {
         this.transactionsDBConnection = transactionsDBConnection;
         this.settingsDBConnection = settingsDBConnection;
-        this.repository = repository;
     }
 
     /**
      * Get list of Transactions by user's login
      *
-     * @param searchContainer - TransactionsSearchContainer
+     * @param getContainer - TransactionsSearchContainer
      * @return response object with list of Transactions
      */
     @PostMapping(value = "/getTransactions")
-    public AjaxRs<List<Transaction>> getTransactions(@RequestBody TransactionsSearchContainer searchContainer) {
+    public AjaxRs<List<Transaction>> getTransactions(@RequestBody TransactionsSearchContainer getContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<Transaction>> requestValidation = new Validator(searchContainer, "Getting Transactions")
-//                .addValidation(() -> repository.existsByAccess_Login(login),
-//                        () -> fillLog(NO_PERSON_EXIST, login))
+        RequestValidation<List<Transaction>> requestValidation = new Validator(getContainer, "Getting Transactions")
+                .addValidation(() -> isDateSequenceValid(getContainer.getRangeFrom(), getContainer.getRangeTo()),
+                        () -> DATE_SEQUENCE_INCORRECT)
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        List<Transaction> transactions = transactionsDBConnection.getTransactions(login, searchContainer);
+        List<Transaction> transactions = transactionsDBConnection.getTransactions(login, getContainer);
 
         log.debug("Returning Transactions for login {}, dateFrom {}, dateTo {} : {}",
-                login, searchContainer.getRangeFrom(), searchContainer.getRangeTo(), transactions);
+                login, getContainer.getRangeFrom(), getContainer.getRangeTo(), transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }
@@ -72,10 +70,11 @@ public class TransactionsController extends AbstractController implements Transa
         System.out.println("addContainer = " + addContainer);
 
         RequestValidation<Transaction> requestValidation = new Validator(addContainer, "Adding Transactions")
-//                .addValidation(() -> repository.existsByAccess_Login(login),
-//                        () -> fillLog(NO_PERSON_EXIST, login))
                 .addValidation(() -> settingsDBConnection.isSpendingSectionIDExists(login, addContainer.getTransaction().getSectionID()),
                         () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, "" + addContainer.getTransaction().getSectionID()))
+                .addValidation(() -> addContainer.getTransaction().isValid().isValidated(),
+                        () -> fillLog(TRANSACTION_INCORRECT, addContainer.getTransaction().isValid().getReasons().toString()))
+
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 

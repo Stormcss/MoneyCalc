@@ -58,4 +58,10 @@ public class ValidationUtils {
         }
         return true;
     }
+
+    public static boolean isDateSequenceValid(String dateFrom, String dateTo) {
+        LocalDate localDateFrom = LocalDate.parse(dateFrom, DateTimeFormatter.ISO_LOCAL_DATE);
+        LocalDate localDateTo = LocalDate.parse(dateTo, DateTimeFormatter.ISO_LOCAL_DATE);
+        return localDateFrom.isBefore(localDateTo) || localDateFrom.isEqual(localDateTo);
+    }
 }

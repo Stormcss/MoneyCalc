@@ -16,7 +16,7 @@ public class Transaction implements Validationable/*, IVisitable*/ {
 
     private String _id;
     private String date;
-    private int sum;
+    private Integer sum;
     private String currency;
     private String description;
     private Integer sectionID;
@@ -24,8 +24,8 @@ public class Transaction implements Validationable/*, IVisitable*/ {
     @Override
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (sum == 0) reasons.add("Transaction sum can not be 0!");
-        if (sectionID < 0) reasons.add("SectionID can not be < 0!");
+        if (sum == null || sum == 0) reasons.add("Transaction sum can not be empty or 0!");
+        if (sectionID == null || sectionID < 0) reasons.add("SectionID can not be empty or < 0!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 

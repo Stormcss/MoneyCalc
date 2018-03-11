@@ -51,6 +51,12 @@ public class SummaryStatisticsHandler {
         //Дозаполняем данными
         statistics.forEach((id, financeSummaryBySection) -> {
             int budget = getBudget(container, id);
+            Period between = Period.between(container.getRangeFrom(), container.getRangeTo());
+            Integer daysbetween = Period.between(container.getRangeFrom(), container.getRangeTo()).getDays();
+            Integer yearsbetween = Period.between(container.getRangeFrom(), container.getRangeTo()).getYears();
+            Integer monthsbetween = Period.between(container.getRangeFrom(), container.getRangeTo()).getMonths();
+
+
             long daysInPeriod = Period.between(container.getRangeFrom(), container.getRangeTo()).getDays() + 1;
             double moneyPerDay = (double) budget / daysInPeriod;
 //            double moneyPerDay = round((double) budget / daysInPeriod, DIGITS);

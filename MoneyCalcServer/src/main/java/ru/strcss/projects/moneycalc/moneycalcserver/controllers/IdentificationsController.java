@@ -11,7 +11,6 @@ import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.IdentificationsDBConnection;
-import ru.strcss.projects.moneycalc.moneycalcserver.mongo.PersonRepository;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
 
@@ -21,11 +20,9 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 public class IdentificationsController extends AbstractController implements IdentificationsAPIService {
 
     private IdentificationsDBConnection identificationsDBConnection;
-    private PersonRepository repository;
 
-    public IdentificationsController(IdentificationsDBConnection identificationsDBConnection, PersonRepository repository) {
+    public IdentificationsController(IdentificationsDBConnection identificationsDBConnection) {
         this.identificationsDBConnection = identificationsDBConnection;
-        this.repository = repository;
     }
 
     /**
@@ -64,12 +61,6 @@ public class IdentificationsController extends AbstractController implements Ide
     @GetMapping(value = "/getIdentifications")
     public AjaxRs<Identifications> getIdentifications() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        RequestValidation<Identifications> requestValidation = new Validator(null, "Requesting Identifications")
-//                .addValidation(() -> repository.existsByAccess_Login(login),
-//                        () -> fillLog(NO_PERSON_EXIST, login))
-                .validate();
-        if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
         Identifications identifications = identificationsDBConnection.getIdentifications(login);
 

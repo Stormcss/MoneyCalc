@@ -11,6 +11,7 @@ public abstract class AbstractController {
 
     final String SETTINGS_UPDATED = "Settings successfully updated";
     final String SETTINGS_RETURNED = "Settings successfully returned";
+    final String SETTINGS_INCORRECT = "Settings has incorrect fields: %s";
 
     final String ACCESS_RETURNED = "Access object successfully returned";
 
@@ -20,6 +21,7 @@ public abstract class AbstractController {
     final String SPENDING_SECTION_UPDATED = "Spending Section successfully updated";
     final String SPENDING_SECTION_NAME_EXISTS = "Spending Section with name %s already exists";
     final String SPENDING_SECTION_ID_NOT_EXISTS = "Spending Section with id %s does not exist";
+    final String SPENDING_SECTION_INCORRECT = "Spending Section has incorrect fields: %s";
 
     final String IDENTIFICATIONS_SAVED = "Identifications successfully saved";
     final String IDENTIFICATIONS_RETURNED = "Identifications successfully returned";
@@ -31,7 +33,9 @@ public abstract class AbstractController {
     final String TRANSACTION_DELETED = "TRANSACTION successfully deleted";
     final String TRANSACTION_UPDATED = "TRANSACTION successfully updated";
     final String TRANSACTIONS_RETURNED = "TRANSACTIONS successfully returned";
+    final String TRANSACTION_INCORRECT = "TRANSACTION has incorrect fields: %s";
 
     final String STATISTICS_RETURNED = "Statistics successfully returned";
     final String DATE_INCORRECT = "Date [%s] is incorrect: must be [yyyy-MM-dd]";
+    final String DATE_SEQUENCE_INCORRECT = "Incorrect dates: dateTo must be after dateFrom";
 }

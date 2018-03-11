@@ -39,26 +39,30 @@ public class RequestValidation<E> {
             additionalChecks.add(new Pair(supplier, actionName, null));
             return this;
         }
+
         public Validator addValidation(Supplier<Boolean> supplier, Supplier<String> actionName, String objectName) {
             additionalChecks.add(new Pair(supplier, actionName, objectName));
             return this;
         }
 
         public <E> RequestValidation<E> validate() {
-            if (container != null){
-            ValidationResult validationResult = container.isValid();
+            if (container == null) {
+                log.error("Container is null");
+                return new RequestValidation<>(false, responseError("Container is null"));
+            } else {
+                ValidationResult validationResult = container.isValid();
                 if (!validationResult.isValidated()) {
                     log.error("{} has failed - required fields are incorrect: {}", actionName, validationResult.getReasons());
                     return new RequestValidation<>(false, responseError("Required fields are incorrect: " + validationResult.getReasons()));
                 }
             }
 
-            for (Pair pair : additionalChecks){
+            for (Pair pair : additionalChecks) {
                 if (!pair.getAction().get()) {
                     log.error(pair.getActionName().get());
 
                     String errorMsg;
-                    if (pair.getObjectName() != null){
+                    if (pair.getObjectName() != null) {
                         errorMsg = String.format("%s in object: %s", pair.getActionName().get(), pair.getObjectName());
                     } else {
                         errorMsg = pair.getActionName().get();
@@ -72,7 +76,7 @@ public class RequestValidation<E> {
 
     @Getter
     @AllArgsConstructor
-    public static class Pair{
+    public static class Pair {
         private Supplier<Boolean> action;
         private Supplier<String> actionName;
         private String objectName;
