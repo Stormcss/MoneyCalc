@@ -1,3 +1,15 @@
+buildscript{
+    ext {
+        springBootVersion = '1.5.9.RELEASE'
+    }
+    dependencies {
+        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+
+        //Check for the latest version here: http://plugins.gradle.org/plugin/com.jfrog.artifactory
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.6.2"
+    }
+}
+
 plugins{
     id 'java'
     id 'idea'
@@ -7,6 +19,8 @@ plugins{
 subprojects{
     apply plugin: 'java'
     apply plugin: 'idea'
+    apply plugin: "com.jfrog.artifactory"
+    apply plugin: 'maven-publish'
 
     sourceCompatibility = 1.8
     group 'ru.strcss.projects.moneycalc'
@@ -14,6 +28,13 @@ subprojects{
     repositories {
         jcenter()
         mavenCentral()
+        maven{
+            url 'http://localhost:8081/artifactory/StrsRepo'
+//            credentials {
+//                username = "${artifactory_user}"
+//                password = "${artifactory_password}"
+//            }
+        }
     }
 
     dependencies {
@@ -24,45 +45,36 @@ subprojects{
     test {
         useTestNG() {
         }
-
-//        include 'ru/strcss/projects/moneycalc/integration/**'
         include 'ru/strcss/projects/moneycalc/moneycalcserver/**'
-
         maxHeapSize = "512m"
     }
 
+    publishing {
+        publications {
+            mavenJava(MavenPublication) {
+                from components.java
+            }
+        }
+    }
+
+    artifactory {
+        contextUrl = "${artifactory_contextUrl}"
+        //The base Artifactory URL if not overridden by the publisher/resolver
+
+        publish {
+            repository {
+                repoKey = 'StrsRepo'
+//                username = "${artifactory_user}"
+//                password = "${artifactory_password}"
+                maven = true
+
+            }
+            defaults {
+                publications('mavenJava')
+                publishArtifacts = true
+                publishPom = true
+            }
+        }
+    }
 
 }
-
-
-//buildscript {
-//    ext {
-//        springBootVersion = '1.5.9.RELEASE'
-//    }
-//    repositories {
-//        mavenCentral()
-//    }
-//    dependencies {
-//        classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-//    }
-//}
-
-
-//subprojects {
-//
-//    apply plugin: 'java'
-//    apply plugin: 'idea'
-//    apply plugin: 'org.springframework.boot'
-//
-//
-//    sourceCompatibility = 1.8
-//
-//    group 'ru.sbt.util'
-//
-//    dependencies {
-//        compileOnly('org.projectlombok:lombok:1.16.18')
-//
-//        testCompileOnly('org.projectlombok:lombok:1.16.18')
-//        testCompile('org.testng:testng:6.13.1')
-//    }
-//}

@@ -41,7 +41,6 @@ public class RegisterControllerTest {
 
     @BeforeGroups(groups = {"registerSuccessfulScenario", "registerIncorrectContainers"})
     public void prepareSuccessfulScenarioAndIncorrectContainers() {
-        System.out.println("PREPARE");
         when(registrationDBConnection.isPersonExistsByEmail(anyString()))
                 .thenReturn(false);
         when(registrationDBConnection.isPersonExistsByLogin(anyString()))
@@ -51,11 +50,6 @@ public class RegisterControllerTest {
         doNothing().when(mongoTemplate).save(anyObject());
 
         registerController = new RegisterController(registrationDBConnection, bCryptPasswordEncoder, mongoTemplate);
-    }
-
-    @BeforeGroups(groups = {"registerFail"})
-    public void prepareRegisterFail() {
-        System.out.println("PREPARE registerFail");
     }
 
     @Test(groups = "registerSuccessfulScenario")
@@ -119,11 +113,16 @@ public class RegisterControllerTest {
     public void testRegisterPerson_incorrectEmail() {
         Access access = generateAccess();
         access.setEmail("123");
+
         AjaxRs<Person> registerRs = registerController.registerPerson(new Credentials(access, generateIdentifications()));
+        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+
+        access.setEmail("123@mail");
+        registerRs = registerController.registerPerson(new Credentials(access, generateIdentifications()));
         assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
     }
 
-    @Test(groups = "registerFail")
+    @Test(groups = "registerFail", dependsOnGroups = {"registerSuccessfulScenario", "registerIncorrectContainers"})
     public void testRegisterPerson_ExistingLogin() {
         System.out.println("testRegisterPerson_ExistingLogin");
         when(registrationDBConnection.isPersonExistsByLogin(anyString())).thenReturn(true);
@@ -133,7 +132,7 @@ public class RegisterControllerTest {
         assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
     }
 
-    @Test(groups = "registerFail")
+    @Test(groups = "registerFail", dependsOnGroups = {"registerSuccessfulScenario", "registerIncorrectContainers"})
     public void testRegisterPerson_ExistingEmail() {
         System.out.println("testRegisterPerson_ExistingEmail");
         when(registrationDBConnection.isPersonExistsByEmail(anyString())).thenReturn(true);

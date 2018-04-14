@@ -7,7 +7,7 @@ public abstract class AbstractController {
     final String PERSON_LOGIN_ALREADY_EXISTS = "Person with login %s is already registered!";
     final String PERSON_EMAIL_ALREADY_EXISTS = "Person with email %s is already registered!";
     final String REGISTER_ERROR = "Can not perform registration: %s";
-    final String PERSON_EMAIL_INCORRECT = "Email %s is incorrect!";
+    final String PERSON_EMAIL_INCORRECT = "Email \"%s\" is incorrect!";
 
     final String SETTINGS_UPDATED = "Settings successfully updated";
     final String SETTINGS_RETURNED = "Settings successfully returned";

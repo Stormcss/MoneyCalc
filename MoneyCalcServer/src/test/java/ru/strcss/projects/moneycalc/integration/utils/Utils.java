@@ -29,7 +29,7 @@ public class Utils {
         try {
             response = call.execute();
         } catch (IOException e) {
-            e.printStackTrace();
+            throw new RuntimeException("Can not send Request!", e);
         }
 
         assertNotNull(response, "Response is null!");
@@ -77,22 +77,15 @@ public class Utils {
         Credentials credentials = generateCredentials(Generator.UUID());
         sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
 
-        Headers headers = null;
-        try {
-            headers = service.login(credentials.getAccess()).execute().headers();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         return new Pair<>(credentials, getToken(service, credentials.getAccess()));
     }
 
     public static String getToken(MoneyCalcClient service, Access access){
-        Headers headers = null;
+        Headers headers;
         try {
             headers = service.login(access).execute().headers();
         } catch (IOException e) {
-            e.printStackTrace();
-            return null;
+            throw new RuntimeException("Can not get Token!", e);
         }
         return headers.get("Authorization");
     }

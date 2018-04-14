@@ -1,6 +1,5 @@
 package ru.strcss.projects.moneycalc.integration;
 
-import org.testng.Assert;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.dto.AjaxRs;
@@ -116,8 +115,8 @@ public class StatisticsControllerIT extends AbstractIT {
 
         assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 200, "MoneyLeftAll is incorrect!");
         assertEquals((int) summary.getMoneySpendAll(), 200, "MoneySpendAll is incorrect!");
-        Assert.assertEquals(summary.getTodayBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays, DIGITS) - 200, DELTA, "TodayBalance is incorrect!");
-        Assert.assertEquals(summary.getSummaryBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 200, DELTA, "SummaryBalance is incorrect!");
+        assertEquals(summary.getTodayBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays, DIGITS) - 200, DELTA, "TodayBalance is incorrect!");
+        assertEquals(summary.getSummaryBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 200, DELTA, "SummaryBalance is incorrect!");
     }
 
     /**
@@ -137,8 +136,8 @@ public class StatisticsControllerIT extends AbstractIT {
 
         assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 500, "MoneyLeftAll is incorrect!");
         assertEquals((int) summary.getMoneySpendAll(), 500, "MoneySpendAll is incorrect!");
-        Assert.assertEquals(summary.getTodayBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays, DIGITS) - 200, DELTA, "TodayBalance is incorrect!");
-        Assert.assertEquals(summary.getSummaryBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 500, DELTA, "SummaryBalance is incorrect!");
+        assertEquals(summary.getTodayBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays, DIGITS) - 200, DELTA, "TodayBalance is incorrect!");
+        assertEquals(summary.getSummaryBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 500, DELTA, "SummaryBalance is incorrect!");
     }
 
     /**
@@ -158,8 +157,8 @@ public class StatisticsControllerIT extends AbstractIT {
 
         assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
         assertEquals((int) summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
-        Assert.assertEquals(summary.getTodayBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays, DIGITS) - 200, DELTA, "TodayBalance is incorrect!");
-        Assert.assertEquals(summary.getSummaryBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 900, DELTA, "SummaryBalance is incorrect!");
+        assertEquals(summary.getTodayBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays, DIGITS) - 200, DELTA, "TodayBalance is incorrect!");
+        assertEquals(summary.getSummaryBalance(), StatisticsHandlerUtils.round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 900, DELTA, "SummaryBalance is incorrect!");
     }
 
 

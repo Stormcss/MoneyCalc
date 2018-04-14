@@ -1,23 +1,19 @@
 package ru.strcss.projects.moneycalc.dto;
 
-import lombok.Builder;
-import lombok.Getter;
-import lombok.ToString;
+import lombok.*;
 
-@Builder
 @Getter
+@Builder
 @ToString
+@AllArgsConstructor
+@NoArgsConstructor
 public class AjaxRs<E> {
     private Status status;
     private E payload;
     private String message;
+    private int httpCode;
 
-    public AjaxRs(Status status, E payload, String message) {
-        this.status = status;
-        this.payload = payload;
-        this.message = message;
-    }
-
-    public AjaxRs() {
+    public boolean isSuccessful() {
+        return Status.SUCCESS.equals(this.status);
     }
 }
