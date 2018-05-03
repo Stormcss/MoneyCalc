@@ -67,19 +67,14 @@ public class RegisterController extends AbstractController implements RegisterAP
         log.info("Registering new Person with Login: {} and Name: {}", login, credentials.getIdentifications().getName());
 
         // TODO: 02.02.2018 TRANSACTIONS REQUIRED!
-
 //        Transactional.startTransaction()
 //                .then(() -> mongoOperations.save(personTransactions, "Transactions"))
 //                .then(() -> mongoOperations.save(person, "Person"))
 //                .endTransaction();
-
         mongoTemplate.save(getRegisteringPersonTransactions(login), "Transactions");
         mongoTemplate.save(getRegisteringPerson(login, credentials), "Person");
 
-
         // TODO: 02.02.2018 validate if save is successful
-
         return responseSuccess(REGISTER_SUCCESSFUL, null);
     }
-
 }

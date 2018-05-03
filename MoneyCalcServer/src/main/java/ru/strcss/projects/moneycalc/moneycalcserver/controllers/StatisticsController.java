@@ -49,8 +49,6 @@ public class StatisticsController extends AbstractController implements Statisti
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(getContainer, "Getting Finance Summary")
-//                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
-//                        () -> fillLog(NO_PERSON_EXIST, login))
                 .addValidation(() -> isDateCorrect(getContainer.getRangeFrom()),
                         () -> fillLog(DATE_INCORRECT, getContainer.getRangeFrom()))
                 .addValidation(() -> isDateCorrect(getContainer.getRangeTo()),

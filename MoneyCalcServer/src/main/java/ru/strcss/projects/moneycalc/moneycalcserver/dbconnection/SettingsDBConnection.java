@@ -2,7 +2,6 @@ package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection;
 
 import com.mongodb.WriteResult;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.aggregation.Aggregation;
 import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
@@ -90,7 +89,7 @@ public class SettingsDBConnection{
      */
     public WriteResult deleteSpendingSectionById(String login, SpendingSectionDeleteContainer deleteContainer) {
         Query getPersonSettingsQuery = query(where("access.login").is(login));
-        Query getSpendingSectionQuery = query(where("_id").is(deleteContainer.getIdOrName()));
+        Query getSpendingSectionQuery = query(where("_id").is(Integer.parseInt(deleteContainer.getIdOrName())));
 
         return mongoTemplate.updateFirst(getPersonSettingsQuery,
                 new Update().pull("settings.sections", getSpendingSectionQuery), "Person");
@@ -191,18 +190,8 @@ public class SettingsDBConnection{
      * @return - max ID value
      */
     public Integer getMaxSpendingSectionId(String login) {
-        AggregationOperation unwind = unwind("settings.sections");
-        AggregationOperation match = match(where("access.login").is(login));
-        AggregationOperation group = group("settings.sections.id");
-        AggregationOperation sort = sort(Sort.Direction.DESC, "settings.sections.id");
-
-        Aggregation aggregation = Aggregation.newAggregation(unwind, match, group, sort, limit(1));
-
-        AggregationResults<SpendingSection> aggregate = mongoTemplate.aggregate(aggregation, Person.class, SpendingSection.class);
-
-        return aggregate.getUniqueMappedResult().getId();
+        return getSpendingSectionList(login).stream().mapToInt(SpendingSection::getId).max().getAsInt();
     }
-
 
     public boolean isSpendingSectionNameNew(String login, String name) {
         Query getSpendingSectionQuery = query(where("access.login").is(login)

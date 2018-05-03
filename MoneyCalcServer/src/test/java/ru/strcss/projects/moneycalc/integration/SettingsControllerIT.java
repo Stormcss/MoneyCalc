@@ -88,17 +88,44 @@ public class SettingsControllerIT extends AbstractIT {
         assertNotNull(identificationsRs.getPayload(), "Identifications object was overwritten!");
     }
 
+
     @Test
     public void addSpendingSection() {
+        int ignoredId = 6;
         String token = savePersonGetToken(service);
-        SpendingSection spendingSection = generateSpendingSection();
+        SpendingSection spendingSection = generateSpendingSection(1000, ignoredId);
 
-        SpendingSectionAddContainer spendingSectionContainer =
+        SpendingSectionAddContainer sectionAddContainer =
                 new SpendingSectionAddContainer(spendingSection);
 
-        AjaxRs<List<SpendingSection>> addSectionRs = sendRequest(service.addSpendingSection(token, spendingSectionContainer), Status.SUCCESS).body();
+        AjaxRs<List<SpendingSection>> addSectionRs =
+                sendRequest(service.addSpendingSection(token, sectionAddContainer), Status.SUCCESS).body();
         assertTrue(addSectionRs.getPayload().stream().anyMatch(section -> section.getName().equals(spendingSection.getName())),
                 "Spending Section was not added!");
+        assertTrue(addSectionRs.getPayload().stream().noneMatch(section -> section.getId() == ignoredId));
+    }
+
+    @Test
+    public void addSpendingSection_correctIdIncrement() {
+        int addedSectionsNum = 10;
+        String token = savePersonGetToken(service);
+
+        for (int i = 0; i < addedSectionsNum; i++) {
+            SpendingSection spendingSection = generateSpendingSection();
+
+            SpendingSectionAddContainer container = new SpendingSectionAddContainer(spendingSection);
+            AjaxRs<List<SpendingSection>> addSectionRs =
+                    sendRequest(service.addSpendingSection(token, container), Status.SUCCESS).body();
+
+            assertTrue(addSectionRs.getPayload().stream()
+                    .anyMatch(section -> section.getName()
+                            .equals(spendingSection.getName())), "Spending Section was not added!");
+            assertEquals((int) addSectionRs.getPayload().stream()
+                            .filter(section -> section.getName().equals(spendingSection.getName()))
+                            .findAny().get().getId(),
+                    addSectionRs.getPayload().size() - 1, "Id has been incremented incorrectly!");
+        }
+
     }
 
     @Test
@@ -108,6 +135,10 @@ public class SettingsControllerIT extends AbstractIT {
 
         SpendingSectionDeleteContainer deleteContainerByName =
                 new SpendingSectionDeleteContainer(spendingSection.getName(), SpendingSectionSearchType.BY_NAME);
+
+        AjaxRs<List<SpendingSection>> addSectionRs =
+                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
+        assertEquals(addSectionRs.getStatus(), Status.SUCCESS, "Adding SpendingSection Status is not SUCCESS!");
 
         AjaxRs<List<SpendingSection>> deleteSectionRs = sendRequest(service.deleteSpendingSection(token, deleteContainerByName), Status.SUCCESS).body();
         assertTrue(deleteSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(spendingSection.getName())),
@@ -119,8 +150,17 @@ public class SettingsControllerIT extends AbstractIT {
         String token = savePersonGetToken(service);
         SpendingSection spendingSection = generateSpendingSection();
 
+
+        AjaxRs<List<SpendingSection>> addSectionRs =
+                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
+        assertEquals(addSectionRs.getStatus(), Status.SUCCESS, "Adding SpendingSection Status is not SUCCESS!");
+
+        int addedSectionId = addSectionRs.getPayload().stream().filter(section -> section.getName().equals(spendingSection.getName()))
+                .findAny()
+                .get().getId();
+
         SpendingSectionDeleteContainer deleteContainerById =
-                new SpendingSectionDeleteContainer("" + spendingSection.getId(), SpendingSectionSearchType.BY_ID);
+                new SpendingSectionDeleteContainer("" + addedSectionId, SpendingSectionSearchType.BY_ID);
 
         AjaxRs<List<SpendingSection>> deleteSectionRs = sendRequest(service.deleteSpendingSection(token, deleteContainerById), Status.SUCCESS).body();
         assertTrue(deleteSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(spendingSection.getName())),

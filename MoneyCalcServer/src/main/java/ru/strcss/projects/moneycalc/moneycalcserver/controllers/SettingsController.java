@@ -72,13 +72,6 @@ public class SettingsController extends AbstractController implements SettingsAP
     @GetMapping(value = "/getSettings")
     public AjaxRs<Settings> getSettings() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-
-//        RequestValidation<Settings> requestValidation = new Validator(null, "Requesting Settings")
-//                .addValidation(() -> repository.existsByAccess_Login(login),
-//                        () -> fillLog(NO_PERSON_EXIST, login))
-//                .validate();
-//        if (!requestValidation.isValid()) return requestValidation.getValidationError();
-
         Settings settings = settingsDBConnection.getSettings(login);
 
         if (settings != null) {
@@ -191,14 +184,9 @@ public class SettingsController extends AbstractController implements SettingsAP
      */
     @GetMapping(value = "/getSpendingSections")
     public AjaxRs<List<SpendingSection>> getSpendingSections() {
+
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-
-//        RequestValidation<List<SpendingSection>> requestValidation = new Validator(null, "Getting SpendingSection list")
-//                .addValidation(() -> repository.existsByAccess_Login(login),
-//                        () -> fillLog(NO_PERSON_EXIST, login))
-//                .validate();
-//        if (!requestValidation.isValid()) return requestValidation.getValidationError();
-
+        log.debug("SpendingSections for login {} is returned", login);
         return responseSuccess(SPENDING_SECTIONS_RETURNED, settingsDBConnection.getSpendingSectionList(login));
     }
 
@@ -222,13 +210,4 @@ public class SettingsController extends AbstractController implements SettingsAP
             return false;
         return true;
     }
-
-//    private Boolean isNewIdAllowed(String login, SpendingSectionUpdateContainer updateContainer, List<SpendingSection> sectionList) {
-//        boolean isIdNew = !updateContainer.getIdOrName().equals(updateContainer.getSpendingSection().getName());
-//        boolean isNewIdExists = sectionList.stream()
-//                .anyMatch(spendingSection -> spendingSection.getName().equals(updateContainer.getSpendingSection().getName()));
-//        if (isIdNew && isNewIdExists)
-//            return false;
-//        return true;
-//    }
 }

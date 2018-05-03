@@ -6,7 +6,7 @@ import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.TodayPositionRange;
 
-import java.time.Period;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -51,22 +51,15 @@ public class SummaryStatisticsHandler {
         //Дозаполняем данными
         statistics.forEach((id, financeSummaryBySection) -> {
             int budget = getBudget(container, id);
-            Period between = Period.between(container.getRangeFrom(), container.getRangeTo());
-            Integer daysbetween = Period.between(container.getRangeFrom(), container.getRangeTo()).getDays();
-            Integer yearsbetween = Period.between(container.getRangeFrom(), container.getRangeTo()).getYears();
-            Integer monthsbetween = Period.between(container.getRangeFrom(), container.getRangeTo()).getMonths();
 
-
-            long daysInPeriod = Period.between(container.getRangeFrom(), container.getRangeTo()).getDays() + 1;
+            long daysInPeriod = ChronoUnit.DAYS.between(container.getRangeFrom(), container.getRangeTo()) + 1;
             double moneyPerDay = (double) budget / daysInPeriod;
-//            double moneyPerDay = round((double) budget / daysInPeriod, DIGITS);
 
             long daysPassed = getDaysPassed(container, todayPositionRange, daysInPeriod);
 
             financeSummaryBySection.setTodayBalance(getTodayBalance(todayPositionRange, spendTodayBySection, id, moneyPerDay));
             financeSummaryBySection.setSummaryBalance(round(moneyPerDay * daysPassed, DIGITS) - financeSummaryBySection.getMoneySpendAll());
             financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
-//            log.error("todayBalance: {}; summaryBalance: {}", financeSummaryBySection.getTodayBalance(), financeSummaryBySection.getSummaryBalance());
         });
         return new ArrayList<>(statistics.values());
     }

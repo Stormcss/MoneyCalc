@@ -3,9 +3,9 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 public abstract class AbstractController {
 
     final String REGISTER_SUCCESSFUL = "Person successfully registered";
-    final String NO_PERSON_EXIST = "Person with login %s does not exist!";
-    final String PERSON_LOGIN_ALREADY_EXISTS = "Person with login %s is already registered!";
-    final String PERSON_EMAIL_ALREADY_EXISTS = "Person with email %s is already registered!";
+    final String NO_PERSON_EXIST = "Person with login \"%s\" does not exist!";
+    final String PERSON_LOGIN_ALREADY_EXISTS = "Person with login \"%s\" is already registered!";
+    final String PERSON_EMAIL_ALREADY_EXISTS = "Person with email \"%s\" is already registered!";
     final String REGISTER_ERROR = "Can not perform registration: %s";
     final String PERSON_EMAIL_INCORRECT = "Email \"%s\" is incorrect!";
 

@@ -1,5 +1,5 @@
 group 'ru.strcss.projects.moneycalc.moneycalcserver'
-version '0.0.1'
+version '0.0.2'
 
 apply plugin: 'org.springframework.boot'
 
