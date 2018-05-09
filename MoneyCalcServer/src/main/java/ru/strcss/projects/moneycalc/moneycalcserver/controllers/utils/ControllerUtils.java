@@ -46,10 +46,6 @@ public class ControllerUtils {
         return String.format(template, data);
     }
 
-//    public static String getLogin(){
-//        return null;
-//    }
-
     /**
      * Check if Transaction is fully empty
      */

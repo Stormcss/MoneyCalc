@@ -27,7 +27,6 @@ public class SummaryStatisticsHandler {
     public List<FinanceSummaryBySection> calculateSummaryStatisticsBySections(FinanceSummaryCalculationContainer container) {
 
         final Map<Integer, FinanceSummaryBySection> statistics = new HashMap<>();
-        //Создать Map<Integer,FinanceSummaryBySection>, заполнять в нём moneySpendAll. Каждый из которых после этого дозаполнить
 
         //Создали мапу
         for (Integer sectionID : container.getSections()) {
@@ -58,7 +57,7 @@ public class SummaryStatisticsHandler {
             long daysPassed = getDaysPassed(container, todayPositionRange, daysInPeriod);
 
             financeSummaryBySection.setTodayBalance(getTodayBalance(todayPositionRange, spendTodayBySection, id, moneyPerDay));
-            financeSummaryBySection.setSummaryBalance(round(moneyPerDay * daysPassed, DIGITS) - financeSummaryBySection.getMoneySpendAll());
+            financeSummaryBySection.setSummaryBalance(round(moneyPerDay * daysPassed - financeSummaryBySection.getMoneySpendAll(), DIGITS));
             financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
         });
         return new ArrayList<>(statistics.values());
@@ -66,7 +65,7 @@ public class SummaryStatisticsHandler {
 
     private Double getTodayBalance(TodayPositionRange todayPositionRange, Map<Integer, Double> spendTodayBySection, Integer id, double moneyPerDay) {
         if (todayPositionRange.equals(TodayPositionRange.IN))
-            return round(moneyPerDay, DIGITS) - spendTodayBySection.getOrDefault(id, 0d);
+            return round(moneyPerDay - spendTodayBySection.getOrDefault(id, 0d), DIGITS);
         else
             return 0d;
     }

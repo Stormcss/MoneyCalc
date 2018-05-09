@@ -1,10 +1,12 @@
 package ru.strcss.projects.moneycalc.testutils;
 
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.enitities.*;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
@@ -165,6 +167,36 @@ public class Generator {
                 .summaryBalance(3000d)
                 .todayBalance(100d)
                 .sectionID(1)
+                .build();
+    }
+
+    public static FinanceSummaryCalculationContainer generateFinSummCalculContainer() {
+        List<SpendingSection> sectionList = Arrays.asList(generateSpendingSection(100, 0, "A"),
+                generateSpendingSection(100, 1, "B"), generateSpendingSection(100, 2, "C"));
+        List<Integer> sectionIds = Arrays.asList(0, 1, 2);
+        return generateFinSummCalculContainer(sectionList, generateTransactionList(5, sectionIds));
+    }
+
+    public static FinanceSummaryCalculationContainer generateFinSummCalculContainer(int sections, int transactionsSum) {
+        List<Integer> sectionIds = IntStream.range(0, sections).boxed().collect(Collectors.toList());
+
+        List<SpendingSection> sectionList = sectionIds.stream()
+                .map(id -> generateSpendingSection(ThreadLocalRandom.current().nextInt(100, 100000), id, "Name" + id))
+                .collect(Collectors.toList());
+
+        return generateFinSummCalculContainer(sectionList, generateTransactionList(transactionsSum, sectionIds));
+    }
+
+    public static FinanceSummaryCalculationContainer generateFinSummCalculContainer(List<SpendingSection> sectionList,
+                                                                                    List<Transaction> transactionsList) {
+        LocalDate rangeFrom = LocalDate.now().minus(2, ChronoUnit.DAYS);
+        return FinanceSummaryCalculationContainer.builder()
+                .rangeFrom(rangeFrom)
+                .rangeTo(rangeFrom.plus(1, ChronoUnit.MONTHS))
+                .sections(sectionList.stream().map(SpendingSection::getId).collect(Collectors.toList()))
+                .spendingSections(sectionList)
+                .today(LocalDate.now())
+                .transactions(transactionsList)
                 .build();
     }
 }
