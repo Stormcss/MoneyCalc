@@ -19,6 +19,7 @@ public interface PersonTransactionsRepository extends MongoRepository<PersonTran
     List<PersonTransactions> findByLogin(String login);
 
     // FIXME: 05.02.2018 Possible performance issues here
+    @Deprecated
     default List<Transaction> findTransactionsBetween(String login, LocalDate dateFrom, LocalDate dateTo){
         List<PersonTransactions> personTransactions = findByLogin(login);
         return personTransactions.stream()
@@ -28,6 +29,7 @@ public interface PersonTransactionsRepository extends MongoRepository<PersonTran
                 .collect(Collectors.toList());
     }
 
+    @Deprecated
     default List<Transaction> findTransactionsBetweenFilteredWithSection(String login, LocalDate dateFrom, LocalDate dateTo, List<Integer> sections){
         List<PersonTransactions> personTransactions = findByLogin(login);
         // TODO: 09.02.2018 Filter transactions using DB!

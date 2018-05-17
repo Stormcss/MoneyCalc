@@ -6,13 +6,14 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import ru.strcss.projects.moneycalc.Validationable;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Builder
 @Document
 @Data
-public class Transaction implements Validationable/*, IVisitable*/ {
+public class Transaction implements Validationable, Serializable {
 
     private String _id;
     private String date;
@@ -28,11 +29,6 @@ public class Transaction implements Validationable/*, IVisitable*/ {
         if (sectionID == null || sectionID < 0) reasons.add("SectionID can not be empty or < 0!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
-
-//    @Override
-//    public String accept(Visitor visitor) {
-//        return visitor.visitTransaction(this);
-//    }
 }
 
 
