@@ -3,8 +3,9 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import ru.strcss.projects.moneycalc.Validationable;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
 import java.util.ArrayList;
@@ -17,9 +18,9 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @Slf4j
 public class RequestValidation<E> {
     private boolean isValid;
-    private AjaxRs<E> validationError;
+    private ResponseEntity<MoneyCalcRs<E>> validationError;
 
-    public RequestValidation(boolean isValid, AjaxRs<E> validationError) {
+    public RequestValidation(boolean isValid, ResponseEntity<MoneyCalcRs<E>> validationError) {
         this.isValid = isValid;
         this.validationError = validationError;
     }

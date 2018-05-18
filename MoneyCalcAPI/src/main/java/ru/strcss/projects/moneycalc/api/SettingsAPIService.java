@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.api;
 
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import org.springframework.http.ResponseEntity;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
@@ -12,15 +13,15 @@ import java.util.List;
 
 public interface SettingsAPIService {
 
-    AjaxRs<Settings> saveSettings(SettingsUpdateContainer updateContainer);
+    ResponseEntity<MoneyCalcRs<Settings>> saveSettings(SettingsUpdateContainer updateContainer);
 
-    AjaxRs<Settings> getSettings();
+    ResponseEntity<MoneyCalcRs<Settings>> getSettings();
 
-    AjaxRs<List<SpendingSection>> getSpendingSections();
+    ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections();
 
-    AjaxRs<List<SpendingSection>> addSpendingSection(SpendingSectionAddContainer addContainer);
+    ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(SpendingSectionAddContainer addContainer);
 
-    AjaxRs<List<SpendingSection>> updateSpendingSection(SpendingSectionUpdateContainer sectionUpdateContainer);
+    ResponseEntity<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(SpendingSectionUpdateContainer sectionUpdateContainer);
 
-    AjaxRs<List<SpendingSection>> deleteSpendingSection(SpendingSectionDeleteContainer sectionDeleteContainer);
+    ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(SpendingSectionDeleteContainer sectionDeleteContainer);
 }

@@ -2,14 +2,15 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.RegisterAPIService;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
@@ -44,7 +45,7 @@ public class RegisterController extends AbstractController implements RegisterAP
      * @return AjaxRs
      */
     @PostMapping(value = "/register")
-    public AjaxRs<Person> registerPerson(@RequestBody Credentials credentials) {
+    public ResponseEntity<MoneyCalcRs<Person>> registerPerson(@RequestBody Credentials credentials) {
 
         RequestValidation<Person> requestValidation = new Validator(credentials, "Registering Person")
                 .addValidation(() -> credentials.getAccess().isValid().isValidated(),
@@ -64,7 +65,7 @@ public class RegisterController extends AbstractController implements RegisterAP
 
         String login = credentials.getAccess().getLogin();
 
-        log.info("Registering new Person with Login: {} and Name: {}", login, credentials.getIdentifications().getName());
+        log.info("Registering new Person with Login: \"{}\" and Name: {}", login, credentials.getIdentifications().getName());
 
         // TODO: 02.02.2018 TRANSACTIONS REQUIRED!
 //        Transactional.startTransaction()

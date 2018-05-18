@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import com.mongodb.WriteResult;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,7 +9,7 @@ import org.springframework.security.core.userdetails.User;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
@@ -49,26 +50,26 @@ public class IdentificationsControllerTest {
     @Test(groups = "SuccessfulScenario")
     public void testSaveIdentifications() {
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(generateIdentifications());
-        AjaxRs<Identifications> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
+        ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
 
-        assertEquals(saveIdentificationsRs.getStatus(), Status.SUCCESS, saveIdentificationsRs.getMessage());
-        assertEquals(updateContainer.getIdentifications(), saveIdentificationsRs.getPayload(), "Identifications are not equal!");
+        assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.SUCCESS, saveIdentificationsRs.getBody().getMessage());
+        assertEquals(updateContainer.getIdentifications(), saveIdentificationsRs.getBody().getPayload(), "Identifications are not equal!");
     }
 
     @Test(groups = "SuccessfulScenario")
     public void testGetIdentifications() {
-        AjaxRs<Identifications> getIdentificationsRs = identificationsController.getIdentifications();
+        ResponseEntity<MoneyCalcRs<Identifications>> getIdentificationsRs = identificationsController.getIdentifications();
 
-        assertEquals(getIdentificationsRs.getStatus(), Status.SUCCESS, getIdentificationsRs.getMessage());
-        assertNotNull(getIdentificationsRs.getPayload(), "Identifications is null!");
+        assertEquals(getIdentificationsRs.getBody().getServerStatus(), Status.SUCCESS, getIdentificationsRs.getBody().getMessage());
+        assertNotNull(getIdentificationsRs.getBody().getPayload(), "Identifications is null!");
     }
 
     @Test(groups = "incorrectContainers")
     public void testSaveIdentifications_emptyIdentifications() {
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(null);
-        AjaxRs<Identifications> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
+        ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
 
-        assertEquals(saveIdentificationsRs.getStatus(), Status.ERROR, saveIdentificationsRs.getMessage());
+        assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
@@ -76,8 +77,8 @@ public class IdentificationsControllerTest {
         Identifications identifications = Identifications.builder().build();
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(identifications);
 
-        AjaxRs<Identifications> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
+        ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
 
-        assertEquals(saveIdentificationsRs.getStatus(), Status.ERROR, saveIdentificationsRs.getMessage());
+        assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
     }
 }

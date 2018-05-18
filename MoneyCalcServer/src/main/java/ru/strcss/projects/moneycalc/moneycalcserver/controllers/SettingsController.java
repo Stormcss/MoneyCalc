@@ -2,10 +2,11 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.strcss.projects.moneycalc.api.SettingsAPIService;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
@@ -42,7 +43,7 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @return response object
      */
     @PostMapping(value = "/saveSettings")
-    public AjaxRs<Settings> saveSettings(@RequestBody SettingsUpdateContainer updateContainer) {
+    public ResponseEntity<MoneyCalcRs<Settings>> saveSettings(@RequestBody SettingsUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Settings> requestValidation = new Validator(updateContainer, "Saving Settings")
@@ -56,11 +57,11 @@ public class SettingsController extends AbstractController implements SettingsAP
         WriteResult updateResult = settingsDBConnection.updateSettings(updateContainer.getSettings());
 
         if (updateResult.getN() == 0) {
-            log.error("Updating Settings for login {} has failed", login);
+            log.error("Updating Settings for login \"{}\" has failed", login);
             return responseError("Settings were not updated!");
         }
 
-        log.debug("Updating Settings {} for login {}", updateContainer.getSettings(), login);
+        log.debug("Updating Settings {} for login \"{}\"", updateContainer.getSettings(), login);
         return responseSuccess(SETTINGS_UPDATED, updateContainer.getSettings());
     }
 
@@ -70,21 +71,21 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @return response object
      */
     @GetMapping(value = "/getSettings")
-    public AjaxRs<Settings> getSettings() {
+    public ResponseEntity<MoneyCalcRs<Settings>> getSettings() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
         Settings settings = settingsDBConnection.getSettings(login);
 
         if (settings != null) {
-            log.debug("returning PersonalSettings for login {}: {}", login, settings);
+            log.debug("returning PersonalSettings for login \"{}\": {}", login, settings);
             return responseSuccess(SETTINGS_RETURNED, settings);
         } else {
-            log.error("Can not return PersonalSettings for login {} - no Person found", login);
+            log.error("Can not return PersonalSettings for login \"{}\" - no Person found", login);
             return responseError(NO_PERSON_EXIST);
         }
     }
 
     @PostMapping(value = "/addSpendingSection")
-    public AjaxRs<List<SpendingSection>> addSpendingSection(@RequestBody SpendingSectionAddContainer addContainer) {
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSectionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(addContainer, "Adding SpendingSection")
@@ -104,19 +105,18 @@ public class SettingsController extends AbstractController implements SettingsAP
         WriteResult writeResult = settingsDBConnection.addSpendingSection(login, addContainer);
 
         if (writeResult.wasAcknowledged()) {
-            log.debug("Saved new SpendingSection for login {} : {}", login, addContainer.getSpendingSection());
+            log.debug("Saved new SpendingSection for login \"{}\" : {}", login, addContainer.getSpendingSection());
             return responseSuccess(SPENDING_SECTION_ADDED, settingsDBConnection.getSpendingSectionList(login));
 
         } else {
-            log.error("Saving Transaction {} for login {} has failed", addContainer.getSpendingSection(), login);
+            log.error("Saving Transaction {} for login \"{}\" has failed", addContainer.getSpendingSection(), login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
     }
 
     @PostMapping(value = "/updateSpendingSection")
-    public AjaxRs<List<SpendingSection>> updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) {
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.debug("Request for updating SpendingSection has received: {}", updateContainer);
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer, "Updating SpendingSection")
                 .addValidation(() -> updateContainer.getSpendingSection().isValid().isValidated(),
@@ -138,16 +138,16 @@ public class SettingsController extends AbstractController implements SettingsAP
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking update success
 
         if (updateResult.getN() == 0) {
-            log.error("Updating SpendingSection for login {} has failed", login);
+            log.error("Updating SpendingSection for login \"{}\" has failed", login);
             return responseError("SpendingSection was not found");
         }
 
-        log.debug("Updated SpendingSection {}: for login: {}", updateContainer.getSpendingSection(), login);
+        log.debug("Updated SpendingSection {}: for login: \"{}\"", updateContainer.getSpendingSection(), login);
         return responseSuccess(SPENDING_SECTION_UPDATED, settingsDBConnection.getSpendingSectionList(login));
     }
 
     @PostMapping(value = "/deleteSpendingSection")
-    public AjaxRs<List<SpendingSection>> deleteSpendingSection(@RequestBody SpendingSectionDeleteContainer deleteContainer) {
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@RequestBody SpendingSectionDeleteContainer deleteContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(deleteContainer, "Deleting SpendingSection")
@@ -166,11 +166,11 @@ public class SettingsController extends AbstractController implements SettingsAP
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
         if (deleteResult.getN() == 0) {
-            log.error("Deleting SpendingSection with SearchType: {} and query: {} for login: {} has failed",
+            log.error("Deleting SpendingSection with SearchType: {} and query: {} for login: \"{}\" has failed",
                     deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
             return responseError("SpendingSection was not deleted!");
         }
-        log.debug("Deleted SpendingSection with SearchType: {} and query: {} for login: {}",
+        log.debug("Deleted SpendingSection with SearchType: {} and query: {} for login: \"{}\"",
                 deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
 
         return responseSuccess(SPENDING_SECTION_DELETED, settingsDBConnection.getSpendingSectionList(login));
@@ -183,11 +183,13 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @return response object
      */
     @GetMapping(value = "/getSpendingSections")
-    public AjaxRs<List<SpendingSection>> getSpendingSections() {
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections() {
 
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        log.debug("SpendingSections for login {} is returned", login);
-        return responseSuccess(SPENDING_SECTIONS_RETURNED, settingsDBConnection.getSpendingSectionList(login));
+        List<SpendingSection> spendingSectionList = settingsDBConnection.getSpendingSectionList(login);
+        log.debug("SpendingSections for login \"{}\" are returned: {}", login, spendingSectionList);
+
+        return responseSuccess(SPENDING_SECTIONS_RETURNED, spendingSectionList);
     }
 
     /**

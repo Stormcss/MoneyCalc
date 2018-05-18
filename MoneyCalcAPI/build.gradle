@@ -1,6 +1,7 @@
 group 'ru.strcss.projects.moneycalc.api'
-version '0.0.2'
+version '0.0.3'
 
 dependencies {
     compile project(':MoneyCalcDTO')
+    compile 'org.springframework:spring-web:5.0.6.RELEASE'
 }

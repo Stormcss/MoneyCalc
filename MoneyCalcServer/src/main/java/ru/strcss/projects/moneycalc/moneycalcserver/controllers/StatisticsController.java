@@ -1,14 +1,15 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.StatisticsAPIService;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
@@ -45,7 +46,7 @@ public class StatisticsController extends AbstractController implements Statisti
 
     @Override
     @PostMapping(value = "/getFinanceSummaryBySection")
-    public AjaxRs<List<FinanceSummaryBySection>> getFinanceSummaryBySection(@RequestBody FinanceSummaryGetContainer getContainer) {
+    public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@RequestBody FinanceSummaryGetContainer getContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(getContainer, "Getting Finance Summary")
@@ -67,7 +68,7 @@ public class StatisticsController extends AbstractController implements Statisti
                 .collect(Collectors.toList());
 
         if (spendingSections.size() != getContainer.getSectionIDs().size()) {
-            log.error("List of required IDs is not equal with list filtered Person's list");
+            log.error("List of required IDs is not equal with list filtered Person's list for login: \"{}\"", login);
             return responseError("List of required IDs is not equal with list filtered Person's list");
         }
 
@@ -83,7 +84,7 @@ public class StatisticsController extends AbstractController implements Statisti
 
         List<FinanceSummaryBySection> financeSummaryResult = statisticsHandler.calculateSummaryStatisticsBySections(calculationContainer);
 
-        log.debug("Returned List of FinanceSummaryBySection for login: {} : {}", login, financeSummaryResult);
+        log.debug("Returned List of FinanceSummaryBySection for login \"{}\" : {}", login, financeSummaryResult);
         return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
     }
 }

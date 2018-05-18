@@ -1,7 +1,7 @@
 package ru.strcss.projects.moneycalc.integration;
 
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
@@ -17,7 +17,7 @@ public class SecurityIT extends AbstractIT {
         String login = loginAndToken.getLeft();
         String token = loginAndToken.getRight();
 
-        AjaxRs<Access> getAccessRs = sendRequest(service.getAccess(token), Status.SUCCESS).body();
+        MoneyCalcRs<Access> getAccessRs = sendRequest(service.getAccess(token), Status.SUCCESS).body();
 
         assertEquals(getAccessRs.getPayload().getLogin(), login, "Login is not the same!");
     }

@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.api;
 
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import org.springframework.http.ResponseEntity;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
@@ -11,11 +12,11 @@ import java.util.List;
 
 public interface TransactionsAPIService {
 
-    AjaxRs<List<Transaction>> getTransactions(TransactionsSearchContainer container);
+    ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions(TransactionsSearchContainer container);
 
-    AjaxRs<Transaction> addTransaction(TransactionAddContainer transactionContainer);
+    ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(TransactionAddContainer transactionContainer);
 
-    AjaxRs<Transaction> updateTransaction(TransactionUpdateContainer transactionContainer);
+    ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(TransactionUpdateContainer transactionContainer);
 
-    AjaxRs<Void> deleteTransaction(TransactionDeleteContainer transactionContainer);
+    ResponseEntity<MoneyCalcRs<Void>> deleteTransaction(TransactionDeleteContainer transactionContainer);
 }

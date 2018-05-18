@@ -4,14 +4,16 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import retrofit2.Call;
 import retrofit2.Response;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
 import ru.strcss.projects.moneycalc.testutils.Generator;
 
 import java.io.IOException;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -19,13 +21,15 @@ import static ru.strcss.projects.moneycalc.testutils.Generator.generateCredentia
 
 @Slf4j
 public class Utils {
+    private final static String messageRegex = "\"message\":\"(.*?)\"";
+    private final static Pattern messageGetterPattern = Pattern.compile(messageRegex);
 
-    public static <T> Response<AjaxRs<T>> sendRequest(Call<AjaxRs<T>> call) {
+    public static <T> Response<MoneyCalcRs<T>> sendRequest(Call<MoneyCalcRs<T>> call) {
         return sendRequest(call, null);
     }
 
-    public static <T> Response<AjaxRs<T>> sendRequest(Call<AjaxRs<T>> call, Status expectedStatus) {
-        Response<AjaxRs<T>> response = null;
+    public static <T> Response<MoneyCalcRs<T>> sendRequest(Call<MoneyCalcRs<T>> call, Status expectedStatus) {
+        Response<MoneyCalcRs<T>> response = null;
         try {
             response = call.execute();
         } catch (IOException e) {
@@ -33,12 +37,35 @@ public class Utils {
         }
 
         assertNotNull(response, "Response is null!");
-        assertNotNull(response.body(), "Response body is null!");
-        if (expectedStatus != null) assertEquals(response.body().getStatus(), expectedStatus, response.body().getMessage());
 
-        log.debug("{} - {}", response.body().getMessage(), response.body().getStatus().name());
+        if (response.body() == null /*&& expectedStatus != null && expectedStatus.equals(Status.ERROR)*/) {
+            String errorBodyMessage = getErrorBodyMessage(response);
+            log.debug("{} - {}", errorBodyMessage, response.code());
+        } else {
+            assertNotNull(response.body(), "Response body is null!");
+            if (expectedStatus != null)
+                assertEquals(response.body().getServerStatus(), expectedStatus, response.body().getMessage());
+            log.debug("{} - {}", response.body().getMessage(), response.body().getServerStatus().name());
+        }
         return response;
     }
+
+    public static String getErrorBodyMessage(Response response) {
+        try {
+            String errorJSON = response.errorBody().string();
+            final Matcher messageMatcher = messageGetterPattern.matcher(errorJSON);
+
+            if (messageMatcher.find()) {
+                return messageMatcher.group(1);
+            } else {
+                return errorJSON;
+            }
+        } catch (IOException e1) {
+            e1.printStackTrace();
+            return response.message();
+        }
+    }
+
 
     /**
      * Save Person with random login and return Token

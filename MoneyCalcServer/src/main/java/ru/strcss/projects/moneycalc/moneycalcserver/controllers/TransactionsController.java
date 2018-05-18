@@ -2,13 +2,14 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.TransactionsAPIService;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
@@ -46,7 +47,7 @@ public class TransactionsController extends AbstractController implements Transa
      * @return response object with list of Transactions
      */
     @PostMapping(value = "/getTransactions")
-    public AjaxRs<List<Transaction>> getTransactions(@RequestBody TransactionsSearchContainer getContainer) {
+    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions(@RequestBody TransactionsSearchContainer getContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<Transaction>> requestValidation = new Validator(getContainer, "Getting Transactions")
@@ -57,14 +58,14 @@ public class TransactionsController extends AbstractController implements Transa
 
         List<Transaction> transactions = transactionsDBConnection.getTransactions(login, getContainer);
 
-        log.debug("Returning Transactions for login {}, dateFrom {}, dateTo {} : {}",
+        log.debug("Returning Transactions for login \"{}\", dateFrom {}, dateTo {} : {}",
                 login, getContainer.getRangeFrom(), getContainer.getRangeTo(), transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }
 
     @PostMapping(value = "/addTransaction")
-    public AjaxRs<Transaction> addTransaction(@RequestBody TransactionAddContainer addContainer) {
+    public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody TransactionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         System.out.println("addContainer = " + addContainer);
@@ -86,11 +87,11 @@ public class TransactionsController extends AbstractController implements Transa
         WriteResult writeResult = transactionsDBConnection.addTransaction(login, addContainer);
 
         if (writeResult.wasAcknowledged()) {
-            log.debug("Saved new Transaction for login {} : {}", login, addContainer.getTransaction());
+            log.debug("Saved new Transaction for login \"{}\" : {}", login, addContainer.getTransaction());
             return responseSuccess(TRANSACTION_SAVED, addContainer.getTransaction());
 
         } else {
-            log.error("Saving Transaction {} for login {} has failed", addContainer.getTransaction(), login);
+            log.error("Saving Transaction {} for login \"{}\" has failed", addContainer.getTransaction(), login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
     }
@@ -105,12 +106,10 @@ public class TransactionsController extends AbstractController implements Transa
      */
 
     @PostMapping(value = "/updateTransaction")
-    public AjaxRs<Transaction> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) {
+    public ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Transaction> requestValidation = new Validator(updateContainer, "Updating Transaction")
-//                .addValidation(() -> repository.existsByAccess_Login(formatLogin(login)),
-//                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
@@ -123,22 +122,20 @@ public class TransactionsController extends AbstractController implements Transa
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
         if (updateResult.getN() == 0) {
-            log.error("Updating Transaction for login {} has failed", login);
+            log.error("Updating Transaction for login \"{}\" has failed", login);
             return responseError("Transaction was not updated!");
         }
 
-        log.debug("Updated Transaction {}: for login: {}", updateContainer.getTransaction());
+        log.debug("Updated Transaction {}: for login: \"{}\"", updateContainer.getTransaction());
         return responseSuccess(TRANSACTION_UPDATED, updateContainer.getTransaction());
     }
 
     @PostMapping(value = "/deleteTransaction")
-    public AjaxRs<Void> deleteTransaction(@RequestBody TransactionDeleteContainer deleteContainer) {
+    public ResponseEntity<MoneyCalcRs<Void>> deleteTransaction(@RequestBody TransactionDeleteContainer deleteContainer) {
 
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Void> requestValidation = new Validator(deleteContainer, "Deleting Transaction")
-//                .addValidation(() -> repository.existsByAccess_Login(login),
-//                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
@@ -149,10 +146,10 @@ public class TransactionsController extends AbstractController implements Transa
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
         if (deleteResult.getN() == 0) {
-            log.error("Deleting Transaction for login {} has failed", login);
+            log.error("Deleting Transaction for login \"{}\" has failed", login);
             return responseError("Transaction was not deleted!");
         }
-        log.debug("Deleted Transaction id {}: for login: {}", deleteContainer.getId(), login);
+        log.debug("Deleted Transaction id \"{}\": for login: \"{}\"", deleteContainer.getId(), login);
         // FIXME: 06.02.2018 some payload should be returned
         return responseSuccess(TRANSACTION_DELETED, null);
     }

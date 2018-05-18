@@ -2,7 +2,7 @@ package ru.strcss.projects.moneycalc.integration;
 
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
@@ -214,7 +214,7 @@ public class StatisticsControllerIT extends AbstractIT {
         return addContainers.stream()
                 .map(transactionAddContainer -> sendRequest(service.addTransaction(token, transactionAddContainer)).body())
                 .filter(Objects::nonNull)
-                .map(AjaxRs::getPayload)
+                .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());
     }
 

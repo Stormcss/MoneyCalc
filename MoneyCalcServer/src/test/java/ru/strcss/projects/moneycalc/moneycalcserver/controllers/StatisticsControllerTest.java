@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -7,8 +8,8 @@ import org.springframework.security.core.userdetails.User;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
@@ -58,74 +59,74 @@ public class StatisticsControllerTest {
     @Test(groups = "SuccessfulScenario")
     public void testGetFinanceSummaryBySection() {
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", "2017-02-20", sectionIDs);
-        AjaxRs<List<FinanceSummaryBySection>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.SUCCESS, financeSummaryBySectionRs.getMessage());
-        assertEquals(financeSummaryBySectionRs.getPayload().size(), sectionIDs.size(), financeSummaryBySectionRs.getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.SUCCESS, financeSummaryBySectionRs.getBody().getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getPayload().size(), sectionIDs.size(), financeSummaryBySectionRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_emptyContainer() {
-        AjaxRs<List<FinanceSummaryBySection>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(null);
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.ERROR, financeSummaryBySectionRs.getMessage());
+        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(null);
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_emptySectionIds() {
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", "2017-02-20", null);
-        AjaxRs<List<FinanceSummaryBySection>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.ERROR, financeSummaryBySectionRs.getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_incorrect_RangeFrom() {
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017.02.10", "2017-02-20", sectionIDs);
-        AjaxRs<List<FinanceSummaryBySection>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.ERROR, financeSummaryBySectionRs.getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
 
         getContainer = new FinanceSummaryGetContainer("10-02-2017", "2017-02-20", sectionIDs);
         financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.ERROR, financeSummaryBySectionRs.getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_incorrect_RangeTo() {
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", "2017.02.20", sectionIDs);
-        AjaxRs<List<FinanceSummaryBySection>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.ERROR, financeSummaryBySectionRs.getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
 
         getContainer = new FinanceSummaryGetContainer("2017-02-10", "20-02-2017", sectionIDs);
         financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.ERROR, financeSummaryBySectionRs.getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_RangeFrom_after_RangeTo() {
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-20", "2017-02-10", sectionIDs);
-        AjaxRs<List<FinanceSummaryBySection>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.ERROR, financeSummaryBySectionRs.getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_empty_RangeFrom() {
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(null, "2017-02-20", sectionIDs);
-        AjaxRs<List<FinanceSummaryBySection>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.ERROR, financeSummaryBySectionRs.getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_empty_RangeTo() {
         FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", null, sectionIDs);
-        AjaxRs<List<FinanceSummaryBySection>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
-        assertEquals(financeSummaryBySectionRs.getStatus(), Status.ERROR, financeSummaryBySectionRs.getMessage());
+        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
     }
 
 }

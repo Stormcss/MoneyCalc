@@ -2,10 +2,11 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.strcss.projects.moneycalc.api.IdentificationsAPIService;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
@@ -32,12 +33,10 @@ public class IdentificationsController extends AbstractController implements Ide
      * @return response object with Identifications payload
      */
     @PostMapping(value = "/saveIdentifications")
-    public AjaxRs<Identifications> saveIdentifications(@RequestBody IdentificationsUpdateContainer updateContainer) {
+    public ResponseEntity<MoneyCalcRs<Identifications>> saveIdentifications(@RequestBody IdentificationsUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Identifications> requestValidation = new Validator(updateContainer, "Saving Identifications")
-//                .addValidation(() -> repository.existsByAccess_Login(login),
-//                        () -> fillLog(NO_PERSON_EXIST, login))
                 .addValidation(() -> updateContainer.getIdentifications().isValid().isValidated(),
                         () -> fillLog(IDENTIFICATIONS_INCORRECT, updateContainer.getIdentifications().isValid().getReasons().toString()))
                 .validate();
@@ -47,7 +46,7 @@ public class IdentificationsController extends AbstractController implements Ide
         final WriteResult updateResult = identificationsDBConnection.updateIdentifications(login, updateContainer);
 
         if (updateResult.getN() == 0) {
-            log.error("Updating Identifications for login {} has failed", login);
+            log.error("Updating Identifications for login \"{}\" has failed", login);
             return responseError(IDENTIFICATIONS_SAVING_ERROR);
         }
         return responseSuccess(IDENTIFICATIONS_SAVED, updateContainer.getIdentifications());
@@ -59,16 +58,16 @@ public class IdentificationsController extends AbstractController implements Ide
      * @return response object with Identifications payload
      */
     @GetMapping(value = "/getIdentifications")
-    public AjaxRs<Identifications> getIdentifications() {
+    public ResponseEntity<MoneyCalcRs<Identifications>> getIdentifications() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Identifications identifications = identificationsDBConnection.getIdentifications(login);
 
         if (identifications != null) {
-            log.debug("returning Identifications for login {}: {}", login, identifications);
+            log.debug("returning Identifications for login \"{}\": {}", login, identifications);
             return responseSuccess(IDENTIFICATIONS_RETURNED, identifications);
         } else {
-            log.error("Can not return Identifications for login {} - no Person found", login);
+            log.error("Can not return Identifications for login \"{}\" - no Person found", login);
             return responseError(NO_PERSON_EXIST);
         }
     }

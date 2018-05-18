@@ -1,12 +1,13 @@
 package ru.strcss.projects.moneycalc.api;
 
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import org.springframework.http.ResponseEntity;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Access;
 
 public interface AccessAPIService {
 
-    AjaxRs<Access> saveAccess(IdentificationsUpdateContainer updateContainer);
+    ResponseEntity<MoneyCalcRs<Access>> saveAccess(IdentificationsUpdateContainer updateContainer);
 
-    AjaxRs<Access> getAccess();
+    ResponseEntity<MoneyCalcRs<Access>> getAccess();
 }

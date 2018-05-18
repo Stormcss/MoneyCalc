@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -9,8 +10,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
@@ -54,59 +55,66 @@ public class RegisterControllerTest {
 
     @Test(groups = "registerSuccessfulScenario")
     public void testRegisterPerson() {
-        AjaxRs<Person> registerRs = registerController.registerPerson(generateCredentials());
-        assertEquals(registerRs.getStatus(), Status.SUCCESS, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs = registerController.registerPerson(generateCredentials());
+        assertEquals(registerRs.getBody().getServerStatus(), Status.SUCCESS, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerIncorrectContainers")
     public void testRegisterPerson_emptyContainer() {
-        AjaxRs<Person> registerRs = registerController.registerPerson(null);
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs = registerController.registerPerson(null);
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerIncorrectContainers")
     public void testRegisterPerson_emptyAccessAndIdentifications() {
-        AjaxRs<Person> registerRs = registerController.registerPerson(new Credentials(null, null));
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs =
+                registerController.registerPerson(new Credentials(null, null));
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerIncorrectContainers")
     public void testRegisterPerson_emptyAccess() {
-        AjaxRs<Person> registerRs = registerController.registerPerson(new Credentials(null, generateIdentifications()));
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs =
+                registerController.registerPerson(new Credentials(null, generateIdentifications()));
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerIncorrectContainers")
     public void testRegisterPerson_AccessWithNulls() {
-        AjaxRs<Person> registerRs = registerController.registerPerson(new Credentials(Access.builder().build(), generateIdentifications()));
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs =
+                registerController.registerPerson(new Credentials(Access.builder().build(), generateIdentifications()));
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerIncorrectContainers")
     public void testRegisterPerson_Access_LoginEmpty() {
         Access access = Access.builder().email("mail@mail.ru").password("123445").build();
-        AjaxRs<Person> registerRs = registerController.registerPerson(new Credentials(access, generateIdentifications()));
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs =
+                registerController.registerPerson(new Credentials(access, generateIdentifications()));
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerIncorrectContainers")
     public void testRegisterPerson_Access_PasswordEmpty() {
         Access access = Access.builder().login("login").email("mail@mail.ru").build();
-        AjaxRs<Person> registerRs = registerController.registerPerson(new Credentials(access, generateIdentifications()));
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs =
+                registerController.registerPerson(new Credentials(access, generateIdentifications()));
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerIncorrectContainers")
     public void testRegisterPerson_Access_EmailEmpty() {
         Access access = Access.builder().login("login").password("12345").build();
-        AjaxRs<Person> registerRs = registerController.registerPerson(new Credentials(access, generateIdentifications()));
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs =
+                registerController.registerPerson(new Credentials(access, generateIdentifications()));
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerIncorrectContainers")
     public void testRegisterPerson_IdentificationWithNulls() {
-        AjaxRs<Person> registerRs = registerController.registerPerson(new Credentials(generateAccess(), Identifications.builder().build()));
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs =
+                registerController.registerPerson(new Credentials(generateAccess(), Identifications.builder().build()));
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerIncorrectContainers")
@@ -114,12 +122,13 @@ public class RegisterControllerTest {
         Access access = generateAccess();
         access.setEmail("123");
 
-        AjaxRs<Person> registerRs = registerController.registerPerson(new Credentials(access, generateIdentifications()));
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs =
+                registerController.registerPerson(new Credentials(access, generateIdentifications()));
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
 
         access.setEmail("123@mail");
         registerRs = registerController.registerPerson(new Credentials(access, generateIdentifications()));
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerFail", dependsOnGroups = {"registerSuccessfulScenario", "registerIncorrectContainers"})
@@ -128,8 +137,8 @@ public class RegisterControllerTest {
         when(registrationDBConnection.isPersonExistsByLogin(anyString())).thenReturn(true);
         registerController = new RegisterController(registrationDBConnection, bCryptPasswordEncoder, mongoTemplate);
 
-        AjaxRs<Person> registerRs = registerController.registerPerson(generateCredentials());
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs = registerController.registerPerson(generateCredentials());
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 
     @Test(groups = "registerFail", dependsOnGroups = {"registerSuccessfulScenario", "registerIncorrectContainers"})
@@ -138,7 +147,7 @@ public class RegisterControllerTest {
         when(registrationDBConnection.isPersonExistsByEmail(anyString())).thenReturn(true);
         registerController = new RegisterController(registrationDBConnection, bCryptPasswordEncoder, mongoTemplate);
 
-        AjaxRs<Person> registerRs = registerController.registerPerson(generateCredentials());
-        assertEquals(registerRs.getStatus(), Status.ERROR, registerRs.getMessage());
+        ResponseEntity<MoneyCalcRs<Person>> registerRs = registerController.registerPerson(generateCredentials());
+        assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
     }
 }

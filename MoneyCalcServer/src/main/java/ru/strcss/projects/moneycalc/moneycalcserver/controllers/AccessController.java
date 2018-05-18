@@ -1,12 +1,13 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.AccessAPIService;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.AccessDBConnection;
@@ -32,29 +33,23 @@ public class AccessController extends AbstractController implements AccessAPISer
      * @return response object with Identifications payload
      */
     @GetMapping(value = "/getAccess")
-    public AjaxRs<Access> getAccess() {
+    public ResponseEntity<MoneyCalcRs<Access>> getAccess() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-
-//        RequestValidation<Access> requestValidation = new RequestValidation.Validator(null, "Requesting Access")
-////                .addValidation(() -> repository.existsByAccess_Login(login),
-////                        () -> fillLog(NO_PERSON_EXIST, login))
-//                .validate();
-//        if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
         Access access = accessDBConnection.getAccess(login);
 
         if (access != null) {
-            log.debug("returning Access for login {}: {}", login, access);
+            log.debug("returning Access for login \"{}\": {}", login, access);
             return responseSuccess(ACCESS_RETURNED, access);
         } else {
-            log.error("Can not return Access for login {} - no Person found", login);
+            log.error("Can not return Access for login \"{}\" - no Person found", login);
             return responseError(NO_PERSON_EXIST);
         }
     }
 
     @Override
-    public AjaxRs<Access> saveAccess(IdentificationsUpdateContainer updateContainer) {
-        return null;
+    public ResponseEntity<MoneyCalcRs<Access>> saveAccess(IdentificationsUpdateContainer updateContainer) {
+        throw new UnsupportedOperationException("Not supported yet");
     }
 
 }

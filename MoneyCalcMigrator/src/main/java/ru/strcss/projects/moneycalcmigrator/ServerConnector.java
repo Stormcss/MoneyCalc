@@ -4,8 +4,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
@@ -114,8 +114,8 @@ class ServerConnector implements ServerConnectorI {
                 .name(config.getName())
                 .build();
         try {
-            AjaxRs<Person> registerResponse = service.registerPerson(new Credentials(access, identifications)).execute().body();
-            if (registerResponse.getStatus() != Status.SUCCESS)
+            MoneyCalcRs<Person> registerResponse = service.registerPerson(new Credentials(access, identifications)).execute().body();
+            if (registerResponse.getServerStatus() != Status.SUCCESS)
                 throw new RuntimeException("Registration has failed", new RuntimeException(registerResponse.getMessage()));
             return service.login(access).execute().headers().get("Authorization");
         } catch (IOException e) {
@@ -158,8 +158,8 @@ class ServerConnector implements ServerConnectorI {
 
         for (Transaction transaction : transactionsToAdd) {
             try {
-                AjaxRs<Transaction> request = service.addTransaction(token, new TransactionAddContainer(transaction)).execute().body();
-                if (request == null || request.getStatus() != Status.SUCCESS || request.getPayload() == null) {
+                MoneyCalcRs<Transaction> request = service.addTransaction(token, new TransactionAddContainer(transaction)).execute().body();
+                if (request == null || request.getServerStatus() != Status.SUCCESS || request.getPayload() == null) {
                     rollback = true;
                     break;
                 } else {

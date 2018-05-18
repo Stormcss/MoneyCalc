@@ -1,13 +1,12 @@
 package ru.strcss.projects.moneycalc.api;
 
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import org.springframework.http.ResponseEntity;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 
 import java.util.List;
 
 public interface StatisticsAPIService {
-
-    AjaxRs<List<FinanceSummaryBySection>> getFinanceSummaryBySection(FinanceSummaryGetContainer container);
-
+    ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(FinanceSummaryGetContainer container);
 }

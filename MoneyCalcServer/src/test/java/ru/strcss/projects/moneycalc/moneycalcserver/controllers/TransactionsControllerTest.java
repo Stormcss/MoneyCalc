@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import com.mongodb.WriteResult;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,7 +9,7 @@ import org.springframework.security.core.userdetails.User;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
@@ -63,66 +64,75 @@ public class TransactionsControllerTest {
 
     @Test(groups = "SuccessfulScenario")
     public void testGetTransactions() {
-        AjaxRs<List<Transaction>> getTransactionsRs = transactionsController.getTransactions(new TransactionsSearchContainer("2017-02-10", "2017-02-20", requiredSections));
+        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
+                new TransactionsSearchContainer("2017-02-10", "2017-02-20", requiredSections));
 
-        assertEquals(getTransactionsRs.getStatus(), Status.SUCCESS, getTransactionsRs.getMessage());
-        assertEquals(getTransactionsRs.getPayload().size(), (int) transactionsCount, getTransactionsRs.getMessage());
+        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, getTransactionsRs.getBody().getMessage());
+        assertEquals(getTransactionsRs.getBody().getPayload().size(), (int) transactionsCount, getTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "SuccessfulScenario")
     public void testAddTransaction() {
-        AjaxRs<Transaction> addTransactionsRs = transactionsController.addTransaction(new TransactionAddContainer(generateTransaction()));
+        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs = transactionsController.addTransaction(
+                new TransactionAddContainer(generateTransaction()));
 
-        assertEquals(addTransactionsRs.getStatus(), Status.SUCCESS, addTransactionsRs.getMessage());
+        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, addTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "SuccessfulScenario")
     public void testUpdateTransaction() {
-        AjaxRs<Transaction> updateTransactionsRs = transactionsController.updateTransaction(new TransactionUpdateContainer("223e4", generateTransaction()));
+        ResponseEntity<MoneyCalcRs<Transaction>> updateTransactionsRs = transactionsController.updateTransaction(
+                new TransactionUpdateContainer("223e4", generateTransaction()));
 
-        assertEquals(updateTransactionsRs.getStatus(), Status.SUCCESS, updateTransactionsRs.getMessage());
+        assertEquals(updateTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, updateTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "SuccessfulScenario")
     public void testDeleteTransaction() {
-        AjaxRs<Void> deleteTransactionsRs = transactionsController.deleteTransaction(new TransactionDeleteContainer("223e4"));
+        ResponseEntity<MoneyCalcRs<Void>> deleteTransactionsRs =
+                transactionsController.deleteTransaction(new TransactionDeleteContainer("223e4"));
 
-        assertEquals(deleteTransactionsRs.getStatus(), Status.SUCCESS, deleteTransactionsRs.getMessage());
+        assertEquals(deleteTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, deleteTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
     public void testGetTransactions_emptyRangeFrom() {
-        AjaxRs<List<Transaction>> getTransactionsRs = transactionsController.getTransactions(new TransactionsSearchContainer(null, "2017-02-20", requiredSections));
+        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
+                new TransactionsSearchContainer(null, "2017-02-20", requiredSections));
 
-        assertEquals(getTransactionsRs.getStatus(), Status.ERROR, getTransactionsRs.getMessage());
+        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
     public void testGetTransactions_emptyRangeTo() {
-        AjaxRs<List<Transaction>> getTransactionsRs = transactionsController.getTransactions(new TransactionsSearchContainer("2017-02-10", null, requiredSections));
+        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
+                new TransactionsSearchContainer("2017-02-10", null, requiredSections));
 
-        assertEquals(getTransactionsRs.getStatus(), Status.ERROR, getTransactionsRs.getMessage());
+        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
     public void testGetTransactions_emptySectionsId() {
-        AjaxRs<List<Transaction>> getTransactionsRs = transactionsController.getTransactions(new TransactionsSearchContainer("2017-02-10", "2017-02-20", null));
+        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
+                new TransactionsSearchContainer("2017-02-10", "2017-02-20", null));
 
-        assertEquals(getTransactionsRs.getStatus(), Status.ERROR, getTransactionsRs.getMessage());
+        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
     public void testGetTransactions_RangeFrom_after_RangeTo() {
-        AjaxRs<List<Transaction>> getTransactionsRs = transactionsController.getTransactions(new TransactionsSearchContainer("2017-02-20", "2017-02-10", requiredSections));
+        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
+                new TransactionsSearchContainer("2017-02-20", "2017-02-10", requiredSections));
 
-        assertEquals(getTransactionsRs.getStatus(), Status.ERROR, getTransactionsRs.getMessage());
+        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
     public void testAddTransaction_emptyTransaction() {
-        AjaxRs<Transaction> addTransactionsRs = transactionsController.addTransaction(new TransactionAddContainer(Transaction.builder().build()));
+        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs = transactionsController.addTransaction(
+                new TransactionAddContainer(Transaction.builder().build()));
 
-        assertEquals(addTransactionsRs.getStatus(), Status.ERROR, addTransactionsRs.getMessage());
+        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.ERROR, addTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
@@ -133,29 +143,33 @@ public class TransactionsControllerTest {
                 .sectionID(0)
                 .build();
 
-        AjaxRs<Transaction> addTransactionsRs = transactionsController.addTransaction(new TransactionAddContainer(transaction));
+        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs =
+                transactionsController.addTransaction(new TransactionAddContainer(transaction));
 
-        assertEquals(addTransactionsRs.getStatus(), Status.ERROR, addTransactionsRs.getMessage());
+        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.ERROR, addTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
     public void testUpdateTransaction_emptyId() {
-        AjaxRs<Transaction> updateTransactionsRs = transactionsController.updateTransaction(new TransactionUpdateContainer(null, generateTransaction()));
+        ResponseEntity<MoneyCalcRs<Transaction>> updateTransactionsRs = transactionsController.updateTransaction(
+                new TransactionUpdateContainer(null, generateTransaction()));
 
-        assertEquals(updateTransactionsRs.getStatus(), Status.ERROR, updateTransactionsRs.getMessage());
+        assertEquals(updateTransactionsRs.getBody().getServerStatus(), Status.ERROR, updateTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
     public void testUpdateTransaction_emptyTransaction() {
-        AjaxRs<Transaction> updateTransactionsRs = transactionsController.updateTransaction(new TransactionUpdateContainer("223e4", null));
+        ResponseEntity<MoneyCalcRs<Transaction>> updateTransactionsRs = transactionsController.updateTransaction(
+                new TransactionUpdateContainer("223e4", null));
 
-        assertEquals(updateTransactionsRs.getStatus(), Status.ERROR, updateTransactionsRs.getMessage());
+        assertEquals(updateTransactionsRs.getBody().getServerStatus(), Status.ERROR, updateTransactionsRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainers")
     public void testDeleteTransaction_emptyId() {
-        AjaxRs<Void> deleteTransactionsRs = transactionsController.deleteTransaction(new TransactionDeleteContainer(null));
+        ResponseEntity<MoneyCalcRs<Void>> deleteTransactionsRs = transactionsController.deleteTransaction(
+                new TransactionDeleteContainer(null));
 
-        assertEquals(deleteTransactionsRs.getStatus(), Status.ERROR, deleteTransactionsRs.getMessage());
+        assertEquals(deleteTransactionsRs.getBody().getServerStatus(), Status.ERROR, deleteTransactionsRs.getBody().getMessage());
     }
 }

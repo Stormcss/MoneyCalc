@@ -1,9 +1,10 @@
 package ru.strcss.projects.moneycalc.api;
 
-import ru.strcss.projects.moneycalc.dto.AjaxRs;
+import org.springframework.http.ResponseEntity;
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.enitities.Person;
 
 public interface RegisterAPIService {
-    AjaxRs<Person> registerPerson(Credentials credentials);
+    ResponseEntity<MoneyCalcRs<Person>> registerPerson(Credentials credentials);
 }

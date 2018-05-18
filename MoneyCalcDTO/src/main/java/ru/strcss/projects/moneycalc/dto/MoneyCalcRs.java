@@ -7,13 +7,12 @@ import lombok.*;
 @ToString
 @AllArgsConstructor
 @NoArgsConstructor
-public class AjaxRs<E> {
-    private Status status;
+public class MoneyCalcRs<E> {
+    private Status serverStatus;
     private E payload;
     private String message;
-    private int httpCode;
 
     public boolean isSuccessful() {
-        return Status.SUCCESS.equals(this.status);
+        return Status.SUCCESS.equals(this.serverStatus);
     }
 }
