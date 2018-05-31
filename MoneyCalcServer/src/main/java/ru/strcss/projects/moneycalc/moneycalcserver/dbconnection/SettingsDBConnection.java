@@ -22,6 +22,7 @@ import java.util.List;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.sortSpendingSectionList;
 
 @Component
 public class SettingsDBConnection{
@@ -162,7 +163,7 @@ public class SettingsDBConnection{
 
         AggregationResults<SpendingSection> aggregate = mongoTemplate.aggregate(aggregation, Person.class, SpendingSection.class);
 
-        return aggregate.getMappedResults();
+        return sortSpendingSectionList(aggregate.getMappedResults());
     }
 
     public SpendingSection getSpendingSectionByName(String login, String name) {

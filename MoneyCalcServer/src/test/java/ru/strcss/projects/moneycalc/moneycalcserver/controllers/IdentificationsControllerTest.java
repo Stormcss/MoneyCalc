@@ -47,6 +47,16 @@ public class IdentificationsControllerTest {
         identificationsController = new IdentificationsController(identificationsDBConnection);
     }
 
+    @BeforeGroups(groups = "failedScenario")
+    public void prepare_failedScenario() {
+        when(identificationsDBConnection.getIdentifications(anyString()))
+                .thenReturn(null);
+        when(identificationsDBConnection.updateIdentifications(anyString(), any(IdentificationsUpdateContainer.class)))
+                .thenReturn(new WriteResult(0, false, new Object()));
+
+        identificationsController = new IdentificationsController(identificationsDBConnection);
+    }
+
     @Test(groups = "SuccessfulScenario")
     public void testSaveIdentifications() {
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(generateIdentifications());
@@ -80,5 +90,20 @@ public class IdentificationsControllerTest {
         ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
 
         assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
+    }
+
+    @Test(groups = "failedScenario", dependsOnGroups = {"SuccessfulScenario", "incorrectContainers"})
+    public void testSaveIdentifications_failed() {
+        IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(generateIdentifications());
+        ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
+
+        assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
+    }
+
+    @Test(groups = "failedScenario", dependsOnGroups = {"SuccessfulScenario", "incorrectContainers"})
+    public void testGetIdentifications_failed() {
+        ResponseEntity<MoneyCalcRs<Identifications>> getIdentificationsRs = identificationsController.getIdentifications();
+
+        assertEquals(getIdentificationsRs.getBody().getServerStatus(), Status.ERROR, getIdentificationsRs.getBody().getMessage());
     }
 }

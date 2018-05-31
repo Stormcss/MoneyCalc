@@ -35,7 +35,7 @@ public class SettingsControllerIT extends AbstractIT {
         String login = loginAndToken.getLeft();
         String token = loginAndToken.getRight();
 
-        Settings settingsIncorrect = generateSettings(login, false);
+        Settings settingsIncorrect = generateSettings(login, false, false);
         settingsIncorrect.setLogin("");
 
         Response<MoneyCalcRs<Settings>> saveSettingsRs = sendRequest(service.saveSettings(token, new SettingsUpdateContainer(settingsIncorrect)));
@@ -73,7 +73,7 @@ public class SettingsControllerIT extends AbstractIT {
         Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
         String login = loginAndToken.getLeft();
         String token = loginAndToken.getRight();
-        Settings newSettings = generateSettings(login, false);
+        Settings newSettings = generateSettings(login, false, false);
         newSettings.setPeriodTo(formatDateToString(generateDatePlus(ChronoUnit.YEARS, 1)));
 
         //Updating Settings
@@ -126,7 +126,6 @@ public class SettingsControllerIT extends AbstractIT {
                             .findAny().get().getId(),
                     addSectionRs.getPayload().size() - 1, "Id has been incremented incorrectly!");
         }
-
     }
 
     @Test

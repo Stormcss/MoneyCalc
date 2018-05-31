@@ -19,6 +19,8 @@ import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.TransactionsDBConnection;
 
+import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -27,8 +29,11 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertTrue;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionList;
+import static ru.strcss.projects.moneycalc.testutils.TestUtils.assertTransactionsOrderedByDate;
 
 public class TransactionsControllerTest {
 
@@ -47,8 +52,11 @@ public class TransactionsControllerTest {
 
     @BeforeGroups(groups = {"SuccessfulScenario", "incorrectContainers"})
     public void prepare_successfulScenario_incorrectContainers() {
+        List<Transaction> transactionList = generateTransactionList(transactionsCount, requiredSections);
+        transactionList.get(1).setDate(formatDateToString(LocalDate.now().minus(1, ChronoUnit.DAYS)));
+
         when(transactionsDBConnection.getTransactions(anyString(), any(TransactionsSearchContainer.class)))
-                .thenReturn(generateTransactionList(transactionsCount, requiredSections));
+                .thenReturn(transactionList);
         when(transactionsDBConnection.addTransaction(anyString(), any(TransactionAddContainer.class)))
                 .thenReturn(new WriteResult(1, false, new Object()));
         when(transactionsDBConnection.deleteTransaction(anyString(), any(TransactionDeleteContainer.class)))
@@ -69,6 +77,7 @@ public class TransactionsControllerTest {
 
         assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, getTransactionsRs.getBody().getMessage());
         assertEquals(getTransactionsRs.getBody().getPayload().size(), (int) transactionsCount, getTransactionsRs.getBody().getMessage());
+        assertTrue(assertTransactionsOrderedByDate(getTransactionsRs.getBody().getPayload()), "Transactions are not ordered by date!");
     }
 
     @Test(groups = "SuccessfulScenario")
@@ -172,4 +181,5 @@ public class TransactionsControllerTest {
 
         assertEquals(deleteTransactionsRs.getBody().getServerStatus(), Status.ERROR, deleteTransactionsRs.getBody().getMessage());
     }
+
 }

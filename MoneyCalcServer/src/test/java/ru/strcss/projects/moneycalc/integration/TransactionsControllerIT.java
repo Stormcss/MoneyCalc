@@ -11,6 +11,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionU
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 
+import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
@@ -23,6 +24,7 @@ import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.*;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
+import static ru.strcss.projects.moneycalc.testutils.TestUtils.assertTransactionsOrderedByDate;
 
 @Slf4j
 public class TransactionsControllerIT extends AbstractIT {
@@ -196,15 +198,16 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(addedTransactions.size(), numOfAddedTransactions, "Some Transactions were not created!");
 
         //Getting random Transactions to update
-        String idToUpdate = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).get_id();
+        String idToUpdate = addedTransactions.get(ThreadLocalRandom.current().nextInt(1, addedTransactions.size())).get_id();
 
         //Update Transaction
+        LocalDate newDate = LocalDate.now().minus(1, ChronoUnit.DAYS);
         MoneyCalcRs<Transaction> updateTransactionRs
-                = sendRequest(service.updateTransaction(token, new TransactionUpdateContainer(idToUpdate, generateTransaction()))).body();
+                = sendRequest(service.updateTransaction(token, new TransactionUpdateContainer(idToUpdate, generateTransaction(newDate)))).body();
         assertEquals(updateTransactionRs.getServerStatus(), Status.SUCCESS, updateTransactionRs.getMessage());
 
         //Getting Transactions list
-        MoneyCalcRs<List<Transaction>> getTransactionsRs = sendRequest(service.getTransactions(token, new TransactionsSearchContainer(formatDateToString(currentDate()),
+        MoneyCalcRs<List<Transaction>> getTransactionsRs = sendRequest(service.getTransactions(token, new TransactionsSearchContainer(formatDateToString(newDate),
                 formatDateToString(currentDate()), Collections.emptyList()))).body();
         assertEquals(getTransactionsRs.getServerStatus(), Status.SUCCESS, getTransactionsRs.getMessage());
 
@@ -226,6 +229,7 @@ public class TransactionsControllerIT extends AbstractIT {
                 .get();
 
         assertNotEquals(updatedTransaction.getSum(), beforeUpdatedTransaction.getSum(), "Sum in Transaction after update has not changed!");
-        assertEquals(updatedTransaction.get_id(), beforeUpdatedTransaction.get_id(), "Sum in Transaction after update has not changed!");
+        assertEquals(updatedTransaction.get_id(), beforeUpdatedTransaction.get_id(), "Id of updated Transaction has changed!");
+        assertTrue(assertTransactionsOrderedByDate(transactionsList), "Transaction list is not ordered by date!");
     }
 }

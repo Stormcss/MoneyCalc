@@ -24,6 +24,12 @@ public class SpendingSection {
     private Boolean isAdded;
 
     /**
+     * if Section is removed. Flag allows to disable ("remove" it for the user) required section without having
+     * to physically remove it from database
+     */
+    private Boolean isRemoved;
+
+    /**
      * Estimated budget for section. Used for Statistics calculation
      */
     private Integer budget;

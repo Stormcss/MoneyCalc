@@ -18,7 +18,7 @@ public class IdentificationsDBConnection {
     private MongoTemplate mongoTemplate;
 
     @Autowired
-    public IdentificationsDBConnection(PersonRepository repository,MongoTemplate mongoTemplate) {
+    public IdentificationsDBConnection(PersonRepository repository, MongoTemplate mongoTemplate) {
         this.repository = repository;
         this.mongoTemplate = mongoTemplate;
     }
@@ -30,6 +30,7 @@ public class IdentificationsDBConnection {
      * @return result of updating
      */
     public WriteResult updateIdentifications(String login, IdentificationsUpdateContainer updateContainer) {
+        // TODO: 29.05.2018 finish me
         Query findUpdatedSettingsQuery = Query.query(
                 Criteria.where("_id").is(login));
 
@@ -37,7 +38,7 @@ public class IdentificationsDBConnection {
                 new Update().set("identifications.$", updateContainer.getIdentifications()), Person.class);
     }
 
-    public Identifications getIdentifications(String login){
+    public Identifications getIdentifications(String login) {
         return repository.findIdentificationsByAccess_Login(login.replace("\"", "")).getIdentifications();
     }
 }

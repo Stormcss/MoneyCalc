@@ -11,6 +11,9 @@ import ru.strcss.projects.moneycalc.enitities.Transaction;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.List;
 
 @Slf4j
 public class ControllerUtils {
@@ -54,22 +57,17 @@ public class ControllerUtils {
         return String.format(template, data);
     }
 
-    /**
-     * Check if Transaction is fully empty
-     */
-    public static boolean isTransactionEmpty(Transaction transaction) {
-        return isNull(transaction.getCurrency()) && isNull(transaction.getDate()) && isNull(transaction.getDescription())
-                && isNull(transaction.getSectionID()) && isNull(transaction.getSum());
+    public static List<SpendingSection> sortSpendingSectionList(List<SpendingSection> incomeList) {
+        List<SpendingSection> spendingSectionList = new ArrayList<>(incomeList);
+        spendingSectionList.sort(Comparator.comparingInt(SpendingSection::getId));
+
+        return spendingSectionList;
     }
 
-    /**
-     * Check if SpendingSection is fully empty
-     */
-    public static boolean isSpendingSectionEmpty(SpendingSection section) {
-        return isNull(section.getBudget()) && isNull(section.getIsAdded()) && isNull(section.getName());
-    }
+    public static List<Transaction> sortTransactionList(List<Transaction> incomeList) {
+        List<Transaction> transactionList = new ArrayList<>(incomeList);
+        transactionList.sort(Comparator.comparing(tr -> formatDateFromString(tr.getDate())));
 
-    private static boolean isNull(java.io.Serializable obj) {
-        return obj == null;
+        return transactionList;
     }
 }

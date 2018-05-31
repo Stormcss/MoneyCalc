@@ -19,9 +19,10 @@ public abstract class AbstractController {
     final String SPENDING_SECTION_ADDED = "Spending Section successfully added";
     final String SPENDING_SECTION_DELETED = "Spending Section successfully deleted";
     final String SPENDING_SECTION_UPDATED = "Spending Section successfully updated";
-    final String SPENDING_SECTION_NAME_EXISTS = "Spending Section with name %s already exists";
-    final String SPENDING_SECTION_ID_NOT_EXISTS = "Spending Section with id %s does not exist";
-    final String SPENDING_SECTION_INCORRECT = "Spending Section has incorrect fields: %s";
+    final String SPENDING_SECTION_NAME_EXISTS = "Spending Section with name \"%s\" already exists";
+    final String SPENDING_SECTION_ID_NOT_EXISTS = "Spending Section with id \"%s\" does not exist";
+    final String SPENDING_SECTION_INCORRECT = "Spending Section has incorrect fields: \"%s\"";
+    final String SPENDING_SECTION_NOT_FOUND = "Spending Section was not found!";
 
     final String IDENTIFICATIONS_SAVED = "Identifications successfully saved";
     final String IDENTIFICATIONS_RETURNED = "Identifications successfully returned";

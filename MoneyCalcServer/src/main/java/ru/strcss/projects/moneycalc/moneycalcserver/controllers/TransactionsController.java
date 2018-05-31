@@ -56,7 +56,7 @@ public class TransactionsController extends AbstractController implements Transa
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        List<Transaction> transactions = transactionsDBConnection.getTransactions(login, getContainer);
+        List<Transaction> transactions = sortTransactionList(transactionsDBConnection.getTransactions(login, getContainer));
 
         log.debug("Returning Transactions for login \"{}\", dateFrom {}, dateTo {} : {}",
                 login, getContainer.getRangeFrom(), getContainer.getRangeTo(), transactions);

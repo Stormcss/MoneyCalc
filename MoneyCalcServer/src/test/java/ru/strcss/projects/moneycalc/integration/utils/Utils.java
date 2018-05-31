@@ -41,6 +41,9 @@ public class Utils {
         if (response.body() == null /*&& expectedStatus != null && expectedStatus.equals(Status.ERROR)*/) {
             String errorBodyMessage = getErrorBodyMessage(response);
             log.debug("{} - {}", errorBodyMessage, response.code());
+            if (expectedStatus != null && expectedStatus.equals(Status.SUCCESS))
+                // TODO: 30.05.2018 add storing http code in Status object
+                assertEquals(response.code(), 200, "Response code is not 200!");
         } else {
             assertNotNull(response.body(), "Response body is null!");
             if (expectedStatus != null)

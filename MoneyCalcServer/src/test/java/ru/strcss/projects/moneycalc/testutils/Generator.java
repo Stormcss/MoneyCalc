@@ -1,20 +1,18 @@
 package ru.strcss.projects.moneycalc.testutils;
 
+import com.mongodb.BasicDBList;
+import com.mongodb.BasicDBObject;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.enitities.*;
 
+import java.lang.reflect.Field;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
-import java.util.function.Function;
-import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
-import java.util.stream.Stream;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.currentDate;
@@ -22,7 +20,8 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Gen
 
 public class Generator {
 
-    private static String[] names = {"Вася", "Петя", "Вова", "Дуся", "Дима", "Ваня", "Митя", "Шура", "Тоня", "Ася", "Зина"};
+    private static String[] names = {"Вася", "Петя", "Вова", "Дуся", "Дима", "Ваня", "Митя", "Шура", "Тоня", "Ася", "Зина",
+            "Жора"};
 
     public static Credentials generateCredentials() {
         return generateCredentials(UUID());
@@ -39,6 +38,7 @@ public class Generator {
                 .email(login + "@mail.ru")
                 .build();
     }
+
     public static Credentials generateCredentials(String login) {
         return Credentials.builder()
                 .access(generateAccess(login))
@@ -48,12 +48,12 @@ public class Generator {
                 .build();
     }
 
-    public static Settings generateSettings(String login, boolean withSections) {
+    public static Settings generateSettings(String login, boolean withSections, boolean sectionsOrdered) {
         return Settings.builder()
                 .login(login)
                 .periodFrom(formatDateToString(currentDate()))
                 .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
-                .sections(withSections ? Stream.generate(Generator::generateSpendingSection).limit(2).collect(Collectors.toList()) : null)
+                .sections(withSections ? generateSpendingSectionList(5, sectionsOrdered) : null)
                 .build();
     }
 
@@ -63,39 +63,39 @@ public class Generator {
                 .build();
     }
 
-    private static <T, R> Supplier<R> bind(Function<T, R> fn, T val) {
-        return () -> fn.apply(val);
-    }
+//    private static <T, R> Supplier<R> bind(Function<T, R> fn, T val) {
+//        return () -> fn.apply(val);
+//    }
 
-    private static List<FinanceSummaryBySection> generateSettingsSectionsList(int count) {
-        return Stream.generate(Generator::generateSettingsSection)
-                .limit(count)
-                .collect(Collectors.toList());
-    }
+//    private static List<FinanceSummaryBySection> generateSettingsSectionsList(int count) {
+//        return Stream.generate(Generator::generateFinanceSummaryBySection)
+//                .limit(count)
+//                .collect(Collectors.toList());
+//    }
 
-    private static FinanceSummaryBySection generateSettingsSection() {
-        return FinanceSummaryBySection.builder()
-                .summaryBalance(ThreadLocalRandom.current().nextDouble(Integer.MIN_VALUE, Integer.MAX_VALUE))
-                .todayBalance(ThreadLocalRandom.current().nextDouble(-500, 500))
-                .moneySpendAll(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE))
-                .moneyLeftAll(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE))
-                .build();
-    }
+//    private static FinanceSummaryBySection generateFinanceSummaryBySection() {
+//        return FinanceSummaryBySection.builder()
+//                .summaryBalance(ThreadLocalRandom.current().nextDouble(Integer.MIN_VALUE, Integer.MAX_VALUE))
+//                .todayBalance(ThreadLocalRandom.current().nextDouble(-500, 500))
+//                .moneySpendAll(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE))
+//                .moneyLeftAll(ThreadLocalRandom.current().nextInt(Integer.MAX_VALUE))
+//                .build();
+//    }
 
     public static Transaction generateTransaction() {
-        return generateTransaction(currentDate(), ThreadLocalRandom.current().nextInt(0, 1), ThreadLocalRandom.current().nextInt(10, 2000));
+        return generateTransaction(LocalDate.now(), ThreadLocalRandom.current().nextInt(0, 1), ThreadLocalRandom.current().nextInt(10, 9000));
     }
 
     public static Transaction generateTransaction(LocalDate date) {
-        return generateTransaction(date, ThreadLocalRandom.current().nextInt(0, 1), ThreadLocalRandom.current().nextInt(10, 2000));
+        return generateTransaction(date, ThreadLocalRandom.current().nextInt(0, 1), ThreadLocalRandom.current().nextInt(10, 9000));
     }
 
     public static Transaction generateTransaction(Integer sectionID) {
-        return generateTransaction(currentDate(), sectionID, ThreadLocalRandom.current().nextInt(10, 2000));
+        return generateTransaction(LocalDate.now(), sectionID, ThreadLocalRandom.current().nextInt(10, 9000));
     }
 
     public static Transaction generateTransaction(Integer sectionID, Integer sum) {
-        return generateTransaction(currentDate(), sectionID, sum);
+        return generateTransaction(LocalDate.now(), sectionID, sum);
     }
 
     public static Transaction generateTransaction(LocalDate date, Integer sectionID, Integer sum) {
@@ -118,11 +118,31 @@ public class Generator {
         return UUID.randomUUID().toString().toUpperCase().replace("-", "");
     }
 
+    public static List<SpendingSection> generateSpendingSectionList(int count, boolean ordered) {
+        List<SpendingSection> spendingSections = new ArrayList<>(count);
+
+        for (int i = 0; i < count; i++) {
+            SpendingSection section = SpendingSection.builder()
+                    .id(i)
+                    .budget(ThreadLocalRandom.current().nextInt(5000, Integer.MAX_VALUE))
+                    .isAdded(true)
+                    .name("Магазин" + ThreadLocalRandom.current().nextInt(2000))
+                    .isRemoved(false)
+                    .build();
+            spendingSections.add(section);
+        }
+        if (!ordered) {
+            Collections.shuffle(spendingSections);
+        }
+        return spendingSections;
+    }
+
     public static SpendingSection generateSpendingSection() {
         return SpendingSection.builder()
                 .budget(ThreadLocalRandom.current().nextInt(5000, Integer.MAX_VALUE))
                 .isAdded(true)
                 .name("Магазин" + ThreadLocalRandom.current().nextInt(2000))
+                .isRemoved(false)
                 .build();
     }
 
@@ -131,6 +151,7 @@ public class Generator {
                 .budget(ThreadLocalRandom.current().nextInt(5000, Integer.MAX_VALUE))
                 .isAdded(true)
                 .name(name)
+                .isRemoved(false)
                 .build();
     }
 
@@ -139,6 +160,7 @@ public class Generator {
                 .budget(budget)
                 .isAdded(true)
                 .name("Магазин" + ThreadLocalRandom.current().nextInt(1000))
+                .isRemoved(false)
                 .build();
     }
 
@@ -148,6 +170,7 @@ public class Generator {
                 .isAdded(true)
                 .name("Магазин" + ThreadLocalRandom.current().nextInt(1000))
                 .id(id)
+                .isRemoved(false)
                 .build();
     }
 
@@ -157,6 +180,7 @@ public class Generator {
                 .isAdded(true)
                 .name(name)
                 .id(id)
+                .isRemoved(false)
                 .build();
     }
 
@@ -199,4 +223,39 @@ public class Generator {
                 .transactions(transactionsList)
                 .build();
     }
+
+    public static BasicDBObject generateBasicDBObjectWithTransaction(List<Integer> sectionIDs) {
+        Map<String, Object> map = new HashMap<>();
+
+        Field[] transactionFields = Transaction.class.getDeclaredFields();
+
+        Integer sectionID = sectionIDs.get(ThreadLocalRandom.current().nextInt(0, sectionIDs.size() - 1));
+        int sum = ThreadLocalRandom.current().nextInt(0, 1000);
+        Transaction generatedTransaction = generateTransaction(LocalDate.now(), sectionID, sum);
+
+        try {
+            for (Field transactionField : transactionFields) {
+                transactionField.setAccessible(true);
+                map.put(transactionField.getName(), transactionField.get(generatedTransaction));
+            }
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+
+//        map.put("_id", UUID());
+//        map.put("sum", ThreadLocalRandom.current().nextInt(0, 10000));
+//        map.put("sectionID", ThreadLocalRandom.current().nextInt(0, 3));
+
+        return new BasicDBObject(map);
+    }
+
+    public static BasicDBList generateBasicDBListWithTransactions(int count, List<Integer> sectionIDs) {
+        BasicDBList basicDBList = new BasicDBList();
+        for (int i = 0; i < count; i++) {
+            basicDBList.add(generateBasicDBObjectWithTransaction(sectionIDs));
+        }
+        return basicDBList;
+    }
 }
+
+

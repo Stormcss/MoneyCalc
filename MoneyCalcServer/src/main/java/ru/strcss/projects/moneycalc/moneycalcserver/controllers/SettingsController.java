@@ -17,9 +17,9 @@ import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
-import ru.strcss.projects.moneycalc.moneycalcserver.mongo.PersonRepository;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
 
@@ -29,11 +29,9 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 public class SettingsController extends AbstractController implements SettingsAPIService {
 
     private SettingsDBConnection settingsDBConnection;
-    private PersonRepository repository;
 
-    public SettingsController(SettingsDBConnection settingsDBConnection, PersonRepository repository) {
+    public SettingsController(SettingsDBConnection settingsDBConnection) {
         this.settingsDBConnection = settingsDBConnection;
-        this.repository = repository;
     }
 
     /**
@@ -73,9 +71,10 @@ public class SettingsController extends AbstractController implements SettingsAP
     @GetMapping(value = "/getSettings")
     public ResponseEntity<MoneyCalcRs<Settings>> getSettings() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        Settings settings = settingsDBConnection.getSettings(login);
+        Settings settings = filterSpendingSections(settingsDBConnection.getSettings(login));
 
         if (settings != null) {
+            settings.setSections(sortSpendingSectionList(settings.getSections()));
             log.debug("returning PersonalSettings for login \"{}\": {}", login, settings);
             return responseSuccess(SETTINGS_RETURNED, settings);
         } else {
@@ -99,19 +98,19 @@ public class SettingsController extends AbstractController implements SettingsAP
 
         //id of income SpendingSection must be ignored and be set here
         Integer maxSpendingSectionId = settingsDBConnection.getMaxSpendingSectionId(login);
-
         addContainer.getSpendingSection().setId(maxSpendingSectionId + 1);
+
+        //isRemoved flag of income SpendingSection must be ignored and be false
+        addContainer.getSpendingSection().setIsRemoved(false);
 
         WriteResult writeResult = settingsDBConnection.addSpendingSection(login, addContainer);
 
-        if (writeResult.wasAcknowledged()) {
-            log.debug("Saved new SpendingSection for login \"{}\" : {}", login, addContainer.getSpendingSection());
-            return responseSuccess(SPENDING_SECTION_ADDED, settingsDBConnection.getSpendingSectionList(login));
-
-        } else {
+        if (writeResult.getN() == 0) {
             log.error("Saving Transaction {} for login \"{}\" has failed", addContainer.getSpendingSection(), login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
+        log.debug("Saved new SpendingSection for login \"{}\" : {}", login, addContainer.getSpendingSection());
+        return responseSuccess(SPENDING_SECTION_ADDED, filterSpendingSections(settingsDBConnection.getSpendingSectionList(login)));
     }
 
     @PostMapping(value = "/updateSpendingSection")
@@ -128,6 +127,9 @@ public class SettingsController extends AbstractController implements SettingsAP
 
         // FIXME: 06.03.2018 updating via ID makes it possible to get 2 sections with the same name!
 
+        //isRemoved flag of income SpendingSection must be ignored and be false
+        updateContainer.getSpendingSection().setIsRemoved(false);
+
         WriteResult updateResult;
         if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
             updateResult = settingsDBConnection.updateSpendingSectionByName(login, updateContainer);
@@ -139,11 +141,11 @@ public class SettingsController extends AbstractController implements SettingsAP
 
         if (updateResult.getN() == 0) {
             log.error("Updating SpendingSection for login \"{}\" has failed", login);
-            return responseError("SpendingSection was not found");
+            return responseError(SPENDING_SECTION_NOT_FOUND);
         }
 
         log.debug("Updated SpendingSection {}: for login: \"{}\"", updateContainer.getSpendingSection(), login);
-        return responseSuccess(SPENDING_SECTION_UPDATED, settingsDBConnection.getSpendingSectionList(login));
+        return responseSuccess(SPENDING_SECTION_UPDATED, filterSpendingSections(settingsDBConnection.getSpendingSectionList(login)));
     }
 
     @PostMapping(value = "/deleteSpendingSection")
@@ -151,8 +153,6 @@ public class SettingsController extends AbstractController implements SettingsAP
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(deleteContainer, "Deleting SpendingSection")
-                .addValidation(() -> repository.existsByAccess_Login(login),
-                        () -> fillLog(NO_PERSON_EXIST, login))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
@@ -173,9 +173,8 @@ public class SettingsController extends AbstractController implements SettingsAP
         log.debug("Deleted SpendingSection with SearchType: {} and query: {} for login: \"{}\"",
                 deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
 
-        return responseSuccess(SPENDING_SECTION_DELETED, settingsDBConnection.getSpendingSectionList(login));
+        return responseSuccess(SPENDING_SECTION_DELETED, filterSpendingSections(settingsDBConnection.getSpendingSectionList(login)));
     }
-
 
     /**
      * Get list of SpendingSections for specific login
@@ -186,7 +185,7 @@ public class SettingsController extends AbstractController implements SettingsAP
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections() {
 
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<SpendingSection> spendingSectionList = settingsDBConnection.getSpendingSectionList(login);
+        List<SpendingSection> spendingSectionList = filterSpendingSections(settingsDBConnection.getSpendingSectionList(login));
         log.debug("SpendingSections for login \"{}\" are returned: {}", login, spendingSectionList);
 
         return responseSuccess(SPENDING_SECTIONS_RETURNED, spendingSectionList);
@@ -211,5 +210,17 @@ public class SettingsController extends AbstractController implements SettingsAP
         if (isNameChanges && isNewNameExists)
             return false;
         return true;
+    }
+
+    private List<SpendingSection> filterSpendingSections(List<SpendingSection> incomeSpendingSections) {
+        return incomeSpendingSections.stream().filter(section -> !section.getIsRemoved()).collect(Collectors.toList());
+    }
+
+    private Settings filterSpendingSections(Settings incomeSettings) {
+        if (incomeSettings == null)
+            return null;
+        incomeSettings.setSections(incomeSettings.getSections().stream().filter(section -> !section.getIsRemoved())
+                .collect(Collectors.toList()));
+        return incomeSettings;
     }
 }
