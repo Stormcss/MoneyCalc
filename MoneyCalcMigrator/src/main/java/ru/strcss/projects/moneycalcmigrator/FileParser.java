@@ -7,6 +7,7 @@ import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalcmigrator.api.FileReaderI;
+import ru.strcss.projects.moneycalcmigrator.api.ServerConnectorI;
 import ru.strcss.projects.moneycalcmigrator.dto.PairFilesContainer;
 import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
 
@@ -23,7 +24,7 @@ import static ru.strcss.projects.moneycalcmigrator.utils.GenerationUtils.generat
 class FileParser {
 
     private final MigrationProperties properties;
-    private final ServerConnector serverConnector;
+    private final ServerConnectorI serverConnector;
     private final FileReaderI fileReader;
 
     private int transactionsAdded;

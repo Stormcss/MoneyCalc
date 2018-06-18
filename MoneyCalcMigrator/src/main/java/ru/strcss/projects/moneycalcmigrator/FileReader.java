@@ -25,7 +25,7 @@ public class FileReader implements FileReaderI {
         Pattern periodPattern = Pattern.compile("MoneyCalc(Data|Info)_(.*?).txt");
         Map<String, PairFilesContainer> filesEntries = new HashMap<>(32);
 
-        try (Stream<Path> paths = Files.walk(Paths.get(filesPath))) {
+        try (Stream<Path> paths = Files.walk(Paths.get(filesPath), 1)) {
             paths.filter(Files::isRegularFile)
                     .map(Path::getFileName)
                     .forEach(path -> {
@@ -65,7 +65,7 @@ public class FileReader implements FileReaderI {
      * @param fileName - file name
      * @return List of Transactions
      */
-    public List<Transaction> parseInfoFile(String folderPath, String fileName){
+    public List<Transaction> parseInfoFile(String folderPath, String fileName) {
         try (Stream<String> stream = Files.lines(Paths.get(folderPath + "\\" + fileName))) {
             // TODO: 19.02.2018 add other sections as well
             return stream.map(this::buildTransaction)
