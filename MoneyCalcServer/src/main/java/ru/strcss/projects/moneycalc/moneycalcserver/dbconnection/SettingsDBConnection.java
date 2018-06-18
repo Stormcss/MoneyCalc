@@ -22,10 +22,12 @@ import java.util.List;
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
 import static org.springframework.data.mongodb.core.query.Criteria.where;
 import static org.springframework.data.mongodb.core.query.Query.query;
+import static ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType.BY_ID;
+import static ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType.BY_NAME;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.sortSpendingSectionList;
 
 @Component
-public class SettingsDBConnection{
+public class SettingsDBConnection {
 
     private PersonRepository repository;
     private MongoTemplate mongoTemplate;
@@ -42,9 +44,6 @@ public class SettingsDBConnection{
 
     /**
      * Update Settings in DB
-     *
-     * @param settings object
-     * @return result of updating
      */
     public WriteResult updateSettings(Settings settings) {
         Query findUpdatedSettingsQuery = query(
@@ -55,9 +54,6 @@ public class SettingsDBConnection{
 
     /**
      * Add SpendingSection to DB
-     *
-     * @param spendingSectionContainer
-     * @return
      */
     public WriteResult addSpendingSection(String login, SpendingSectionAddContainer spendingSectionContainer) {
         Update update = new Update();
@@ -70,37 +66,45 @@ public class SettingsDBConnection{
 
     /**
      * Delete SpendingSection from DB by Name
-     *
-     * @param deleteContainer
-     * @return
      */
     public WriteResult deleteSpendingSectionByName(String login, SpendingSectionDeleteContainer deleteContainer) {
-        Query getPersonSettingsQuery = query(where("access.login").is(login));
-        Query getSpendingSectionQuery = query(where("name").is(deleteContainer.getIdOrName()));
+        SpendingSection existingSpendingSection = this.getSpendingSectionByName(login, deleteContainer.getIdOrName());
+        existingSpendingSection.setIsRemoved(true);
 
-        return mongoTemplate.updateFirst(getPersonSettingsQuery,
-                new Update().pull("settings.sections", getSpendingSectionQuery), "Person");
+        SpendingSectionUpdateContainer updateContainer =
+                new SpendingSectionUpdateContainer(deleteContainer.getIdOrName(), existingSpendingSection, BY_NAME);
+
+        return this.updateSpendingSectionByName(login, updateContainer);
+        //        Query getPersonSettingsQuery = query(where("access.login").is(login));
+//        Query getSpendingSectionQuery = query(where("name").is(deleteContainer.getIdOrName()));
+//
+//        return mongoTemplate.updateFirst(getPersonSettingsQuery,
+//                new Update().pull("settings.sections", getSpendingSectionQuery), "Person");
     }
 
     /**
      * Delete SpendingSection from DB by ID
-     *
-     * @param deleteContainer
-     * @return
      */
     public WriteResult deleteSpendingSectionById(String login, SpendingSectionDeleteContainer deleteContainer) {
-        Query getPersonSettingsQuery = query(where("access.login").is(login));
-        Query getSpendingSectionQuery = query(where("_id").is(Integer.parseInt(deleteContainer.getIdOrName())));
+        SpendingSection existingSpendingSection = this.getSpendingSectionByID(login, Integer.parseInt(deleteContainer.getIdOrName()));
+        existingSpendingSection.setIsRemoved(true);
 
-        return mongoTemplate.updateFirst(getPersonSettingsQuery,
-                new Update().pull("settings.sections", getSpendingSectionQuery), "Person");
+        SpendingSectionUpdateContainer updateContainer =
+                new SpendingSectionUpdateContainer(deleteContainer.getIdOrName(), existingSpendingSection, BY_ID);
+
+        return this.updateSpendingSectionById(login, updateContainer);
+
+//        Query getPersonSettingsQuery = query(where("access.login").is(login));
+//        Query getSpendingSectionQuery = query(where("_id").is(Integer.parseInt(deleteContainer.getIdOrName())));
+//        return mongoTemplate.updateFirst(getPersonSettingsQuery,
+//                new Update().pull("settings.sections", getSpendingSectionQuery), "Person");
+
+        //        return mongoTemplate.updateFirst(getPersonSettingsQuery,
+//                new Update().pull("settings.sections", getSpendingSectionQuery), "Person");
     }
 
     /**
      * Update SpendingSection from DB by ID
-     *
-     * @param updateContainer
-     * @return
      */
     public WriteResult updateSpendingSectionById(String login, SpendingSectionUpdateContainer updateContainer) {
         SpendingSection existingSpendingSection = this.getSpendingSectionByID(login, Integer.parseInt(updateContainer.getIdOrName()));
@@ -118,9 +122,6 @@ public class SettingsDBConnection{
 
     /**
      * Update SpendingSection from DB by Name
-     *
-     * @param updateContainer
-     * @return
      */
     public WriteResult updateSpendingSectionByName(String login, SpendingSectionUpdateContainer updateContainer) {
         SpendingSection existingSpendingSection = this.getSpendingSectionByName(login, updateContainer.getIdOrName());
@@ -134,18 +135,6 @@ public class SettingsDBConnection{
 
         return mongoTemplate.updateMulti(findUpdatedSpendingSectionQuery,
                 new Update().set("settings.sections.$", mergeSpendingSections(existingSpendingSection, updateContainer.getSpendingSection())), Person.class);
-    }
-
-    private SpendingSection mergeSpendingSections(SpendingSection existingSpendingSection, SpendingSection newSpendingSection) {
-        newSpendingSection.setId(existingSpendingSection.getId());
-        if (newSpendingSection.getName() == null)
-            newSpendingSection.setName(existingSpendingSection.getName());
-        if (newSpendingSection.getBudget() == null)
-            newSpendingSection.setBudget(existingSpendingSection.getBudget());
-        if (newSpendingSection.getIsAdded() == null)
-            newSpendingSection.setIsAdded(existingSpendingSection.getIsAdded());
-
-        return newSpendingSection;
     }
 
     /**
@@ -174,7 +163,7 @@ public class SettingsDBConnection{
         return getSpendingSection(login, match(where("settings.sections._id").is(id)));
     }
 
-    private SpendingSection getSpendingSection(String login, AggregationOperation matchIdOrName){
+    private SpendingSection getSpendingSection(String login, AggregationOperation matchIdOrName) {
         AggregationOperation unwind = unwind("settings.sections");
         AggregationOperation matchLogin = match(where("access.login").is(login));
         AggregationOperation group = group("settings.sections");
@@ -204,5 +193,17 @@ public class SettingsDBConnection{
         Query getSpendingSectionQuery = query(where("access.login").is(login)
                 .and("settings.sections._id").is(id));
         return mongoTemplate.exists(getSpendingSectionQuery, Person.class);
+    }
+
+    private SpendingSection mergeSpendingSections(SpendingSection existingSpendingSection, SpendingSection newSpendingSection) {
+        newSpendingSection.setId(existingSpendingSection.getId());
+        if (newSpendingSection.getName() == null)
+            newSpendingSection.setName(existingSpendingSection.getName());
+        if (newSpendingSection.getBudget() == null)
+            newSpendingSection.setBudget(existingSpendingSection.getBudget());
+        if (newSpendingSection.getIsAdded() == null)
+            newSpendingSection.setIsAdded(existingSpendingSection.getIsAdded());
+
+        return newSpendingSection;
     }
 }

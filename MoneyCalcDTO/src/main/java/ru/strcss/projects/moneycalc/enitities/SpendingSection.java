@@ -4,12 +4,13 @@ import lombok.Builder;
 import lombok.Data;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Builder
 @Data
-public class SpendingSection {
+public class SpendingSection implements Serializable {
     /**
      * id of SpendingSection - unique id which is used to identify Section while calculating Statistics
      */
@@ -39,7 +40,6 @@ public class SpendingSection {
         if (name == null || name.isEmpty()) reasons.add("name is empty");
         if (budget == null) reasons.add("budget is empty");
         if (budget != null && budget <= 0) reasons.add("budget must be >= 0");
-//        if (id == null) reasons.add("id can not be null");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

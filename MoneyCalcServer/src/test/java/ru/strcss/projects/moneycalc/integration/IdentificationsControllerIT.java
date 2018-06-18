@@ -11,7 +11,7 @@ import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
 
 import static org.testng.Assert.*;
-import static ru.strcss.projects.moneycalc.integration.utils.Utils.*;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.*;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateIdentifications;
 
 @Slf4j
@@ -26,12 +26,10 @@ public class IdentificationsControllerIT extends AbstractIT {
         //Updating default Identifications
         MoneyCalcRs<Identifications> saveIdentificationsRs =
                 sendRequest(service.saveIdentifications(token, new IdentificationsUpdateContainer(credentials.getIdentifications())), Status.SUCCESS).body();
-        assertNotNull(saveIdentificationsRs.getPayload(), "Payload is null!");
         assertNotNull(saveIdentificationsRs.getPayload().getName(), "Identifications object is empty!");
 
         //Requesting updated Identifications
         MoneyCalcRs<Identifications> getUpdatedRs = sendRequest(service.getIdentifications(token), Status.SUCCESS).body();
-//        assertEquals(getUpdatedRs.getPayload().getLogin(), login, "returned Identifications object has wrong login!");
         assertEquals(getUpdatedRs.getPayload().getName(), credentials.getIdentifications().getName(),
                 "returned Identifications object has wrong name!");
     }
@@ -56,7 +54,8 @@ public class IdentificationsControllerIT extends AbstractIT {
 
         MoneyCalcRs<Identifications> getIdentificationsRs = sendRequest(service.getIdentifications(token), Status.SUCCESS).body();
 
-        assertEquals(getIdentificationsRs.getPayload().getName(), credentials.getIdentifications().getName(), "returned Identifications object has wrong name!");
+        assertEquals(getIdentificationsRs.getPayload().getName(), credentials.getIdentifications().getName(),
+                "returned Identifications object has wrong name!");
     }
 
 }

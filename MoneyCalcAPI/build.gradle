@@ -1,5 +1,5 @@
 group 'ru.strcss.projects.moneycalc.api'
-version '0.0.4'
+version '0.0.6'
 
 dependencies {
     compile project(':MoneyCalcDTO')

@@ -10,7 +10,7 @@ import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
 
 import java.util.List;
 
-import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSection;
 
 public class StatisticsControllerTestUtils {

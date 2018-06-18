@@ -2,7 +2,7 @@ package ru.strcss.projects.moneycalcmigrator.utils;
 
 import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalcmigrator.dto.ConfigContainer;
+import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
 
 public class GenerationUtils {
     /**
@@ -19,11 +19,11 @@ public class GenerationUtils {
                 .build();
     }
 
-    public static Access generateAccess(ConfigContainer config) {
+    public static Access generateAccess(MigrationProperties properties) {
         return Access.builder()
-                .login(config.getLogin())
-                .password(config.getPassword())
-                .email(config.getEmail())
+                .login(properties.getLogin())
+                .password(properties.getPassword())
+                .email(properties.getEmail())
                 .build();
     }
 

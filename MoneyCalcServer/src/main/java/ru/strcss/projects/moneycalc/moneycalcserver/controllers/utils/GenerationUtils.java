@@ -50,13 +50,13 @@ public class GenerationUtils {
                 .access(credentials.getAccess())
                 .identifications(credentials.getIdentifications())
                 .settings(generateRegisteringSettings(login))
-                .finance(Finance.builder()
-                        ._id(login)
-                        .financeSummary(FinanceSummary.builder()
-                                ._id(login)
-                                .financeSections(new ArrayList<>())
-                                .build())
-                        .build())
+//                .finance(Finance.builder()
+//                        ._id(login)
+//                        .financeSummary(FinanceSummary.builder()
+//                                ._id(login)
+//                                .financeSections(new ArrayList<>())
+//                                .build())
+//                        .build())
                 .build();
     }
     private static Settings generateRegisteringSettings(String login){

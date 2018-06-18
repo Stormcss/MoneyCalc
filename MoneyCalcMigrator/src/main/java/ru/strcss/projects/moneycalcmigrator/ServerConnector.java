@@ -13,7 +13,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionD
 import ru.strcss.projects.moneycalc.enitities.*;
 import ru.strcss.projects.moneycalcmigrator.api.MigrationAPI;
 import ru.strcss.projects.moneycalcmigrator.api.ServerConnectorI;
-import ru.strcss.projects.moneycalcmigrator.dto.ConfigContainer;
+import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -25,20 +25,20 @@ import java.util.List;
 class ServerConnector implements ServerConnectorI {
 
     private MigrationAPI service;
-    private ConfigContainer config;
+    private MigrationProperties properties;
 
     @PostConstruct
     public void init() {
         // Setup Retrofit
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(config.getMoneyCalcServerHost() + ":" + config.getMoneyCalcServerPort())
+                .baseUrl(properties.getMoneyCalcServerHost() + ":" + properties.getMoneyCalcServerPort())
                 .addConverterFactory(GsonConverterFactory.create())
                 .build();
         service = retrofit.create(MigrationAPI.class);
     }
 
-    public ServerConnector(ConfigContainer config) {
-        this.config = config;
+    public ServerConnector(MigrationProperties properties) {
+        this.properties = properties;
     }
 
     @Override
@@ -46,15 +46,12 @@ class ServerConnector implements ServerConnectorI {
         String token;
         try {
             token = service.login(access).execute().headers().get("Authorization");
-
             if (token == null) {
                 token = registerPerson(access);
             }
-
         } catch (IOException e) {
             throw new RuntimeException("Getting Token has failed!", e);
         }
-
         return token;
     }
 
@@ -107,11 +104,14 @@ class ServerConnector implements ServerConnectorI {
 //        return spendingSectionsToAdd;
 //    }
 
-
+    /**
+     * Register person with provided Access object and return Token header
+     *
+     * @return token header
+     */
     private String registerPerson(Access access) {
-
         Identifications identifications = Identifications.builder()
-                .name(config.getName())
+                .name(properties.getName())
                 .build();
         try {
             MoneyCalcRs<Person> registerResponse = service.registerPerson(new Credentials(access, identifications)).execute().body();
@@ -165,7 +165,7 @@ class ServerConnector implements ServerConnectorI {
                 } else {
                     addedTransactions.add(request.getPayload());
                 }
-            } catch (IOException e) {
+            } catch (Exception e) {
                 rollback = true;
                 e.printStackTrace();
                 break;
@@ -179,6 +179,7 @@ class ServerConnector implements ServerConnectorI {
                         try {
                             service.deleteTransaction(token, new TransactionDeleteContainer(transaction.get_id())).execute().body();
                         } catch (IOException e) {
+                            log.error("Rollback for transaction id \"{}\" has failed", transaction.get_id());
                             e.printStackTrace();
                         }
                     }

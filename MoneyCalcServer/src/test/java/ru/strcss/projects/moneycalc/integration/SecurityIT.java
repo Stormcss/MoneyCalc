@@ -7,8 +7,8 @@ import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
 
 import static org.testng.Assert.assertEquals;
-import static ru.strcss.projects.moneycalc.integration.utils.Utils.savePersonGetLoginAndToken;
-import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetLoginAndToken;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
 
 public class SecurityIT extends AbstractIT {
     @Test

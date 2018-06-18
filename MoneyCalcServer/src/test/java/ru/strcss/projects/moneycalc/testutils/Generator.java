@@ -126,7 +126,7 @@ public class Generator {
                     .id(i)
                     .budget(ThreadLocalRandom.current().nextInt(5000, Integer.MAX_VALUE))
                     .isAdded(true)
-                    .name("Магазин" + ThreadLocalRandom.current().nextInt(2000))
+                    .name("Магазин" + ThreadLocalRandom.current().nextInt(500_000))
                     .isRemoved(false)
                     .build();
             spendingSections.add(section);
@@ -141,7 +141,7 @@ public class Generator {
         return SpendingSection.builder()
                 .budget(ThreadLocalRandom.current().nextInt(5000, Integer.MAX_VALUE))
                 .isAdded(true)
-                .name("Магазин" + ThreadLocalRandom.current().nextInt(2000))
+                .name("Магазин" + ThreadLocalRandom.current().nextInt(500_000))
                 .isRemoved(false)
                 .build();
     }
@@ -159,7 +159,7 @@ public class Generator {
         return SpendingSection.builder()
                 .budget(budget)
                 .isAdded(true)
-                .name("Магазин" + ThreadLocalRandom.current().nextInt(1000))
+                .name("Магазин" + ThreadLocalRandom.current().nextInt(500_000))
                 .isRemoved(false)
                 .build();
     }
@@ -168,7 +168,7 @@ public class Generator {
         return SpendingSection.builder()
                 .budget(budget)
                 .isAdded(true)
-                .name("Магазин" + ThreadLocalRandom.current().nextInt(1000))
+                .name("Магазин" + ThreadLocalRandom.current().nextInt(500_000))
                 .id(id)
                 .isRemoved(false)
                 .build();
@@ -241,10 +241,6 @@ public class Generator {
         } catch (IllegalAccessException e) {
             e.printStackTrace();
         }
-
-//        map.put("_id", UUID());
-//        map.put("sum", ThreadLocalRandom.current().nextInt(0, 10000));
-//        map.put("sectionID", ThreadLocalRandom.current().nextInt(0, 3));
 
         return new BasicDBObject(map);
     }

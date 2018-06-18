@@ -45,4 +45,12 @@ public class TestUtils {
         return true;
     }
 
+    /**
+     * Return max Spending Section Id
+     */
+    public static int getMaxSpendingSectionId(List<SpendingSection> spendingSections) {
+        return spendingSections.stream().map(SpendingSection::getId).mapToInt(Integer::intValue).max().orElse(-1);
+    }
+
+
 }

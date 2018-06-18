@@ -11,7 +11,7 @@ import ru.strcss.projects.moneycalc.testutils.Generator;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
-import static ru.strcss.projects.moneycalc.integration.utils.Utils.sendRequest;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateCredentials;
 
 @Slf4j
