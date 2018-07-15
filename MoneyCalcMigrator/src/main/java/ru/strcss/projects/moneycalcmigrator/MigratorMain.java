@@ -23,7 +23,7 @@ public class MigratorMain implements ApplicationRunner {
     }
 
     @Override
-    public void run(ApplicationArguments args) throws Exception {
+    public void run(ApplicationArguments args) {
         if (migrationProperties.getMigrationType().equals(MigrationType.OLD_MONEYCALC_TO_NEW)) {
             parser.parseOldFiles(true);
 

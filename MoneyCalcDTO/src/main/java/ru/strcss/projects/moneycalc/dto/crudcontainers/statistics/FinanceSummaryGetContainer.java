@@ -2,6 +2,7 @@ package ru.strcss.projects.moneycalc.dto.crudcontainers.statistics;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
@@ -10,8 +11,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class FinanceSummaryGetContainer extends AbstractContainer{
+public class FinanceSummaryGetContainer extends AbstractContainer {
 
     private LocalDate rangeFrom;
     private LocalDate rangeTo;

@@ -2,6 +2,7 @@ package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
@@ -22,6 +23,7 @@ import java.util.List;
  */
 
 @Data
+@EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 public class TransactionsSearchContainer extends AbstractContainer {
 

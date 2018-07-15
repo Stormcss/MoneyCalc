@@ -1,39 +1,38 @@
 package ru.strcss.projects.moneycalcmigrator.properties;
 
-import com.sun.istack.internal.NotNull;
 import lombok.Getter;
-import lombok.NonNull;
 import lombok.Setter;
-import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 import ru.strcss.projects.moneycalcmigrator.dto.MigrationType;
 
 @Configuration
-@PropertySource(value = {"classpath:migration.properties"})
-@ConfigurationProperties("moneyCalcMigrator")
+@PropertySource("classpath:migration.properties")
 @Getter
 @Setter
 public class MigrationProperties {
-
-    @NotNull
+    @Value("${config.migrationType}")
     private MigrationType migrationType;
 
-    @NotNull
+    @Value("${config.dataPath}")
     private String dataPath;
 
-    @NotNull
+    @Value("${config.moneyCalcServerHost}")
     private String moneyCalcServerHost;
-    @NotNull
+
+    @Value("${config.moneyCalcServerPort}")
     private String moneyCalcServerPort;
 
-    @NonNull
+    @Value("${config.login}")
     private String login;
-    @NonNull
-    private String password;
-    @NonNull
-    private String name;
-    @NonNull
-    private String email;
 
+    @Value("${config.password}")
+    private String password;
+
+    @Value("${config.name}")
+    private String name;
+
+    @Value("${config.email}")
+    private String email;
 }

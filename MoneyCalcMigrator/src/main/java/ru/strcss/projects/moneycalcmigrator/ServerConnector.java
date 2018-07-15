@@ -72,50 +72,10 @@ class ServerConnector implements ServerConnectorI {
         }
     }
 
-//    /**
-//     * Save Sections with provided names in DB
-//     *
-//     * @param sectionsNames - sections required to save in DB
-//     * @return
-//     * @throws IOException
-//     */
-//    public List<SpendingSection> saveSections(String token, Set<String> sectionsNames) {
-//
-//        AjaxRs<List<SpendingSection>> settingsResponse = service.getSpendingSections(token).execute().body();
-//
-//        String token = checkPersonRegistration(settingsResponse);
-//
-//
-//        List<SpendingSection> existingSectionsList = getSectionsList(settingsResponse);
-//
-//        List<SpendingSection> spendingSectionsToAdd = new ArrayList<>();
-//
-//        for (String sectionName : sectionsNames) {
-//            if (existingSectionsList.stream().anyMatch(spendingSection -> spendingSection.getName().equals(sectionName))) {
-//                break;
-//            }
-//            spendingSectionsToAdd.add(generateSpendingSection(sectionName));
-//        }
-//
-//        for (SpendingSection spendingSection : spendingSectionsToAdd) {
-//            AjaxRs<List<SpendingSection>> addResponse = service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)).execute().body();
-//            if (addResponse == null || addResponse.getStatus() != Status.SUCCESS)
-//                throw new RuntimeException("Error saving new Section!");
-//        }
-//
-////        existingSettings.getSections().addAll(spendingSectionsToAdd);
-////        AjaxRs<Settings> saveSettingResponse = service.saveSettings(existingSettings).execute().body();
-//
-//
-//        log.info("Added following sections: {}. Additional Sections found in files: {}", spendingSectionsToAdd, sectionsNames);
-//
-//        return spendingSectionsToAdd;
-//    }
-
     /**
-     * Register person with provided Access object and return Token header
+     * Register person with provided Access object and return token Authorization header
      *
-     * @return token header
+     * @return token Authorization header
      */
     private String registerPerson(Access access) {
         Identifications identifications = Identifications.builder()
@@ -131,23 +91,6 @@ class ServerConnector implements ServerConnectorI {
         }
     }
 
-    //    private String checkPersonRegistration(AjaxRs<List<SpendingSection>> settingsResponse) throws IOException {
-//        if (settingsResponse.getStatus() == Status.ERROR && settingsResponse.getMessage().contains("does not exist")) {
-//            Access access = Access.builder()
-//                    .email(config.getEmail())
-//                    .login(config.getLogin())
-//                    .password(config.getPassword())
-//                    .build();
-//
-//            Identifications identifications = Identifications.builder()
-//                    .name(config.getName())
-//                    .build();
-//            AjaxRs<Person> registerResponse = service.registerPerson(new Credentials(access, identifications)).execute().body();
-//            if (registerResponse.getStatus() != Status.SUCCESS)
-//                throw new RuntimeException("Registration has failed", new RuntimeException(registerResponse.getMessage()));
-//            return service.login(access).execute().headers().get("Authorization");
-//        }
-//    }
     @Override
     public List<SpendingSection> getSectionsList(String token) {
         try {
@@ -195,14 +138,4 @@ class ServerConnector implements ServerConnectorI {
         }
         return rollback ? Status.ERROR : Status.SUCCESS;
     }
-
-//    private static String getToken(MigrationAPI service, Access access) {
-//        try {
-//            Headers headers = service.login(access).execute().headers();
-//            return headers.get("Authorization");
-//        } catch (IOException e) {
-//            throw new RuntimeException("Can not get Token!", e);
-//        }
-//
-//    }
 }
