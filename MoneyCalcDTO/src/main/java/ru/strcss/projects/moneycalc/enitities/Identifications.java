@@ -1,16 +1,31 @@
 package ru.strcss.projects.moneycalc.enitities;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.Validationable;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
 @Builder
-public class Identifications implements Validationable/*, IVisitable*/ {
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "\"Identifications\"")
+public class Identifications implements Validationable, Serializable {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "name")
     private String name;
 
     public ValidationResult isValid() {
@@ -18,9 +33,4 @@ public class Identifications implements Validationable/*, IVisitable*/ {
         if (name == null || name.isEmpty()) reasons.add("name is empty");
         return new ValidationResult(reasons.isEmpty(), reasons, "Identifications");
     }
-
-//    @Override
-//    public String accept(Visitor visitor) {
-//        return visitor.visitIdentifications(this);
-//    }
 }

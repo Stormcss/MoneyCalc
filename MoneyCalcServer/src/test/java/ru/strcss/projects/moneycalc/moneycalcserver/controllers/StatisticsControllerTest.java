@@ -12,18 +12,18 @@ import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.TransactionsDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -31,8 +31,9 @@ import static ru.strcss.projects.moneycalc.testutils.Generator.*;
 
 public class StatisticsControllerTest {
 
-    private TransactionsDBConnection transactionsDBConnection = mock(TransactionsDBConnection.class);
-    private SettingsDBConnection settingsDBConnection = mock(SettingsDBConnection.class);
+    private TransactionsDao transactionsDao = mock(TransactionsDao.class);
+    private SpendingSectionDao spendingSectionDao = mock(SpendingSectionDao.class);
+    private PersonDao personDao = mock(PersonDao.class);
     private SummaryStatisticsHandler statisticsHandler = mock(SummaryStatisticsHandler.class);
     private StatisticsController statisticsController;
     private List<Integer> sectionIDs = Arrays.asList(0, 1);
@@ -44,21 +45,28 @@ public class StatisticsControllerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    @BeforeGroups(groups = {"SuccessfulScenario", "incorrectContainers"})
+    @BeforeGroups(groups = {"successfulScenario", "incorrectContainers"})
     public void prepare_successfulScenario_incorrectContainers() {
-        when(transactionsDBConnection.getTransactions(anyString(), any(TransactionsSearchContainer.class)))
+        when(transactionsDao.getTransactionsByPersonId(anyInt(), any(LocalDate.class), any(LocalDate.class), anyListOf(Integer.class)))
                 .thenReturn(generateTransactionList(50, Arrays.asList(0, 1)));
-        when(settingsDBConnection.getSpendingSectionList(anyString()))
+        when(spendingSectionDao.getSpendingSectionsByPersonId(anyInt()))
                 .thenReturn(Arrays.asList(generateSpendingSection(5000, 0), generateSpendingSection(5000, 1)));
+
+        when(personDao.getPersonIdByLogin(anyString()))
+                .thenReturn(1);
+
         when(statisticsHandler.calculateSummaryStatisticsBySections(any(FinanceSummaryCalculationContainer.class)))
                 .thenReturn(Arrays.asList(generateFinanceSummaryBySection(), generateFinanceSummaryBySection()));
 
-        statisticsController = new StatisticsController(transactionsDBConnection, settingsDBConnection, statisticsHandler);
+        statisticsController = new StatisticsController(transactionsDao, spendingSectionDao, personDao, statisticsHandler);
     }
 
-    @Test(groups = "SuccessfulScenario")
+    @Test(groups = "successfulScenario")
     public void testGetFinanceSummaryBySection() {
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", "2017-02-20", sectionIDs);
+        LocalDate dateFrom = LocalDate.of(2017, 2, 10);
+        LocalDate dateTo = LocalDate.of(2017, 2, 20);
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(dateFrom, dateTo, sectionIDs);
+
         ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
         assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.SUCCESS, financeSummaryBySectionRs.getBody().getMessage());
@@ -73,41 +81,47 @@ public class StatisticsControllerTest {
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_emptySectionIds() {
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", "2017-02-20", null);
+        LocalDate dateFrom = LocalDate.of(2017, 2, 10);
+        LocalDate dateTo = LocalDate.of(2017, 2, 20);
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(dateFrom, dateTo, null);
+
         ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
         assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
     }
 
-    @Test(groups = "incorrectContainer")
-    public void testGetFinanceSummaryBySection_incorrect_RangeFrom() {
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017.02.10", "2017-02-20", sectionIDs);
-        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+//    @Test(groups = "incorrectContainer")
+//    public void testGetFinanceSummaryBySection_incorrect_RangeFrom() {
+//        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017.02.10", "2017-02-20", sectionIDs);
+//        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+//
+//        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
+//
+//        getContainer = new FinanceSummaryGetContainer("10-02-2017", "2017-02-20", sectionIDs);
+//        financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+//
+//        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
+//    }
 
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-
-        getContainer = new FinanceSummaryGetContainer("10-02-2017", "2017-02-20", sectionIDs);
-        financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
-
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-    }
-
-    @Test(groups = "incorrectContainer")
-    public void testGetFinanceSummaryBySection_incorrect_RangeTo() {
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", "2017.02.20", sectionIDs);
-        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
-
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-
-        getContainer = new FinanceSummaryGetContainer("2017-02-10", "20-02-2017", sectionIDs);
-        financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
-
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-    }
+//    @Test(groups = "incorrectContainer")
+//    public void testGetFinanceSummaryBySection_incorrect_RangeTo() {
+//        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", "2017.02.20", sectionIDs);
+//        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+//
+//        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
+//
+//        getContainer = new FinanceSummaryGetContainer("2017-02-10", "20-02-2017", sectionIDs);
+//        financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+//
+//        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
+//    }
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_RangeFrom_after_RangeTo() {
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-20", "2017-02-10", sectionIDs);
+        LocalDate dateFrom = LocalDate.of(2017, 2, 20);
+        LocalDate dateTo = LocalDate.of(2017, 2, 10);
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(dateFrom, dateTo, sectionIDs);
+
         ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
         assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
@@ -115,15 +129,20 @@ public class StatisticsControllerTest {
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_empty_RangeFrom() {
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(null, "2017-02-20", sectionIDs);
-        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        LocalDate dateTo = LocalDate.of(2017, 2, 10);
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(null, dateTo, sectionIDs);
+
+        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs =
+                statisticsController.getFinanceSummaryBySection(getContainer);
 
         assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
     }
 
     @Test(groups = "incorrectContainer")
     public void testGetFinanceSummaryBySection_empty_RangeTo() {
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", null, sectionIDs);
+        LocalDate dateFrom = LocalDate.of(2017, 2, 20);
+        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(dateFrom, null, sectionIDs);
+
         ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
 
         assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());

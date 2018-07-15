@@ -7,7 +7,6 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.testng.Assert.assertTrue;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateFromString;
 
 public class TestUtils {
     /**
@@ -37,8 +36,8 @@ public class TestUtils {
         if (transactionList.size() < 2)
             return true;
         for (int i = 1; i < transactionList.size(); i++) {
-            LocalDate dateTransaction1 = formatDateFromString(transactionList.get(i - 1).getDate());
-            LocalDate dateTransaction2 = formatDateFromString(transactionList.get(i).getDate());
+            LocalDate dateTransaction1 = transactionList.get(i - 1).getDate();
+            LocalDate dateTransaction2 = transactionList.get(i).getDate();
             if (dateTransaction1.isAfter(dateTransaction2))
                 return false;
         }
@@ -46,10 +45,10 @@ public class TestUtils {
     }
 
     /**
-     * Return max Spending Section Id
+     *  Return max Spending Section Id
      */
     public static int getMaxSpendingSectionId(List<SpendingSection> spendingSections) {
-        return spendingSections.stream().map(SpendingSection::getId).mapToInt(Integer::intValue).max().orElse(-1);
+        return spendingSections.stream().map(SpendingSection::getSectionId).mapToInt(Integer::intValue).max().orElse(-1);
     }
 
 

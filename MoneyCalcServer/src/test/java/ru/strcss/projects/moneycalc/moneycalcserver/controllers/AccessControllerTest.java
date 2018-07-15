@@ -12,7 +12,7 @@ import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.AccessDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.AccessService;
 
 import java.util.Collections;
 
@@ -24,7 +24,7 @@ import static ru.strcss.projects.moneycalc.testutils.Generator.generateAccess;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateIdentifications;
 
 public class AccessControllerTest {
-    private AccessDBConnection accessDBConnection = mock(AccessDBConnection.class);
+    private AccessService accessService = mock(AccessService.class);
     private AccessController accessController;
 
     @BeforeClass
@@ -34,35 +34,35 @@ public class AccessControllerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    @BeforeGroups(groups = "successfulScenario")
+    @BeforeGroups(groups = "AccessSuccessfulScenario")
     public void prepare_successfulScenario() {
-        when(accessDBConnection.getAccess(anyString()))
+        when(accessService.getAccessByLogin(anyString()))
                 .thenReturn(generateAccess());
 
-        accessController = new AccessController(accessDBConnection);
+        accessController = new AccessController(accessService);
     }
 
-    @BeforeGroups(groups = "failedScenario")
+    @BeforeGroups(groups = "AccessFailedScenario")
     public void prepare_failedScenario() {
-        when(accessDBConnection.getAccess(anyString()))
+        when(accessService.getAccessByLogin(anyString()))
                 .thenReturn(null);
 
-        accessController = new AccessController(accessDBConnection);
+        accessController = new AccessController(accessService);
     }
 
-    @Test(groups = "successfulScenario")
+    @Test(groups = "AccessSuccessfulScenario")
     public void testGetAccess() throws Exception {
         ResponseEntity<MoneyCalcRs<Access>> accessRs = accessController.getAccess();
 
         assertEquals(accessRs.getBody().getServerStatus(), Status.SUCCESS, accessRs.getBody().getMessage());
     }
 
-    @Test(groups = "successfulScenario", expectedExceptions = UnsupportedOperationException.class)
+    @Test(groups = "AccessSuccessfulScenario", expectedExceptions = UnsupportedOperationException.class)
     public void testSaveAccess() throws Exception {
         accessController.saveAccess(new IdentificationsUpdateContainer(generateIdentifications()));
     }
 
-    @Test(groups = "failedScenario", dependsOnGroups = "successfulScenario")
+    @Test(groups = "AccessFailedScenario", dependsOnGroups = "AccessSuccessfulScenario")
     public void testGetAccess_failedScenario() throws Exception {
         ResponseEntity<MoneyCalcRs<Access>> accessRs = accessController.getAccess();
 

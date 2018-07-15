@@ -1,5 +1,7 @@
 package ru.strcss.projects.moneycalcmigrator;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import retrofit2.Retrofit;
@@ -14,9 +16,11 @@ import ru.strcss.projects.moneycalc.enitities.*;
 import ru.strcss.projects.moneycalcmigrator.api.MigrationAPI;
 import ru.strcss.projects.moneycalcmigrator.api.ServerConnectorI;
 import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
+import ru.strcss.projects.moneycalcmigrator.utils.LocalDateAdapter;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -29,10 +33,14 @@ class ServerConnector implements ServerConnectorI {
 
     @PostConstruct
     public void init() {
-        // Setup Retrofit
+        Gson gson = new GsonBuilder()
+                .setPrettyPrinting()
+                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
+                .create();
+
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(properties.getMoneyCalcServerHost() + ":" + properties.getMoneyCalcServerPort())
-                .addConverterFactory(GsonConverterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create(gson))
                 .build();
         service = retrofit.create(MigrationAPI.class);
     }
@@ -158,12 +166,12 @@ class ServerConnector implements ServerConnectorI {
 
         for (Transaction transaction : transactionsToAdd) {
             try {
-                MoneyCalcRs<Transaction> request = service.addTransaction(token, new TransactionAddContainer(transaction)).execute().body();
-                if (request == null || request.getServerStatus() != Status.SUCCESS || request.getPayload() == null) {
+                MoneyCalcRs<Transaction> response = service.addTransaction(token, new TransactionAddContainer(transaction)).execute().body();
+                if (response == null || response.getServerStatus() != Status.SUCCESS || response.getPayload() == null) {
                     rollback = true;
                     break;
                 } else {
-                    addedTransactions.add(request.getPayload());
+                    addedTransactions.add(response.getPayload());
                 }
             } catch (Exception e) {
                 rollback = true;
@@ -177,9 +185,9 @@ class ServerConnector implements ServerConnectorI {
 
             addedTransactions.forEach(transaction -> {
                         try {
-                            service.deleteTransaction(token, new TransactionDeleteContainer(transaction.get_id())).execute().body();
+                            service.deleteTransaction(token, new TransactionDeleteContainer(transaction.getId())).execute().body();
                         } catch (IOException e) {
-                            log.error("Rollback for transaction id \"{}\" has failed", transaction.get_id());
+                            log.error("Rollback for transaction id \"{}\" has failed", transaction.getId());
                             e.printStackTrace();
                         }
                     }

@@ -1,6 +1,5 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
-import com.mongodb.WriteResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,8 +15,9 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionD
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.TransactionsDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -30,19 +30,22 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionList;
 import static ru.strcss.projects.moneycalc.testutils.TestUtils.assertTransactionsOrderedByDate;
 
 public class TransactionsControllerTest {
 
-    private TransactionsDBConnection transactionsDBConnection = mock(TransactionsDBConnection.class);
-    private SettingsDBConnection settingsDBConnection = mock(SettingsDBConnection.class);
+    private TransactionsService transactionsService = mock(TransactionsService.class);
+    private PersonService personService = mock(PersonService.class);
+    private SpendingSectionService sectionService = mock(SpendingSectionService.class);
+    
     private TransactionsController transactionsController;
     private List<Integer> requiredSections = Arrays.asList(0, 1);
     private Integer transactionsCount = 50;
 
+    private LocalDate dateFrom = LocalDate.of(2017, 2, 10);
+    private LocalDate dateTo = LocalDate.of(2017, 2, 20);
     @BeforeClass
     public void setUp() {
         User user = new User("login", "password", Collections.emptyList());
@@ -50,37 +53,59 @@ public class TransactionsControllerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    @BeforeGroups(groups = {"SuccessfulScenario", "incorrectContainers"})
+    @BeforeGroups(groups = {"successfulScenario", "incorrectContainers"})
     public void prepare_successfulScenario_incorrectContainers() {
         List<Transaction> transactionList = generateTransactionList(transactionsCount, requiredSections);
-        transactionList.get(1).setDate(formatDateToString(LocalDate.now().minus(1, ChronoUnit.DAYS)));
+        transactionList.get(1).setDate(LocalDate.now().minus(1, ChronoUnit.DAYS));
 
-        when(transactionsDBConnection.getTransactions(anyString(), any(TransactionsSearchContainer.class)))
-                .thenReturn(transactionList);
-        when(transactionsDBConnection.addTransaction(anyString(), any(TransactionAddContainer.class)))
-                .thenReturn(new WriteResult(1, false, new Object()));
-        when(transactionsDBConnection.deleteTransaction(anyString(), any(TransactionDeleteContainer.class)))
-                .thenReturn(new WriteResult(1, false, new Object()));
-        when(transactionsDBConnection.updateTransaction(anyString(), any(TransactionUpdateContainer.class)))
-                .thenReturn(new WriteResult(1, false, new Object()));
-        when(settingsDBConnection.isSpendingSectionIDExists(anyString(), anyInt()))
+        when(transactionsService.getTransactionsByLogin(anyString(), any(LocalDate.class), any(LocalDate.class),
+                anyListOf(Integer.class))).thenReturn(transactionList);
+        when(transactionsService.getTransactionById(anyInt()))
+                .thenReturn(generateTransaction());
+        when(transactionsService.addTransaction(anyInt(), any(Transaction.class)))
+                .thenReturn(1);
+        when(transactionsService.deleteTransaction(any(Transaction.class)))
+                .thenReturn(true);
+        when(transactionsService.updateTransaction(any(Transaction.class)))
+                .thenReturn(true);
+        when(sectionService.isSpendingSectionIdExists(anyInt(), anyInt()))
                 .thenReturn(true);
 
-        transactionsController = new TransactionsController(transactionsDBConnection, settingsDBConnection);
+        transactionsController = new TransactionsController(transactionsService, sectionService, personService);
     }
 
+    @BeforeGroups(groups = "failedScenario")
+    public void prepare_failedScenario() {
+//        List<Transaction> transactionList = generateTransactionList(transactionsCount, requiredSections);
+//        transactionList.get(1).setDate(LocalDate.now().minus(1, ChronoUnit.DAYS));
+//
+//        when(transactionsService.getTransactionsByLogin(anyString(), any(LocalDate.class), any(LocalDate.class),
+//                anyListOf(Integer.class))).thenReturn(transactionList);
+//        when(transactionsService.getTransactionById(anyInt()))
+//                .thenReturn(generateTransaction());
+//        when(transactionsService.addTransaction(anyInt(), any(Transaction.class)))
+//                .thenReturn(1);
+//        when(transactionsService.deleteTransaction(any(Transaction.class)))
+//                .thenReturn(true);
+//        when(transactionsService.updateTransaction(any(Transaction.class)))
+//                .thenReturn(true);
+//        when(sectionService.isSpendingSectionIdExists(anyInt(), anyInt()))
+//                .thenReturn(true);
+//
+        transactionsController = new TransactionsController(transactionsService, sectionService, personService);
+    }
 
-    @Test(groups = "SuccessfulScenario")
+    @Test(groups = "successfulScenario")
     public void testGetTransactions() {
         ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer("2017-02-10", "2017-02-20", requiredSections));
+                new TransactionsSearchContainer(dateFrom, dateTo, requiredSections));
 
         assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, getTransactionsRs.getBody().getMessage());
         assertEquals(getTransactionsRs.getBody().getPayload().size(), (int) transactionsCount, getTransactionsRs.getBody().getMessage());
         assertTrue(assertTransactionsOrderedByDate(getTransactionsRs.getBody().getPayload()), "Transactions are not ordered by date!");
     }
 
-    @Test(groups = "SuccessfulScenario")
+    @Test(groups = "successfulScenario")
     public void testAddTransaction() {
         ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs = transactionsController.addTransaction(
                 new TransactionAddContainer(generateTransaction()));
@@ -88,18 +113,18 @@ public class TransactionsControllerTest {
         assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, addTransactionsRs.getBody().getMessage());
     }
 
-    @Test(groups = "SuccessfulScenario")
+    @Test(groups = "successfulScenario")
     public void testUpdateTransaction() {
         ResponseEntity<MoneyCalcRs<Transaction>> updateTransactionsRs = transactionsController.updateTransaction(
-                new TransactionUpdateContainer("223e4", generateTransaction()));
+                new TransactionUpdateContainer(33, generateTransaction()));
 
         assertEquals(updateTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, updateTransactionsRs.getBody().getMessage());
     }
 
-    @Test(groups = "SuccessfulScenario")
+    @Test(groups = "successfulScenario")
     public void testDeleteTransaction() {
         ResponseEntity<MoneyCalcRs<Void>> deleteTransactionsRs =
-                transactionsController.deleteTransaction(new TransactionDeleteContainer("223e4"));
+                transactionsController.deleteTransaction(new TransactionDeleteContainer(2));
 
         assertEquals(deleteTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, deleteTransactionsRs.getBody().getMessage());
     }
@@ -107,7 +132,7 @@ public class TransactionsControllerTest {
     @Test(groups = "incorrectContainers")
     public void testGetTransactions_emptyRangeFrom() {
         ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer(null, "2017-02-20", requiredSections));
+                new TransactionsSearchContainer(null, dateTo, requiredSections));
 
         assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
     }
@@ -115,15 +140,15 @@ public class TransactionsControllerTest {
     @Test(groups = "incorrectContainers")
     public void testGetTransactions_emptyRangeTo() {
         ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer("2017-02-10", null, requiredSections));
+                new TransactionsSearchContainer(dateFrom, null, requiredSections));
 
         assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
     }
 
-    @Test(groups = "incorrectContainers")
+    @Test(groups = "incorrectContainers", enabled = false)
     public void testGetTransactions_emptySectionsId() {
         ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer("2017-02-10", "2017-02-20", null));
+                new TransactionsSearchContainer(dateFrom, dateTo, null));
 
         assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
     }
@@ -131,7 +156,7 @@ public class TransactionsControllerTest {
     @Test(groups = "incorrectContainers")
     public void testGetTransactions_RangeFrom_after_RangeTo() {
         ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer("2017-02-20", "2017-02-10", requiredSections));
+                new TransactionsSearchContainer(dateTo, dateFrom, requiredSections));
 
         assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
     }
@@ -147,9 +172,9 @@ public class TransactionsControllerTest {
     @Test(groups = "incorrectContainers")
     public void testAddTransaction_Transaction_emptyFields() {
         Transaction transaction = Transaction.builder()
-                .date("2017-02-20")
+                .date(dateTo)
                 .currency("RUR")
-                .sectionID(0)
+                .sectionId(0)
                 .build();
 
         ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs =
@@ -169,7 +194,7 @@ public class TransactionsControllerTest {
     @Test(groups = "incorrectContainers")
     public void testUpdateTransaction_emptyTransaction() {
         ResponseEntity<MoneyCalcRs<Transaction>> updateTransactionsRs = transactionsController.updateTransaction(
-                new TransactionUpdateContainer("223e4", null));
+                new TransactionUpdateContainer(2, null));
 
         assertEquals(updateTransactionsRs.getBody().getServerStatus(), Status.ERROR, updateTransactionsRs.getBody().getMessage());
     }
@@ -181,5 +206,28 @@ public class TransactionsControllerTest {
 
         assertEquals(deleteTransactionsRs.getBody().getServerStatus(), Status.ERROR, deleteTransactionsRs.getBody().getMessage());
     }
+
+    @Test(groups = "failedScenario")
+    public void testAddTransaction_missingSectionId() {
+        when(sectionService.isSpendingSectionIdExists(anyInt(), anyInt()))
+                .thenReturn(false);
+        transactionsController = new TransactionsController(transactionsService, sectionService, personService);
+
+        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs = transactionsController.addTransaction(
+                new TransactionAddContainer(generateTransaction()));
+
+        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.ERROR, addTransactionsRs.getBody().getMessage());
+    }
+
+    @Test(groups = "failedScenario")
+    public void testUpdateTransaction_incorrectTransaction() {
+        Transaction transaction = generateTransaction();
+        transaction.setSectionId(null);
+        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs = transactionsController.addTransaction(
+                new TransactionAddContainer(transaction));
+
+        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.ERROR, addTransactionsRs.getBody().getMessage());
+    }
+
 
 }

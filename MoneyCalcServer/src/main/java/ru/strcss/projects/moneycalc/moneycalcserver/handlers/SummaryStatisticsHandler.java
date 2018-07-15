@@ -12,7 +12,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateFromString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.*;
 
 @Slf4j
@@ -72,7 +71,7 @@ public class SummaryStatisticsHandler {
 
     private Integer getBudget(FinanceSummaryCalculationContainer container, Integer id) {
         return container.getSpendingSections().stream()
-                .filter(spendingSection -> spendingSection.getId().equals(id))
+                .filter(spendingSection -> spendingSection.getSectionId().equals(id))
                 .findAny()
                 .get()
                 .getBudget();
@@ -84,11 +83,12 @@ public class SummaryStatisticsHandler {
 
     private void fillMoneySpend(FinanceSummaryCalculationContainer container, Map<Integer, FinanceSummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
         container.getTransactions().forEach(transaction -> {
-            Integer sectionID = transaction.getSectionID();
+            Integer sectionID = transaction.getSectionId();
             FinanceSummaryBySection temporary = statistics.get(sectionID);
 
             temporary.setMoneySpendAll(temporary.getMoneySpendAll() + transaction.getSum());
-            if (spendTodayBySection != null && formatDateFromString(transaction.getDate()).isEqual(container.getToday())) {
+            if (spendTodayBySection != null && transaction.getDate().isEqual(container.getToday())) {
+//            if (spendTodayBySection != null && formatDateFromString(transaction.getDate()).isEqual(container.getToday())) {
                 spendTodayBySection.put(sectionID, spendTodayBySection.getOrDefault(sectionID, 0d) + transaction.getSum());
             }
             statistics.put(sectionID, temporary);

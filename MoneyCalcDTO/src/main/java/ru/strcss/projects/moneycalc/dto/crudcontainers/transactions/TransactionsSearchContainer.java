@@ -5,6 +5,8 @@ import lombok.Data;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -23,14 +25,17 @@ import java.util.List;
 @AllArgsConstructor
 public class TransactionsSearchContainer extends AbstractContainer {
 
-    private String rangeFrom;
-    private String rangeTo;
+    private LocalDate rangeFrom;
+    private LocalDate rangeTo;
     private List<Integer> requiredSections;
 
     @Override
     public ValidationResult isValid() {
-        List<String> reasons = validateStringFields(new FieldPairs("rangeFrom", rangeFrom), new FieldPairs("rangeTo", rangeTo));
-        if (requiredSections == null) reasons.add("requiredSections are empty");
+        List<String> reasons = new ArrayList<>();
+        if (rangeFrom == null) reasons.add("rangeFrom is empty");
+        if (rangeTo == null) reasons.add("rangeTo is empty");
+        //        List<String> reasons = validateStringFields(new FieldPairs("rangeFrom", rangeFrom), new FieldPairs("rangeTo", rangeTo));
+//        if (requiredSections == null) reasons.add("requiredSections are empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

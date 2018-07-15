@@ -1,6 +1,5 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
-import com.mongodb.WriteResult;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -13,12 +12,12 @@ import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.IdentificationsDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.IdentificationsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
 
 import java.util.Collections;
 
-import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyString;
+import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -27,7 +26,8 @@ import static ru.strcss.projects.moneycalc.testutils.Generator.generateIdentific
 
 public class IdentificationsControllerTest {
 
-    private IdentificationsDBConnection identificationsDBConnection = mock(IdentificationsDBConnection.class);
+    private IdentificationsService identificationsService = mock(IdentificationsService.class);
+    private PersonService personService = mock(PersonService.class);
     private IdentificationsController identificationsController;
 
     @BeforeClass
@@ -37,27 +37,33 @@ public class IdentificationsControllerTest {
         SecurityContextHolder.getContext().setAuthentication(auth);
     }
 
-    @BeforeGroups(groups = {"SuccessfulScenario", "incorrectContainers"})
+    @BeforeGroups(groups = {"IdentificationsSuccessfulScenario", "IdentificationsIncorrectContainers"})
     public void prepare_successfulScenario_incorrectContainers() {
-        when(identificationsDBConnection.getIdentifications(anyString()))
+        when(identificationsService.getIdentificationsById(anyInt()))
                 .thenReturn(generateIdentifications());
-        when(identificationsDBConnection.updateIdentifications(anyString(), any(IdentificationsUpdateContainer.class)))
-                .thenReturn(new WriteResult(1, false, new Object()));
-
-        identificationsController = new IdentificationsController(identificationsDBConnection);
+        when(identificationsService.updateIdentifications(any(Identifications.class)))
+                .thenReturn(generateIdentifications());
+        when(personService.getPersonIdByLogin(anyString()))
+                .thenReturn(1);
+        when(personService.getIdentificationsIdByPersonId(anyInt()))
+                .thenReturn(1);
+        identificationsController = new IdentificationsController(identificationsService, personService);
     }
 
-    @BeforeGroups(groups = "failedScenario")
+    @BeforeGroups(groups = "IdentificationsFailedScenario")
     public void prepare_failedScenario() {
-        when(identificationsDBConnection.getIdentifications(anyString()))
+        when(identificationsService.getIdentificationsById(anyInt()))
                 .thenReturn(null);
-        when(identificationsDBConnection.updateIdentifications(anyString(), any(IdentificationsUpdateContainer.class)))
-                .thenReturn(new WriteResult(0, false, new Object()));
-
-        identificationsController = new IdentificationsController(identificationsDBConnection);
+        when(identificationsService.updateIdentifications(any(Identifications.class)))
+                .thenReturn(null);
+        when(personService.getPersonIdByLogin(anyString()))
+                .thenReturn(1);
+        when(personService.getIdentificationsIdByPersonId(anyInt()))
+                .thenReturn(1);
+        identificationsController = new IdentificationsController(identificationsService, personService);
     }
 
-    @Test(groups = "SuccessfulScenario")
+    @Test(groups = "IdentificationsSuccessfulScenario")
     public void testSaveIdentifications() {
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(generateIdentifications());
         ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
@@ -66,7 +72,7 @@ public class IdentificationsControllerTest {
         assertEquals(updateContainer.getIdentifications(), saveIdentificationsRs.getBody().getPayload(), "Identifications are not equal!");
     }
 
-    @Test(groups = "SuccessfulScenario")
+    @Test(groups = "IdentificationsSuccessfulScenario")
     public void testGetIdentifications() {
         ResponseEntity<MoneyCalcRs<Identifications>> getIdentificationsRs = identificationsController.getIdentifications();
 
@@ -74,7 +80,7 @@ public class IdentificationsControllerTest {
         assertNotNull(getIdentificationsRs.getBody().getPayload(), "Identifications is null!");
     }
 
-    @Test(groups = "incorrectContainers")
+    @Test(groups = "IdentificationsIncorrectContainers")
     public void testSaveIdentifications_emptyIdentifications() {
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(null);
         ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
@@ -82,7 +88,7 @@ public class IdentificationsControllerTest {
         assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
     }
 
-    @Test(groups = "incorrectContainers")
+    @Test(groups = "IdentificationsIncorrectContainers")
     public void testSaveIdentifications_Identifications_emptyFields() {
         Identifications identifications = Identifications.builder().build();
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(identifications);
@@ -92,7 +98,7 @@ public class IdentificationsControllerTest {
         assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
     }
 
-    @Test(groups = "failedScenario", dependsOnGroups = {"SuccessfulScenario", "incorrectContainers"})
+    @Test(groups = "IdentificationsFailedScenario", dependsOnGroups = {"IdentificationsSuccessfulScenario", "IdentificationsIncorrectContainers"})
     public void testSaveIdentifications_failed() {
         IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(generateIdentifications());
         ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.saveIdentifications(updateContainer);
@@ -100,7 +106,7 @@ public class IdentificationsControllerTest {
         assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
     }
 
-    @Test(groups = "failedScenario", dependsOnGroups = {"SuccessfulScenario", "incorrectContainers"})
+    @Test(groups = "IdentificationsFailedScenario", dependsOnGroups = {"IdentificationsSuccessfulScenario", "IdentificationsIncorrectContainers"})
     public void testGetIdentifications_failed() {
         ResponseEntity<MoneyCalcRs<Identifications>> getIdentificationsRs = identificationsController.getIdentifications();
 

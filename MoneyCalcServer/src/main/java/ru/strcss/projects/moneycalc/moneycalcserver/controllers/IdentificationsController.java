@@ -1,6 +1,5 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
-import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,7 +10,8 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.Identific
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.IdentificationsDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.IdentificationsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
 
@@ -20,10 +20,13 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @RequestMapping("/api/identifications/")
 public class IdentificationsController extends AbstractController implements IdentificationsAPIService {
 
-    private IdentificationsDBConnection identificationsDBConnection;
+    private IdentificationsService identificationsService;
+    private PersonService personService;
 
-    public IdentificationsController(IdentificationsDBConnection identificationsDBConnection) {
-        this.identificationsDBConnection = identificationsDBConnection;
+    public IdentificationsController(IdentificationsService identificationsService, PersonService personService) {
+        this.identificationsService = identificationsService;
+        this.personService = personService;
+
     }
 
     /**
@@ -43,9 +46,14 @@ public class IdentificationsController extends AbstractController implements Ide
 
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        final WriteResult updateResult = identificationsDBConnection.updateIdentifications(login, updateContainer);
+        Integer personId = personService.getPersonIdByLogin(login);
+        Integer identificationsId = personService.getIdentificationsIdByPersonId(personId);
 
-        if (updateResult.getN() == 0) {
+        updateContainer.getIdentifications().setId(identificationsId);
+
+        Identifications identifications = identificationsService.updateIdentifications(updateContainer.getIdentifications());
+
+        if (identifications == null) {
             log.error("Updating Identifications for login \"{}\" has failed", login);
             return responseError(IDENTIFICATIONS_SAVING_ERROR);
         }
@@ -61,7 +69,11 @@ public class IdentificationsController extends AbstractController implements Ide
     public ResponseEntity<MoneyCalcRs<Identifications>> getIdentifications() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        Identifications identifications = identificationsDBConnection.getIdentifications(login);
+        Integer personId = personService.getPersonIdByLogin(login);
+        Integer identificationsId = personService.getIdentificationsIdByPersonId(personId);
+
+
+        Identifications identifications = identificationsService.getIdentificationsById(identificationsId);
 
         if (identifications != null) {
             log.debug("returning Identifications for login \"{}\": {}", login, identifications);

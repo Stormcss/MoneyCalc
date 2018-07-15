@@ -11,22 +11,22 @@ import ru.strcss.projects.moneycalc.api.StatisticsAPIService;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.TransactionsDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
 
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateCorrect;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
 
 @Slf4j
@@ -34,13 +34,16 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @RequestMapping("/api/statistics/financeSummary")
 public class StatisticsController extends AbstractController implements StatisticsAPIService {
 
-    private TransactionsDBConnection transactionsDBConnection;
-    private SettingsDBConnection settingsDBConnection;
+    private TransactionsDao transactionsDao;
+    private SpendingSectionDao sectionsDao;
+    private PersonDao personDao;
     private SummaryStatisticsHandler statisticsHandler;
 
-    public StatisticsController(TransactionsDBConnection transactionsDBConnection, SettingsDBConnection settingsDBConnection, SummaryStatisticsHandler statisticsHandler) {
-        this.transactionsDBConnection = transactionsDBConnection;
-        this.settingsDBConnection = settingsDBConnection;
+    public StatisticsController(TransactionsDao transactionsDao, SpendingSectionDao sectionsDao, PersonDao personDao,
+                                SummaryStatisticsHandler statisticsHandler) {
+        this.transactionsDao = transactionsDao;
+        this.sectionsDao = sectionsDao;
+        this.personDao = personDao;
         this.statisticsHandler = statisticsHandler;
     }
 
@@ -50,32 +53,37 @@ public class StatisticsController extends AbstractController implements Statisti
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(getContainer, "Getting Finance Summary")
-                .addValidation(() -> isDateCorrect(getContainer.getRangeFrom()),
-                        () -> fillLog(DATE_INCORRECT, getContainer.getRangeFrom()))
-                .addValidation(() -> isDateCorrect(getContainer.getRangeTo()),
-                        () -> fillLog(DATE_INCORRECT, getContainer.getRangeTo()))
+//                .addValidation(() -> isDateCorrect(getContainer.getRangeFrom()),
+//                        () -> fillLog(DATE_INCORRECT, getContainer.getRangeFrom()))
+//                .addValidation(() -> isDateCorrect(getContainer.getRangeTo()),
+//                        () -> fillLog(DATE_INCORRECT, getContainer.getRangeTo()))
                 .addValidation(() -> isDateSequenceValid(getContainer.getRangeFrom(), getContainer.getRangeTo()),
                         () -> DATE_SEQUENCE_INCORRECT)
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        List<Transaction> transactions = transactionsDBConnection.getTransactions(login, new TransactionsSearchContainer(
-                getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getSectionIDs()));
+        Integer personId = personDao.getPersonIdByLogin(login);
+
+        List<Transaction> transactions = transactionsDao.getTransactionsByPersonId(personId, getContainer.getRangeFrom(),
+                getContainer.getRangeTo(), getContainer.getSectionIds());
+
+        //        List<Transaction> transactions = transactionsDao.getTransactionsByLogin(login, new TransactionsSearchContainer(
+//                getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getSectionIds()));
 
         //оставляю только те секции клиента для которых мне нужна статистика
-        List<SpendingSection> spendingSections = settingsDBConnection.getSpendingSectionList(login).stream()
-                .filter(section -> getContainer.getSectionIDs().stream().anyMatch(id -> id.equals(section.getId())))
+        List<SpendingSection> spendingSections = sectionsDao.getSpendingSectionsByPersonId(personId).stream()
+                .filter(section -> getContainer.getSectionIds().stream().anyMatch(id -> id.equals(section.getSectionId())))
                 .collect(Collectors.toList());
 
-        if (spendingSections.size() != getContainer.getSectionIDs().size()) {
+        if (spendingSections.size() != getContainer.getSectionIds().size()) {
             log.error("List of required IDs is not equal with list filtered Person's list for login: \"{}\"", login);
             return responseError("List of required IDs is not equal with list filtered Person's list");
         }
 
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
-                .rangeFrom(formatDateFromString(getContainer.getRangeFrom()))
-                .rangeTo(formatDateFromString(getContainer.getRangeTo()))
-                .sections(getContainer.getSectionIDs())
+                .rangeFrom(getContainer.getRangeFrom())
+                .rangeTo((getContainer.getRangeTo()))
+                .sections(getContainer.getSectionIds())
                 .transactions(transactions)
                 .spendingSections(spendingSections)
                 .today(LocalDate.now())

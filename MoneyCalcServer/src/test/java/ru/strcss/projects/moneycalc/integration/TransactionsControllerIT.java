@@ -45,7 +45,7 @@ public class TransactionsControllerIT extends AbstractIT {
                 generateDatePlus(ChronoUnit.DAYS, 1), Collections.emptyList());
         assertEquals(today2TomorrowRs.getPayload().size(), 2, INCORRECT_TRANSACTIONS_COUNT);
 
-        //Requesting Transactions from yesterday to tomorrow
+        //Requesting Transactions from yesterday to today
         MoneyCalcRs<List<Transaction>> yesterday2TodayRs = getTransactions(service, token,
                 generateDateMinus(ChronoUnit.DAYS, 1), LocalDate.now(), Collections.emptyList());
         assertEquals(yesterday2TodayRs.getPayload().size(), 1, INCORRECT_TRANSACTIONS_COUNT);
@@ -89,7 +89,7 @@ public class TransactionsControllerIT extends AbstractIT {
                     generateDatePlus(ChronoUnit.DAYS, 1), sectionID);
 
             assertEquals(singleSectionRs.getPayload().size(), numOfAddedTransactionsPerSection, INCORRECT_TRANSACTIONS_COUNT);
-            assertTrue(singleSectionRs.getPayload().stream().allMatch(t -> t.getSectionID() == finalSectionID),
+            assertTrue(singleSectionRs.getPayload().stream().allMatch(t -> t.getSectionId() == finalSectionID),
                     "Some of returned Transactions have wrong SectionID");
         }
         //Requesting Transactions with Multiple Sections
@@ -146,7 +146,7 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(addedTransactions.size(), numOfAddedTransactions, "Some Transactions were not created!");
 
         //Getting random Transactions to delete
-        String idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).get_id();
+        Integer idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).getId();
 
         sendRequest(service.deleteTransaction(token, new TransactionDeleteContainer(idToDelete)), Status.SUCCESS).body();
 
@@ -155,7 +155,7 @@ public class TransactionsControllerIT extends AbstractIT {
                 Collections.emptyList());
         assertEquals(getTransactionsRs.getPayload().size(), numOfAddedTransactions - 1,
                 "List size after delete has not decreased!");
-        assertFalse(getTransactionsRs.getPayload().stream().anyMatch(transaction -> transaction.get_id().equals(idToDelete)),
+        assertFalse(getTransactionsRs.getPayload().stream().anyMatch(transaction -> transaction.getId().equals(idToDelete)),
                 "Transaction was not deleted!");
     }
 
@@ -177,7 +177,7 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(addedTransactions.size(), numOfAddedTransactions, "Some Transactions were not created!");
 
         //Getting random Transactions to update
-        String idToUpdate = addedTransactions.get(ThreadLocalRandom.current().nextInt(1, addedTransactions.size())).get_id();
+        Integer idToUpdate = addedTransactions.get(ThreadLocalRandom.current().nextInt(1, addedTransactions.size())).getId();
 
         //Update Transaction
         LocalDate newDate = LocalDate.now().minus(1, ChronoUnit.DAYS);
@@ -185,28 +185,26 @@ public class TransactionsControllerIT extends AbstractIT {
                 new TransactionUpdateContainer(idToUpdate, generateTransaction(newDate))), Status.SUCCESS);
 
         //Getting Transactions list
-        MoneyCalcRs<List<Transaction>> getTransactionsRs = getTransactions(service, token, newDate, LocalDate.now(),
-                Collections.emptyList());
-
-        List<Transaction> transactionsList = getTransactionsRs.getPayload();
+        List<Transaction> transactionsList = getTransactions(service, token, newDate, LocalDate.now(),
+                Collections.emptyList()).getPayload();
 
         assertTrue(transactionsList.stream()
-                .map(Transaction::get_id)
+                .map(Transaction::getId)
                 .anyMatch(id -> id.equals(idToUpdate)), "Id of updated Transaction has changed!");
         assertEquals(transactionsList.size(), numOfAddedTransactions, "Size of Transactions list has changed!");
 
-
         Transaction beforeUpdatedTransaction = addedTransactions.stream()
-                .filter(transaction -> transaction.get_id().equals(idToUpdate))
+                .filter(transaction -> transaction.getId().equals(idToUpdate))
                 .findFirst()
                 .get();
         Transaction updatedTransaction = transactionsList.stream()
-                .filter(transaction -> transaction.get_id().equals(idToUpdate))
+                .filter(transaction -> transaction.getId().equals(idToUpdate))
                 .findFirst()
                 .get();
 
         assertNotEquals(updatedTransaction.getSum(), beforeUpdatedTransaction.getSum(), "Sum in Transaction after update has not changed!");
-        assertEquals(updatedTransaction.get_id(), beforeUpdatedTransaction.get_id(), "Id of updated Transaction has changed!");
+        assertEquals(updatedTransaction.getId(), beforeUpdatedTransaction.getId(), "id of updated Transaction has changed!");
+        assertEquals(updatedTransaction.getSectionId(), beforeUpdatedTransaction.getSectionId(), "inner id of updated Transaction has changed!");
         assertTrue(assertTransactionsOrderedByDate(transactionsList), "Transaction list is not ordered by date!");
     }
 }

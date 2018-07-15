@@ -1,6 +1,5 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -16,21 +15,20 @@ import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.Access;
 import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.RegistrationDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.RegisterService;
 
 import java.util.Collections;
 
-import static org.mockito.Matchers.anyObject;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static ru.strcss.projects.moneycalc.testutils.Generator.*;
 
 public class RegisterControllerTest {
 
-    private RegistrationDBConnection registrationDBConnection = mock(RegistrationDBConnection.class);
+    private RegisterService registerService = mock(RegisterService.class);
     private BCryptPasswordEncoder bCryptPasswordEncoder = mock(BCryptPasswordEncoder.class);
-    private MongoTemplate mongoTemplate = mock(MongoTemplate.class);
     private RegisterController registerController;
 
     @BeforeClass
@@ -42,15 +40,14 @@ public class RegisterControllerTest {
 
     @BeforeGroups(groups = {"registerSuccessfulScenario", "registerIncorrectContainers"})
     public void prepareSuccessfulScenarioAndIncorrectContainers() {
-        when(registrationDBConnection.isPersonExistsByEmail(anyString()))
+        when(registerService.isPersonExistsByEmail(anyString()))
                 .thenReturn(false);
-        when(registrationDBConnection.isPersonExistsByLogin(anyString()))
+        when(registerService.isPersonExistsByLogin(anyString()))
                 .thenReturn(false);
         when(bCryptPasswordEncoder.encode(anyString()))
                 .thenReturn(UUID());
-        doNothing().when(mongoTemplate).save(anyObject());
 
-        registerController = new RegisterController(registrationDBConnection, bCryptPasswordEncoder, mongoTemplate);
+        registerController = new RegisterController(registerService, bCryptPasswordEncoder);
     }
 
     @Test(groups = "registerSuccessfulScenario")
@@ -134,8 +131,8 @@ public class RegisterControllerTest {
     @Test(groups = "registerFail", dependsOnGroups = {"registerSuccessfulScenario", "registerIncorrectContainers"})
     public void testRegisterPerson_ExistingLogin() {
         System.out.println("testRegisterPerson_ExistingLogin");
-        when(registrationDBConnection.isPersonExistsByLogin(anyString())).thenReturn(true);
-        registerController = new RegisterController(registrationDBConnection, bCryptPasswordEncoder, mongoTemplate);
+        when(registerService.isPersonExistsByLogin(anyString())).thenReturn(true);
+        registerController = new RegisterController(registerService, bCryptPasswordEncoder);
 
         ResponseEntity<MoneyCalcRs<Person>> registerRs = registerController.registerPerson(generateCredentials());
         assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());
@@ -144,8 +141,8 @@ public class RegisterControllerTest {
     @Test(groups = "registerFail", dependsOnGroups = {"registerSuccessfulScenario", "registerIncorrectContainers"})
     public void testRegisterPerson_ExistingEmail() {
         System.out.println("testRegisterPerson_ExistingEmail");
-        when(registrationDBConnection.isPersonExistsByEmail(anyString())).thenReturn(true);
-        registerController = new RegisterController(registrationDBConnection, bCryptPasswordEncoder, mongoTemplate);
+        when(registerService.isPersonExistsByEmail(anyString())).thenReturn(true);
+        registerController = new RegisterController(registerService, bCryptPasswordEncoder);
 
         ResponseEntity<MoneyCalcRs<Person>> registerRs = registerController.registerPerson(generateCredentials());
         assertEquals(registerRs.getBody().getServerStatus(), Status.ERROR, registerRs.getBody().getMessage());

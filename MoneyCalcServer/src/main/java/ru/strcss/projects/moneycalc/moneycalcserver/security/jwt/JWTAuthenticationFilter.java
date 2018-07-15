@@ -3,7 +3,9 @@ package ru.strcss.projects.moneycalc.moneycalcserver.security.jwt;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
@@ -21,6 +23,7 @@ import java.util.Date;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.security.SecurityConstants.*;
 
+@Slf4j
 public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
     private AuthenticationManager authenticationManager;
 
@@ -31,11 +34,10 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
     @Override
     public Authentication attemptAuthentication(HttpServletRequest req,
                                                 HttpServletResponse res) throws AuthenticationException {
+        Access access = null;
         try {
-            Access access = new ObjectMapper()
+            access = new ObjectMapper()
                     .readValue(req.getInputStream(), Access.class);
-            //            ApplicationUser creds = new ObjectMapper()
-//                    .readValue(req.getInputStream(), ApplicationUser.class);
 
             return authenticationManager.authenticate(
                     new UsernamePasswordAuthenticationToken(
@@ -43,6 +45,9 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                             access.getPassword(),
                             new ArrayList<>())
             );
+        } catch (BadCredentialsException bce) {
+            log.info("Bad credentials for login \"{}\"", access.getLogin());
+            return null;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

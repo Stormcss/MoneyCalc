@@ -11,7 +11,11 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.time.LocalDate;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,7 +29,7 @@ public class FileReader implements FileReaderI {
         Pattern periodPattern = Pattern.compile("MoneyCalc(Data|Info)_(.*?).txt");
         Map<String, PairFilesContainer> filesEntries = new HashMap<>(32);
 
-        try (Stream<Path> paths = Files.walk(Paths.get(filesPath), 1)) {
+        try (Stream<Path> paths = Files.walk(Paths.get(filesPath))) {
             paths.filter(Files::isRegularFile)
                     .map(Path::getFileName)
                     .forEach(path -> {
@@ -94,7 +98,7 @@ public class FileReader implements FileReaderI {
     private Transaction buildTransaction(String line) {
         TransactionParseContainer parseContainer = parseTransactionLine(line);
         return Transaction.builder()
-                .sectionID(parseContainer.getId()) // FIXME: 19.02.2018 Only 0 and 1 are created
+                .sectionId(parseContainer.getId()) // FIXME: 19.02.2018 Only 0 and 1 are created
                 .date(parseContainer.getDate())
                 .sum(parseContainer.getSum())
                 .description(parseContainer.getDescription())
@@ -112,9 +116,8 @@ public class FileReader implements FileReaderI {
                 .build();
     }
 
-    private String formatDate(String oldDate) {
+    private LocalDate formatDate(String oldDate) {
         String[] part = oldDate.split("\\.");
-        StringJoiner joiner = new StringJoiner("-");
-        return joiner.add(part[2]).add(part[1]).add(part[0]).toString();
+        return LocalDate.of(Integer.valueOf(part[2]), Integer.valueOf(part[1]), Integer.valueOf(part[0]));
     }
 }

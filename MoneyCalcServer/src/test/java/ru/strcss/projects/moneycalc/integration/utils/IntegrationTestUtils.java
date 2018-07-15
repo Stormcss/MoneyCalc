@@ -12,6 +12,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionD
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Access;
+import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
@@ -27,7 +28,6 @@ import java.util.regex.Pattern;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
 import static ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType.BY_ID;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateCredentials;
 
 @Slf4j
@@ -108,6 +108,25 @@ public class IntegrationTestUtils {
     }
 
     /**
+     * Save Person with random login and return container with Entity IDs
+     *
+     * @param service - Retrofit configured service
+     */
+    public static Pair<IdsContainer, String> savePersonGetIdsAndToken(MoneyCalcClient service) {
+        Credentials credentials = generateCredentials(Generator.UUID());
+        Person registerRs = sendRequest(service.registerPerson(credentials), Status.SUCCESS).body().getPayload();
+
+        IdsContainer idsContainer = IdsContainer.builder()
+                .personId(registerRs.getId())
+                .accessId(registerRs.getAccessId())
+                .settingsId(registerRs.getSettingsId())
+                .identificationsId(registerRs.getIdentificationsId())
+                .build();
+
+        return new Pair<>(idsContainer, getToken(service, credentials.getAccess()));
+    }
+
+    /**
      * Save Person with random login and return credentials with token
      *
      * @param service - Retrofit configured service
@@ -142,7 +161,7 @@ public class IntegrationTestUtils {
 
         return addSectionRs.getPayload().stream().filter(section -> section.getName().equals(spendingSection.getName()))
                 .findAny()
-                .get().getId();
+                .get().getSectionId();
     }
 
     /**
@@ -186,15 +205,17 @@ public class IntegrationTestUtils {
     public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
                                                                  LocalDate dateTo, Integer sectionId) {
         List<Integer> requiredSections = Arrays.asList(sectionId);
-        TransactionsSearchContainer container = new TransactionsSearchContainer(formatDateToString(dateFrom),
-                formatDateToString(dateTo), requiredSections);
+        TransactionsSearchContainer container = new TransactionsSearchContainer(dateFrom, dateTo, requiredSections);
+//        TransactionsSearchContainer container = new TransactionsSearchContainer(formatDateToString(dateFrom),
+//                formatDateToString(dateTo), requiredSections);
         return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
     }
 
     public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
                                                                  LocalDate dateTo, List<Integer> sectionIds) {
-        TransactionsSearchContainer container = new TransactionsSearchContainer(formatDateToString(dateFrom),
-                formatDateToString(dateTo), sectionIds);
+        TransactionsSearchContainer container = new TransactionsSearchContainer(dateFrom, dateTo, sectionIds);
+//        TransactionsSearchContainer container = new TransactionsSearchContainer(formatDateToString(dateFrom),
+//                formatDateToString(dateTo), sectionIds);
         return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
     }
 }

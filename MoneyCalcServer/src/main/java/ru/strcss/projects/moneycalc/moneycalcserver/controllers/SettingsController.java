@@ -1,6 +1,5 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
-import com.mongodb.WriteResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,22 +15,29 @@ import ru.strcss.projects.moneycalc.enitities.Settings;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.SettingsDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
+import static ru.strcss.projects.moneycalc.utils.Merger.mergeSpendingSections;
 
 @Slf4j
 @RestController
 @RequestMapping("/api/settings/")
 public class SettingsController extends AbstractController implements SettingsAPIService {
 
-    private SettingsDBConnection settingsDBConnection;
+    private SettingsService settingsService;
+    private PersonService personService;
+    private SpendingSectionService sectionService;
 
-    public SettingsController(SettingsDBConnection settingsDBConnection) {
-        this.settingsDBConnection = settingsDBConnection;
+    public SettingsController(SettingsService settingsService, PersonService personService, SpendingSectionService sectionService) {
+        this.settingsService = settingsService;
+        this.personService = personService;
+        this.sectionService = sectionService;
     }
 
     /**
@@ -50,17 +56,20 @@ public class SettingsController extends AbstractController implements SettingsAP
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        updateContainer.getSettings().setSections(null);
+        Integer personId = personService.getPersonIdByLogin(login);
+        Integer settingsId = personService.getSettingsIdByPersonId(personId);
 
-        WriteResult updateResult = settingsDBConnection.updateSettings(updateContainer.getSettings());
+        updateContainer.getSettings().setId(settingsId);
 
-        if (updateResult.getN() == 0) {
+        Settings updatedSettings = settingsService.updateSettings(updateContainer.getSettings());
+
+        if (updatedSettings == null) {
             log.error("Updating Settings for login \"{}\" has failed", login);
             return responseError("Settings were not updated!");
         }
 
-        log.debug("Updating Settings {} for login \"{}\"", updateContainer.getSettings(), login);
-        return responseSuccess(SETTINGS_UPDATED, updateContainer.getSettings());
+        log.debug("Updating Settings {} for login \"{}\"", updatedSettings, login);
+        return responseSuccess(SETTINGS_UPDATED, updatedSettings);
     }
 
     /**
@@ -71,10 +80,13 @@ public class SettingsController extends AbstractController implements SettingsAP
     @GetMapping(value = "/getSettings")
     public ResponseEntity<MoneyCalcRs<Settings>> getSettings() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        Settings settings = filterSpendingSections(settingsDBConnection.getSettings(login));
+//        Settings settings = filterSpendingSections(settingsService.getSettingsById(login));
+        Integer personId = personService.getPersonIdByLogin(login);
+        Integer settingsId = personService.getSettingsIdByPersonId(personId);
+        Settings settings = settingsService.getSettingsById(settingsId);
 
         if (settings != null) {
-            settings.setSections(sortSpendingSectionList(settings.getSections()));
+//            settings.setSections(sortSpendingSectionList(settingsService.getSpendingSections(login)));
             log.debug("returning PersonalSettings for login \"{}\": {}", login, settings);
             return responseSuccess(SETTINGS_RETURNED, settings);
         } else {
@@ -87,65 +99,81 @@ public class SettingsController extends AbstractController implements SettingsAP
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSectionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
+        Integer personId = personService.getPersonIdByLogin(login);
+
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(addContainer, "Adding SpendingSection")
                 .addValidation(() -> addContainer.getSpendingSection().isValid().isValidated(),
                         () -> fillLog(SPENDING_SECTION_INCORRECT, addContainer.getSpendingSection().isValid().getReasons().toString()))
-                .addValidation(() -> settingsDBConnection.isSpendingSectionNameNew(login, addContainer.getSpendingSection().getName()),
+                .addValidation(() -> sectionService.isSpendingSectionNameNew(personId, addContainer.getSpendingSection().getName()),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, addContainer.getSpendingSection().getName()))
                 .validate();
 
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
         //id of income SpendingSection must be ignored and be set here
-        Integer maxSpendingSectionId = settingsDBConnection.getMaxSpendingSectionId(login);
-        addContainer.getSpendingSection().setId(maxSpendingSectionId + 1);
+        Integer maxSpendingSectionId = sectionService.getMaxSpendingSectionId(personId);
+        addContainer.getSpendingSection().setSectionId(maxSpendingSectionId + 1);
 
         //isRemoved flag of income SpendingSection must be ignored and be false
         addContainer.getSpendingSection().setIsRemoved(false);
 
-        WriteResult writeResult = settingsDBConnection.addSpendingSection(login, addContainer);
+        if (addContainer.getSpendingSection().getIsAdded() == null)
+            addContainer.getSpendingSection().setIsAdded(true);
 
-        if (writeResult.getN() == 0) {
-            log.error("Saving Transaction {} for login \"{}\" has failed", addContainer.getSpendingSection(), login);
+        Integer addedSectionId = sectionService.addSpendingSection(personId, addContainer.getSpendingSection());
+
+        if (addedSectionId == null) {
+            log.error("Saving SpendingSection {} for login \"{}\" has failed", addContainer.getSpendingSection(), login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
         log.debug("Saved new SpendingSection for login \"{}\" : {}", login, addContainer.getSpendingSection());
-        return responseSuccess(SPENDING_SECTION_ADDED, filterSpendingSections(settingsDBConnection.getSpendingSectionList(login)));
+        return responseSuccess(SPENDING_SECTION_ADDED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
     }
 
     @PostMapping(value = "/updateSpendingSection")
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
+        Integer personId = personService.getPersonIdByLogin(login);
+
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer, "Updating SpendingSection")
                 .addValidation(() -> updateContainer.getSpendingSection().isValid().isValidated(),
                         () -> fillLog(SPENDING_SECTION_INCORRECT, updateContainer.getSpendingSection().isValid().getReasons().toString()))
-                .addValidation(() -> isNewNameAllowed(login, updateContainer),
+                .addValidation(() -> isNewNameAllowed(personId, updateContainer),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, updateContainer.getSpendingSection().getName()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        // FIXME: 06.03.2018 updating via ID makes it possible to get 2 sections with the same name!
-
         //isRemoved flag of income SpendingSection must be ignored and be false
         updateContainer.getSpendingSection().setIsRemoved(false);
 
-        WriteResult updateResult;
+
+        Integer sectionId;
         if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-            updateResult = settingsDBConnection.updateSpendingSectionByName(login, updateContainer);
+            sectionId = sectionService.getSectionIdByName(personId, updateContainer.getIdOrName());
         } else {
-            updateResult = settingsDBConnection.updateSpendingSectionById(login, updateContainer);
+            sectionId = sectionService.getSectionIdById(personId, Integer.valueOf(updateContainer.getIdOrName()));
         }
 
-        // TODO: 07.02.2018 Find out if there are more reliable ways of checking update success
+        if (sectionId == null) {
+            log.error("SpendingSection with SearchType: {} and query: {} for login: \"{}\" was not found",
+                    updateContainer.getSearchType(), updateContainer.getIdOrName(), login);
+            return responseError("SpendingSection was not found!");
+        }
 
-        if (updateResult.getN() == 0) {
+        SpendingSection oldSection = sectionService.getSpendingSectionById(sectionId);
+
+        SpendingSection resultSection = mergeSpendingSections(oldSection, updateContainer.getSpendingSection());
+
+        boolean isUpdateSuccessful = sectionService.updateSpendingSection(resultSection);
+
+        if (!isUpdateSuccessful) {
             log.error("Updating SpendingSection for login \"{}\" has failed", login);
             return responseError(SPENDING_SECTION_NOT_FOUND);
         }
 
         log.debug("Updated SpendingSection {}: for login: \"{}\"", updateContainer.getSpendingSection(), login);
-        return responseSuccess(SPENDING_SECTION_UPDATED, filterSpendingSections(settingsDBConnection.getSpendingSectionList(login)));
+        return responseSuccess(SPENDING_SECTION_UPDATED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
     }
 
     @PostMapping(value = "/deleteSpendingSection")
@@ -156,16 +184,27 @@ public class SettingsController extends AbstractController implements SettingsAP
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
+        Integer personId = personService.getPersonIdByLogin(login);
 
-        WriteResult deleteResult;
+        Integer sectionId;
         if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-            deleteResult = settingsDBConnection.deleteSpendingSectionByName(login, deleteContainer);
+            sectionId = sectionService.getSectionIdByName(personId, deleteContainer.getIdOrName());
         } else {
-            deleteResult = settingsDBConnection.deleteSpendingSectionById(login, deleteContainer);
+            sectionId = sectionService.getSectionIdById(personId, Integer.valueOf(deleteContainer.getIdOrName()));
         }
         // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
 
-        if (deleteResult.getN() == 0) {
+        if (sectionId == null) {
+            log.error("SpendingSection with SearchType: {} and query: {} for login: \"{}\" was not found",
+                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
+            return responseError("SpendingSection was not found!");
+        }
+
+        SpendingSection spendingSection = sectionService.getSpendingSectionById(sectionId);
+
+        boolean isDeleteSuccessful = sectionService.deleteSpendingSection(spendingSection);
+
+        if (!isDeleteSuccessful) {
             log.error("Deleting SpendingSection with SearchType: {} and query: {} for login: \"{}\" has failed",
                     deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
             return responseError("SpendingSection was not deleted!");
@@ -173,7 +212,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         log.debug("Deleted SpendingSection with SearchType: {} and query: {} for login: \"{}\"",
                 deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
 
-        return responseSuccess(SPENDING_SECTION_DELETED, filterSpendingSections(settingsDBConnection.getSpendingSectionList(login)));
+        return responseSuccess(SPENDING_SECTION_DELETED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
     }
 
     /**
@@ -185,7 +224,8 @@ public class SettingsController extends AbstractController implements SettingsAP
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections() {
 
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        List<SpendingSection> spendingSectionList = filterSpendingSections(settingsDBConnection.getSpendingSectionList(login));
+        List<SpendingSection> spendingSectionList =
+                sortSpendingSectionList(filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
         log.debug("SpendingSections for login \"{}\" are returned: {}", login, spendingSectionList);
 
         return responseSuccess(SPENDING_SECTIONS_RETURNED, spendingSectionList);
@@ -198,11 +238,12 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @param updateContainer
      * @return
      */
-    private Boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
+    private Boolean isNewNameAllowed(Integer personId, SpendingSectionUpdateContainer updateContainer) {
 
-        if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_ID) || updateContainer.getSpendingSection().getName() == null)
+        if (updateContainer.getSpendingSection().getName() == null)
+//        if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_ID) || updateContainer.getSpendingSection().getName() == null)
             return true;
-        List<SpendingSection> sectionList = settingsDBConnection.getSpendingSectionList(login);
+        List<SpendingSection> sectionList = sectionService.getSpendingSectionsByPersonId(personId);
         boolean isNameChanges = !updateContainer.getIdOrName().equals(updateContainer.getSpendingSection().getName());
 
         boolean isNewNameExists = sectionList.stream()
@@ -216,11 +257,11 @@ public class SettingsController extends AbstractController implements SettingsAP
         return incomeSpendingSections.stream().filter(section -> !section.getIsRemoved()).collect(Collectors.toList());
     }
 
-    private Settings filterSpendingSections(Settings incomeSettings) {
-        if (incomeSettings == null)
-            return null;
-        incomeSettings.setSections(incomeSettings.getSections().stream().filter(section -> !section.getIsRemoved())
-                .collect(Collectors.toList()));
-        return incomeSettings;
-    }
+//    private Settings filterSpendingSections(Settings incomeSettings) {
+//        if (incomeSettings == null)
+//            return null;
+//        incomeSettings.setSections(incomeSettings.getSections().stream().filter(section -> !section.getIsRemoved())
+//                .collect(Collectors.toList()));
+//        return incomeSettings;
+//    }
 }

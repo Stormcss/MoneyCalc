@@ -3,7 +3,8 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 public abstract class AbstractController {
 
     final String REGISTER_SUCCESSFUL = "Person successfully registered";
-    final String NO_PERSON_EXIST = "Person with login \"%s\" does not exist!";
+    final String NO_PERSON_EXIST = "Person does not exist!";
+    final String NO_PERSON_LOGIN_EXISTS = "Person with login \"%s\" does not exist!";
     final String PERSON_LOGIN_ALREADY_EXISTS = "Person with login \"%s\" is already registered!";
     final String PERSON_EMAIL_ALREADY_EXISTS = "Person with email \"%s\" is already registered!";
     final String REGISTER_ERROR = "Can not perform registration: %s";
@@ -23,6 +24,7 @@ public abstract class AbstractController {
     final String SPENDING_SECTION_ID_NOT_EXISTS = "Spending Section with id \"%s\" does not exist";
     final String SPENDING_SECTION_INCORRECT = "Spending Section has incorrect fields: \"%s\"";
     final String SPENDING_SECTION_NOT_FOUND = "Spending Section was not found!";
+    final String SPENDING_SECTION_SAVING_ERROR = "ERROR has occurred while saving Spending Section!";
 
     final String IDENTIFICATIONS_SAVED = "Identifications successfully saved";
     final String IDENTIFICATIONS_RETURNED = "Identifications successfully returned";
@@ -33,8 +35,10 @@ public abstract class AbstractController {
     final String TRANSACTION_SAVED = "TRANSACTION successfully saved";
     final String TRANSACTION_DELETED = "TRANSACTION successfully deleted";
     final String TRANSACTION_UPDATED = "TRANSACTION successfully updated";
+    final String TRANSACTION_NOT_UPDATED = "Updating transaction has failed!";
     final String TRANSACTIONS_RETURNED = "TRANSACTIONS successfully returned";
     final String TRANSACTION_INCORRECT = "TRANSACTION has incorrect fields: %s";
+    final String TRANSACTION_NOT_FOUND = "TRANSACTION was not found!";
 
     final String STATISTICS_RETURNED = "Statistics successfully returned";
     final String DATE_INCORRECT = "Date [%s] is incorrect: must be [yyyy-MM-dd]";

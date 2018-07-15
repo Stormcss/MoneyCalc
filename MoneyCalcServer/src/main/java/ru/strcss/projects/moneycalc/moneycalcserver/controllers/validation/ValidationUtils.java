@@ -8,37 +8,6 @@ import java.time.format.DateTimeFormatter;
 
 public class ValidationUtils {
 
-//    public static ValidationResult validateRegisterPerson(Access access, Identifications identifications) {
-//        return processValidationResults(access.isValid(), identifications.isValid());
-//    }
-
-//    private static ValidationResult processValidationResults(ValidationResult... validationResults) {
-//        boolean status = true;
-//
-//        List reasons = new ArrayList();
-//        for (ValidationResult vr : validationResults) {
-//            if (!vr.isValidated()) {
-//                status = false;
-//            }
-//            reasons.addAll(vr.getReasons());
-//        }
-//        return new ValidationResult(status, reasons);
-//    }
-
-//    public static ValidationResult isPersonExists(Access access, PersonRepository repository) {
-//
-//        ArrayList<String> reasons = new ArrayList<>();
-//
-//        // FIXME: 22.02.2018 use proper requests to DB
-//        boolean loginExists = repository.findPersonByAccess_Login(access.getLogin()) != null;
-//        boolean emailExists = repository.findPersonByAccess_Email(access.getEmail()) != null;
-//
-//        if (loginExists) reasons.add("Login is already registered");
-//        if (emailExists) reasons.add("Email is already registered");
-//
-//        return new ValidationResult(!loginExists && !emailExists, reasons);
-//    }
-
     public static boolean isEmailValid(String email){
         return EmailValidator.getInstance().isValid(email);
     }
@@ -53,9 +22,10 @@ public class ValidationUtils {
         return true;
     }
 
-    public static boolean isDateSequenceValid(String dateFrom, String dateTo) {
-        LocalDate localDateFrom = LocalDate.parse(dateFrom, DateTimeFormatter.ISO_LOCAL_DATE);
-        LocalDate localDateTo = LocalDate.parse(dateTo, DateTimeFormatter.ISO_LOCAL_DATE);
-        return localDateFrom.isBefore(localDateTo) || localDateFrom.isEqual(localDateTo);
+    public static boolean isDateSequenceValid(LocalDate dateFrom, LocalDate dateTo) {
+//        LocalDate localDateFrom = LocalDate.parse(dateFrom, DateTimeFormatter.ISO_LOCAL_DATE);
+//        LocalDate localDateTo = LocalDate.parse(dateTo, DateTimeFormatter.ISO_LOCAL_DATE);
+//        return localDateFrom.isBefore(localDateTo) || localDateFrom.isEqual(localDateTo);
+        return dateFrom.isBefore(dateTo) || dateFrom.isEqual(dateTo);
     }
 }

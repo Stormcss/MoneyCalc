@@ -2,17 +2,30 @@ package ru.strcss.projects.moneycalc.enitities;
 
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+
+import javax.persistence.*;
+import java.io.Serializable;
 
 @Data
 @Builder
-@Document(collection="Person")
-public class Person{
+@Entity
+@Table(name = "\"Person\"")
+public class Person implements Serializable {
+
     @Id
-    private String ID;
-    private Access access;
-    private Identifications identifications;
-    private Settings settings;
-    private Finance finance;
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "\"accessId\"")
+//    @OneToOne(cascade = CascadeType.REMOVE)
+    private int accessId;
+
+    @Column(name = "\"identificationsId\"")
+//    @OneToOne(cascade = CascadeType.REMOVE)
+    private int identificationsId;
+
+    @Column(name = "\"settingsId\"")
+//    @OneToOne(cascade = CascadeType.REMOVE)
+    private int settingsId;
 }

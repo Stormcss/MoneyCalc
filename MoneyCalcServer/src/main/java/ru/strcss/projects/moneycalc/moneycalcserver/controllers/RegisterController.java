@@ -1,7 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -14,12 +13,11 @@ import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.enitities.Person;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.RegistrationDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.RegisterService;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.getRegisteringPerson;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.getRegisteringPersonTransactions;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateRegisteringSettings;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isEmailValid;
 
 @Slf4j
@@ -27,14 +25,12 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @RequestMapping("/api/registration/")
 public class RegisterController extends AbstractController implements RegisterAPIService {
 
-    private RegistrationDBConnection registrationDBConnection;
+    private RegisterService registerService;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
-    private MongoTemplate mongoTemplate;
 
-    public RegisterController(RegistrationDBConnection registrationDBConnection, BCryptPasswordEncoder bCryptPasswordEncoder, MongoTemplate mongoTemplate) {
-        this.registrationDBConnection = registrationDBConnection;
+    public RegisterController(RegisterService registerService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+        this.registerService = registerService;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
-        this.mongoTemplate = mongoTemplate;
     }
 
     /**
@@ -52,9 +48,9 @@ public class RegisterController extends AbstractController implements RegisterAP
                         () -> fillLog(REGISTER_ERROR, credentials.getAccess().isValid().getReasons().toString()), "Access")
                 .addValidation(() -> credentials.getIdentifications().isValid().isValidated(),
                         () -> fillLog(REGISTER_ERROR, credentials.getIdentifications().isValid().getReasons().toString()), "Identifications")
-                .addValidation(() -> !registrationDBConnection.isPersonExistsByLogin(credentials.getAccess().getLogin()),
+                .addValidation(() -> !registerService.isPersonExistsByLogin(credentials.getAccess().getLogin()),
                         () -> fillLog(PERSON_LOGIN_ALREADY_EXISTS, credentials.getAccess().getLogin()))
-                .addValidation(() -> !registrationDBConnection.isPersonExistsByEmail(credentials.getAccess().getEmail()),
+                .addValidation(() -> !registerService.isPersonExistsByEmail(credentials.getAccess().getEmail()),
                         () -> fillLog(PERSON_EMAIL_ALREADY_EXISTS, credentials.getAccess().getEmail()))
                 .addValidation(() -> isEmailValid(credentials.getAccess().getEmail()),
                         () -> fillLog(PERSON_EMAIL_INCORRECT, credentials.getAccess().getEmail()))
@@ -67,15 +63,23 @@ public class RegisterController extends AbstractController implements RegisterAP
 
         log.info("Registering new Person with Login: \"{}\" and Name: {}", login, credentials.getIdentifications().getName());
 
+        Person registeredUser = registerService.registerUser(credentials.getAccess(), credentials.getIdentifications(),
+                generateRegisteringSettings(login));
+
+
         // TODO: 02.02.2018 TRANSACTIONS REQUIRED!
 //        Transactional.startTransaction()
 //                .then(() -> mongoOperations.save(personTransactions, "Transactions"))
 //                .then(() -> mongoOperations.save(person, "Person"))
 //                .endTransaction();
-        mongoTemplate.save(getRegisteringPersonTransactions(login), "Transactions");
-        mongoTemplate.save(getRegisteringPerson(login, credentials), "Person");
+
+
+//        settingsService.saveSettings(generateRegisteringSettings(login));
+
+//        mongoTemplate.save(getRegisteringPersonTransactions(login), "Transactions");
+//        mongoTemplate.save(getRegisteringPerson(login, credentials), "Person");
 
         // TODO: 02.02.2018 validate if save is successful
-        return responseSuccess(REGISTER_SUCCESSFUL, null);
+        return responseSuccess(REGISTER_SUCCESSFUL, registeredUser);
     }
 }

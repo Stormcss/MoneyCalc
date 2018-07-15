@@ -1,33 +1,58 @@
 package ru.strcss.projects.moneycalc.enitities;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
-import java.io.Serializable;
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Builder
 @Data
-public class SpendingSection implements Serializable {
+@Entity
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "\"SpendingSection\"")
+public class SpendingSection {
     /**
-     * id of SpendingSection - unique id which is used to identify Section while calculating Statistics
+     * id of SpendingSection - spending section id in DB Table
      */
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
+
+    /**
+     * Person Id - used for linking Person with current SpendingSection in DB
+     */
+    @Column(name = "\"personId\"")
+    private Integer personId;
+
+    /**
+     * sectionId of SpendingSection - inner id of spending section for current Person (e.g. [0, 1, 2])
+     */
+    @Column(name = "\"sectionId\"")
+    private Integer sectionId;
+
     /**
      * Name of SpendingSection which is seen in UI
      */
     private String name;
+
     /**
      * if Section is active in UI. It is allowed to disable unactual sections without having to delete it
      */
+    @Column(name = "\"isAdded\"")
     private Boolean isAdded;
 
     /**
      * if Section is removed. Flag allows to disable ("remove" it for the user) required section without having
      * to physically remove it from database
      */
+    @Column(name = "\"isRemoved\"")
     private Boolean isRemoved;
 
     /**

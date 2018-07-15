@@ -10,7 +10,7 @@ import ru.strcss.projects.moneycalc.api.AccessAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.AccessDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.AccessService;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
@@ -21,10 +21,10 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 public class AccessController extends AbstractController implements AccessAPIService {
     // TODO: 06.03.2018 finish me
 
-    private AccessDBConnection accessDBConnection;
+    private AccessService accessService;
 
-    public AccessController(AccessDBConnection accessDBConnection) {
-        this.accessDBConnection = accessDBConnection;
+    public AccessController(AccessService accessService) {
+        this.accessService = accessService;
     }
 
     /**
@@ -36,15 +36,14 @@ public class AccessController extends AbstractController implements AccessAPISer
     public ResponseEntity<MoneyCalcRs<Access>> getAccess() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        Access access = accessDBConnection.getAccess(login);
+        Access access = accessService.getAccessByLogin(login);
 
-        if (access != null) {
-            log.debug("returning Access for login \"{}\": {}", login, access);
-            return responseSuccess(ACCESS_RETURNED, access);
-        } else {
+        if (access == null) {
             log.error("Can not return Access for login \"{}\" - no Person found", login);
             return responseError(NO_PERSON_EXIST);
         }
+        log.debug("returning Access for login \"{}\": {}", login, access);
+        return responseSuccess(ACCESS_RETURNED, access);
     }
 
     @Override

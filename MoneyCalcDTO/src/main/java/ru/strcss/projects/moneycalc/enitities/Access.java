@@ -1,17 +1,27 @@
 package ru.strcss.projects.moneycalc.enitities;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
+import javax.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
 @Data
 @Builder
-@Document
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "\"Access\"")
 public class Access {
+
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
 
     private String login;
     private String password;

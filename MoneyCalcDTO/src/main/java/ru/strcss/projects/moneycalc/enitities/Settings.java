@@ -1,35 +1,39 @@
 package ru.strcss.projects.moneycalc.enitities;
 
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
-import org.springframework.data.mongodb.core.mapping.Document;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.Validationable;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
+import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Document
 @Builder
-public class Settings implements Validationable/*, IVisitable*/ {
+@Entity
+@NoArgsConstructor
+@AllArgsConstructor
+@Table(name = "\"Settings\"")
+public class Settings implements Validationable, Serializable {
 
-    //    @Id
-    private String login;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private int id;
+
+    @Column(name = "\"periodFrom\"")
     private String periodFrom;
+
+    @Column(name = "\"periodTo\"")
     private String periodTo;
-    private List<SpendingSection> sections;
 
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (login == null || login.isEmpty()) reasons.add("login is empty");
-//        if (sections == null) reasons.add("sections is null!");
-//        if (sections.stream().map(SpendingSection::getId).distinct().collect(Collectors.toList()).size() != sections.size()) reasons.add("SpendingSections have duplicates!");
+        if (periodFrom == null || periodFrom.isEmpty()) reasons.add("periodFrom is empty");
+        if (periodTo == null || periodTo.isEmpty()) reasons.add("periodTo is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
-
-//    @Override
-//    public String accept(Visitor visitor) {
-//        return visitor.visitSettings(this);
-//    }
 }

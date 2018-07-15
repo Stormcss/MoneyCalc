@@ -7,7 +7,6 @@ import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalcmigrator.api.FileReaderI;
-import ru.strcss.projects.moneycalcmigrator.api.ServerConnectorI;
 import ru.strcss.projects.moneycalcmigrator.dto.PairFilesContainer;
 import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
 
@@ -24,7 +23,7 @@ import static ru.strcss.projects.moneycalcmigrator.utils.GenerationUtils.generat
 class FileParser {
 
     private final MigrationProperties properties;
-    private final ServerConnectorI serverConnector;
+    private final ServerConnector serverConnector;
     private final FileReaderI fileReader;
 
     private int transactionsAdded;
@@ -66,11 +65,17 @@ class FileParser {
             }
 
             List<Transaction> transactionsInFile = fileReader.parseInfoFile(properties.getDataPath(), pair.getValue().getPathInfoFile());
-            transactionsAdded += transactionsInFile.size();
 
             Status savingStatus = serverConnector.saveTransactions(token, transactionsInFile, properties.getLogin());
-            log.debug("Saving Transactions status is {}", savingStatus);
 
+            if (Status.SUCCESS.equals(savingStatus))
+                transactionsAdded += transactionsInFile.size();
+
+            if (Status.SUCCESS.equals(savingStatus))
+                log.debug("Saving Transactions status is {}. Saved {} transactions from file {}",
+                        savingStatus, transactionsInFile.size(), pair.getValue().getPathInfoFile());
+            else
+                log.debug("Saving Transactions status is {}", savingStatus);
         }
         spendingSectionsAdded += personSectionsList.size();
 

@@ -6,12 +6,14 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 
@@ -66,8 +68,20 @@ public class ControllerUtils {
 
     public static List<Transaction> sortTransactionList(List<Transaction> incomeList) {
         List<Transaction> transactionList = new ArrayList<>(incomeList);
-        transactionList.sort(Comparator.comparing(tr -> formatDateFromString(tr.getDate())));
-
+        transactionList.sort(Comparator.comparing(Transaction::getDate));
+//        transactionList.sort(Comparator.comparing(tr -> formatDateFromString(tr.getDate())));
         return transactionList;
+    }
+
+    public static void fillDefaultValues(Transaction transaction) {
+        if (transaction.getDate() == null)
+            transaction.setDate(LocalDate.now());
+        if (transaction.getCurrency() == null)
+            transaction.setCurrency("RUR");
+    }
+
+    public static void fillDefaultValues(TransactionsSearchContainer searchContainer) {
+        if (searchContainer.getRequiredSections() == null)
+            searchContainer.setRequiredSections(Collections.emptyList());
     }
 }

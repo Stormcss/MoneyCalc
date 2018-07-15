@@ -6,21 +6,21 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.RegistrationDBConnection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.AccessService;
 
 import static java.util.Collections.emptyList;
 
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
-    private RegistrationDBConnection registrationDBConnection;
+    private AccessService accessService;
 
-    public UserDetailsServiceImpl(RegistrationDBConnection registrationDBConnection) {
-        this.registrationDBConnection = registrationDBConnection;
+    public UserDetailsServiceImpl(AccessService accessService) {
+        this.accessService = accessService;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        Access personAccess = registrationDBConnection.getAccessByLogin(username);
+        Access personAccess = accessService.getAccessByLogin(username);
         if (personAccess == null) {
             throw new UsernameNotFoundException(username);
         }

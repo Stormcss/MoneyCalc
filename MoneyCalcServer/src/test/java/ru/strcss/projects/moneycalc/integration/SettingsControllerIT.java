@@ -9,9 +9,9 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateCo
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
-import ru.strcss.projects.moneycalc.enitities.Identifications;
 import ru.strcss.projects.moneycalc.enitities.Settings;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
+import ru.strcss.projects.moneycalc.integration.utils.IdsContainer;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
 
 import java.time.temporal.ChronoUnit;
@@ -32,13 +32,12 @@ import static ru.strcss.projects.moneycalc.testutils.TestUtils.getMaxSpendingSec
 public class SettingsControllerIT extends AbstractIT {
 
     @Test
-    public void saveSettingsIncorrectLogin() {
+    public void saveSettingsIncorrectDateFrom() {
         Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
-        String login = loginAndToken.getLeft();
         String token = loginAndToken.getRight();
 
-        Settings settingsIncorrect = generateSettings(login, false, false);
-        settingsIncorrect.setLogin("");
+        Settings settingsIncorrect = generateSettings();
+        settingsIncorrect.setPeriodFrom("");
 
         Response<MoneyCalcRs<Settings>> saveSettingsRs =
                 sendRequest(service.saveSettings(token, new SettingsUpdateContainer(settingsIncorrect)));
@@ -61,36 +60,32 @@ public class SettingsControllerIT extends AbstractIT {
 
     @Test
     public void getSettings() {
-        Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
-        String login = loginAndToken.getLeft();
-        String token = loginAndToken.getRight();
+        Pair<IdsContainer, String> idsAndToken = savePersonGetIdsAndToken(service);
+        IdsContainer idsContainer = idsAndToken.getLeft();
+        String token = idsAndToken.getRight();
 
         MoneyCalcRs<Settings> getSettingsRs = sendRequest(service.getSettings(token), Status.SUCCESS).body();
 
-        assertEquals(getSettingsRs.getPayload().getLogin(), login, "returned Settings object has wrong login!");
-        assertTrue(getSettingsRs.getPayload().getSections()
-                .stream().allMatch(section -> section.getId() != null), "Some IDs in Spending Sections are null!");
+        assertEquals(getSettingsRs.getPayload().getId(), idsContainer.getSettingsId(), "wrong settingsId!");
     }
 
     @Test
     public void settingsUpdate() {
         Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
-        String login = loginAndToken.getLeft();
         String token = loginAndToken.getRight();
-        Settings newSettings = generateSettings(login, false, false);
+        Settings newSettings = generateSettings();
         newSettings.setPeriodTo(formatDateToString(generateDatePlus(ChronoUnit.YEARS, 1)));
 
         //Updating Settings
         MoneyCalcRs<Settings> updatedRs = sendRequest(service.saveSettings(token, new SettingsUpdateContainer(newSettings)), Status.SUCCESS).body();
 
         assertNotNull(updatedRs.getPayload(), "Payload is null!");
-        assertEquals(updatedRs.getPayload().getLogin(), login, "returned Settings object has wrong login!");
         assertEquals(newSettings.getPeriodTo(),
                 updatedRs.getPayload().getPeriodTo(), "Settings were not updated!");
 
         //Checking that Person is ok after updating Settings
-        MoneyCalcRs<Identifications> identificationsRs = sendRequest(service.getIdentifications(token)).body();
-        assertNotNull(identificationsRs.getPayload(), "Identifications object was overwritten!");
+//        MoneyCalcRs<Identifications> identificationsRs = sendRequest(service.getIdentifications(token)).body();
+//        assertNotNull(identificationsRs.getPayload(), "Identifications object was overwritten!");
     }
 
 
@@ -121,7 +116,7 @@ public class SettingsControllerIT extends AbstractIT {
                             .equals(spendingSection.getName())), "Spending Section was not added!");
             assertEquals((int) addSectionRs.getPayload().stream()
                             .filter(section -> section.getName().equals(spendingSection.getName()))
-                            .findAny().get().getId(),
+                            .findAny().get().getSectionId(),
                     addSectionRs.getPayload().size() - 1, "Id has been incremented incorrectly!");
         }
     }
@@ -187,7 +182,7 @@ public class SettingsControllerIT extends AbstractIT {
         MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
 
         String oldName = getSectionsRs.getPayload()
-                .stream().filter(section -> section.getId().equals(updatedSectionID)).findAny().get().getName();
+                .stream().filter(section -> section.getSectionId().equals(updatedSectionID)).findAny().get().getName();
         spendingSection.setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
 
         SpendingSectionUpdateContainer updateContainerById =
