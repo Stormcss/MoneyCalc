@@ -147,7 +147,6 @@ public class SettingsController extends AbstractController implements SettingsAP
         //isRemoved flag of income SpendingSection must be ignored and be false
         updateContainer.getSpendingSection().setIsRemoved(false);
 
-
         Integer sectionId;
         if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
             sectionId = sectionService.getSectionIdByName(personId, updateContainer.getIdOrName());
@@ -241,7 +240,6 @@ public class SettingsController extends AbstractController implements SettingsAP
     private Boolean isNewNameAllowed(Integer personId, SpendingSectionUpdateContainer updateContainer) {
 
         if (updateContainer.getSpendingSection().getName() == null)
-//        if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_ID) || updateContainer.getSpendingSection().getName() == null)
             return true;
         List<SpendingSection> sectionList = sectionService.getSpendingSectionsByPersonId(personId);
         boolean isNameChanges = !updateContainer.getIdOrName().equals(updateContainer.getSpendingSection().getName());
@@ -256,12 +254,4 @@ public class SettingsController extends AbstractController implements SettingsAP
     private List<SpendingSection> filterSpendingSections(List<SpendingSection> incomeSpendingSections) {
         return incomeSpendingSections.stream().filter(section -> !section.getIsRemoved()).collect(Collectors.toList());
     }
-
-//    private Settings filterSpendingSections(Settings incomeSettings) {
-//        if (incomeSettings == null)
-//            return null;
-//        incomeSettings.setSections(incomeSettings.getSections().stream().filter(section -> !section.getIsRemoved())
-//                .collect(Collectors.toList()));
-//        return incomeSettings;
-//    }
 }

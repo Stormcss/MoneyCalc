@@ -66,19 +66,6 @@ public class RegisterController extends AbstractController implements RegisterAP
         Person registeredUser = registerService.registerUser(credentials.getAccess(), credentials.getIdentifications(),
                 generateRegisteringSettings(login));
 
-
-        // TODO: 02.02.2018 TRANSACTIONS REQUIRED!
-//        Transactional.startTransaction()
-//                .then(() -> mongoOperations.save(personTransactions, "Transactions"))
-//                .then(() -> mongoOperations.save(person, "Person"))
-//                .endTransaction();
-
-
-//        settingsService.saveSettings(generateRegisteringSettings(login));
-
-//        mongoTemplate.save(getRegisteringPersonTransactions(login), "Transactions");
-//        mongoTemplate.save(getRegisteringPerson(login, credentials), "Person");
-
         // TODO: 02.02.2018 validate if save is successful
         return responseSuccess(REGISTER_SUCCESSFUL, registeredUser);
     }

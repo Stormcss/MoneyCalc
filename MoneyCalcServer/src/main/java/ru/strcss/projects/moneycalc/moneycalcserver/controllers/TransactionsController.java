@@ -116,13 +116,7 @@ public class TransactionsController extends AbstractController implements Transa
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-//        Transaction transactionToUpdate = generateTransactionID(updateContainer.getTransaction(), updateContainer.getId());
-
-//        updateContainer.setTransaction(transactionToUpdate);
-//        Integer personId = personService.getPersonIdByLogin(login);
-
         Transaction oldTransaction = transactionsService.getTransactionById(updateContainer.getId());
-
 
         if (oldTransaction == null) {
             log.error("Transaction with id {} was not found", updateContainer.getId());

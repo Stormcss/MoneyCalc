@@ -6,7 +6,6 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 import ru.strcss.projects.moneycalc.enitities.Settings;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SettingsDao;
 
 @Repository
@@ -15,11 +14,9 @@ public class SettingsDaoImpl implements SettingsDao {
     @Setter
     private SessionFactory sessionFactory;
 
-    private PersonDao personDao;
 
-    public SettingsDaoImpl(SessionFactory sessionFactory, PersonDao personDao) {
+    public SettingsDaoImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
-        this.personDao = personDao;
     }
 
     @Override

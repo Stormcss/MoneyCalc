@@ -66,11 +66,11 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
     public Boolean isSpendingSectionIdExists(Integer personId, Integer sectionId) {
         Session session = sessionFactory.openSession();
         String hql = "SELECT COUNT(*) FROM SpendingSection ss WHERE ss.personId = :personId AND ss.sectionId = :sectionId";
-        Query query = session.createQuery(hql)
+        Query<Long> query = session.createQuery(hql, Long.class)
                 .setParameter("personId", personId)
                 .setParameter("sectionId", sectionId);
 
-        Long count = (Long) query.list().get(0);
+        Long count = query.list().get(0);
         session.close();
         return count != 0;
 

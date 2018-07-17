@@ -53,10 +53,6 @@ public class StatisticsController extends AbstractController implements Statisti
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(getContainer, "Getting Finance Summary")
-//                .addValidation(() -> isDateCorrect(getContainer.getRangeFrom()),
-//                        () -> fillLog(DATE_INCORRECT, getContainer.getRangeFrom()))
-//                .addValidation(() -> isDateCorrect(getContainer.getRangeTo()),
-//                        () -> fillLog(DATE_INCORRECT, getContainer.getRangeTo()))
                 .addValidation(() -> isDateSequenceValid(getContainer.getRangeFrom(), getContainer.getRangeTo()),
                         () -> DATE_SEQUENCE_INCORRECT)
                 .validate();
@@ -66,9 +62,6 @@ public class StatisticsController extends AbstractController implements Statisti
 
         List<Transaction> transactions = transactionsDao.getTransactionsByPersonId(personId, getContainer.getRangeFrom(),
                 getContainer.getRangeTo(), getContainer.getSectionIds());
-
-        //        List<Transaction> transactions = transactionsDao.getTransactionsByLogin(login, new TransactionsSearchContainer(
-//                getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getSectionIds()));
 
         //оставляю только те секции клиента для которых мне нужна статистика
         List<SpendingSection> spendingSections = sectionsDao.getSpendingSectionsByPersonId(personId).stream()
