@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,6 +27,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
 import static ru.strcss.projects.moneycalc.utils.Merger.mergeTransactions;
 
+@Timed
 @Slf4j
 @RestController
 @RequestMapping("/api/finance/transactions")

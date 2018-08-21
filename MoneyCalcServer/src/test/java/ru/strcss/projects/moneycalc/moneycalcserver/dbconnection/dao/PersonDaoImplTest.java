@@ -10,7 +10,6 @@ import javax.persistence.criteria.CriteriaQuery;
 import java.util.Arrays;
 
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 import static org.testng.Assert.assertEquals;
@@ -39,7 +38,7 @@ public class PersonDaoImplTest {
 
         when(mockedQuery.list())
                 .thenReturn(Arrays.asList(1));
-        when(mockedQuery.setParameter(anyString(), anyInt()))
+        when(mockedQuery.setParameter(anyString(), any()))
                 .thenReturn(mockedQuery);
 
         when(sessionFactory.openSession())

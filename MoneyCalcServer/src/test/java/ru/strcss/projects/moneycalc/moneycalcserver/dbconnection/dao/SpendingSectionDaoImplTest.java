@@ -12,7 +12,8 @@ import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
@@ -30,20 +31,21 @@ public class SpendingSectionDaoImplTest {
     private PersonDao personDao = mock(PersonDao.class);
 
     @BeforeGroups(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void setUp() throws Exception {
+    public void setUp() {
         when(sessionFactory.openSession())
                 .thenReturn(mockedSession);
         when(mockedSession.getTransaction())
                 .thenReturn(mockedTransaction);
-        when(mockedSession.save(anyObject()))
+        when(mockedSession.save(any()))
                 .thenReturn(1);
         when(mockedSession.createQuery(anyString()))
                 .thenReturn(mockedQuery);
         when(mockedSession.createQuery(anyString(), any()))
                 .thenReturn(mockedQuery);
 
-        when(mockedQuery.setParameter(anyString(), anyInt()))
+        when(mockedQuery.setParameter(anyString(), any()))
                 .thenReturn(mockedQuery);
+
         when(mockedQuery.getSingleResult())
                 .thenReturn(generateSpendingSection(null, null, 1, null, null, null));
         when(mockedQuery.list())
@@ -57,19 +59,19 @@ public class SpendingSectionDaoImplTest {
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testGetSectionIdByName() throws Exception {
+    public void testGetSectionIdByName() {
         Integer sectionId = spendingSectionDao.getSectionIdByName(1, "sectionName");
         assertEquals((int) sectionId, 1);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testGetSectionIdById() throws Exception {
+    public void testGetSectionIdById() {
         Integer sectionId = spendingSectionDao.getSectionIdById(1, 1);
         assertEquals((int) sectionId, 1);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testIsSpendingSectionIdExists() throws Exception {
+    public void testIsSpendingSectionIdExists() {
         when(mockedQuery.list())
                 .thenReturn(Arrays.asList(1L, 2L));
 
@@ -78,55 +80,55 @@ public class SpendingSectionDaoImplTest {
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testIsSpendingSectionNameNew() throws Exception {
+    public void testIsSpendingSectionNameNew() {
         boolean isNameNew = spendingSectionDao.isSpendingSectionNameNew(1, "newName");
         assertTrue(isNameNew);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testGetMaxSpendingSectionId() throws Exception {
+    public void testGetMaxSpendingSectionId() {
         int maxSpendingSectionId = spendingSectionDao.getMaxSpendingSectionId(1);
         assertEquals(maxSpendingSectionId, 1);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testAddSpendingSection() throws Exception {
+    public void testAddSpendingSection() {
         Integer sectionId = spendingSectionDao.addSpendingSection(1, generateSpendingSection());
         assertEquals((int) sectionId, 1);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testUpdateSpendingSection() throws Exception {
+    public void testUpdateSpendingSection() {
         boolean isUpdateSuccessful = spendingSectionDao.updateSpendingSection(generateSpendingSection());
         assertTrue(isUpdateSuccessful);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testDeleteSpendingSection() throws Exception {
+    public void testDeleteSpendingSection() {
         boolean isDeleteSuccessful = spendingSectionDao.deleteSpendingSection(generateSpendingSection());
         assertTrue(isDeleteSuccessful);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testGetSpendingSectionById() throws Exception {
+    public void testGetSpendingSectionById() {
         SpendingSection spendingSection = spendingSectionDao.getSpendingSectionById(1);
         assertEquals((int) spendingSection.getId(), 1);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testGetSpendingSectionsByLogin() throws Exception {
+    public void testGetSpendingSectionsByLogin() {
         List<SpendingSection> spendingSection = spendingSectionDao.getSpendingSectionsByLogin("login");
         assertEquals(spendingSection.size(), 2);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testGetSpendingSectionsByPersonId() throws Exception {
+    public void testGetSpendingSectionsByPersonId() {
         List<SpendingSection> spendingSection = spendingSectionDao.getSpendingSectionsByPersonId(1);
         assertEquals(spendingSection.size(), 2);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testSetSessionFactory() throws Exception {
+    public void testSetSessionFactory() {
         spendingSectionDao.setSessionFactory(sessionFactory);
     }
 

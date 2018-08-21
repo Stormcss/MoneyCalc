@@ -2,8 +2,8 @@ package ru.strcss.projects.moneycalc.integration;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import org.springframework.boot.context.embedded.LocalServerPort;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.BeforeClass;
 import retrofit2.Retrofit;

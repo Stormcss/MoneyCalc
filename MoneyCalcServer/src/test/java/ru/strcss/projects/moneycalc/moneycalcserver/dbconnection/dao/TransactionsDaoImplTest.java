@@ -15,7 +15,8 @@ import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.*;
@@ -44,7 +45,7 @@ public class TransactionsDaoImplTest {
                 .thenReturn(mockedSession);
         when(mockedSession.createQuery(anyString(), any()))
                 .thenReturn(mockedQuery);
-        when(mockedSession.save(anyObject()))
+        when(mockedSession.save(any()))
                 .thenReturn(1);
         when(mockedSession.getEntityManagerFactory())
                 .thenReturn(mockedEntityManagerFactory);
@@ -57,7 +58,7 @@ public class TransactionsDaoImplTest {
         when(mockedEntityManager.getTransaction())
                 .thenReturn(mockedTransaction);
 
-        when(mockedQuery.setParameter(anyString(), anyInt()))
+        when(mockedQuery.setParameter(anyString(), any()))
                 .thenReturn(mockedQuery);
         when(mockedQuery.list())
                 .thenReturn(generateTransactionList(5, Arrays.asList(0, 1)));

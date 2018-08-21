@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.security;
 
+import org.springframework.context.annotation.Primary;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -10,6 +11,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfa
 
 import static java.util.Collections.emptyList;
 
+@Primary
 @Service
 public class UserDetailsServiceImpl implements UserDetailsService {
     private AccessService accessService;

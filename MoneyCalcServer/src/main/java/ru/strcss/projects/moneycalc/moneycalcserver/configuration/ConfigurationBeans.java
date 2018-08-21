@@ -3,7 +3,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.configuration;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletContainerFactory;
+import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -19,8 +19,8 @@ public class ConfigurationBeans {
     }
 
     @Bean
-    public JettyEmbeddedServletContainerFactory jettyEmbeddedServletContainerFactory() {
-        final JettyEmbeddedServletContainerFactory factory = new JettyEmbeddedServletContainerFactory();
+    public JettyServletWebServerFactory jettyEmbeddedServletContainerFactory() {
+        final JettyServletWebServerFactory factory = new JettyServletWebServerFactory();
 
         factory.addServerCustomizers((Server server) -> {
             final QueuedThreadPool threadPool = server.getBean(QueuedThreadPool.class);

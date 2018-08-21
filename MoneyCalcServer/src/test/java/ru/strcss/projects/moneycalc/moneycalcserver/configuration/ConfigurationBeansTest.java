@@ -1,8 +1,8 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.configuration;
 
 import org.eclipse.jetty.server.Server;
-import org.springframework.boot.context.embedded.jetty.JettyEmbeddedServletContainerFactory;
-import org.springframework.boot.context.embedded.jetty.JettyServerCustomizer;
+import org.springframework.boot.web.embedded.jetty.JettyServerCustomizer;
+import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
@@ -30,7 +30,7 @@ public class ConfigurationBeansTest {
 
     @Test
     public void testJettyEmbeddedServletContainerFactory() {
-        JettyEmbeddedServletContainerFactory factory = configurationBeans.jettyEmbeddedServletContainerFactory();
+        JettyServletWebServerFactory factory = configurationBeans.jettyEmbeddedServletContainerFactory();
 
         Collection<JettyServerCustomizer> serverCustomizers = factory.getServerCustomizers();
 
