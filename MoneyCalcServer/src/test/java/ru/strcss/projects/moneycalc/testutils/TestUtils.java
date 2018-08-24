@@ -7,6 +7,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 import static org.testng.Assert.assertTrue;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.string2LocalDate;
 
 public class TestUtils {
     /**
@@ -36,8 +37,8 @@ public class TestUtils {
         if (transactionList.size() < 2)
             return true;
         for (int i = 1; i < transactionList.size(); i++) {
-            LocalDate dateTransaction1 = transactionList.get(i - 1).getDate();
-            LocalDate dateTransaction2 = transactionList.get(i).getDate();
+            LocalDate dateTransaction1 = string2LocalDate(transactionList.get(i - 1).getDate());
+            LocalDate dateTransaction2 = string2LocalDate(transactionList.get(i).getDate());
             if (dateTransaction1.isAfter(dateTransaction2))
                 return false;
         }

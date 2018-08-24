@@ -12,7 +12,6 @@ public class ValidationUtils {
         return EmailValidator.getInstance().isValid(email);
     }
 
-
     public static boolean isDateCorrect(String date) {
         try {
             LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);

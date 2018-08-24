@@ -11,7 +11,7 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.localDate2String;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.currentDate;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 
@@ -47,8 +47,8 @@ public class Generator {
 
     public static Settings generateSettings() {
         return Settings.builder()
-                .periodFrom(formatDateToString(currentDate()))
-                .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
+                .periodFrom(localDate2String(currentDate()))
+                .periodTo(localDate2String(generateDatePlus(ChronoUnit.MONTHS, 1)))
                 .build();
     }
 
@@ -77,7 +77,7 @@ public class Generator {
     public static Transaction generateTransaction(LocalDate date, Integer sectionId, Integer sum, Integer id) {
         return Transaction.builder()
                 .id(id)
-                .date(date == null ? LocalDate.now() : date)
+                .date(date == null ? localDate2String(LocalDate.now()) : localDate2String(date))
                 .sum(sum == null ? ThreadLocalRandom.current().nextInt(10, 9000) : sum)
                 .currency("RUR")
                 .title("Магазин")

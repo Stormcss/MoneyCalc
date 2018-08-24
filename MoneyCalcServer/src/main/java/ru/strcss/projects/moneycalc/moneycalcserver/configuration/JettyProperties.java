@@ -15,7 +15,6 @@ import javax.validation.constraints.Min;
 @Setter
 public class JettyProperties {
 
-    @NotEmpty
     private String threadNamePrefix;
 
     @Min(3)

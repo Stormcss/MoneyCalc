@@ -22,7 +22,7 @@ import static org.testng.Assert.*;
 import static ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType.BY_ID;
 import static ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType.BY_NAME;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.*;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.localDate2String;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSettings;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSection;
@@ -74,7 +74,7 @@ public class SettingsControllerIT extends AbstractIT {
         Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
         String token = loginAndToken.getRight();
         Settings newSettings = generateSettings();
-        newSettings.setPeriodTo(formatDateToString(generateDatePlus(ChronoUnit.YEARS, 1)));
+        newSettings.setPeriodTo(localDate2String(generateDatePlus(ChronoUnit.YEARS, 1)));
 
         //Updating Settings
         MoneyCalcRs<Settings> updatedRs = sendRequest(service.saveSettings(token, new SettingsUpdateContainer(newSettings)), Status.SUCCESS).body();

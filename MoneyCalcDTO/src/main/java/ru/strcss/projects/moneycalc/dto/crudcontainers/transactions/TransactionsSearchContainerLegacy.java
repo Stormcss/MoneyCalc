@@ -3,6 +3,7 @@ package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
@@ -20,23 +21,14 @@ import java.util.List;
  * rangeFrom - starting Date of range from which transactions should be received
  * rangeTo - ending Date of range from which transactions should be received
  *
+ * LEGACY EDITION
  */
-
 @Data
-@EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
 @AllArgsConstructor
-public class TransactionsSearchContainer extends AbstractContainer {
-
-    private LocalDate rangeFrom;
-    private LocalDate rangeTo;
+public class TransactionsSearchContainerLegacy{
+    private String rangeFrom;
+    private String rangeTo;
     private List<Integer> requiredSections;
-
-    @Override
-    public ValidationResult isValid() {
-        List<String> reasons = new ArrayList<>();
-        if (rangeFrom == null) reasons.add("rangeFrom is empty");
-        if (rangeTo == null) reasons.add("rangeTo is empty");
-        return new ValidationResult(reasons.isEmpty(), reasons);
-    }
 }
 

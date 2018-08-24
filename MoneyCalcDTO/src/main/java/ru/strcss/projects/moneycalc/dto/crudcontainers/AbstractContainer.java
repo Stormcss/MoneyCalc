@@ -10,7 +10,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AbstractContainer implements Validationable/*, Visitor*/ {
+public abstract class AbstractContainer implements Validationable {
 
     public List<String> validateStringFields(FieldPairs... fields) {
         List<String> reasons = new ArrayList<>();

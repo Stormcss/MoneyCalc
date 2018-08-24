@@ -3,6 +3,7 @@ package ru.strcss.projects.moneycalc.dto.crudcontainers.statistics;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
@@ -11,6 +12,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Data
+@NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
 public class FinanceSummaryGetContainer extends AbstractContainer {
@@ -21,8 +23,6 @@ public class FinanceSummaryGetContainer extends AbstractContainer {
 
     @Override
     public ValidationResult isValid() {
-//        List<String> reasons = validateStringFields(new FieldPairs("rangeFrom", rangeFrom),
-//                new FieldPairs("rangeTo", rangeTo));
         List<String> reasons = new ArrayList<>();
 
         if (rangeFrom == null) reasons.add("rangeFrom is empty");

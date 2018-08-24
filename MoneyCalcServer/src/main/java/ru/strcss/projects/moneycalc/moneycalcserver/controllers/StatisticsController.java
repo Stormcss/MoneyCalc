@@ -3,20 +3,19 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.strcss.projects.moneycalc.api.StatisticsAPIService;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.enitities.Settings;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SettingsDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
@@ -27,28 +26,64 @@ import java.util.stream.Collectors;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.string2LocalDate;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/statistics/financeSummary")
+@RequestMapping("/api/stats/summaryBySection")
 public class StatisticsController extends AbstractController implements StatisticsAPIService {
 
     private TransactionsDao transactionsDao;
     private SpendingSectionDao sectionsDao;
+    private SettingsDao settingsDao;
     private PersonDao personDao;
     private SummaryStatisticsHandler statisticsHandler;
 
     public StatisticsController(TransactionsDao transactionsDao, SpendingSectionDao sectionsDao, PersonDao personDao,
-                                SummaryStatisticsHandler statisticsHandler) {
+                                SettingsDao settingsDao, SummaryStatisticsHandler statisticsHandler) {
         this.transactionsDao = transactionsDao;
         this.sectionsDao = sectionsDao;
         this.personDao = personDao;
+        this.settingsDao = settingsDao;
         this.statisticsHandler = statisticsHandler;
     }
 
+    /**
+     * Get finance summary for all active sections
+     */
     @Override
-    @PostMapping(value = "/getFinanceSummaryBySection")
+    @GetMapping(value = "/get")
+    public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection() {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
+        Integer personId = personDao.getPersonIdByLogin(login);
+
+        Settings settings = settingsDao.getSettingsById(personId);
+        List<SpendingSection> spendingSections = sectionsDao.getActiveSpendingSectionsByPersonId(personId);
+        List<Integer> sectionIds = spendingSections.stream().map(SpendingSection::getSectionId).collect(Collectors.toList());
+
+        LocalDate dateFrom = string2LocalDate(settings.getPeriodFrom());
+        LocalDate dateTo = string2LocalDate(settings.getPeriodTo());
+        List<Transaction> transactionsList = transactionsDao.getTransactionsByPersonId(personId, dateFrom, dateTo, sectionIds);
+
+        FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
+                .rangeFrom(dateFrom)
+                .rangeTo(dateTo)
+                .sections(sectionIds)
+                .transactions(transactionsList)
+                .spendingSections(spendingSections)
+                .today(LocalDate.now())
+                .build();
+        // TODO: 13.02.2018 should be client's time
+
+        List<FinanceSummaryBySection> financeSummaryResult = statisticsHandler.calculateSummaryStatisticsBySections(calculationContainer);
+
+        log.debug("Returned List of FinanceSummaryBySections for login \"{}\" : {}", login, financeSummaryResult);
+        return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
+    }
+
+    @Override
+    @PostMapping(value = "/getFiltered")
     public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@RequestBody FinanceSummaryGetContainer getContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 

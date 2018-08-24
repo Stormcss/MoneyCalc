@@ -197,4 +197,31 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
         session.close();
         return sectionList;
     }
+
+    @Override
+    public List<SpendingSection> getActiveSpendingSectionsByPersonId(Integer personId) {
+        List<SpendingSection> sectionList;
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "FROM SpendingSection ss where ss.personId = :personId AND ss.isAdded IS TRUE";
+
+            Query<SpendingSection> query = session.createQuery(hql, SpendingSection.class)
+                    .setParameter("personId", personId);
+
+            sectionList = query.list();
+        }
+        return sectionList;
+    }
+
+    @Override
+    public List<Integer> getActiveSpendingSectionIdsByPersonId(Integer personId) {
+        List<Integer> idsList;
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "SELECT ss.sectionId FROM SpendingSection ss where ss.personId = :personId AND ss.isAdded IS TRUE ORDER BY sectionId ASC";
+
+            Query<Integer> query = session.createQuery(hql, Integer.class)
+                    .setParameter("personId", personId);
+            idsList = query.list();
+        }
+        return idsList;
+    }
 }

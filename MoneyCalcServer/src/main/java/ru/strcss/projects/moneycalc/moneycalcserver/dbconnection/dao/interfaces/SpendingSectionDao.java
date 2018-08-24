@@ -26,4 +26,8 @@ public interface SpendingSectionDao {
     List<SpendingSection> getSpendingSectionsByLogin(String login);
 
     List<SpendingSection> getSpendingSectionsByPersonId(Integer personId);
+
+    List<SpendingSection> getActiveSpendingSectionsByPersonId(Integer personId);
+
+    List<Integer> getActiveSpendingSectionIdsByPersonId(Integer personId);
 }

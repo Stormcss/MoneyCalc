@@ -16,6 +16,8 @@ import javax.persistence.NoResultException;
 import java.time.LocalDate;
 import java.util.List;
 
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.localDate2String;
+
 @Transactional
 @Repository
 public class TransactionsDaoImpl implements TransactionsDao {
@@ -48,29 +50,28 @@ public class TransactionsDaoImpl implements TransactionsDao {
 
     @Override
     public List<Transaction> getTransactionsByPersonId(Integer personId, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds) {
-        Session session = sessionFactory.openSession();
 
-        String hql;
         List<Transaction> transactionList;
+        try (Session session = sessionFactory.openSession()) {
 
-        if (sectionIds.isEmpty()) {
-            hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo";
-            transactionList = session.createQuery(hql, Transaction.class)
-                    .setParameter("personId", personId)
-                    .setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo)
-                    .list();
-        } else {
-            hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo AND t.sectionId IN (:ids)";
-            transactionList = session.createQuery(hql, Transaction.class)
-                    .setParameter("personId", personId)
-                    .setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo)
-                    .setParameter("ids", sectionIds)
-                    .list();
+            String hql;
+            if (sectionIds == null || sectionIds.isEmpty()) {
+                hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo";
+                transactionList = session.createQuery(hql, Transaction.class)
+                        .setParameter("personId", personId)
+                        .setParameter("dateFrom", dateFrom)
+                        .setParameter("dateTo", dateTo)
+                        .list();
+            } else {
+                hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo AND t.sectionId IN (:ids)";
+                transactionList = session.createQuery(hql, Transaction.class)
+                        .setParameter("personId", personId)
+                        .setParameter("dateFrom", (dateFrom))
+                        .setParameter("dateTo", dateTo)
+                        .setParameter("ids", sectionIds)
+                        .list();
+            }
         }
-
-        session.close();
         return transactionList;
     }
 
