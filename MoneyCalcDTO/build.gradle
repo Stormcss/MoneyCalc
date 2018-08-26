@@ -1,5 +1,5 @@
 group 'ru.strcss.projects.moneycalc.dto'
-version '1.0.4a'
+version '1.0.4d'
 
 dependencies {
     compile('org.springframework.boot:spring-boot-starter-data-jpa:1.5.9.RELEASE')

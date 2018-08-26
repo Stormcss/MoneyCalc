@@ -16,8 +16,6 @@ import javax.persistence.NoResultException;
 import java.time.LocalDate;
 import java.util.List;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.localDate2String;
-
 @Transactional
 @Repository
 public class TransactionsDaoImpl implements TransactionsDao {
@@ -82,35 +80,37 @@ public class TransactionsDaoImpl implements TransactionsDao {
     }
 
     @Override
-    public Integer addTransaction(Integer personId, Transaction transaction) {
-        Session session = sessionFactory.openSession();
-        transaction.setPersonId(personId);
+    public List<Transaction> getTransactionsByLogin(String login) {
+        try (Session session = sessionFactory.openSession()) {
+            String sql = "select t.* from \"Transactions\" t\n" +
+                    "join \"Person\" p on t.\"personId\" = p.id\n" +
+                    "join \"Settings\" s on p.\"settingsId\" = s.id\n" +
+                    "join \"Access\" a on p.\"accessId\" = a.id\n" +
+                    "where\n" +
+                    "    a.login LIKE 'qwe'\n" +
+                    "    AND t.date >= s.\"periodFrom\"\n" +
+                    "    AND t.date < s.\"periodTo\"\n" +
+                    "    AND t.\"sectionId\" IN (select ss.\"sectionId\" from \"SpendingSection\" ss\n" +
+                    "                          where\n" +
+                    "                            ss.\"personId\" = p.id\n" +
+                    "                            AND ss.\"isAdded\" IS TRUE\n" +
+                    "                            AND ss.\"isRemoved\" IS FALSE\n" +
+                    "                         )";
+            return session.createNativeQuery(sql, Transaction.class).list();
+        }
+    }
 
-        Integer addedTransactionId = (Integer) session.save(transaction);
-        session.close();
-        return addedTransactionId;
+    @Override
+    public Integer addTransaction(Integer personId, Transaction transaction) {
+        try (Session session = sessionFactory.openSession()) {
+            transaction.setPersonId(personId);
+            return (Integer) session.save(transaction);
+        }
     }
 
     @Override
     public boolean updateTransaction(Transaction transaction) {
         return DaoUtils.updateEntity(sessionFactory, transaction);
-//        Session session = sessionFactory.openSession();
-//
-//        boolean isError = false;
-//        try {
-//            session.beginTransaction();
-//            session.update(transaction);
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//            isError = true;
-//        } finally {
-//            if (!isError)
-//                session.getTransaction().commit();
-//            else
-//                session.getTransaction().rollback();
-//            session.close();
-//        }
-//        return !isError;
     }
 
     @Override

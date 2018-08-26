@@ -4,10 +4,7 @@ import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.strcss.projects.moneycalc.api.TransactionsAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
@@ -30,7 +27,7 @@ import static ru.strcss.projects.moneycalc.utils.Merger.mergeTransactions;
 @Timed
 @Slf4j
 @RestController
-@RequestMapping("/api/finance/transactions")
+@RequestMapping("/api/transactions")
 public class TransactionsController extends AbstractController implements TransactionsAPIService {
 
     private TransactionsService transactionsService;
@@ -43,13 +40,32 @@ public class TransactionsController extends AbstractController implements Transa
         this.personService = personService;
     }
 
+    // TODO: 26.08.2018 test me
     /**
-     * Get list of Transactions by user's login
+     * Get filtered list of Transactions by user's login
+     * Returned transactions are filtered by dates range at Settings and active
+     *
+     * @return response object with list of Transactions
+     */
+    @GetMapping(value = "/get")
+    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions() {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // TODO: 26.08.2018 sort using db
+        List<Transaction> transactions = sortTransactionList(transactionsService.getTransactionsByLogin(login));
+
+        log.info("Returning Transactions for login \'{}\'", login);
+
+        return responseSuccess(TRANSACTIONS_RETURNED, transactions);
+    }
+
+    /**
+     * Get filtered list of Transactions by user's login - return transactions only for specific dates range and Ids
      *
      * @param getContainer - TransactionsSearchContainer
      * @return response object with list of Transactions
      */
-    @PostMapping(value = "/getTransactions")
+    @PostMapping(value = "/getFiltered")
     public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions(@RequestBody TransactionsSearchContainer getContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -64,15 +80,17 @@ public class TransactionsController extends AbstractController implements Transa
         List<Transaction> transactions = sortTransactionList(transactionsService.getTransactionsByLogin(login,
                 getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getRequiredSections()));
 
-        log.info("Returning Transactions for login \"{}\", dateFrom {}, dateTo {} : {}",
+        log.info("Returning Transactions for login \'{}\', applying Filter: dateFrom {}, dateTo {} : {}",
                 login, getContainer.getRangeFrom(), getContainer.getRangeTo(), transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }
 
-    @PostMapping(value = "/addTransaction")
+    @PostMapping(value = "/add")
     public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody TransactionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        log.debug("addTransaction Request recieved {}", addContainer);
 
         Integer personId = personService.getPersonIdByLogin(login);
 
@@ -108,7 +126,7 @@ public class TransactionsController extends AbstractController implements Transa
      * @return
      */
 
-    @PostMapping(value = "/updateTransaction")
+    @PostMapping(value = "/update")
     public ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -138,7 +156,7 @@ public class TransactionsController extends AbstractController implements Transa
         return responseSuccess(TRANSACTION_UPDATED, resultTransaction);
     }
 
-    @PostMapping(value = "/deleteTransaction")
+    @PostMapping(value = "/delete")
     public ResponseEntity<MoneyCalcRs<Void>> deleteTransaction(@RequestBody TransactionDeleteContainer deleteContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 

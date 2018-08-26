@@ -30,7 +30,6 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.localDate2String;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionList;
 import static ru.strcss.projects.moneycalc.testutils.TestUtils.assertTransactionsOrderedByDate;
@@ -58,7 +57,7 @@ public class TransactionsControllerTest {
     @BeforeGroups(groups = {"successfulScenario", "incorrectContainers"})
     public void prepare_successfulScenario_incorrectContainers() {
         List<Transaction> transactionList = generateTransactionList(transactionsCount, requiredSections);
-        transactionList.get(1).setDate(localDate2String(LocalDate.now().minus(1, ChronoUnit.DAYS)));
+        transactionList.get(1).setDate(LocalDate.now().minus(1, ChronoUnit.DAYS));
 
         when(transactionsService.getTransactionsByLogin(anyString(), any(LocalDate.class), any(LocalDate.class),
                 anyListOf(Integer.class))).thenReturn(transactionList);
@@ -158,7 +157,7 @@ public class TransactionsControllerTest {
     @Test(groups = "incorrectContainers")
     public void testAddTransaction_Transaction_emptyFields() {
         Transaction transaction = Transaction.builder()
-                .date(localDate2String(dateTo))
+                .date(dateTo)
                 .currency("RUR")
                 .sectionId(0)
                 .build();

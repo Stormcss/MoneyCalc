@@ -9,6 +9,7 @@ import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,15 +26,17 @@ public class Settings implements Validationable, Serializable {
     private int id;
 
     @Column(name = "\"periodFrom\"")
-    private String periodFrom;
+    private LocalDate periodFrom;
 
     @Column(name = "\"periodTo\"")
-    private String periodTo;
+    private LocalDate periodTo;
 
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (periodFrom == null || periodFrom.isEmpty()) reasons.add("periodFrom is empty");
-        if (periodTo == null || periodTo.isEmpty()) reasons.add("periodTo is empty");
+        if (periodFrom == null) reasons.add("periodFrom is empty");
+//        if (periodFrom == null || periodFrom.isEmpty()) reasons.add("periodFrom is empty");
+        if (periodTo == null) reasons.add("periodTo is empty");
+//        if (periodTo == null || periodTo.isEmpty()) reasons.add("periodTo is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

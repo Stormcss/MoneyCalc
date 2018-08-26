@@ -46,7 +46,7 @@ public class JWTAuthenticationFilter extends UsernamePasswordAuthenticationFilte
                             new ArrayList<>())
             );
         } catch (BadCredentialsException bce) {
-            log.info("Bad credentials for login \"{}\"", access.getLogin());
+            log.info("Bad credentials for login \'{}\'", access.getLogin());
             return null;
         } catch (IOException e) {
             throw new RuntimeException(e);

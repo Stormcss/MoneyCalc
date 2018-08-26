@@ -32,7 +32,7 @@ public class AccessController extends AbstractController implements AccessAPISer
      *
      * @return response object with Identifications payload
      */
-    @GetMapping(value = "/getAccess")
+    @GetMapping(value = "/get")
     public ResponseEntity<MoneyCalcRs<Access>> getAccess() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 

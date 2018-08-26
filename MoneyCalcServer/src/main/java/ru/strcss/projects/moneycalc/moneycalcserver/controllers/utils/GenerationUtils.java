@@ -62,8 +62,9 @@ public class GenerationUtils {
     public static Settings generateRegisteringSettings(String login) {
         return Settings.builder()
 //                .login(login)
-                .periodFrom(currentDateString())
-                .periodTo(localDate2String(generateDatePlus(ChronoUnit.MONTHS, 1)))
+                .periodFrom(currentDate())
+                .periodTo(generateDatePlus(ChronoUnit.MONTHS, 1))
+//                .periodTo(localDate2String(generateDatePlus(ChronoUnit.MONTHS, 1)))
 //                .sections(Arrays.asList(SpendingSection.builder()
 //                                .id(0)
 //                                .isAdded(true)

@@ -13,7 +13,7 @@ import java.util.List;
 
 public interface SettingsAPIService {
 
-    ResponseEntity<MoneyCalcRs<Settings>> saveSettings(SettingsUpdateContainer updateContainer);
+    ResponseEntity<MoneyCalcRs<Settings>> updateSettings(SettingsUpdateContainer updateContainer);
 
     ResponseEntity<MoneyCalcRs<Settings>> getSettings();
 

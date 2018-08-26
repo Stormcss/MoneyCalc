@@ -41,16 +41,16 @@ public class SettingsController extends AbstractController implements SettingsAP
     }
 
     /**
-     * Save Settings object using user's login stored inside
+     * Update Settings object using user's login stored inside
      *
      * @param updateContainer - income container with Settings object
      * @return response object
      */
-    @PostMapping(value = "/saveSettings")
-    public ResponseEntity<MoneyCalcRs<Settings>> saveSettings(@RequestBody SettingsUpdateContainer updateContainer) {
+    @PostMapping(value = "/update")
+    public ResponseEntity<MoneyCalcRs<Settings>> updateSettings(@RequestBody SettingsUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<Settings> requestValidation = new Validator(updateContainer, "Saving Settings")
+        RequestValidation<Settings> requestValidation = new Validator(updateContainer, "Updatings Settings")
                 .addValidation(() -> updateContainer.getSettings().isValid().isValidated(),
                         () -> fillLog(SETTINGS_INCORRECT, updateContainer.getSettings().isValid().getReasons().toString()))
                 .validate();
@@ -77,7 +77,7 @@ public class SettingsController extends AbstractController implements SettingsAP
      *
      * @return response object
      */
-    @GetMapping(value = "/getSettings")
+    @GetMapping(value = "/get")
     public ResponseEntity<MoneyCalcRs<Settings>> getSettings() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 //        Settings settings = filterSpendingSections(settingsService.getSettingsById(login));
@@ -95,7 +95,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         }
     }
 
-    @PostMapping(value = "/addSpendingSection")
+    @PostMapping(value = "/spendingSection/add")
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSectionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -130,7 +130,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         return responseSuccess(SPENDING_SECTION_ADDED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
     }
 
-    @PostMapping(value = "/updateSpendingSection")
+    @PostMapping(value = "/spendingSection/update")
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -175,7 +175,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         return responseSuccess(SPENDING_SECTION_UPDATED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
     }
 
-    @PostMapping(value = "/deleteSpendingSection")
+    @PostMapping(value = "/spendingSection/delete")
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@RequestBody SpendingSectionDeleteContainer deleteContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -219,7 +219,7 @@ public class SettingsController extends AbstractController implements SettingsAP
      *
      * @return response object
      */
-    @GetMapping(value = "/getSpendingSections")
+    @GetMapping(value = "/spendingSection/get")
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections() {
 
         String login = SecurityContextHolder.getContext().getAuthentication().getName();

@@ -44,7 +44,7 @@ public class StatisticsControllerTestUtils {
 //
 //            assertTrue(spendingSections.stream().allMatch(spendingSection -> spendingSection.getBudget() == budget));
 //
-//            sendRequest(service.saveSettings(personSettings), Status.SUCCESS).body();
+//            sendRequest(service.updateSettings(personSettings), Status.SUCCESS).body();
         }
     }
 

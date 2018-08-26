@@ -96,7 +96,7 @@ public class SettingsControllerTest {
 
     @Test(groups = "SettingsSuccessfulScenario")
     public void testSaveSettings() {
-        ResponseEntity<MoneyCalcRs<Settings>> settingsSaveRs = settingsController.saveSettings(
+        ResponseEntity<MoneyCalcRs<Settings>> settingsSaveRs = settingsController.updateSettings(
                 new SettingsUpdateContainer(generateSettings()));
         assertEquals(settingsSaveRs.getBody().getServerStatus(), Status.SUCCESS, "Settings were not saved!");
     }
@@ -205,13 +205,13 @@ public class SettingsControllerTest {
 
     @Test(groups = "SettingsIncorrectContainers")
     public void testSaveSettings_Empty_Settings() {
-        ResponseEntity<MoneyCalcRs<Settings>> settingsSaveRs = settingsController.saveSettings(new SettingsUpdateContainer(null));
+        ResponseEntity<MoneyCalcRs<Settings>> settingsSaveRs = settingsController.updateSettings(new SettingsUpdateContainer(null));
         assertEquals(settingsSaveRs.getBody().getServerStatus(), Status.ERROR, settingsSaveRs.getBody().getMessage());
     }
 
     @Test(groups = "SettingsIncorrectContainers")
     public void testSaveSettings_Settings_EmptyAll() {
-        ResponseEntity<MoneyCalcRs<Settings>> settingsSaveRs = settingsController.saveSettings(new SettingsUpdateContainer(Settings.builder().build()));
+        ResponseEntity<MoneyCalcRs<Settings>> settingsSaveRs = settingsController.updateSettings(new SettingsUpdateContainer(Settings.builder().build()));
         assertEquals(settingsSaveRs.getBody().getServerStatus(), Status.ERROR, settingsSaveRs.getBody().getMessage());
     }
 
@@ -307,7 +307,7 @@ public class SettingsControllerTest {
 
     @Test(groups = "failedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
     public void testSaveSettings_failedScenario() {
-        ResponseEntity<MoneyCalcRs<Settings>> settingsSaveRs = settingsController.saveSettings(
+        ResponseEntity<MoneyCalcRs<Settings>> settingsSaveRs = settingsController.updateSettings(
                 new SettingsUpdateContainer(generateSettings()));
 
         assertEquals(settingsSaveRs.getBody().getServerStatus(), Status.ERROR, "Response is not failed!");

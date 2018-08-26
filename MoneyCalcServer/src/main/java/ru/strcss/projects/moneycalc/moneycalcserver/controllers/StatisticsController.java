@@ -26,7 +26,6 @@ import java.util.stream.Collectors;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.string2LocalDate;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
 
 @Slf4j
@@ -49,6 +48,7 @@ public class StatisticsController extends AbstractController implements Statisti
         this.statisticsHandler = statisticsHandler;
     }
 
+    // TODO: 26.08.2018 test me
     /**
      * Get finance summary for all active sections
      */
@@ -62,8 +62,10 @@ public class StatisticsController extends AbstractController implements Statisti
         List<SpendingSection> spendingSections = sectionsDao.getActiveSpendingSectionsByPersonId(personId);
         List<Integer> sectionIds = spendingSections.stream().map(SpendingSection::getSectionId).collect(Collectors.toList());
 
-        LocalDate dateFrom = string2LocalDate(settings.getPeriodFrom());
-        LocalDate dateTo = string2LocalDate(settings.getPeriodTo());
+        LocalDate dateFrom = settings.getPeriodFrom();
+//        LocalDate dateFrom = string2LocalDate(settings.getPeriodFrom());
+        LocalDate dateTo = settings.getPeriodTo();
+//        LocalDate dateTo = string2LocalDate(settings.getPeriodTo());
         List<Transaction> transactionsList = transactionsDao.getTransactionsByPersonId(personId, dateFrom, dateTo, sectionIds);
 
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()

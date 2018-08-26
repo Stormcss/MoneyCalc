@@ -35,8 +35,8 @@ public class IdentificationsController extends AbstractController implements Ide
      * @param updateContainer - container with user's login and Identifications object
      * @return response object with Identifications payload
      */
-    @PostMapping(value = "/saveIdentifications")
-    public ResponseEntity<MoneyCalcRs<Identifications>> saveIdentifications(@RequestBody IdentificationsUpdateContainer updateContainer) {
+    @PostMapping(value = "/update")
+    public ResponseEntity<MoneyCalcRs<Identifications>> updateIdentifications(@RequestBody IdentificationsUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Identifications> requestValidation = new Validator(updateContainer, "Saving Identifications")
@@ -54,7 +54,7 @@ public class IdentificationsController extends AbstractController implements Ide
         Identifications identifications = identificationsService.updateIdentifications(updateContainer.getIdentifications());
 
         if (identifications == null) {
-            log.error("Updating Identifications for login \"{}\" has failed", login);
+            log.error("Updating Identifications for login \'{}\' has failed", login);
             return responseError(IDENTIFICATIONS_SAVING_ERROR);
         }
         return responseSuccess(IDENTIFICATIONS_SAVED, updateContainer.getIdentifications());
@@ -65,7 +65,7 @@ public class IdentificationsController extends AbstractController implements Ide
      *
      * @return response object with Identifications payload
      */
-    @GetMapping(value = "/getIdentifications")
+    @GetMapping(value = "/get")
     public ResponseEntity<MoneyCalcRs<Identifications>> getIdentifications() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -76,10 +76,10 @@ public class IdentificationsController extends AbstractController implements Ide
         Identifications identifications = identificationsService.getIdentificationsById(identificationsId);
 
         if (identifications != null) {
-            log.debug("returning Identifications for login \"{}\": {}", login, identifications);
+            log.debug("returning Identifications for login \'{}\': {}", login, identifications);
             return responseSuccess(IDENTIFICATIONS_RETURNED, identifications);
         } else {
-            log.error("Can not return Identifications for login \"{}\" - no Person found", login);
+            log.error("Can not return Identifications for login \'{}\' - no Person found", login);
             return responseError(NO_PERSON_EXIST);
         }
     }
