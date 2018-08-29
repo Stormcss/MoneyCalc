@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao;
 
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
@@ -15,6 +16,7 @@ import java.util.List;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.utils.DaoUtils.updateEntity;
 
+@Slf4j
 @Repository
 @Transactional
 public class SpendingSectionDaoImpl implements SpendingSectionDao {
@@ -45,7 +47,7 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
     }
 
     @Override
-    public Integer getSectionIdById(Integer personId, Integer innerSectionId) {
+    public Integer getSectionIdByInnerId(Integer personId, Integer innerSectionId) {
         Session session = sessionFactory.openSession();
 
         String hql = "SELECT ss.id FROM SpendingSection ss WHERE ss.personId = :personId AND ss.sectionId = :sectionId";
@@ -136,9 +138,70 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
     }
 
     @Override
-    public boolean deleteSpendingSection(SpendingSection section) {
-        section.setIsRemoved(true);
-        return updateEntity(sessionFactory, section);
+    public boolean deleteSpendingSectionByName(String login, String sectionName) {
+        try (Session session = sessionFactory.openSession()) {
+            String sqlQuery =
+                    "update \"SpendingSection\" ss\n" +
+                            "SET \"isRemoved\" = TRUE\n" +
+                            "WHERE ss.id = (select ss.id\n" +
+                            "                from \"Person\" p\n" +
+                            "                       join \"Access\" a on p.\"accessId\" = a.id\n" +
+                            "                       join \"SpendingSection\" ss on ss.\"personId\" = p.id\n" +
+                            "                WHERE a.login = :login\n" +
+                            "                  AND ss.\"name\" = :sectionName);";
+            Query query = session.createNativeQuery(sqlQuery)
+                    .setParameter("login", login)
+                    .setParameter("sectionName", sectionName);
+
+            int updatedCount = query.executeUpdate();
+            session.getTransaction().commit();
+            if (updatedCount == 0) {
+                log.error("deleteSpendingSectionByName - updatedCount is 0");
+                return false;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("deleteSpendingSectionByName - {}", ex.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+    @Override
+    public boolean deleteSpendingSectionByInnerId(String login, Integer innerId) {
+        try (Session session = sessionFactory.openSession()) {
+            session.getTransaction().begin();
+            String sqlQuery =
+                    "update \"SpendingSection\" s\n" +
+                            "SET \"isRemoved\" = TRUE\n" +
+                            "WHERE s.id = (select ss.id\n" +
+                            "                from \"Person\" p\n" +
+                            "                       join \"Access\" a on p.\"accessId\" = a.id\n" +
+                            "                       join \"SpendingSection\" ss on ss.\"personId\" = p.id\n" +
+                            "                WHERE a.login = :login\n" +
+                            "                  AND ss.\"sectionId\" = :innerId)";
+            Query query = session.createNativeQuery(sqlQuery)
+                    .setParameter("login", login)
+                    .setParameter("innerId", innerId);
+
+            int updatedCount = query.executeUpdate();
+            session.getTransaction().commit();
+            if (updatedCount == 0) {
+                log.error("deleteSpendingSectionByInnerId - updatedCount is 0");
+                return false;
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            log.error("deleteSpendingSectionByInnerId - {}", ex.getMessage());
+            return false;
+        }
+        return true;
+    }
+
+//    @Override
+//    public boolean deleteSpendingSectionByName(SpendingSection section) {
+//        section.setIsRemoved(true);
+//        return updateEntity(sessionFactory, section);
 //        Session session = sessionFactory.openSession();
 //
 //        EntityManager entityManager = session.getEntityManagerFactory().createEntityManager();
@@ -157,7 +220,7 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
 //            session.close();
 //        }
 //        return !isError;
-    }
+//}
 
     @Override
     public SpendingSection getSpendingSectionById(Integer sectionId) {
@@ -206,6 +269,21 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
 
             Query<SpendingSection> query = session.createQuery(hql, SpendingSection.class)
                     .setParameter("personId", personId);
+
+            sectionList = query.list();
+        }
+        return sectionList;
+    }
+
+    @Override
+    public List<SpendingSection> getActiveSpendingSectionsByLogin(String login) {
+        List<SpendingSection> sectionList;
+        try (Session session = sessionFactory.openSession()) {
+            // TODO: 29.08.2018 finish me
+            String hql = "FROM SpendingSection ss where ss.personId = :personId AND ss.isAdded IS TRUE";
+
+            Query<SpendingSection> query = session.createQuery(hql, SpendingSection.class)
+                    .setParameter("login", login);
 
             sectionList = query.list();
         }

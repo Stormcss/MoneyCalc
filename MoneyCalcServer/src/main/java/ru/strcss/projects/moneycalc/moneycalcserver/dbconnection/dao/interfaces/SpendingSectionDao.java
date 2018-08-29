@@ -7,7 +7,7 @@ import java.util.List;
 public interface SpendingSectionDao {
     Integer getSectionIdByName(Integer personId, String sectionName);
 
-    Integer getSectionIdById(Integer personId, Integer innerSectionId);
+    Integer getSectionIdByInnerId(Integer personId, Integer innerSectionId);
 
     Boolean isSpendingSectionIdExists(Integer personId, Integer sectionId);
 
@@ -19,13 +19,17 @@ public interface SpendingSectionDao {
 
     boolean updateSpendingSection(SpendingSection section);
 
-    boolean deleteSpendingSection(SpendingSection section);
+    boolean deleteSpendingSectionByName(String login, String sectionName);
+
+    boolean deleteSpendingSectionByInnerId(String login, Integer innerId);
 
     SpendingSection getSpendingSectionById(Integer sectionId);
 
     List<SpendingSection> getSpendingSectionsByLogin(String login);
 
     List<SpendingSection> getSpendingSectionsByPersonId(Integer personId);
+
+    List<SpendingSection> getActiveSpendingSectionsByLogin(String login);
 
     List<SpendingSection> getActiveSpendingSectionsByPersonId(Integer personId);
 

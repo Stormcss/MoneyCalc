@@ -66,7 +66,7 @@ public class SpendingSectionDaoImplTest {
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
     public void testGetSectionIdById() {
-        Integer sectionId = spendingSectionDao.getSectionIdById(1, 1);
+        Integer sectionId = spendingSectionDao.getSectionIdByInnerId(1, 1);
         assertEquals((int) sectionId, 1);
     }
 
@@ -105,7 +105,7 @@ public class SpendingSectionDaoImplTest {
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
     public void testDeleteSpendingSection() {
-        boolean isDeleteSuccessful = spendingSectionDao.deleteSpendingSection(generateSpendingSection());
+        boolean isDeleteSuccessful = spendingSectionDao.deleteSpendingSectionByName("login", "name");
         assertTrue(isDeleteSuccessful);
     }
 

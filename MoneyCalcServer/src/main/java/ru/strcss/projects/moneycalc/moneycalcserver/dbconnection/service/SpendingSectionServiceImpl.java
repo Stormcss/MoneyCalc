@@ -2,11 +2,17 @@ package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.List;
+
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_NOT_DELETED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 
 @Service
 public class SpendingSectionServiceImpl implements SpendingSectionService {
@@ -23,8 +29,8 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     }
 
     @Override
-    public Integer getSectionIdById(Integer personId, Integer innerSectionId) {
-        return spendingSectionDao.getSectionIdById(personId, innerSectionId);
+    public Integer getSectionIdByInnerId(Integer personId, Integer innerSectionId) {
+        return spendingSectionDao.getSectionIdByInnerId(personId, innerSectionId);
     }
 
     @Override
@@ -57,13 +63,27 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     }
 
     @Override
-    @Transactional
-    public boolean deleteSpendingSection(SpendingSection section) {
-        return spendingSectionDao.deleteSpendingSection(section);
+    public ResultContainer deleteSpendingSection(String login, SpendingSectionDeleteContainer deleteContainer) {
+        boolean isDeletionSuccessful;
+        ResultContainer resultContainer;
+
+        if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
+            isDeletionSuccessful = spendingSectionDao.deleteSpendingSectionByName(login, deleteContainer.getIdOrName());
+        } else {
+            isDeletionSuccessful = spendingSectionDao.deleteSpendingSectionByInnerId(login, Integer.valueOf(deleteContainer.getIdOrName()));
+        }
+        if (isDeletionSuccessful)
+            resultContainer = new ResultContainer(true);
+        else {
+            resultContainer = new ResultContainer(false);
+            resultContainer.setErrorMessage(SPENDING_SECTION_NOT_DELETED);
+            resultContainer.setFullErrorMessage(fillLog("SpendingSection with searchType: '%s' and query: '%s' for login: '%s' was not deleted",
+                    deleteContainer.getSearchType().toString(), deleteContainer.getIdOrName(), login));
+        }
+        return resultContainer;
     }
 
     @Override
-    @Transactional
     public SpendingSection getSpendingSectionById(Integer sectionId) {
         return spendingSectionDao.getSpendingSectionById(sectionId);
     }

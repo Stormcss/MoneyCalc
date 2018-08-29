@@ -15,6 +15,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.Reque
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.RegisterService;
 
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateRegisteringSettings;

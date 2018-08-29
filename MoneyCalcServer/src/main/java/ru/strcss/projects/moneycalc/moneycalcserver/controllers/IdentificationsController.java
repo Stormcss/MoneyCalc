@@ -13,6 +13,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.Reque
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.IdentificationsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
 
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
 
 @Slf4j

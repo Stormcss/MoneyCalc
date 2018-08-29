@@ -18,10 +18,12 @@ import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.Reque
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
 import static ru.strcss.projects.moneycalc.utils.Merger.mergeSpendingSections;
 
@@ -81,6 +83,7 @@ public class SettingsController extends AbstractController implements SettingsAP
     public ResponseEntity<MoneyCalcRs<Settings>> getSettings() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 //        Settings settings = filterSpendingSections(settingsService.getSettingsById(login));
+        // FIXME: 27.08.2018 request with single sql query in dao
         Integer personId = personService.getPersonIdByLogin(login);
         Integer settingsId = personService.getSettingsIdByPersonId(personId);
         Settings settings = settingsService.getSettingsById(settingsId);
@@ -95,6 +98,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         }
     }
 
+    // FIXME: 28.08.2018 It is impossible to add spending section if previously one with the same name was deleted
     @PostMapping(value = "/spendingSection/add")
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSectionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -139,6 +143,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer, "Updating SpendingSection")
                 .addValidation(() -> updateContainer.getSpendingSection().isValid().isValidated(),
                         () -> fillLog(SPENDING_SECTION_INCORRECT, updateContainer.getSpendingSection().isValid().getReasons().toString()))
+                // FIXME: 28.08.2018 updating section via ID without chaning name is impossible - otherwise following check says that updating causes doubles
                 .addValidation(() -> isNewNameAllowed(personId, updateContainer),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, updateContainer.getSpendingSection().getName()))
                 .validate();
@@ -151,7 +156,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
             sectionId = sectionService.getSectionIdByName(personId, updateContainer.getIdOrName());
         } else {
-            sectionId = sectionService.getSectionIdById(personId, Integer.valueOf(updateContainer.getIdOrName()));
+            sectionId = sectionService.getSectionIdByInnerId(personId, Integer.valueOf(updateContainer.getIdOrName()));
         }
 
         if (sectionId == null) {
@@ -175,6 +180,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         return responseSuccess(SPENDING_SECTION_UPDATED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
     }
 
+    // TODO: 28.08.2018 deleting already deleted section by name returns success each time
     @PostMapping(value = "/spendingSection/delete")
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@RequestBody SpendingSectionDeleteContainer deleteContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -183,35 +189,53 @@ public class SettingsController extends AbstractController implements SettingsAP
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Integer personId = personService.getPersonIdByLogin(login);
+        ResultContainer deleteResult = sectionService.deleteSpendingSection(login, deleteContainer);
 
-        Integer sectionId;
-        if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-            sectionId = sectionService.getSectionIdByName(personId, deleteContainer.getIdOrName());
-        } else {
-            sectionId = sectionService.getSectionIdById(personId, Integer.valueOf(deleteContainer.getIdOrName()));
+        if (!deleteResult.getIsSuccess()) {
+            String errorMessage = deleteResult.getErrorMessage();
+            String fullErrorMessage = deleteResult.getFullErrorMessage();
+            log.error(fullErrorMessage != null ? fullErrorMessage : (errorMessage != null ? errorMessage : "error"));
+            return responseError(errorMessage != null ? errorMessage : "error");
         }
-        // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
-
-        if (sectionId == null) {
-            log.error("SpendingSection with SearchType: {} and query: {} for login: \"{}\" was not found",
-                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
-            return responseError("SpendingSection was not found!");
-        }
-
-        SpendingSection spendingSection = sectionService.getSpendingSectionById(sectionId);
-
-        boolean isDeleteSuccessful = sectionService.deleteSpendingSection(spendingSection);
-
-        if (!isDeleteSuccessful) {
-            log.error("Deleting SpendingSection with SearchType: {} and query: {} for login: \"{}\" has failed",
-                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
-            return responseError("SpendingSection was not deleted!");
-        }
-        log.debug("Deleted SpendingSection with SearchType: {} and query: {} for login: \"{}\"",
+        log.debug("Deleted SpendingSection with searchType: '{}' and query: '{}' for login: \'{}\'",
                 deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
+        return responseSuccess(SPENDING_SECTION_DELETED, sectionService.getSpendingSectionsByLogin(login));
 
-        return responseSuccess(SPENDING_SECTION_DELETED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
+//        if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
+//            sectionId = sectionService.deleteSpendingSectionByName(personId, deleteContainer.getIdOrName());
+//        } else {
+//            sectionId = sectionService.getSectionIdByInnerId(personId, Integer.valueOf(deleteContainer.getIdOrName()));
+//        }
+
+//        Integer personId = personService.getPersonIdByLogin(login);
+//
+//        Integer sectionId;
+//        if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
+//            sectionId = sectionService.getSectionIdByName(personId, deleteContainer.getIdOrName());
+//        } else {
+//            sectionId = sectionService.getSectionIdByInnerId(personId, Integer.valueOf(deleteContainer.getIdOrName()));
+//        }
+//        // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
+//
+//        if (sectionId == null) {
+//            log.error("SpendingSection with searchType: '{}' and query: '{}' for login: \'{}\' was not found",
+//                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
+//            return responseError("SpendingSection was not found!");
+//        }
+//
+//        SpendingSection spendingSection = sectionService.getSpendingSectionById(sectionId);
+//
+//        boolean isDeleteSuccessful = sectionService.deleteSpendingSectionByName(spendingSection);
+//
+//        if (!isDeleteSuccessful) {
+//            log.error("Deleting SpendingSection with searchType: '{}' and query: '{}' for login: \'{}\' has failed",
+//                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
+//            return responseError("SpendingSection was not deleted!");
+//        }
+//        log.debug("Deleted SpendingSection with searchType: '{}' and query: '{}' for login: \'{}\'",
+//                deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
+//
+//        return responseSuccess(SPENDING_SECTION_DELETED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
     }
 
     /**

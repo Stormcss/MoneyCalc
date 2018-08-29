@@ -3,6 +3,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao;
 import lombok.Setter;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,23 +32,19 @@ public class TransactionsDaoImpl implements TransactionsDao {
 
     @Override
     public Transaction getTransactionById(Integer transactionId) {
-        Session session = sessionFactory.openSession();
-
-        String hql = "FROM Transactions t WHERE t.id = :transactionId";
-        Query<Transaction> query = session.createQuery(hql, Transaction.class)
-                .setParameter("transactionId", transactionId);
-        try {
-            Transaction transaction = query.getSingleResult();
-            session.close();
-            return transaction;
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "FROM Transactions t WHERE t.id = :transactionId";
+            Query<Transaction> query = session.createQuery(hql, Transaction.class)
+                    .setParameter("transactionId", transactionId);
+            return query.getSingleResult();
         } catch (NoResultException nre) {
-            session.close();
             return null;
         }
     }
 
     @Override
-    public List<Transaction> getTransactionsByPersonId(Integer personId, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds) {
+    public List<Transaction> getTransactionsByPersonId(Integer personId, LocalDate dateFrom, LocalDate
+            dateTo, List<Integer> sectionIds) {
 
         List<Transaction> transactionList;
         try (Session session = sessionFactory.openSession()) {
@@ -74,7 +71,8 @@ public class TransactionsDaoImpl implements TransactionsDao {
     }
 
     @Override
-    public List<Transaction> getTransactionsByLogin(String login, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds) {
+    public List<Transaction> getTransactionsByLogin(String login, LocalDate dateFrom, LocalDate
+            dateTo, List<Integer> sectionIds) {
         Integer personId = personDao.getPersonIdByLogin(login);
         return this.getTransactionsByPersonId(personId, dateFrom, dateTo, sectionIds);
     }
@@ -87,7 +85,7 @@ public class TransactionsDaoImpl implements TransactionsDao {
                     "join \"Settings\" s on p.\"settingsId\" = s.id\n" +
                     "join \"Access\" a on p.\"accessId\" = a.id\n" +
                     "where\n" +
-                    "    a.login LIKE 'qwe'\n" +
+                    "    a.login = :login\n" +
                     "    AND t.date >= s.\"periodFrom\"\n" +
                     "    AND t.date < s.\"periodTo\"\n" +
                     "    AND t.\"sectionId\" IN (select ss.\"sectionId\" from \"SpendingSection\" ss\n" +
@@ -96,7 +94,9 @@ public class TransactionsDaoImpl implements TransactionsDao {
                     "                            AND ss.\"isAdded\" IS TRUE\n" +
                     "                            AND ss.\"isRemoved\" IS FALSE\n" +
                     "                         )";
-            return session.createNativeQuery(sql, Transaction.class).list();
+            NativeQuery<Transaction> sqlQuery = session.createNativeQuery(sql, Transaction.class)
+                    .setParameter("login", login);
+            return sqlQuery.list();
         }
     }
 

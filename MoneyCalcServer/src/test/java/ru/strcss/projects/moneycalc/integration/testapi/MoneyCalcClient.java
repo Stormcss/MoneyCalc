@@ -67,7 +67,7 @@ public interface MoneyCalcClient {
     /**
      * Transactions
      */
-    @POST("/api/transactions/get")
+    @POST("/api/transactions/getFiltered")
     Call<MoneyCalcRs<List<Transaction>>> getTransactions(@Header("Authorization") String token,
                                                          @Body TransactionsSearchContainer container);
 

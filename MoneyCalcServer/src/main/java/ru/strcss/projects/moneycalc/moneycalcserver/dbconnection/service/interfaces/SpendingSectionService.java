@@ -1,13 +1,15 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces;
 
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.List;
 
 public interface SpendingSectionService {
     Integer getSectionIdByName(Integer personId, String sectionName);
 
-    Integer getSectionIdById(Integer personId, Integer innerSectionId);
+    Integer getSectionIdByInnerId(Integer personId, Integer innerSectionId);
 
     Boolean isSpendingSectionIdExists(Integer personId, Integer sectionId);
 
@@ -19,7 +21,9 @@ public interface SpendingSectionService {
 
     boolean updateSpendingSection(SpendingSection section);
 
-    boolean deleteSpendingSection(SpendingSection section);
+//    boolean deleteSpendingSectionByName(SpendingSection section);
+
+    ResultContainer deleteSpendingSection(String login, SpendingSectionDeleteContainer deleteContainer);
 
     SpendingSection getSpendingSectionById(Integer sectionId);
 

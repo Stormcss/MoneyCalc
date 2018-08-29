@@ -20,6 +20,7 @@ import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.Collections;
 import java.util.List;
@@ -67,7 +68,7 @@ public class SettingsControllerTest {
         when(sectionService.getSpendingSectionById(anyInt())).thenReturn(generateSpendingSection());
         when(sectionService.addSpendingSection(anyInt(), any(SpendingSection.class))).thenReturn(1);
         when(sectionService.updateSpendingSection(any(SpendingSection.class))).thenReturn(true);
-        when(sectionService.deleteSpendingSection(any(SpendingSection.class))).thenReturn(true);
+        when(sectionService.deleteSpendingSection(anyString(), any())).thenReturn(new ResultContainer(true));
 
         when(sectionService.isSpendingSectionNameNew(anyInt(), anyString())).thenReturn(true);
 
@@ -81,7 +82,7 @@ public class SettingsControllerTest {
         when(sectionService.getSpendingSectionsByLogin(anyString())).thenReturn(null);
         when(sectionService.addSpendingSection(anyInt(), any(SpendingSection.class))).thenReturn(null);
         when(sectionService.updateSpendingSection(any(SpendingSection.class))).thenReturn(false);
-        when(sectionService.deleteSpendingSection(any(SpendingSection.class))).thenReturn(false);
+        when(sectionService.deleteSpendingSection(anyString(), any())).thenReturn(new ResultContainer(false));
     }
 
     @BeforeGroups(groups = "SettingsDuplicatingSectionNames")
