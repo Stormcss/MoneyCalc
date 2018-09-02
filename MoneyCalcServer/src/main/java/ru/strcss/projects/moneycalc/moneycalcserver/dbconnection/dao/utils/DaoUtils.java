@@ -20,7 +20,8 @@ public class DaoUtils {
             session.beginTransaction();
             session.update(entity);
         } catch (Exception ex) {
-            ex.printStackTrace();
+            if (log.isDebugEnabled())
+                ex.printStackTrace();
             isError = true;
         } finally {
             if (!isError)

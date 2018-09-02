@@ -28,6 +28,7 @@ public class ControllerMessages {
     public static final String SPENDING_SECTIONS_RETURNED = "Spending Sections successfully returned";
     public static final String SPENDING_SECTION_ADDED = "Spending Section successfully added";
     public static final String SPENDING_SECTION_DELETED = "Spending Section successfully deleted";
+    public static final String SPENDING_SECTION_ALREADY_DELETED = "Spending Section is already deleted!";
     public static final String SPENDING_SECTION_NOT_DELETED = "Spending Section was not deleted!";
     public static final String SPENDING_SECTION_UPDATED = "Spending Section successfully updated";
     public static final String SPENDING_SECTION_NAME_EXISTS = "Spending Section with name \'%s\' already exists";

@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces;
 
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.List;
 
@@ -19,13 +20,14 @@ public interface SpendingSectionDao {
 
     boolean updateSpendingSection(SpendingSection section);
 
-    boolean deleteSpendingSectionByName(String login, String sectionName);
+    ResultContainer deleteSpendingSectionByName(String login, String sectionName);
 
-    boolean deleteSpendingSectionByInnerId(String login, Integer innerId);
+    ResultContainer deleteSpendingSectionByInnerId(String login, Integer innerId);
 
     SpendingSection getSpendingSectionById(Integer sectionId);
 
-    List<SpendingSection> getSpendingSectionsByLogin(String login);
+    List<SpendingSection> getSpendingSectionsByLogin(String login, boolean withNonAdded,
+                                                     boolean withRemoved, boolean withRemovedOnly);
 
     List<SpendingSection> getSpendingSectionsByPersonId(Integer personId);
 

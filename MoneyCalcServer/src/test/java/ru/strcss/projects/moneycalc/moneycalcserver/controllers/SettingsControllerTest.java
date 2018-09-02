@@ -25,13 +25,12 @@ import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Matchers.*;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 import static ru.strcss.projects.moneycalc.testutils.Generator.*;
-import static ru.strcss.projects.moneycalc.testutils.TestUtils.assertReturnedSectionsOrder;
 
 public class SettingsControllerTest {
 
@@ -64,7 +63,8 @@ public class SettingsControllerTest {
         when(settingsService.updateSettings(any(Settings.class))).thenReturn(generateSettings());
         when(settingsService.getSettingsById(anyInt())).thenReturn(generateSettings());
 
-        when(sectionService.getSpendingSectionsByLogin(anyString())).thenReturn(sectionList);
+        when(sectionService.getSpendingSectionsByLogin(anyString(), anyBoolean(), anyBoolean(), anyBoolean()))
+                .thenReturn(sectionList);
         when(sectionService.getSpendingSectionById(anyInt())).thenReturn(generateSpendingSection());
         when(sectionService.addSpendingSection(anyInt(), any(SpendingSection.class))).thenReturn(1);
         when(sectionService.updateSpendingSection(any(SpendingSection.class))).thenReturn(true);
@@ -79,7 +79,8 @@ public class SettingsControllerTest {
     public void prepare_failedScenario() {
         when(settingsService.getSettingsById(anyInt())).thenReturn(null);
         when(settingsService.updateSettings(any(Settings.class))).thenReturn(null);
-        when(sectionService.getSpendingSectionsByLogin(anyString())).thenReturn(null);
+        when(sectionService.getSpendingSectionsByLogin(anyString(), anyBoolean(), anyBoolean(), anyBoolean()))
+                .thenReturn(null);
         when(sectionService.addSpendingSection(anyInt(), any(SpendingSection.class))).thenReturn(null);
         when(sectionService.updateSpendingSection(any(SpendingSection.class))).thenReturn(false);
         when(sectionService.deleteSpendingSection(anyString(), any())).thenReturn(new ResultContainer(false));
@@ -89,9 +90,9 @@ public class SettingsControllerTest {
     public void prepare_duplicatingSectionNames() {
         List<SpendingSection> sectionList = generateSpendingSectionList(5, false);
         sectionList.get(1).setName(duplicatingSectionName);
-        when(sectionService.getSpendingSectionsByLogin(anyString()))
+        when(sectionService.getSpendingSectionsByLogin(anyString(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(sectionList);
-        when(sectionService.getSpendingSectionsByLogin(anyString()))
+        when(sectionService.getSpendingSectionsByLogin(anyString(), anyBoolean(), anyBoolean(), anyBoolean()))
                 .thenReturn(sectionList);
     }
 
@@ -115,7 +116,6 @@ public class SettingsControllerTest {
                 new SpendingSectionAddContainer(generateSpendingSection()));
 
         assertEquals(sectionAddRs.getBody().getServerStatus(), Status.SUCCESS, sectionAddRs.getBody().getMessage());
-        assertNoRemovedSections(sectionAddRs.getBody().getPayload());
     }
 
     @Test(groups = "SettingsSuccessfulScenario")
@@ -127,7 +127,6 @@ public class SettingsControllerTest {
                 new SpendingSectionAddContainer(spendingSection));
 
         assertEquals(sectionAddRs.getBody().getServerStatus(), Status.SUCCESS, sectionAddRs.getBody().getMessage());
-        assertNoRemovedSections(sectionAddRs.getBody().getPayload());
     }
 
     @Test(groups = "SettingsSuccessfulScenario")
@@ -137,7 +136,6 @@ public class SettingsControllerTest {
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.SUCCESS, sectionUpdateRs.getBody().getMessage());
-        assertNoRemovedSections(sectionUpdateRs.getBody().getPayload());
     }
 
     @Test(groups = "SettingsSuccessfulScenario")
@@ -147,7 +145,6 @@ public class SettingsControllerTest {
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.SUCCESS, sectionUpdateRs.getBody().getMessage());
-        assertNoRemovedSections(sectionUpdateRs.getBody().getPayload());
     }
 
     @Test(groups = "SettingsSuccessfulScenario")
@@ -157,7 +154,6 @@ public class SettingsControllerTest {
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.SUCCESS, sectionUpdateRs.getBody().getMessage());
-        assertNoRemovedSections(sectionUpdateRs.getBody().getPayload());
     }
 
     @Test(groups = "SettingsSuccessfulScenario")
@@ -170,7 +166,6 @@ public class SettingsControllerTest {
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.SUCCESS, sectionUpdateRs.getBody().getMessage());
-        assertNoRemovedSections(sectionUpdateRs.getBody().getPayload());
     }
 
     @Test(groups = "SettingsSuccessfulScenario")
@@ -180,7 +175,6 @@ public class SettingsControllerTest {
 
         assertEquals(sectionDeleteRs.getBody().getServerStatus(), Status.SUCCESS, sectionDeleteRs.getBody().getMessage());
         assertTrue(sectionDeleteRs.getBody().getPayload().size() > 0, "Size of returned sections is 0!");
-        assertNoRemovedSections(sectionDeleteRs.getBody().getPayload());
     }
 
     @Test(groups = "SettingsSuccessfulScenario")
@@ -190,18 +184,6 @@ public class SettingsControllerTest {
 
         assertEquals(sectionDeleteRs.getBody().getServerStatus(), Status.SUCCESS, sectionDeleteRs.getBody().getMessage());
         assertTrue(sectionDeleteRs.getBody().getPayload().size() > 0, "Size of returned sections is 0!");
-        assertNoRemovedSections(sectionDeleteRs.getBody().getPayload());
-    }
-
-    @Test(groups = "SettingsSuccessfulScenario")
-    public void testGetSpendingSections() {
-        ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionGetRs = settingsController.getSpendingSections();
-
-        assertEquals(sectionGetRs.getBody().getServerStatus(), Status.SUCCESS, sectionGetRs.getBody().getMessage());
-        assertTrue(sectionGetRs.getBody().getPayload().size() == sectionList.size() - 1,
-                "Incorrect size of returned sectionsList!");
-        assertNoRemovedSections(sectionGetRs.getBody().getPayload());
-        assertReturnedSectionsOrder(sectionGetRs.getBody().getPayload());
     }
 
     @Test(groups = "SettingsIncorrectContainers")
@@ -363,12 +345,12 @@ public class SettingsControllerTest {
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.ERROR, sectionUpdateRs.getBody().getMessage());
     }
 
-    /**
-     * Asserting that incoming list has no removed sections.
-     */
-    private void assertNoRemovedSections(List<SpendingSection> spendingSections) {
-        assertTrue(spendingSections.stream().noneMatch(SpendingSection::getIsRemoved), "Some removed sections are returned!");
-    }
+//    /**
+//     * Asserting that incoming list has no removed sections.
+//     */
+//    private void assertNoRemovedSections(List<SpendingSection> spendingSections) {
+//        assertTrue(spendingSections.stream().noneMatch(SpendingSection::getIsRemoved), "Some removed sections are returned!");
+//    }
 
 
 }

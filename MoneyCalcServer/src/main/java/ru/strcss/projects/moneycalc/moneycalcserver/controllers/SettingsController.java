@@ -21,7 +21,6 @@ import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfa
 import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
@@ -90,10 +89,10 @@ public class SettingsController extends AbstractController implements SettingsAP
 
         if (settings != null) {
 //            settings.setSections(sortSpendingSectionList(settingsService.getSpendingSections(login)));
-            log.debug("returning PersonalSettings for login \"{}\": {}", login, settings);
+            log.debug("returning PersonalSettings for login \'{}\': {}", login, settings);
             return responseSuccess(SETTINGS_RETURNED, settings);
         } else {
-            log.error("Can not return PersonalSettings for login \"{}\" - no Person found", login);
+            log.error("Can not return PersonalSettings for login \'{}\' - no Person found", login);
             return responseError(NO_PERSON_EXIST);
         }
     }
@@ -115,7 +114,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
         //id of income SpendingSection must be ignored and be set here
-        Integer maxSpendingSectionId = sectionService.getMaxSpendingSectionId(personId);
+        int maxSpendingSectionId = sectionService.getMaxSpendingSectionId(personId);
         addContainer.getSpendingSection().setSectionId(maxSpendingSectionId + 1);
 
         //isRemoved flag of income SpendingSection must be ignored and be false
@@ -127,11 +126,12 @@ public class SettingsController extends AbstractController implements SettingsAP
         Integer addedSectionId = sectionService.addSpendingSection(personId, addContainer.getSpendingSection());
 
         if (addedSectionId == null) {
-            log.error("Saving SpendingSection {} for login \"{}\" has failed", addContainer.getSpendingSection(), login);
+            log.error("Saving SpendingSection {} for login \'{}\' has failed", addContainer.getSpendingSection(), login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
-        log.debug("Saved new SpendingSection for login \"{}\" : {}", login, addContainer.getSpendingSection());
-        return responseSuccess(SPENDING_SECTION_ADDED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
+        log.debug("Saved new SpendingSection for login \'{}\' : {}", login, addContainer.getSpendingSection());
+        return responseSuccess(SPENDING_SECTION_ADDED,
+                sectionService.getSpendingSectionsByLogin(login, false, false, false));
     }
 
     @PostMapping(value = "/spendingSection/update")
@@ -160,7 +160,7 @@ public class SettingsController extends AbstractController implements SettingsAP
         }
 
         if (sectionId == null) {
-            log.error("SpendingSection with SearchType: {} and query: {} for login: \"{}\" was not found",
+            log.error("SpendingSection with SearchType: {} and query: {} for login: \'{}\' was not found",
                     updateContainer.getSearchType(), updateContainer.getIdOrName(), login);
             return responseError("SpendingSection was not found!");
         }
@@ -172,70 +172,32 @@ public class SettingsController extends AbstractController implements SettingsAP
         boolean isUpdateSuccessful = sectionService.updateSpendingSection(resultSection);
 
         if (!isUpdateSuccessful) {
-            log.error("Updating SpendingSection for login \"{}\" has failed", login);
+            log.error("Updating SpendingSection for login \'{}\' has failed", login);
             return responseError(SPENDING_SECTION_NOT_FOUND);
         }
 
-        log.debug("Updated SpendingSection {}: for login: \"{}\"", updateContainer.getSpendingSection(), login);
-        return responseSuccess(SPENDING_SECTION_UPDATED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
+        log.debug("Updated SpendingSection {}: for login: \'{}\'", updateContainer.getSpendingSection(), login);
+        return responseSuccess(SPENDING_SECTION_UPDATED,
+                sectionService.getSpendingSectionsByLogin(login, false, false, false));
     }
 
-    // TODO: 28.08.2018 deleting already deleted section by name returns success each time
     @PostMapping(value = "/spendingSection/delete")
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@RequestBody SpendingSectionDeleteContainer deleteContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<SpendingSection>> requestValidation = new Validator(deleteContainer, "Deleting SpendingSection")
+        RequestValidation<List<SpendingSection>> requestValidation = new Validator(deleteContainer,
+                "Deleting SpendingSection")
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
         ResultContainer deleteResult = sectionService.deleteSpendingSection(login, deleteContainer);
 
-        if (!deleteResult.getIsSuccess()) {
+        if (!deleteResult.isSuccess()) {
             String errorMessage = deleteResult.getErrorMessage();
-            String fullErrorMessage = deleteResult.getFullErrorMessage();
-            log.error(fullErrorMessage != null ? fullErrorMessage : (errorMessage != null ? errorMessage : "error"));
-            return responseError(errorMessage != null ? errorMessage : "error");
+            return responseError(errorMessage != null ? errorMessage : DEFAULT_ERROR);
         }
-        log.debug("Deleted SpendingSection with searchType: '{}' and query: '{}' for login: \'{}\'",
-                deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
-        return responseSuccess(SPENDING_SECTION_DELETED, sectionService.getSpendingSectionsByLogin(login));
-
-//        if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-//            sectionId = sectionService.deleteSpendingSectionByName(personId, deleteContainer.getIdOrName());
-//        } else {
-//            sectionId = sectionService.getSectionIdByInnerId(personId, Integer.valueOf(deleteContainer.getIdOrName()));
-//        }
-
-//        Integer personId = personService.getPersonIdByLogin(login);
-//
-//        Integer sectionId;
-//        if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-//            sectionId = sectionService.getSectionIdByName(personId, deleteContainer.getIdOrName());
-//        } else {
-//            sectionId = sectionService.getSectionIdByInnerId(personId, Integer.valueOf(deleteContainer.getIdOrName()));
-//        }
-//        // TODO: 07.02.2018 Find out if there are more reliable ways of checking deletion success
-//
-//        if (sectionId == null) {
-//            log.error("SpendingSection with searchType: '{}' and query: '{}' for login: \'{}\' was not found",
-//                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
-//            return responseError("SpendingSection was not found!");
-//        }
-//
-//        SpendingSection spendingSection = sectionService.getSpendingSectionById(sectionId);
-//
-//        boolean isDeleteSuccessful = sectionService.deleteSpendingSectionByName(spendingSection);
-//
-//        if (!isDeleteSuccessful) {
-//            log.error("Deleting SpendingSection with searchType: '{}' and query: '{}' for login: \'{}\' has failed",
-//                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
-//            return responseError("SpendingSection was not deleted!");
-//        }
-//        log.debug("Deleted SpendingSection with searchType: '{}' and query: '{}' for login: \'{}\'",
-//                deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
-//
-//        return responseSuccess(SPENDING_SECTION_DELETED, filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
+        return responseSuccess(SPENDING_SECTION_DELETED,
+                sectionService.getSpendingSectionsByLogin(login, false, false, false));
     }
 
     /**
@@ -244,12 +206,15 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @return response object
      */
     @GetMapping(value = "/spendingSection/get")
-    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections() {
-
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections(
+            @RequestParam(required = false) boolean withNonAdded,
+            @RequestParam(required = false) boolean withRemoved,
+            @RequestParam(required = false) boolean withRemovedOnly) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
+
         List<SpendingSection> spendingSectionList =
-                sortSpendingSectionList(filterSpendingSections(sectionService.getSpendingSectionsByLogin(login)));
-        log.debug("SpendingSections for login \"{}\" are returned: {}", login, spendingSectionList);
+                sectionService.getSpendingSectionsByLogin(login, withNonAdded, withRemoved, withRemovedOnly);
+        log.debug("SpendingSections for login \'{}\' are returned: {}", login, spendingSectionList);
 
         return responseSuccess(SPENDING_SECTIONS_RETURNED, spendingSectionList);
     }
@@ -273,9 +238,5 @@ public class SettingsController extends AbstractController implements SettingsAP
         if (isNameChanges && isNewNameExists)
             return false;
         return true;
-    }
-
-    private List<SpendingSection> filterSpendingSections(List<SpendingSection> incomeSpendingSections) {
-        return incomeSpendingSections.stream().filter(section -> !section.getIsRemoved()).collect(Collectors.toList());
     }
 }

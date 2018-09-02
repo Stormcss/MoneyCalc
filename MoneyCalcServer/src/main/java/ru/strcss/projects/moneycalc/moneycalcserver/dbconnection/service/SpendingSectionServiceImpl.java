@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
@@ -12,8 +13,8 @@ import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 import java.util.List;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_NOT_DELETED;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 
+@Slf4j
 @Service
 public class SpendingSectionServiceImpl implements SpendingSectionService {
 
@@ -64,23 +65,23 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
 
     @Override
     public ResultContainer deleteSpendingSection(String login, SpendingSectionDeleteContainer deleteContainer) {
-        boolean isDeletionSuccessful;
-        ResultContainer resultContainer;
+        ResultContainer deletionResult;
 
         if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-            isDeletionSuccessful = spendingSectionDao.deleteSpendingSectionByName(login, deleteContainer.getIdOrName());
+            deletionResult = spendingSectionDao.deleteSpendingSectionByName(login, deleteContainer.getIdOrName());
         } else {
-            isDeletionSuccessful = spendingSectionDao.deleteSpendingSectionByInnerId(login, Integer.valueOf(deleteContainer.getIdOrName()));
+            deletionResult = spendingSectionDao.deleteSpendingSectionByInnerId(login, Integer.valueOf(deleteContainer.getIdOrName()));
         }
-        if (isDeletionSuccessful)
-            resultContainer = new ResultContainer(true);
+
+        if (deletionResult.isSuccess())
+            return deletionResult;
         else {
-            resultContainer = new ResultContainer(false);
-            resultContainer.setErrorMessage(SPENDING_SECTION_NOT_DELETED);
-            resultContainer.setFullErrorMessage(fillLog("SpendingSection with searchType: '%s' and query: '%s' for login: '%s' was not deleted",
-                    deleteContainer.getSearchType().toString(), deleteContainer.getIdOrName(), login));
+            if (deletionResult.getErrorMessage() == null)
+                deletionResult.setErrorMessage(SPENDING_SECTION_NOT_DELETED);
+            log.error("SpendingSection was not deleted, having searchType: '{}' and query: '{}' for login: '{}'",
+                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
         }
-        return resultContainer;
+        return deletionResult;
     }
 
     @Override
@@ -95,7 +96,8 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     }
 
     @Override
-    public List<SpendingSection> getSpendingSectionsByLogin(String login) {
-        return spendingSectionDao.getSpendingSectionsByLogin(login);
+    public List<SpendingSection> getSpendingSectionsByLogin(String login, boolean withNonAdded,
+                                                            boolean withRemoved, boolean withRemovedOnly) {
+        return spendingSectionDao.getSpendingSectionsByLogin(login, withNonAdded, withRemoved, withRemovedOnly);
     }
 }

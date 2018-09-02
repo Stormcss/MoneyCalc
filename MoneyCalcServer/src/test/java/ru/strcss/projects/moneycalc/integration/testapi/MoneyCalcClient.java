@@ -54,6 +54,15 @@ public interface MoneyCalcClient {
     @GET("/api/settings/spendingSection/get")
     Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSections(@Header("Authorization") String token);
 
+    @GET("/api/settings/spendingSection/get?withNonAdded=true")
+    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithNonAdded(@Header("Authorization") String token);
+
+    @GET("/api/settings/spendingSection/get?withRemoved=true")
+    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemoved(@Header("Authorization") String token);
+
+    @GET("/api/settings/spendingSection/get?withRemovedOnly=true")
+    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemovedOnly(@Header("Authorization") String token);
+
     /**
      * Identifications
      */

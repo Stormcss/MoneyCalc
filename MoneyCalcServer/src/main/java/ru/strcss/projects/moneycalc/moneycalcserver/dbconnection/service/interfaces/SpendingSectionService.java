@@ -27,7 +27,8 @@ public interface SpendingSectionService {
 
     SpendingSection getSpendingSectionById(Integer sectionId);
 
-    List<SpendingSection> getSpendingSectionsByLogin(String login);
+    List<SpendingSection> getSpendingSectionsByLogin(String login, boolean withNonAdded,
+                                                     boolean withRemoved, boolean withRemovedOnly);
 
     List<SpendingSection> getSpendingSectionsByPersonId(Integer personId);
 }

@@ -3,21 +3,21 @@ package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
+import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.Arrays;
 import java.util.List;
 
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.mockito.Mockito.*;
+import static org.testng.Assert.*;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSection;
 
 public class SpendingSectionDaoImplTest {
@@ -28,6 +28,7 @@ public class SpendingSectionDaoImplTest {
     private Session mockedSession = mock(Session.class);
     private Transaction mockedTransaction = mock(Transaction.class);
     private Query mockedQuery = mock(Query.class);
+    private NativeQuery mockedNativeQuery = mock(NativeQuery.class);
     private PersonDao personDao = mock(PersonDao.class);
 
     @BeforeGroups(groups = "SpendingSectionDaoSuccessfulScenario")
@@ -40,11 +41,20 @@ public class SpendingSectionDaoImplTest {
                 .thenReturn(1);
         when(mockedSession.createQuery(anyString()))
                 .thenReturn(mockedQuery);
+        when(mockedSession.createNativeQuery(anyString()))
+                .thenReturn(mockedNativeQuery);
         when(mockedSession.createQuery(anyString(), any()))
                 .thenReturn(mockedQuery);
 
         when(mockedQuery.setParameter(anyString(), any()))
                 .thenReturn(mockedQuery);
+
+        when(mockedNativeQuery.setParameter(anyString(), any()))
+                .thenReturn(mockedNativeQuery);
+        when(mockedNativeQuery.getSingleResult())
+                .thenReturn(false);
+        when(mockedNativeQuery.executeUpdate())
+                .thenReturn(1);
 
         when(mockedQuery.getSingleResult())
                 .thenReturn(generateSpendingSection(null, null, 1, null, null, null));
@@ -55,7 +65,11 @@ public class SpendingSectionDaoImplTest {
                 .thenReturn(1);
 
         spendingSectionDao = new SpendingSectionDaoImpl(sessionFactory, personDao);
+    }
 
+    @BeforeGroups(groups = "SpendingSectionDaoSuccessfulScenario_Get")
+    public void setUp_getChecks() {
+        spendingSectionDao = new SpendingSectionDaoImpl(sessionFactory, personDao);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
@@ -104,21 +118,21 @@ public class SpendingSectionDaoImplTest {
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testDeleteSpendingSection() {
-        boolean isDeleteSuccessful = spendingSectionDao.deleteSpendingSectionByName("login", "name");
-        assertTrue(isDeleteSuccessful);
+    public void testDeleteSpendingSectionByName() {
+        ResultContainer deleteContainer = spendingSectionDao.deleteSpendingSectionByName("login", "name");
+        assertTrue(deleteContainer.isSuccess());
+    }
+
+    @Test(groups = "SpendingSectionDaoSuccessfulScenario")
+    public void testDeleteSpendingSectionByInnerId() {
+        ResultContainer deleteContainer = spendingSectionDao.deleteSpendingSectionByInnerId("login", 0);
+        assertTrue(deleteContainer.isSuccess());
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
     public void testGetSpendingSectionById() {
         SpendingSection spendingSection = spendingSectionDao.getSpendingSectionById(1);
         assertEquals((int) spendingSection.getId(), 1);
-    }
-
-    @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testGetSpendingSectionsByLogin() {
-        List<SpendingSection> spendingSection = spendingSectionDao.getSpendingSectionsByLogin("login");
-        assertEquals(spendingSection.size(), 2);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
@@ -132,5 +146,51 @@ public class SpendingSectionDaoImplTest {
         spendingSectionDao.setSessionFactory(sessionFactory);
     }
 
+    @Test(groups = "SpendingSectionDaoSuccessfulScenario_Get", dependsOnGroups = {"SpendingSectionDaoSuccessfulScenario"})
+    public void testGetSpendingSectionsByLogin_all_false() {
+        assertSqlQuery(true, "isAdded IS TRUE", true, "isRemoved IS FALSE");
 
+        spendingSectionDao.getSpendingSectionsByLogin("login", false, false, false);
+    }
+
+    @Test(groups = "SpendingSectionDaoSuccessfulScenario_Get", dependsOnGroups = {"SpendingSectionDaoSuccessfulScenario"})
+    public void testGetSpendingSectionsByLogin_withNonAdded() {
+        assertSqlQuery(false, "isAdded", true, "isRemoved IS FALSE");
+        spendingSectionDao.getSpendingSectionsByLogin("login", true, false, false);
+    }
+
+    @Test(groups = "SpendingSectionDaoSuccessfulScenario_Get", dependsOnGroups = {"SpendingSectionDaoSuccessfulScenario"})
+    public void testGetSpendingSectionsByLogin_withRemoved() {
+        assertSqlQuery(true, "isAdded IS TRUE", false, "isRemoved");
+        spendingSectionDao.getSpendingSectionsByLogin("login", false, true, false);
+    }
+
+    @Test(groups = "SpendingSectionDaoSuccessfulScenario_Get", dependsOnGroups = {"SpendingSectionDaoSuccessfulScenario"})
+    public void testGetSpendingSectionsByLogin_withRemovedOnly() {
+        assertSqlQuery(true, "isAdded IS TRUE", true, "isRemoved IS TRUE");
+        spendingSectionDao.getSpendingSectionsByLogin("login", false, false, true);
+    }
+
+    @Test(groups = "SpendingSectionDaoSuccessfulScenario_Get", dependsOnGroups = {"SpendingSectionDaoSuccessfulScenario"})
+    public void testGetSpendingSectionsByLogin_withRemoved_withRemovedOnly() {
+        assertSqlQuery(true, "isAdded IS TRUE", true, "isRemoved IS TRUE");
+        spendingSectionDao.getSpendingSectionsByLogin("login", false, true, true);
+    }
+
+    private void assertSqlQuery(boolean isText1Expected, String text1, boolean isText2Expected, String text2) {
+        doAnswer(invocation -> {
+            String sqlQuery = invocation.getArgument(0);
+
+            if (isText1Expected)
+                assertTrue(sqlQuery.contains(text1));
+            else
+                assertFalse(sqlQuery.contains(text1));
+
+            if (isText2Expected)
+                assertTrue(sqlQuery.contains(text2));
+            else
+                assertFalse(sqlQuery.contains(text2));
+            return mockedQuery;
+        }).when(mockedSession).createQuery(anyString(), any());
+    }
 }

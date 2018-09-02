@@ -5,6 +5,7 @@ import org.testng.annotations.Test;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
@@ -30,33 +31,6 @@ import static ru.strcss.projects.moneycalc.testutils.TestUtils.getMaxSpendingSec
 @Slf4j
 public class SettingsControllerIT extends AbstractIT {
 
-//    @Test
-//    public void saveSettingsIncorrectDateFrom() {
-//        Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
-//        String token = loginAndToken.getRight();
-//
-//        Settings settingsIncorrect = generateSettings();
-//        settingsIncorrect.setPeriodFrom("");
-//
-//        Response<MoneyCalcRs<Settings>> saveSettingsRs =
-//                sendRequest(service.updateSettings(token, new SettingsUpdateContainer(settingsIncorrect)));
-//
-//        assertFalse(saveSettingsRs.isSuccessful(), "Incorrect Settings are saved!");
-//    }
-
-    @Test
-    public void saveDuplicateSpendingSections() {
-        Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
-        String token = loginAndToken.getRight();
-        SpendingSection spendingSection = generateSpendingSection();
-
-        sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
-        Response<MoneyCalcRs<List<SpendingSection>>> addSectionRs =
-                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)));
-
-        assertFalse(addSectionRs.isSuccessful(), "Response is not failed!");
-    }
-
     @Test
     public void getSettings() {
         Pair<IdsContainer, String> idsAndToken = savePersonGetIdsAndToken(service);
@@ -81,10 +55,6 @@ public class SettingsControllerIT extends AbstractIT {
         assertNotNull(updatedRs.getPayload(), "Payload is null!");
         assertEquals(newSettings.getPeriodTo(),
                 updatedRs.getPayload().getPeriodTo(), "Settings were not updated!");
-
-        //Checking that Person is ok after updating Settings
-//        MoneyCalcRs<Identifications> identificationsRs = sendRequest(service.getIdentifications(token)).body();
-//        assertNotNull(identificationsRs.getPayload(), "Identifications object was overwritten!");
     }
 
 
@@ -99,6 +69,19 @@ public class SettingsControllerIT extends AbstractIT {
         assertTrue(addSectionRs.getPayload().stream().anyMatch(section -> section.getName().equals(spendingSection.getName())),
                 "Spending Section was not added!");
         assertTrue(addSectionRs.getPayload().stream().noneMatch(section -> section.getId() == ignoredId));
+    }
+
+    @Test
+    public void saveDuplicateSpendingSections() {
+        Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
+        String token = loginAndToken.getRight();
+        SpendingSection spendingSection = generateSpendingSection();
+
+        sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
+        Response<MoneyCalcRs<List<SpendingSection>>> addSectionRs =
+                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)));
+
+        assertFalse(addSectionRs.isSuccessful(), "Response is not failed!");
     }
 
     @Test
@@ -220,6 +203,41 @@ public class SettingsControllerIT extends AbstractIT {
         assertEquals(getSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
     }
 
+    @Test
+    public void getSpendingSections_withNonAdded() {
+        String token = savePersonGetToken(service);
+        int nonAddedId = 0;
+        SpendingSection spendingSection = new SpendingSection(null, null, nonAddedId, "Renamed",
+                false, false, 1000);
+
+        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer("" + nonAddedId, spendingSection,
+                SpendingSectionSearchType.BY_ID)), Status.SUCCESS);
+
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSectionsWithNonAdded(token), Status.SUCCESS).body();
+
+        assertEquals(getSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
+        assertFalse(getSectionsRs.getPayload().get(nonAddedId).getIsAdded(), "Section is still added!");
+    }
+
+    @Test
+    public void getSpendingSections_withRemoved() {
+        String token = savePersonGetToken(service);
+        int removedId = 0;
+
+        sendRequest(service.deleteSpendingSection(token, new SpendingSectionDeleteContainer("" + removedId,
+                SpendingSectionSearchType.BY_ID)), Status.SUCCESS);
+
+        MoneyCalcRs<List<SpendingSection>> getWithRemovedSectionsRs =
+                sendRequest(service.getSpendingSectionsWithRemoved(token), Status.SUCCESS).body();
+        assertEquals(getWithRemovedSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
+        assertTrue(getWithRemovedSectionsRs.getPayload().get(removedId).getIsRemoved(), "Section is not removed!");
+
+        MoneyCalcRs<List<SpendingSection>> getRemovedSectionsOnlyRs =
+                sendRequest(service.getSpendingSectionsWithRemovedOnly(token), Status.SUCCESS).body();
+        assertEquals(getRemovedSectionsOnlyRs.getPayload().size(), 1, "Wrong number of spending sections is returned!");
+        assertTrue(getRemovedSectionsOnlyRs.getPayload().get(removedId).getIsRemoved(), "Section is not removed!");
+    }
+
     /**
      * Test case checking that spending section was deactivated after deletion, but not removed
      */
@@ -239,5 +257,11 @@ public class SettingsControllerIT extends AbstractIT {
                 "Spending Section was not deleted!");
         assertEquals(getMaxSpendingSectionId(addingSection2Rs.getPayload()), addedSection1Id + 1,
                 "Spending Section Id is not incremented!");
+
+        //getting removed sections
+        MoneyCalcRs<List<SpendingSection>> removedSectionsRs = sendRequest(service.getSpendingSectionsWithRemovedOnly(token)).body();
+        assertEquals(removedSectionsRs.getPayload().size(), 1, "Removed section size is incorrect!");
+        assertEquals(removedSectionsRs.getPayload().get(0).getName(), spendingSection1.getName(),
+                "Removed section name is not equal!");
     }
 }

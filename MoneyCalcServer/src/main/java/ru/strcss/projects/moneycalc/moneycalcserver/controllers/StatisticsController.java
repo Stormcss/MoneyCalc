@@ -65,9 +65,8 @@ public class StatisticsController extends AbstractController implements Statisti
         List<Integer> sectionIds = spendingSections.stream().map(SpendingSection::getSectionId).collect(Collectors.toList());
 
         LocalDate dateFrom = settings.getPeriodFrom();
-//        LocalDate dateFrom = string2LocalDate(settings.getPeriodFrom());
         LocalDate dateTo = settings.getPeriodTo();
-//        LocalDate dateTo = string2LocalDate(settings.getPeriodTo());
+
         List<Transaction> transactionsList = transactionsDao.getTransactionsByPersonId(personId, dateFrom, dateTo, sectionIds);
 
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
