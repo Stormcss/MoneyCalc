@@ -5,7 +5,6 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -15,15 +14,12 @@ import java.util.List;
 @AllArgsConstructor
 public class SpendingSectionDeleteContainer extends AbstractContainer {
 
-    private String idOrName;
-    private SpendingSectionSearchType searchType;
+    private Integer sectionId;
 
     @Override
     public ValidationResult isValid() {
-//        List<String> reasons = validateStringFields(new FieldPairs("idOrName", idOrName));
         List<String> reasons = new ArrayList<>();
-        if (idOrName == null) reasons.add("idOrName is empty");
-        if (searchType == null) reasons.add("searchType is empty");
+        if (sectionId == null) reasons.add("idOrName is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

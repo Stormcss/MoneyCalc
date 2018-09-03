@@ -111,10 +111,10 @@ public class TransactionsController extends AbstractController implements Transa
         Integer addedTransactionId = transactionsService.addTransaction(personId, addContainer.getTransaction());
 
         if (addedTransactionId == null) {
-            log.error("Saving Transaction {} for login \"{}\" has failed", addContainer.getTransaction(), login);
+            log.error("Saving Transaction {} for login \'{}\' has failed", addContainer.getTransaction(), login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
-        log.info("Saved new Transaction for login \"{}\" : {}", login, addContainer.getTransaction());
+        log.info("Saved new Transaction for login \'{}\' : {}", login, addContainer.getTransaction());
         return responseSuccess(TRANSACTION_SAVED, addContainer.getTransaction());
     }
 
@@ -149,11 +149,11 @@ public class TransactionsController extends AbstractController implements Transa
         boolean isUpdateSuccessful = transactionsService.updateTransaction(resultTransaction);
 
         if (!isUpdateSuccessful) {
-            log.error("Updating Transaction for login \"{}\" has failed", login);
+            log.error("Updating Transaction for login \'{}\' has failed", login);
             return responseError(TRANSACTION_UPDATED);
         }
 
-        log.info("Updated Transaction {}: for login: \"{}\" with values: {}", resultTransaction, login, updateContainer.getTransaction());
+        log.info("Updated Transaction {}: for login: \'{}\' with values: {}", resultTransaction, login, updateContainer.getTransaction());
         return responseSuccess(TRANSACTION_UPDATED, resultTransaction);
     }
 
@@ -168,17 +168,17 @@ public class TransactionsController extends AbstractController implements Transa
         Transaction deletedTransaction = transactionsService.getTransactionById(deleteContainer.getId());
 
         if (deletedTransaction == null) {
-            log.error("Transaction with id: \"{}\" was not found", deleteContainer.getId());
+            log.error("Transaction with id: \'{}\' was not found", deleteContainer.getId());
             return responseError(TRANSACTION_NOT_FOUND);
         }
 
         boolean isDeleteSuccessful = transactionsService.deleteTransaction(deletedTransaction);
 
         if (!isDeleteSuccessful) {
-            log.error("Deleting Transaction for login \"{}\" has failed", login);
+            log.error("Deleting Transaction for login \'{}\' has failed", login);
             return responseError("Transaction was not deleted!");
         }
-        log.info("Deleted Transaction id \"{}\": for login: \"{}\"", deleteContainer.getId(), login);
+        log.info("Deleted Transaction id \'{}\': for login: \'{}\'", deleteContainer.getId(), login);
 
         // TODO: 06.02.2018 some payload should be returned
         return responseSuccess(TRANSACTION_DELETED, null);

@@ -6,7 +6,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import ru.strcss.projects.moneycalc.api.SettingsAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
@@ -21,6 +20,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfa
 import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.List;
+import java.util.Optional;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
@@ -65,11 +65,11 @@ public class SettingsController extends AbstractController implements SettingsAP
         Settings updatedSettings = settingsService.updateSettings(updateContainer.getSettings());
 
         if (updatedSettings == null) {
-            log.error("Updating Settings for login \"{}\" has failed", login);
+            log.error("Updating Settings for login \'{}\' has failed", login);
             return responseError("Settings were not updated!");
         }
 
-        log.debug("Updating Settings {} for login \"{}\"", updatedSettings, login);
+        log.debug("Updating Settings {} for login \'{}\'", updatedSettings, login);
         return responseSuccess(SETTINGS_UPDATED, updatedSettings);
     }
 
@@ -81,7 +81,6 @@ public class SettingsController extends AbstractController implements SettingsAP
     @GetMapping(value = "/get")
     public ResponseEntity<MoneyCalcRs<Settings>> getSettings() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Settings settings = filterSpendingSections(settingsService.getSettingsById(login));
         // FIXME: 27.08.2018 request with single sql query in dao
         Integer personId = personService.getPersonIdByLogin(login);
         Integer settingsId = personService.getSettingsIdByPersonId(personId);
@@ -97,7 +96,6 @@ public class SettingsController extends AbstractController implements SettingsAP
         }
     }
 
-    // FIXME: 28.08.2018 It is impossible to add spending section if previously one with the same name was deleted
     @PostMapping(value = "/spendingSection/add")
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSectionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -141,9 +139,10 @@ public class SettingsController extends AbstractController implements SettingsAP
         Integer personId = personService.getPersonIdByLogin(login);
 
         RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer, "Updating SpendingSection")
-                .addValidation(() -> updateContainer.getSpendingSection().isValid().isValidated(),
-                        () -> fillLog(SPENDING_SECTION_INCORRECT, updateContainer.getSpendingSection().isValid().getReasons().toString()))
-                // FIXME: 28.08.2018 updating section via ID without chaning name is impossible - otherwise following check says that updating causes doubles
+                .addValidation(() -> sectionService.isSpendingSectionIdExists(personId, updateContainer.getSectionId()),
+                        () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, "" + updateContainer.getSectionId()))
+                .addValidation(() -> updateContainer.getSpendingSection().isAnyFieldSet(),
+                        () -> SPENDING_SECTION_EMPTY)
                 .addValidation(() -> isNewNameAllowed(personId, updateContainer),
                         () -> fillLog(SPENDING_SECTION_NAME_EXISTS, updateContainer.getSpendingSection().getName()))
                 .validate();
@@ -152,16 +151,10 @@ public class SettingsController extends AbstractController implements SettingsAP
         //isRemoved flag of income SpendingSection must be ignored and be false
         updateContainer.getSpendingSection().setIsRemoved(false);
 
-        Integer sectionId;
-        if (updateContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-            sectionId = sectionService.getSectionIdByName(personId, updateContainer.getIdOrName());
-        } else {
-            sectionId = sectionService.getSectionIdByInnerId(personId, Integer.valueOf(updateContainer.getIdOrName()));
-        }
+        Integer sectionId = sectionService.getSectionIdByInnerId(personId, updateContainer.getSectionId());
 
         if (sectionId == null) {
-            log.error("SpendingSection with SearchType: {} and query: {} for login: \'{}\' was not found",
-                    updateContainer.getSearchType(), updateContainer.getIdOrName(), login);
+            log.error("SpendingSection with id: '{}' for login: '{}' was not found", updateContainer.getSectionId(), login);
             return responseError("SpendingSection was not found!");
         }
 
@@ -190,7 +183,7 @@ public class SettingsController extends AbstractController implements SettingsAP
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        ResultContainer deleteResult = sectionService.deleteSpendingSection(login, deleteContainer);
+        ResultContainer deleteResult = sectionService.deleteSpendingSection(login, deleteContainer.getSectionId());
 
         if (!deleteResult.isSuccess()) {
             String errorMessage = deleteResult.getErrorMessage();
@@ -228,15 +221,27 @@ public class SettingsController extends AbstractController implements SettingsAP
      */
     private Boolean isNewNameAllowed(Integer personId, SpendingSectionUpdateContainer updateContainer) {
 
+        // if name is not set at all
         if (updateContainer.getSpendingSection().getName() == null)
             return true;
-        List<SpendingSection> sectionList = sectionService.getSpendingSectionsByPersonId(personId);
-        boolean isNameChanges = !updateContainer.getIdOrName().equals(updateContainer.getSpendingSection().getName());
 
-        boolean isNewNameExists = sectionList.stream()
-                .anyMatch(spendingSection -> spendingSection.getName().equals(updateContainer.getSpendingSection().getName()));
-        if (isNameChanges && isNewNameExists)
-            return false;
-        return true;
+        List<SpendingSection> sectionList = sectionService.getSpendingSectionsByPersonId(personId);
+        String oldName = sectionList.stream()
+                .filter(section -> section.getSectionId().equals(updateContainer.getSectionId()))
+                .map(SpendingSection::getName)
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Can not update Spending Section - sectionId is not found!"));
+
+        // if updateContainer has name which does not change
+        if (oldName.equals(updateContainer.getSpendingSection().getName()))
+            return true;
+
+        // looking for other sections with the new name
+        Optional<Integer> existingSectionIdWithSameName = sectionList.stream()
+                .filter(section -> section.getName().equals(updateContainer.getSpendingSection().getName()))
+                .map(SpendingSection::getSectionId)
+                .findAny();
+
+        return !existingSectionIdWithSameName.isPresent();
     }
 }

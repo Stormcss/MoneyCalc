@@ -10,7 +10,6 @@ import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
@@ -71,11 +70,13 @@ public class SettingsControllerTest {
         when(sectionService.deleteSpendingSection(anyString(), any())).thenReturn(new ResultContainer(true));
 
         when(sectionService.isSpendingSectionNameNew(anyInt(), anyString())).thenReturn(true);
+        when(sectionService.isSpendingSectionIdExists(anyInt(), anyInt())).thenReturn(true);
+        when(sectionService.getSpendingSectionsByPersonId(anyInt())).thenReturn(generateSpendingSectionList(3, true));
 
         settingsController = new SettingsController(settingsService, personService, sectionService);
     }
 
-    @BeforeGroups(groups = "failedScenario")
+    @BeforeGroups(groups = "SettingsfailedScenario")
     public void prepare_failedScenario() {
         when(settingsService.getSettingsById(anyInt())).thenReturn(null);
         when(settingsService.updateSettings(any(Settings.class))).thenReturn(null);
@@ -126,42 +127,23 @@ public class SettingsControllerTest {
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionAddRs = settingsController.addSpendingSection(
                 new SpendingSectionAddContainer(spendingSection));
 
-        assertEquals(sectionAddRs.getBody().getServerStatus(), Status.SUCCESS, sectionAddRs.getBody().getMessage());
+        assertEquals(sectionAddRs.getBody().getServerStatus(), Status.ERROR, sectionAddRs.getBody().getMessage());
     }
 
     @Test(groups = "SettingsSuccessfulScenario")
-    public void testUpdateSpendingSection_byName_ExistingName() {
+    public void testUpdateSpendingSection_ExistingId() {
         SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer("Name", generateSpendingSection("Name"), SpendingSectionSearchType.BY_NAME);
+                new SpendingSectionUpdateContainer(1, generateSpendingSection(5000, 1));
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.SUCCESS, sectionUpdateRs.getBody().getMessage());
     }
 
     @Test(groups = "SettingsSuccessfulScenario")
-    public void testUpdateSpendingSection_byName_NewName() {
-        SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer("Name", generateSpendingSection("newName"), SpendingSectionSearchType.BY_NAME);
-        ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
-
-        assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.SUCCESS, sectionUpdateRs.getBody().getMessage());
-    }
-
-    @Test(groups = "SettingsSuccessfulScenario")
-    public void testUpdateSpendingSection_byId_ExistingId() {
-        SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer("1", generateSpendingSection(5000, 1), SpendingSectionSearchType.BY_ID);
-        ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
-
-        assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.SUCCESS, sectionUpdateRs.getBody().getMessage());
-    }
-
-    @Test(groups = "SettingsSuccessfulScenario")
-    public void testUpdateSpendingSection_byId_withIsRemovedTrue() {
+    public void testUpdateSpendingSection_withIsRemovedTrue() {
         SpendingSection spendingSection = generateSpendingSection(5000, 1);
         spendingSection.setIsRemoved(true);
-        SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer("1", spendingSection, SpendingSectionSearchType.BY_ID);
+        SpendingSectionUpdateContainer nameUpdateContainer = new SpendingSectionUpdateContainer(1, spendingSection);
 
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
@@ -170,16 +152,7 @@ public class SettingsControllerTest {
 
     @Test(groups = "SettingsSuccessfulScenario")
     public void testDeleteSpendingSection_byId() {
-        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer("1", SpendingSectionSearchType.BY_ID);
-        ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionDeleteRs = settingsController.deleteSpendingSection(deleteContainer);
-
-        assertEquals(sectionDeleteRs.getBody().getServerStatus(), Status.SUCCESS, sectionDeleteRs.getBody().getMessage());
-        assertTrue(sectionDeleteRs.getBody().getPayload().size() > 0, "Size of returned sections is 0!");
-    }
-
-    @Test(groups = "SettingsSuccessfulScenario")
-    public void testDeleteSpendingSection_byName() {
-        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer("name", SpendingSectionSearchType.BY_NAME);
+        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer(1);
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionDeleteRs = settingsController.deleteSpendingSection(deleteContainer);
 
         assertEquals(sectionDeleteRs.getBody().getServerStatus(), Status.SUCCESS, sectionDeleteRs.getBody().getMessage());
@@ -214,9 +187,9 @@ public class SettingsControllerTest {
 
 
     @Test(groups = "SettingsIncorrectContainers")
-    public void testUpdateSpendingSection_byId_Empty_idOrName() {
+    public void testUpdateSpendingSection_Empty_idOrName() {
         SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer(null, generateSpendingSection(5000, 1), SpendingSectionSearchType.BY_ID);
+                new SpendingSectionUpdateContainer(null, generateSpendingSection(5000, 1));
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.ERROR, sectionUpdateRs.getBody().getMessage());
@@ -225,70 +198,36 @@ public class SettingsControllerTest {
     @Test(groups = "SettingsIncorrectContainers")
     public void testUpdateSpendingSection_SpendingSection_emptyAll() {
         SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer("1", SpendingSection.builder().build(), SpendingSectionSearchType.BY_ID);
+                new SpendingSectionUpdateContainer(1, SpendingSection.builder().build());
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.ERROR, sectionUpdateRs.getBody().getMessage());
     }
 
     @Test(groups = "SettingsIncorrectContainers")
-    public void testUpdateSpendingSection_byId_Empty_SpendingSection() {
-        SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer("1", null, SpendingSectionSearchType.BY_ID);
+    public void testUpdateSpendingSection_empty_spendingSection() {
+        SpendingSectionUpdateContainer nameUpdateContainer = new SpendingSectionUpdateContainer(1, null);
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.ERROR, sectionUpdateRs.getBody().getMessage());
     }
 
     @Test(groups = "SettingsIncorrectContainers")
-    public void testUpdateSpendingSection_Empty_SearchType() {
-        SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer("Name", generateSpendingSection(5000, 1), null);
-        ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
-
-        assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.ERROR, sectionUpdateRs.getBody().getMessage());
-    }
-
-    @Test(groups = "SettingsIncorrectContainers")
-    public void testDeleteSpendingSection_byId_Empty_idOrName() {
-        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer(null, SpendingSectionSearchType.BY_ID);
+    public void testDeleteSpendingSection_idEmpty() {
+        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer(null);
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionDeleteRs = settingsController.deleteSpendingSection(deleteContainer);
 
         assertEquals(sectionDeleteRs.getBody().getServerStatus(), Status.ERROR, sectionDeleteRs.getBody().getMessage());
     }
 
-    @Test(groups = "SettingsIncorrectContainers")
-    public void testDeleteSpendingSection_byName_Empty_idOrName() {
-        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer(null, SpendingSectionSearchType.BY_NAME);
-        ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionDeleteRs = settingsController.deleteSpendingSection(deleteContainer);
-
-        assertEquals(sectionDeleteRs.getBody().getServerStatus(), Status.ERROR, sectionDeleteRs.getBody().getMessage());
-    }
-
-    @Test(groups = "SettingsIncorrectContainers")
-    public void testDeleteSpendingSection_Empty_searchType() {
-        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer("1", null);
-        ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionDeleteRs = settingsController.deleteSpendingSection(deleteContainer);
-
-        assertEquals(sectionDeleteRs.getBody().getServerStatus(), Status.ERROR, sectionDeleteRs.getBody().getMessage());
-    }
-
-    @Test(groups = "SettingsIncorrectContainers")
-    public void testDeleteSpendingSection_Empty_all() {
-        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer(null, null);
-        ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionDeleteRs = settingsController.deleteSpendingSection(deleteContainer);
-
-        assertEquals(sectionDeleteRs.getBody().getServerStatus(), Status.ERROR, sectionDeleteRs.getBody().getMessage());
-    }
-
-    @Test(groups = "failedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
+    @Test(groups = "SettingsfailedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
     public void testGetSettings_failedScenario() {
         ResponseEntity<MoneyCalcRs<Settings>> settingsGetRs = settingsController.getSettings();
 
         assertEquals(settingsGetRs.getBody().getServerStatus(), Status.ERROR, "Response is not failed!");
     }
 
-    @Test(groups = "failedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
+    @Test(groups = "SettingsfailedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
     public void testSaveSettings_failedScenario() {
         ResponseEntity<MoneyCalcRs<Settings>> settingsSaveRs = settingsController.updateSettings(
                 new SettingsUpdateContainer(generateSettings()));
@@ -297,7 +236,7 @@ public class SettingsControllerTest {
     }
 
 
-    @Test(groups = "failedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
+    @Test(groups = "SettingsfailedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
     public void testAddSpendingSection_failedScenario() {
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionAddRs = settingsController.addSpendingSection(
                 new SpendingSectionAddContainer(generateSpendingSection()));
@@ -305,7 +244,7 @@ public class SettingsControllerTest {
         assertEquals(sectionAddRs.getBody().getServerStatus(), Status.ERROR, sectionAddRs.getBody().getMessage());
     }
 
-    @Test(groups = "failedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
+    @Test(groups = "SettingsfailedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
     public void testAddSpendingSection_existingSpendingSectionName() {
         when(sectionService.isSpendingSectionNameNew(anyInt(), anyString())).thenReturn(false);
 
@@ -316,30 +255,28 @@ public class SettingsControllerTest {
         when(sectionService.isSpendingSectionNameNew(anyInt(), anyString())).thenReturn(true);
     }
 
-    @Test(groups = "failedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
+    @Test(groups = "SettingsfailedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
     public void testUpdateSpendingSection_failedScenario() {
         SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer("0", generateSpendingSection(duplicatingSectionName),
-                        SpendingSectionSearchType.BY_NAME);
+                new SpendingSectionUpdateContainer(0, generateSpendingSection(duplicatingSectionName));
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.ERROR, sectionUpdateRs.getBody().getMessage());
     }
 
-    @Test(groups = "failedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
+    @Test(groups = "SettingsfailedScenario", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers"})
     public void testDeleteSpendingSection_failedScenario() {
-        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer("name", SpendingSectionSearchType.BY_NAME);
+        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer(1);
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionDeleteRs = settingsController.deleteSpendingSection(deleteContainer);
 
         assertEquals(sectionDeleteRs.getBody().getServerStatus(), Status.ERROR, sectionDeleteRs.getBody().getMessage());
     }
 
 
-    @Test(groups = "SettingsDuplicatingSectionNames", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers", "failedScenario"})
+    @Test(groups = "SettingsDuplicatingSectionNames", dependsOnGroups = {"SettingsSuccessfulScenario", "SettingsIncorrectContainers", "SettingsfailedScenario"})
     public void testUpdateSpendingSection_updatingToExistingSpendingSectionName() {
         SpendingSectionUpdateContainer nameUpdateContainer =
-                new SpendingSectionUpdateContainer("0", generateSpendingSection(duplicatingSectionName),
-                        SpendingSectionSearchType.BY_ID);
+                new SpendingSectionUpdateContainer(0, generateSpendingSection(duplicatingSectionName));
         ResponseEntity<MoneyCalcRs<List<SpendingSection>>> sectionUpdateRs = settingsController.updateSpendingSection(nameUpdateContainer);
 
         assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.ERROR, sectionUpdateRs.getBody().getMessage());

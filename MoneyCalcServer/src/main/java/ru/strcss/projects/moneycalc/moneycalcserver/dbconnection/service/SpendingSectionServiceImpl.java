@@ -3,8 +3,6 @@ package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
@@ -22,11 +20,6 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
 
     public SpendingSectionServiceImpl(SpendingSectionDao spendingSectionDao) {
         this.spendingSectionDao = spendingSectionDao;
-    }
-
-    @Override
-    public Integer getSectionIdByName(Integer personId, String sectionName) {
-        return spendingSectionDao.getSectionIdByName(personId, sectionName);
     }
 
     @Override
@@ -64,22 +57,16 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     }
 
     @Override
-    public ResultContainer deleteSpendingSection(String login, SpendingSectionDeleteContainer deleteContainer) {
-        ResultContainer deletionResult;
+    public ResultContainer deleteSpendingSection(String login, Integer sectionId) {
 
-        if (deleteContainer.getSearchType().equals(SpendingSectionSearchType.BY_NAME)) {
-            deletionResult = spendingSectionDao.deleteSpendingSectionByName(login, deleteContainer.getIdOrName());
-        } else {
-            deletionResult = spendingSectionDao.deleteSpendingSectionByInnerId(login, Integer.valueOf(deleteContainer.getIdOrName()));
-        }
+        ResultContainer deletionResult = spendingSectionDao.deleteSpendingSectionByInnerId(login, sectionId);
 
         if (deletionResult.isSuccess())
             return deletionResult;
         else {
             if (deletionResult.getErrorMessage() == null)
                 deletionResult.setErrorMessage(SPENDING_SECTION_NOT_DELETED);
-            log.error("SpendingSection was not deleted, having searchType: '{}' and query: '{}' for login: '{}'",
-                    deleteContainer.getSearchType(), deleteContainer.getIdOrName(), login);
+            log.error("SpendingSection with id: '' was not deleted, having searchType: '{}' for login: '{}'", sectionId, login);
         }
         return deletionResult;
     }

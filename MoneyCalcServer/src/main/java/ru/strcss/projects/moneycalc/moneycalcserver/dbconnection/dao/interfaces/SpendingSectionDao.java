@@ -20,8 +20,6 @@ public interface SpendingSectionDao {
 
     boolean updateSpendingSection(SpendingSection section);
 
-    ResultContainer deleteSpendingSectionByName(String login, String sectionName);
-
     ResultContainer deleteSpendingSectionByInnerId(String login, Integer innerId);
 
     SpendingSection getSpendingSectionById(Integer sectionId);

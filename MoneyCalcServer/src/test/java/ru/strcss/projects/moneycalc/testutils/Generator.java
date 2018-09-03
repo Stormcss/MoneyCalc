@@ -135,7 +135,7 @@ public class Generator {
                 .id(id == null ? ThreadLocalRandom.current().nextInt(3000) : id)
                 .sectionId(innerId)
                 .isAdded(isAdded == null ? true : isAdded)
-                .isRemoved(isRemoved == null ? false : isRemoved)
+                .isRemoved(isRemoved)
                 .name(name == null ? "Магазин" + ThreadLocalRandom.current().nextInt(500_000) : name)
                 .budget(budget == null ? 1000 + ThreadLocalRandom.current().nextInt(9000) : budget)
                 .build();

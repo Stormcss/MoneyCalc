@@ -68,6 +68,12 @@ public class SpendingSection implements Validationable, Serializable {
         if (name == null || name.isEmpty()) reasons.add("name is empty");
         if (budget == null) reasons.add("budget is empty");
         if (budget != null && budget <= 0) reasons.add("budget must be >= 0");
+        if (isRemoved != null) reasons.add("isRemoved can not be set as income parameter");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
+
+    public boolean isAnyFieldSet() {
+        return (name != null && !name.isEmpty()) || budget != null || isAdded != null;
+    }
+
 }

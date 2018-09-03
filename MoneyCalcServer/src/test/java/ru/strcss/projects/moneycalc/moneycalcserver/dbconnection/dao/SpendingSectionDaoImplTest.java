@@ -118,12 +118,6 @@ public class SpendingSectionDaoImplTest {
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")
-    public void testDeleteSpendingSectionByName() {
-        ResultContainer deleteContainer = spendingSectionDao.deleteSpendingSectionByName("login", "name");
-        assertTrue(deleteContainer.isSuccess());
-    }
-
-    @Test(groups = "SpendingSectionDaoSuccessfulScenario")
     public void testDeleteSpendingSectionByInnerId() {
         ResultContainer deleteContainer = spendingSectionDao.deleteSpendingSectionByInnerId("login", 0);
         assertTrue(deleteContainer.isSuccess());

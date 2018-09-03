@@ -14,10 +14,10 @@ import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SettingsDao;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
 
 import java.time.LocalDate;
@@ -35,18 +35,18 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @RequestMapping("/api/stats/summaryBySection")
 public class StatisticsController extends AbstractController implements StatisticsAPIService {
 
-    private TransactionsDao transactionsDao;
-    private SpendingSectionDao sectionsDao;
-    private SettingsDao settingsDao;
-    private PersonDao personDao;
+    private TransactionsService transactionsService;
+    private SpendingSectionService sectionService;
+    private SettingsService settingsService;
+    private PersonService personService;
     private SummaryStatisticsHandler statisticsHandler;
 
-    public StatisticsController(TransactionsDao transactionsDao, SpendingSectionDao sectionsDao, PersonDao personDao,
-                                SettingsDao settingsDao, SummaryStatisticsHandler statisticsHandler) {
-        this.transactionsDao = transactionsDao;
-        this.sectionsDao = sectionsDao;
-        this.personDao = personDao;
-        this.settingsDao = settingsDao;
+    public StatisticsController(TransactionsService transactionsService, SpendingSectionService spendingSectionService,
+                                PersonService personService, SettingsService settingsService, SummaryStatisticsHandler statisticsHandler) {
+        this.transactionsService = transactionsService;
+        this.sectionService = spendingSectionService;
+        this.personService = personService;
+        this.settingsService = settingsService;
         this.statisticsHandler = statisticsHandler;
     }
 
@@ -58,16 +58,17 @@ public class StatisticsController extends AbstractController implements Statisti
     @GetMapping(value = "/get")
     public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-        Integer personId = personDao.getPersonIdByLogin(login);
+        Integer personId = personService.getPersonIdByLogin(login);
 
-        Settings settings = settingsDao.getSettingsById(personId);
-        List<SpendingSection> spendingSections = sectionsDao.getActiveSpendingSectionsByPersonId(personId);
+        Settings settings = settingsService.getSettingsById(personId);
+        List<SpendingSection> spendingSections = sectionService.getSpendingSectionsByLogin(login, false,
+                false, false);
         List<Integer> sectionIds = spendingSections.stream().map(SpendingSection::getSectionId).collect(Collectors.toList());
 
         LocalDate dateFrom = settings.getPeriodFrom();
         LocalDate dateTo = settings.getPeriodTo();
 
-        List<Transaction> transactionsList = transactionsDao.getTransactionsByPersonId(personId, dateFrom, dateTo, sectionIds);
+        List<Transaction> transactionsList = transactionsService.getTransactionsByPersonId(personId, dateFrom, dateTo, sectionIds);
 
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
                 .rangeFrom(dateFrom)
@@ -81,7 +82,7 @@ public class StatisticsController extends AbstractController implements Statisti
 
         List<FinanceSummaryBySection> financeSummaryResult = statisticsHandler.calculateSummaryStatisticsBySections(calculationContainer);
 
-        log.debug("Returned List of FinanceSummaryBySections for login \"{}\" : {}", login, financeSummaryResult);
+        log.debug("Returned List of FinanceSummaryBySections for login \'{}\' : {}", login, financeSummaryResult);
         return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
     }
 
@@ -96,18 +97,18 @@ public class StatisticsController extends AbstractController implements Statisti
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Integer personId = personDao.getPersonIdByLogin(login);
+        Integer personId = personService.getPersonIdByLogin(login);
 
-        List<Transaction> transactions = transactionsDao.getTransactionsByPersonId(personId, getContainer.getRangeFrom(),
+        List<Transaction> transactions = transactionsService.getTransactionsByPersonId(personId, getContainer.getRangeFrom(),
                 getContainer.getRangeTo(), getContainer.getSectionIds());
 
         //оставляю только те секции клиента для которых мне нужна статистика
-        List<SpendingSection> spendingSections = sectionsDao.getSpendingSectionsByPersonId(personId).stream()
+        List<SpendingSection> spendingSections = sectionService.getSpendingSectionsByPersonId(personId).stream()
                 .filter(section -> getContainer.getSectionIds().stream().anyMatch(id -> id.equals(section.getSectionId())))
                 .collect(Collectors.toList());
 
         if (spendingSections.size() != getContainer.getSectionIds().size()) {
-            log.error("List of required IDs is not equal with list filtered Person's list for login: \"{}\"", login);
+            log.error("List of required IDs is not equal with list filtered Person's list for login: \'{}\'", login);
             return responseError("List of required IDs is not equal with list filtered Person's list");
         }
 
@@ -123,7 +124,7 @@ public class StatisticsController extends AbstractController implements Statisti
 
         List<FinanceSummaryBySection> financeSummaryResult = statisticsHandler.calculateSummaryStatisticsBySections(calculationContainer);
 
-        log.debug("Returned List of FinanceSummaryBySection for login \"{}\" : {}", login, financeSummaryResult);
+        log.debug("Returned List of FinanceSummaryBySection for login \'{}\' : {}", login, financeSummaryResult);
         return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
     }
 }

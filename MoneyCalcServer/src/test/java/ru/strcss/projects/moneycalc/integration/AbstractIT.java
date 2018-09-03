@@ -28,7 +28,8 @@ import java.time.LocalDate;
 })
 @TestPropertySource(properties = {
         "spring.datasource.username=h2DB",
-        "spring.datasource.url=jdbc:h2:mem:test",
+        "spring.datasource.url=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
+//        "spring.datasource.url=jdbc:h2:mem:test",
         "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
         "spring.datasource.password=password"
 })

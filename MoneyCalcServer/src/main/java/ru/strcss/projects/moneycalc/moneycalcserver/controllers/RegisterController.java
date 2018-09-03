@@ -62,7 +62,7 @@ public class RegisterController extends AbstractController implements RegisterAP
 
         String login = credentials.getAccess().getLogin();
 
-        log.info("Registering new Person with Login: \"{}\" and Name: {}", login, credentials.getIdentifications().getName());
+        log.info("Registering new Person with Login: '{}' and name: '{}'", login, credentials.getIdentifications().getName());
 
         Person registeredUser = registerService.registerUser(credentials.getAccess(), credentials.getIdentifications(),
                 generateRegisteringSettings(login));

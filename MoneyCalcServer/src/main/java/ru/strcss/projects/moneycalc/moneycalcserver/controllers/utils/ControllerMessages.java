@@ -34,6 +34,7 @@ public class ControllerMessages {
     public static final String SPENDING_SECTION_NAME_EXISTS = "Spending Section with name \'%s\' already exists";
     public static final String SPENDING_SECTION_ID_NOT_EXISTS = "Spending Section with id \'%s\' does not exist";
     public static final String SPENDING_SECTION_INCORRECT = "Spending Section has incorrect fields: \'%s\'";
+    public static final String SPENDING_SECTION_EMPTY = "Spending Section is empty!";
     public static final String SPENDING_SECTION_NOT_FOUND = "Spending Section was not found!";
     public static final String SPENDING_SECTION_SAVING_ERROR = "ERROR has occurred while saving Spending Section!";
 

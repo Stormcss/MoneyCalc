@@ -14,10 +14,10 @@ import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
 import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.enitities.Settings;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SettingsDao;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
 
 import java.time.LocalDate;
@@ -34,10 +34,10 @@ import static ru.strcss.projects.moneycalc.testutils.Generator.*;
 
 public class StatisticsControllerTest {
 
-    private TransactionsDao transactionsDao = mock(TransactionsDao.class);
-    private SpendingSectionDao spendingSectionDao = mock(SpendingSectionDao.class);
-    private PersonDao personDao = mock(PersonDao.class);
-    private SettingsDao settingsDao = mock(SettingsDao.class);
+    private TransactionsService transactionsService = mock(TransactionsService.class);
+    private SpendingSectionService spendingSectionService = mock(SpendingSectionService.class);
+    private PersonService personService = mock(PersonService.class);
+    private SettingsService settingsService = mock(SettingsService.class);
     private SummaryStatisticsHandler statisticsHandler = mock(SummaryStatisticsHandler.class);
     private StatisticsController statisticsController;
     private List<Integer> sectionIDs = Arrays.asList(0, 1);
@@ -51,20 +51,20 @@ public class StatisticsControllerTest {
 
     @BeforeGroups(groups = {"successfulScenario", "incorrectContainers"})
     public void prepare_successfulScenario_incorrectContainers() {
-        when(transactionsDao.getTransactionsByPersonId(anyInt(), any(LocalDate.class), any(LocalDate.class), anyList()))
+        when(transactionsService.getTransactionsByPersonId(anyInt(), any(LocalDate.class), any(LocalDate.class), anyList()))
                 .thenReturn(generateTransactionList(50, Arrays.asList(0, 1)));
-        when(spendingSectionDao.getSpendingSectionsByPersonId(anyInt()))
+        when(spendingSectionService.getSpendingSectionsByPersonId(anyInt()))
                 .thenReturn(Arrays.asList(generateSpendingSection(5000, 0), generateSpendingSection(5000, 1)));
-        when(settingsDao.getSettingsById(anyInt()))
+        when(settingsService.getSettingsById(anyInt()))
                 .thenReturn(new Settings(1, LocalDate.now(), LocalDate.now().plus(1, ChronoUnit.MONTHS)));
 
-        when(personDao.getPersonIdByLogin(anyString()))
+        when(personService.getPersonIdByLogin(anyString()))
                 .thenReturn(1);
 
         when(statisticsHandler.calculateSummaryStatisticsBySections(any(FinanceSummaryCalculationContainer.class)))
                 .thenReturn(Arrays.asList(generateFinanceSummaryBySection(), generateFinanceSummaryBySection()));
 
-        statisticsController = new StatisticsController(transactionsDao, spendingSectionDao, personDao, settingsDao, statisticsHandler);
+        statisticsController = new StatisticsController(transactionsService, spendingSectionService, personService, settingsService, statisticsHandler);
     }
 
     @Test(groups = "successfulScenario")

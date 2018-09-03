@@ -119,58 +119,6 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
     }
 
     @Override
-    public ResultContainer deleteSpendingSectionByName(String login, String sectionName) {
-        try (Session session = sessionFactory.openSession()) {
-            session.getTransaction().begin();
-
-            String isAlreadyDeletedSqlQuery =
-                    "select ss.\"isRemoved\"\n" +
-                            "FROM \"SpendingSection\" ss\n" +
-                            "WHERE ss.id = (select ss.id\n" +
-                            "                from \"Person\" p\n" +
-                            "                       join \"Access\" a on p.\"accessId\" = a.id\n" +
-                            "                       join \"SpendingSection\" ss on ss.\"personId\" = p.id\n" +
-                            "                WHERE a.login = :login\n" +
-                            "                  AND ss.name = :sectionName)";
-            Query isAlreadyDeletedQuery = session.createNativeQuery(isAlreadyDeletedSqlQuery)
-                    .setParameter("login", login)
-                    .setParameter("sectionName", sectionName);
-
-            Boolean isAlreadyDeleted = (Boolean) isAlreadyDeletedQuery.getSingleResult();
-
-            if (isAlreadyDeleted) {
-                session.getTransaction().rollback();
-                log.info("deleteSpendingSectionByInnerId - trying to delete already deleted SpendingSection. login: '{}'", login);
-                return new ResultContainer(false, SPENDING_SECTION_ALREADY_DELETED, null);
-            }
-            String sqlQuery =
-                    "update \"SpendingSection\" ss\n" +
-                            "SET \"isRemoved\" = TRUE\n" +
-                            "WHERE ss.id = (select ss.id\n" +
-                            "                from \"Person\" p\n" +
-                            "                       join \"Access\" a on p.\"accessId\" = a.id\n" +
-                            "                       join \"SpendingSection\" ss on ss.\"personId\" = p.id\n" +
-                            "                WHERE a.login = :login\n" +
-                            "                  AND ss.name = :sectionName)";
-            Query query = session.createNativeQuery(sqlQuery)
-                    .setParameter("login", login)
-                    .setParameter("sectionName", sectionName);
-
-            int updatedCount = query.executeUpdate();
-            session.getTransaction().commit();
-            if (updatedCount == 0) {
-                log.error("deleteSpendingSectionByName - updatedCount is 0");
-                return new ResultContainer(false, null, "Updated Count is 0");
-            }
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            log.error("deleteSpendingSectionByName - {}", ex.getMessage());
-            return new ResultContainer(false, null, ex.getMessage());
-        }
-        return new ResultContainer(true);
-    }
-
-    @Override
     public ResultContainer deleteSpendingSectionByInnerId(String login, Integer innerId) {
         try (Session session = sessionFactory.openSession()) {
             session.getTransaction().begin();
@@ -198,7 +146,7 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
 
             String sqlQuery =
                     "update \"SpendingSection\" s\n" +
-                            "SET \"isRemoved\" = TRUE\n" +
+                            "SET \"isRemoved\" = TRUE, name = name || '_#del'\n" +
                             "WHERE s.id = (select ss.id\n" +
                             "                from \"Person\" p\n" +
                             "                       join \"Access\" a on p.\"accessId\" = a.id\n" +

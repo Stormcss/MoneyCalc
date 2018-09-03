@@ -41,10 +41,10 @@ public class AccessController extends AbstractController implements AccessAPISer
         Access access = accessService.getAccessByLogin(login);
 
         if (access == null) {
-            log.error("Can not return Access for login \"{}\" - no Person found", login);
+            log.error("Can not return Access for login \'{}\' - no Person found", login);
             return responseError(NO_PERSON_EXIST);
         }
-        log.debug("returning Access for login \"{}\": {}", login, access);
+        log.debug("returning Access for login \'{}\': {}", login, access);
         return responseSuccess(ACCESS_RETURNED, access);
     }
 
