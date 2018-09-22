@@ -53,7 +53,8 @@ public class TransactionsController extends AbstractController implements Transa
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         // TODO: 26.08.2018 sort using db
-        List<Transaction> transactions = sortTransactionList(transactionsService.getTransactionsByLogin(login));
+        List<Transaction> transactions = transactionsService.getTransactionsByLogin(login);
+//        List<Transaction> transactions = sortTransactionList(transactionsService.getTransactionsByLogin(login));
 
         log.info("Returning Transactions for login \'{}\'", login);
 
@@ -91,7 +92,7 @@ public class TransactionsController extends AbstractController implements Transa
     public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody TransactionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        log.debug("addTransaction Request recieved {}", addContainer);
+        log.debug("addTransaction Request received {}", addContainer);
 
         Integer personId = personService.getPersonIdByLogin(login);
 
@@ -111,10 +112,10 @@ public class TransactionsController extends AbstractController implements Transa
         Integer addedTransactionId = transactionsService.addTransaction(personId, addContainer.getTransaction());
 
         if (addedTransactionId == null) {
-            log.error("Saving Transaction {} for login \'{}\' has failed", addContainer.getTransaction(), login);
+            log.error("Saving Transaction {} for login '{}' has failed", addContainer.getTransaction(), login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
-        log.info("Saved new Transaction for login \'{}\' : {}", login, addContainer.getTransaction());
+        log.info("Saved new Transaction for login '{}' : {}", login, addContainer.getTransaction());
         return responseSuccess(TRANSACTION_SAVED, addContainer.getTransaction());
     }
 

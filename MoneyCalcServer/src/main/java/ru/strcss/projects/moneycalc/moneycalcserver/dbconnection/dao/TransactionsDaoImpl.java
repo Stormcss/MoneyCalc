@@ -93,7 +93,8 @@ public class TransactionsDaoImpl implements TransactionsDao {
                     "                            ss.\"personId\" = p.id\n" +
                     "                            AND ss.\"isAdded\" IS TRUE\n" +
                     "                            AND ss.\"isRemoved\" IS FALSE\n" +
-                    "                         )";
+                    "                         )" +
+                    "order by t.date, t.id";
             NativeQuery<Transaction> sqlQuery = session.createNativeQuery(sql, Transaction.class)
                     .setParameter("login", login);
             return sqlQuery.list();
