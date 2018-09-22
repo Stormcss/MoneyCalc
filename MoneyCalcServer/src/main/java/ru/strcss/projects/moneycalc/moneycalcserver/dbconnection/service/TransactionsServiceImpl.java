@@ -33,6 +33,11 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
+    public List<Transaction> getTransactionsByLogin(String login) {
+        return transactionsDao.getTransactionsByLogin(login);
+    }
+
+    @Override
     public Integer addTransaction(Integer personId, Transaction transaction) {
         return transactionsDao.addTransaction(personId, transaction);
     }

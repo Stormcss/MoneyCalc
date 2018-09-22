@@ -32,69 +32,79 @@ public interface MoneyCalcClient {
     /**
      * Settings
      */
-    @POST("/api/settings/saveSettings")
-    Call<MoneyCalcRs<Settings>> saveSettings(@Header("Authorization") String token,
-                                             @Body SettingsUpdateContainer updateContainer);
+    @POST("/api/settings/update")
+    Call<MoneyCalcRs<Settings>> updateSettings(@Header("Authorization") String token,
+                                               @Body SettingsUpdateContainer updateContainer);
 
-    @GET("/api/settings/getSettings")
+    @GET("/api/settings/get")
     Call<MoneyCalcRs<Settings>> getSettings(@Header("Authorization") String token);
 
-    @POST("/api/settings/addSpendingSection")
+    @POST("/api/settings/spendingSection/add")
     Call<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@Header("Authorization") String token,
                                                                 @Body SpendingSectionAddContainer spendingSectionContainer);
 
-    @POST("/api/settings/updateSpendingSection")
+    @POST("/api/settings/spendingSection/update")
     Call<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@Header("Authorization") String token,
                                                                    @Body SpendingSectionUpdateContainer updateContainer);
 
-    @POST("/api/settings/deleteSpendingSection")
+    @POST("/api/settings/spendingSection/delete")
     Call<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@Header("Authorization") String token,
                                                                    @Body SpendingSectionDeleteContainer deleteContainer);
 
-    @GET("/api/settings/getSpendingSections")
+    @GET("/api/settings/spendingSection/get")
     Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSections(@Header("Authorization") String token);
+
+    @GET("/api/settings/spendingSection/get?withNonAdded=true")
+    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithNonAdded(@Header("Authorization") String token);
+
+    @GET("/api/settings/spendingSection/get?withRemoved=true")
+    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemoved(@Header("Authorization") String token);
+
+    @GET("/api/settings/spendingSection/get?withRemovedOnly=true")
+    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemovedOnly(@Header("Authorization") String token);
 
     /**
      * Identifications
      */
-    @POST("/api/identifications/saveIdentifications")
+    @POST("/api/identifications/update")
     Call<MoneyCalcRs<Identifications>> saveIdentifications(@Header("Authorization") String token,
                                                            @Body IdentificationsUpdateContainer updateContainer);
 
-    @GET("/api/identifications/getIdentifications")
+    @GET("/api/identifications/get")
     Call<MoneyCalcRs<Identifications>> getIdentifications(@Header("Authorization") String token);
 
     /**
      * Transactions
      */
-    @POST("/api/finance/transactions/getTransactions")
+    @POST("/api/transactions/getFiltered")
     Call<MoneyCalcRs<List<Transaction>>> getTransactions(@Header("Authorization") String token,
                                                          @Body TransactionsSearchContainer container);
 
-    @POST("/api/finance/transactions/addTransaction")
+    @POST("/api/transactions/add")
     Call<MoneyCalcRs<Transaction>> addTransaction(@Header("Authorization") String token,
                                                   @Body TransactionAddContainer transactionContainer);
 
-    @POST("/api/finance/transactions/deleteTransaction")
+    @POST("/api/transactions/delete")
     Call<MoneyCalcRs<Void>> deleteTransaction(@Header("Authorization") String token,
                                               @Body TransactionDeleteContainer transactionContainer);
 
-    @POST("/api/finance/transactions/updateTransaction")
+    @POST("/api/transactions/update")
     Call<MoneyCalcRs<Transaction>> updateTransaction(@Header("Authorization") String token,
                                                      @Body TransactionUpdateContainer transactionUpdateContainer);
-
-    @POST("/api/finance/transactions/dropStatistics")
-    Call<MoneyCalcRs<List<Transaction>>> dropTransactions(@Header("Authorization") String token);
 
     /**
      * Statistics
      */
-    @POST("/api/statistics/financeSummary/getFinanceSummaryBySection")
+    @POST("/api/stats/summaryBySection/get")
+    Call<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@Header("Authorization") String token);
+
+    @POST("/api/stats/summaryBySection/getFiltered")
     Call<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@Header("Authorization") String token,
                                                                                 @Body FinanceSummaryGetContainer getContainer);
 
-
-
-    @GET("/api/access/getAccess")
+    /**
+     * Access
+     */
+    @GET("/api/access/get")
     Call<MoneyCalcRs<Access>> getAccess(@Header("Authorization") String token);
 }

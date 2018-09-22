@@ -7,7 +7,7 @@ import ru.strcss.projects.moneycalc.enitities.Identifications;
 
 public interface IdentificationsAPIService {
 
-    ResponseEntity<MoneyCalcRs<Identifications>> saveIdentifications(IdentificationsUpdateContainer updateContainer);
+    ResponseEntity<MoneyCalcRs<Identifications>> updateIdentifications(IdentificationsUpdateContainer updateContainer);
 
     ResponseEntity<MoneyCalcRs<Identifications>> getIdentifications();
 }

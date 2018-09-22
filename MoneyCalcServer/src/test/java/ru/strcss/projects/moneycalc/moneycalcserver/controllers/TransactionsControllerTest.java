@@ -39,13 +39,14 @@ public class TransactionsControllerTest {
     private TransactionsService transactionsService = mock(TransactionsService.class);
     private PersonService personService = mock(PersonService.class);
     private SpendingSectionService sectionService = mock(SpendingSectionService.class);
-    
+
     private TransactionsController transactionsController;
     private List<Integer> requiredSections = Arrays.asList(0, 1);
     private Integer transactionsCount = 50;
 
     private LocalDate dateFrom = LocalDate.of(2017, 2, 10);
     private LocalDate dateTo = LocalDate.of(2017, 2, 20);
+
     @BeforeClass
     public void setUp() {
         User user = new User("login", "password", Collections.emptyList());
@@ -76,22 +77,6 @@ public class TransactionsControllerTest {
 
     @BeforeGroups(groups = "failedScenario")
     public void prepare_failedScenario() {
-//        List<Transaction> transactionList = generateTransactionList(transactionsCount, requiredSections);
-//        transactionList.get(1).setDate(LocalDate.now().minus(1, ChronoUnit.DAYS));
-//
-//        when(transactionsService.getTransactionsByLogin(anyString(), any(LocalDate.class), any(LocalDate.class),
-//                anyListOf(Integer.class))).thenReturn(transactionList);
-//        when(transactionsService.getTransactionById(anyInt()))
-//                .thenReturn(generateTransaction());
-//        when(transactionsService.addTransaction(anyInt(), any(Transaction.class)))
-//                .thenReturn(1);
-//        when(transactionsService.deleteTransaction(any(Transaction.class)))
-//                .thenReturn(true);
-//        when(transactionsService.updateTransaction(any(Transaction.class)))
-//                .thenReturn(true);
-//        when(sectionService.isSpendingSectionIdExists(anyInt(), anyInt()))
-//                .thenReturn(true);
-//
         transactionsController = new TransactionsController(transactionsService, sectionService, personService);
     }
 

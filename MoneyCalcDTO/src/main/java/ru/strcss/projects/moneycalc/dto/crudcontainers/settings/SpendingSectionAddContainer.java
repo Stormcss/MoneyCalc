@@ -20,7 +20,7 @@ public class SpendingSectionAddContainer extends AbstractContainer {
     @Override
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (spendingSection == null) reasons.add("SpendingSection is empty");
+        if (spendingSection == null) reasons.add("spendingSection is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

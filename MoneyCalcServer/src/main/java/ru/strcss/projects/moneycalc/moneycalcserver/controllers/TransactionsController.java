@@ -4,10 +4,7 @@ import io.micrometer.core.annotation.Timed;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import ru.strcss.projects.moneycalc.api.TransactionsAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
@@ -23,6 +20,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfa
 
 import java.util.List;
 
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
 import static ru.strcss.projects.moneycalc.utils.Merger.mergeTransactions;
@@ -30,7 +28,7 @@ import static ru.strcss.projects.moneycalc.utils.Merger.mergeTransactions;
 @Timed
 @Slf4j
 @RestController
-@RequestMapping("/api/finance/transactions")
+@RequestMapping("/api/transactions")
 public class TransactionsController extends AbstractController implements TransactionsAPIService {
 
     private TransactionsService transactionsService;
@@ -43,13 +41,33 @@ public class TransactionsController extends AbstractController implements Transa
         this.personService = personService;
     }
 
+    // TODO: 26.08.2018 test me
     /**
-     * Get list of Transactions by user's login
+     * Get filtered list of Transactions by user's login
+     * Returned transactions are filtered by dates range at Settings and active
+     *
+     * @return response object with list of Transactions
+     */
+    @GetMapping(value = "/get")
+    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions() {
+        String login = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        // TODO: 26.08.2018 sort using db
+        List<Transaction> transactions = transactionsService.getTransactionsByLogin(login);
+//        List<Transaction> transactions = sortTransactionList(transactionsService.getTransactionsByLogin(login));
+
+        log.info("Returning Transactions for login \'{}\'", login);
+
+        return responseSuccess(TRANSACTIONS_RETURNED, transactions);
+    }
+
+    /**
+     * Get filtered list of Transactions by user's login - return transactions only for specific dates range and Ids
      *
      * @param getContainer - TransactionsSearchContainer
      * @return response object with list of Transactions
      */
-    @PostMapping(value = "/getTransactions")
+    @PostMapping(value = "/getFiltered")
     public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions(@RequestBody TransactionsSearchContainer getContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -64,15 +82,17 @@ public class TransactionsController extends AbstractController implements Transa
         List<Transaction> transactions = sortTransactionList(transactionsService.getTransactionsByLogin(login,
                 getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getRequiredSections()));
 
-        log.info("Returning Transactions for login \"{}\", dateFrom {}, dateTo {} : {}",
+        log.info("Returning Transactions for login \'{}\', applying Filter: dateFrom {}, dateTo {} : {}",
                 login, getContainer.getRangeFrom(), getContainer.getRangeTo(), transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }
 
-    @PostMapping(value = "/addTransaction")
+    @PostMapping(value = "/add")
     public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody TransactionAddContainer addContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        log.debug("addTransaction Request received {}", addContainer);
 
         Integer personId = personService.getPersonIdByLogin(login);
 
@@ -92,10 +112,10 @@ public class TransactionsController extends AbstractController implements Transa
         Integer addedTransactionId = transactionsService.addTransaction(personId, addContainer.getTransaction());
 
         if (addedTransactionId == null) {
-            log.error("Saving Transaction {} for login \"{}\" has failed", addContainer.getTransaction(), login);
+            log.error("Saving Transaction {} for login '{}' has failed", addContainer.getTransaction(), login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
-        log.info("Saved new Transaction for login \"{}\" : {}", login, addContainer.getTransaction());
+        log.info("Saved new Transaction for login '{}' : {}", login, addContainer.getTransaction());
         return responseSuccess(TRANSACTION_SAVED, addContainer.getTransaction());
     }
 
@@ -108,7 +128,7 @@ public class TransactionsController extends AbstractController implements Transa
      * @return
      */
 
-    @PostMapping(value = "/updateTransaction")
+    @PostMapping(value = "/update")
     public ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -130,15 +150,15 @@ public class TransactionsController extends AbstractController implements Transa
         boolean isUpdateSuccessful = transactionsService.updateTransaction(resultTransaction);
 
         if (!isUpdateSuccessful) {
-            log.error("Updating Transaction for login \"{}\" has failed", login);
+            log.error("Updating Transaction for login \'{}\' has failed", login);
             return responseError(TRANSACTION_UPDATED);
         }
 
-        log.info("Updated Transaction {}: for login: \"{}\" with values: {}", resultTransaction, login, updateContainer.getTransaction());
+        log.info("Updated Transaction {}: for login: \'{}\' with values: {}", resultTransaction, login, updateContainer.getTransaction());
         return responseSuccess(TRANSACTION_UPDATED, resultTransaction);
     }
 
-    @PostMapping(value = "/deleteTransaction")
+    @PostMapping(value = "/delete")
     public ResponseEntity<MoneyCalcRs<Void>> deleteTransaction(@RequestBody TransactionDeleteContainer deleteContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -149,17 +169,17 @@ public class TransactionsController extends AbstractController implements Transa
         Transaction deletedTransaction = transactionsService.getTransactionById(deleteContainer.getId());
 
         if (deletedTransaction == null) {
-            log.error("Transaction with id: \"{}\" was not found", deleteContainer.getId());
+            log.error("Transaction with id: \'{}\' was not found", deleteContainer.getId());
             return responseError(TRANSACTION_NOT_FOUND);
         }
 
         boolean isDeleteSuccessful = transactionsService.deleteTransaction(deletedTransaction);
 
         if (!isDeleteSuccessful) {
-            log.error("Deleting Transaction for login \"{}\" has failed", login);
+            log.error("Deleting Transaction for login \'{}\' has failed", login);
             return responseError("Transaction was not deleted!");
         }
-        log.info("Deleted Transaction id \"{}\": for login: \"{}\"", deleteContainer.getId(), login);
+        log.info("Deleted Transaction id \'{}\': for login: \'{}\'", deleteContainer.getId(), login);
 
         // TODO: 06.02.2018 some payload should be returned
         return responseSuccess(TRANSACTION_DELETED, null);

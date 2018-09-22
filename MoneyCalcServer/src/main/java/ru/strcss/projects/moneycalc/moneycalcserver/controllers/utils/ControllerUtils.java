@@ -44,12 +44,12 @@ public class ControllerUtils {
         return new ResponseEntity<>(new MoneyCalcRs<>(Status.ERROR, null, message), headers, httpStatus);
     }
 
-    public static String formatDateToString(LocalDate date) {
+    public static String localDate2String(LocalDate date) {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         return date.format(formatter);
     }
 
-    public static LocalDate formatDateFromString(String date) {
+    public static LocalDate string2LocalDate(String date) {
         return LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
     }
 
@@ -69,13 +69,14 @@ public class ControllerUtils {
     public static List<Transaction> sortTransactionList(List<Transaction> incomeList) {
         List<Transaction> transactionList = new ArrayList<>(incomeList);
         transactionList.sort(Comparator.comparing(Transaction::getDate));
-//        transactionList.sort(Comparator.comparing(tr -> formatDateFromString(tr.getDate())));
+//        transactionList.sort(Comparator.comparing(tr -> string2LocalDate(tr.getDate())));
         return transactionList;
     }
 
     public static void fillDefaultValues(Transaction transaction) {
         if (transaction.getDate() == null)
             transaction.setDate(LocalDate.now());
+//            transaction.setDate(localDate2String(LocalDate.now()));
         if (transaction.getCurrency() == null)
             transaction.setCurrency("RUR");
     }

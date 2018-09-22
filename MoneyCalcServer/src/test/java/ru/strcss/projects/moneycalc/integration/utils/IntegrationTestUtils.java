@@ -27,7 +27,6 @@ import java.util.regex.Pattern;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
-import static ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType.BY_ID;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateCredentials;
 
 @Slf4j
@@ -54,7 +53,8 @@ public class IntegrationTestUtils {
             log.debug("{} - {}", errorBodyMessage, response.code());
             if (expectedStatus != null && expectedStatus.equals(Status.SUCCESS))
                 // TODO: 30.05.2018 add storing http code in Status object
-                assertEquals(response.code(), 200, "Response code is not 200!");
+                assertEquals(response.code(), 200, errorBodyMessage);
+//                assertEquals(response.code(), 200, "Response code is not 200!");
         } else {
             assertNotNull(response.body(), "Response body is null!");
             if (expectedStatus != null)
@@ -181,9 +181,9 @@ public class IntegrationTestUtils {
      * @param id    - deleted Transaction id
      * @return income Rs object
      */
-    public static MoneyCalcRs<List<SpendingSection>> deleteSpendingSectionByIdGetRs(MoneyCalcClient service, String token, String id) {
+    public static MoneyCalcRs<List<SpendingSection>> deleteSpendingSectionByIdGetRs(MoneyCalcClient service, String token, Integer id) {
         SpendingSectionDeleteContainer deleteContainerById =
-                new SpendingSectionDeleteContainer(id, BY_ID);
+                new SpendingSectionDeleteContainer(id);
         return sendRequest(service.deleteSpendingSection(token, deleteContainerById), Status.SUCCESS).body();
     }
 
@@ -206,16 +206,16 @@ public class IntegrationTestUtils {
                                                                  LocalDate dateTo, Integer sectionId) {
         List<Integer> requiredSections = Arrays.asList(sectionId);
         TransactionsSearchContainer container = new TransactionsSearchContainer(dateFrom, dateTo, requiredSections);
-//        TransactionsSearchContainer container = new TransactionsSearchContainer(formatDateToString(dateFrom),
-//                formatDateToString(dateTo), requiredSections);
+//        TransactionsSearchContainer container = new TransactionsSearchContainer(localDate2String(dateFrom),
+//                localDate2String(dateTo), requiredSections);
         return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
     }
 
     public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
                                                                  LocalDate dateTo, List<Integer> sectionIds) {
         TransactionsSearchContainer container = new TransactionsSearchContainer(dateFrom, dateTo, sectionIds);
-//        TransactionsSearchContainer container = new TransactionsSearchContainer(formatDateToString(dateFrom),
-//                formatDateToString(dateTo), sectionIds);
+//        TransactionsSearchContainer container = new TransactionsSearchContainer(localDate2String(dateFrom),
+//                localDate2String(dateTo), sectionIds);
         return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
     }
 }

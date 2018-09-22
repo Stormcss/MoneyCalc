@@ -13,11 +13,11 @@ import java.util.List;
 
 public interface SettingsAPIService {
 
-    ResponseEntity<MoneyCalcRs<Settings>> saveSettings(SettingsUpdateContainer updateContainer);
+    ResponseEntity<MoneyCalcRs<Settings>> updateSettings(SettingsUpdateContainer updateContainer);
 
     ResponseEntity<MoneyCalcRs<Settings>> getSettings();
 
-    ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections();
+    ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections(boolean withNonAdded, boolean withRemoved, boolean withRemovedOnly);
 
     ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(SpendingSectionAddContainer addContainer);
 

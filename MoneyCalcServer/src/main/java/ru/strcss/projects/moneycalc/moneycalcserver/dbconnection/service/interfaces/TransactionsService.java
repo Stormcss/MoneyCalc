@@ -13,6 +13,8 @@ public interface TransactionsService {
 
     List<Transaction> getTransactionsByLogin(String login, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds);
 
+    List<Transaction> getTransactionsByLogin(String login);
+
     Integer addTransaction(Integer personId, Transaction transaction);
 
     boolean updateTransaction(Transaction transaction);

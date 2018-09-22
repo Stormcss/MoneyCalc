@@ -11,7 +11,6 @@ import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.currentDate;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 
@@ -47,8 +46,8 @@ public class Generator {
 
     public static Settings generateSettings() {
         return Settings.builder()
-                .periodFrom(formatDateToString(currentDate()))
-                .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
+                .periodFrom(currentDate())
+                .periodTo(generateDatePlus(ChronoUnit.MONTHS, 1))
                 .build();
     }
 
@@ -136,7 +135,7 @@ public class Generator {
                 .id(id == null ? ThreadLocalRandom.current().nextInt(3000) : id)
                 .sectionId(innerId)
                 .isAdded(isAdded == null ? true : isAdded)
-                .isRemoved(isRemoved == null ? false : isRemoved)
+                .isRemoved(isRemoved)
                 .name(name == null ? "Магазин" + ThreadLocalRandom.current().nextInt(500_000) : name)
                 .budget(budget == null ? 1000 + ThreadLocalRandom.current().nextInt(9000) : budget)
                 .build();
@@ -148,7 +147,7 @@ public class Generator {
                 .moneySpendAll(1000)
                 .summaryBalance(3000d)
                 .todayBalance(100d)
-                .sectionID(1)
+                .sectionId(1)
                 .build();
     }
 

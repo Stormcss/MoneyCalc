@@ -8,5 +8,8 @@ import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
 import java.util.List;
 
 public interface StatisticsAPIService {
+
+    ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection();
+
     ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(FinanceSummaryGetContainer container);
 }

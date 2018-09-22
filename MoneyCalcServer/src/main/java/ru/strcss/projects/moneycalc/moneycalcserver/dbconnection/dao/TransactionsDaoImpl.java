@@ -3,6 +3,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao;
 import lombok.Setter;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -31,85 +32,86 @@ public class TransactionsDaoImpl implements TransactionsDao {
 
     @Override
     public Transaction getTransactionById(Integer transactionId) {
-        Session session = sessionFactory.openSession();
-
-        String hql = "FROM Transactions t WHERE t.id = :transactionId";
-        Query<Transaction> query = session.createQuery(hql, Transaction.class)
-                .setParameter("transactionId", transactionId);
-        try {
-            Transaction transaction = query.getSingleResult();
-            session.close();
-            return transaction;
+        try (Session session = sessionFactory.openSession()) {
+            String hql = "FROM Transactions t WHERE t.id = :transactionId";
+            Query<Transaction> query = session.createQuery(hql, Transaction.class)
+                    .setParameter("transactionId", transactionId);
+            return query.getSingleResult();
         } catch (NoResultException nre) {
-            session.close();
             return null;
         }
     }
 
     @Override
-    public List<Transaction> getTransactionsByPersonId(Integer personId, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds) {
-        Session session = sessionFactory.openSession();
+    public List<Transaction> getTransactionsByPersonId(Integer personId, LocalDate dateFrom, LocalDate
+            dateTo, List<Integer> sectionIds) {
 
-        String hql;
         List<Transaction> transactionList;
+        try (Session session = sessionFactory.openSession()) {
 
-        if (sectionIds.isEmpty()) {
-            hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo";
-            transactionList = session.createQuery(hql, Transaction.class)
-                    .setParameter("personId", personId)
-                    .setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo)
-                    .list();
-        } else {
-            hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo AND t.sectionId IN (:ids)";
-            transactionList = session.createQuery(hql, Transaction.class)
-                    .setParameter("personId", personId)
-                    .setParameter("dateFrom", dateFrom)
-                    .setParameter("dateTo", dateTo)
-                    .setParameter("ids", sectionIds)
-                    .list();
+            String hql;
+            if (sectionIds == null || sectionIds.isEmpty()) {
+                hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo";
+                transactionList = session.createQuery(hql, Transaction.class)
+                        .setParameter("personId", personId)
+                        .setParameter("dateFrom", dateFrom)
+                        .setParameter("dateTo", dateTo)
+                        .list();
+            } else {
+                hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo AND t.sectionId IN (:ids)";
+                transactionList = session.createQuery(hql, Transaction.class)
+                        .setParameter("personId", personId)
+                        .setParameter("dateFrom", (dateFrom))
+                        .setParameter("dateTo", dateTo)
+                        .setParameter("ids", sectionIds)
+                        .list();
+            }
         }
-
-        session.close();
         return transactionList;
     }
 
     @Override
-    public List<Transaction> getTransactionsByLogin(String login, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds) {
+    public List<Transaction> getTransactionsByLogin(String login, LocalDate dateFrom, LocalDate
+            dateTo, List<Integer> sectionIds) {
         Integer personId = personDao.getPersonIdByLogin(login);
         return this.getTransactionsByPersonId(personId, dateFrom, dateTo, sectionIds);
     }
 
     @Override
-    public Integer addTransaction(Integer personId, Transaction transaction) {
-        Session session = sessionFactory.openSession();
-        transaction.setPersonId(personId);
+    public List<Transaction> getTransactionsByLogin(String login) {
+        try (Session session = sessionFactory.openSession()) {
+            String sql = "select t.* from \"Transactions\" t\n" +
+                    "join \"Person\" p on t.\"personId\" = p.id\n" +
+                    "join \"Settings\" s on p.\"settingsId\" = s.id\n" +
+                    "join \"Access\" a on p.\"accessId\" = a.id\n" +
+                    "where\n" +
+                    "    a.login = :login\n" +
+                    "    AND t.date >= s.\"periodFrom\"\n" +
+                    "    AND t.date < s.\"periodTo\"\n" +
+                    "    AND t.\"sectionId\" IN (select ss.\"sectionId\" from \"SpendingSection\" ss\n" +
+                    "                          where\n" +
+                    "                            ss.\"personId\" = p.id\n" +
+                    "                            AND ss.\"isAdded\" IS TRUE\n" +
+                    "                            AND ss.\"isRemoved\" IS FALSE\n" +
+                    "                         )" +
+                    "order by t.date, t.id";
+            NativeQuery<Transaction> sqlQuery = session.createNativeQuery(sql, Transaction.class)
+                    .setParameter("login", login);
+            return sqlQuery.list();
+        }
+    }
 
-        Integer addedTransactionId = (Integer) session.save(transaction);
-        session.close();
-        return addedTransactionId;
+    @Override
+    public Integer addTransaction(Integer personId, Transaction transaction) {
+        try (Session session = sessionFactory.openSession()) {
+            transaction.setPersonId(personId);
+            return (Integer) session.save(transaction);
+        }
     }
 
     @Override
     public boolean updateTransaction(Transaction transaction) {
         return DaoUtils.updateEntity(sessionFactory, transaction);
-//        Session session = sessionFactory.openSession();
-//
-//        boolean isError = false;
-//        try {
-//            session.beginTransaction();
-//            session.update(transaction);
-//        } catch (Exception ex) {
-//            ex.printStackTrace();
-//            isError = true;
-//        } finally {
-//            if (!isError)
-//                session.getTransaction().commit();
-//            else
-//                session.getTransaction().rollback();
-//            session.close();
-//        }
-//        return !isError;
     }
 
     @Override

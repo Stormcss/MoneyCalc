@@ -19,10 +19,7 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 import static org.testng.Assert.*;
-import static ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType.BY_ID;
-import static ru.strcss.projects.moneycalc.dto.crudcontainers.SpendingSectionSearchType.BY_NAME;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.*;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSettings;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSection;
@@ -31,33 +28,9 @@ import static ru.strcss.projects.moneycalc.testutils.TestUtils.getMaxSpendingSec
 @Slf4j
 public class SettingsControllerIT extends AbstractIT {
 
-    @Test
-    public void saveSettingsIncorrectDateFrom() {
-        Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
-        String token = loginAndToken.getRight();
-
-        Settings settingsIncorrect = generateSettings();
-        settingsIncorrect.setPeriodFrom("");
-
-        Response<MoneyCalcRs<Settings>> saveSettingsRs =
-                sendRequest(service.saveSettings(token, new SettingsUpdateContainer(settingsIncorrect)));
-
-        assertFalse(saveSettingsRs.isSuccessful(), "Incorrect Settings are saved!");
-    }
-
-    @Test
-    public void saveDuplicateSpendingSections() {
-        Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
-        String token = loginAndToken.getRight();
-        SpendingSection spendingSection = generateSpendingSection();
-
-        sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
-        Response<MoneyCalcRs<List<SpendingSection>>> addSectionRs =
-                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)));
-
-        assertFalse(addSectionRs.isSuccessful(), "Response is not failed!");
-    }
-
+    /**
+     * Settings
+     */
     @Test
     public void getSettings() {
         Pair<IdsContainer, String> idsAndToken = savePersonGetIdsAndToken(service);
@@ -74,21 +47,19 @@ public class SettingsControllerIT extends AbstractIT {
         Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
         String token = loginAndToken.getRight();
         Settings newSettings = generateSettings();
-        newSettings.setPeriodTo(formatDateToString(generateDatePlus(ChronoUnit.YEARS, 1)));
+        newSettings.setPeriodTo(generateDatePlus(ChronoUnit.YEARS, 1));
 
         //Updating Settings
-        MoneyCalcRs<Settings> updatedRs = sendRequest(service.saveSettings(token, new SettingsUpdateContainer(newSettings)), Status.SUCCESS).body();
+        MoneyCalcRs<Settings> updatedRs = sendRequest(service.updateSettings(token, new SettingsUpdateContainer(newSettings)), Status.SUCCESS).body();
 
         assertNotNull(updatedRs.getPayload(), "Payload is null!");
         assertEquals(newSettings.getPeriodTo(),
                 updatedRs.getPayload().getPeriodTo(), "Settings were not updated!");
-
-        //Checking that Person is ok after updating Settings
-//        MoneyCalcRs<Identifications> identificationsRs = sendRequest(service.getIdentifications(token)).body();
-//        assertNotNull(identificationsRs.getPayload(), "Identifications object was overwritten!");
     }
 
-
+    /**
+     * Spending Sections
+     */
     @Test
     public void addSpendingSection() {
         int ignoredId = 6;
@@ -100,6 +71,19 @@ public class SettingsControllerIT extends AbstractIT {
         assertTrue(addSectionRs.getPayload().stream().anyMatch(section -> section.getName().equals(spendingSection.getName())),
                 "Spending Section was not added!");
         assertTrue(addSectionRs.getPayload().stream().noneMatch(section -> section.getId() == ignoredId));
+    }
+
+    @Test
+    public void addDuplicateSpendingSections() {
+        Pair<String, String> loginAndToken = savePersonGetLoginAndToken(service);
+        String token = loginAndToken.getRight();
+        SpendingSection spendingSection = generateSpendingSection();
+
+        sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
+        Response<MoneyCalcRs<List<SpendingSection>>> addSectionRs =
+                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)));
+
+        assertFalse(addSectionRs.isSuccessful(), "Response is not failed!");
     }
 
     @Test
@@ -121,20 +105,22 @@ public class SettingsControllerIT extends AbstractIT {
         }
     }
 
+    /**
+     * Test case when we are adding spending section with name which has deleted section
+     */
     @Test
-    public void deleteSpendingSectionByName() {
+    public void addSpendingSection_sectionWithDeletedName() {
         String token = savePersonGetToken(service);
-        SpendingSection spendingSection = generateSpendingSection();
 
-        SpendingSectionDeleteContainer deleteContainerByName =
-                new SpendingSectionDeleteContainer(spendingSection.getName(), BY_NAME);
+        MoneyCalcRs<List<SpendingSection>> sectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+        SpendingSection deletedSection = sectionsRs.getPayload().get(0);
+        String deletedSectionName = deletedSection.getName();
 
-        addSpendingSectionGetRs(service, token, spendingSection);
-
-        MoneyCalcRs<List<SpendingSection>> deleteSectionRs =
-                sendRequest(service.deleteSpendingSection(token, deleteContainerByName), Status.SUCCESS).body();
-        assertTrue(deleteSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(spendingSection.getName())),
-                "Spending Section was not deleted!");
+        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer(deletedSection.getSectionId());
+        Response<MoneyCalcRs<List<SpendingSection>>> deleteRs = sendRequest(service.deleteSpendingSection(token, deleteContainer), Status.SUCCESS);
+        Response<MoneyCalcRs<List<SpendingSection>>> addRs = sendRequest(service.addSpendingSection(token,
+                new SpendingSectionAddContainer(generateSpendingSection(deletedSectionName))),
+                Status.SUCCESS);
     }
 
     @Test
@@ -144,81 +130,10 @@ public class SettingsControllerIT extends AbstractIT {
 
         int addedSectionId = addSpendingSectionGetId(service, token, spendingSection);
 
-        MoneyCalcRs<List<SpendingSection>> deleteSectionRs = deleteSpendingSectionByIdGetRs(service, token, "" + addedSectionId);
+        MoneyCalcRs<List<SpendingSection>> deleteSectionRs = deleteSpendingSectionByIdGetRs(service, token, addedSectionId);
 
         assertTrue(deleteSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(spendingSection.getName())),
                 "Spending Section was not deleted!");
-    }
-
-    @Test
-    public void updateSpendingSectionByName() {
-        String token = savePersonGetToken(service);
-        SpendingSection spendingSection = generateSpendingSection();
-
-        MoneyCalcRs<List<SpendingSection>> addSpendingSectionRs = addSpendingSectionGetRs(service, token, spendingSection);
-
-        Integer oldBudget = spendingSection.getBudget();
-        spendingSection.setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
-
-        SpendingSectionUpdateContainer updateContainerByName =
-                new SpendingSectionUpdateContainer("" + spendingSection.getName(), spendingSection, BY_NAME);
-
-        MoneyCalcRs<List<SpendingSection>> updateSectionRs =
-                sendRequest(service.updateSpendingSection(token, updateContainerByName), Status.SUCCESS).body();
-        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getBudget().equals(oldBudget)),
-                "Spending Section was not updated!");
-        assertEquals(addSpendingSectionRs.getPayload().size(), updateSectionRs.getPayload().size(),
-                "Number of Spending Sections has changed!");
-        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getId() == null),
-                "Some Section IDs are null!");
-    }
-
-    @Test
-    public void updateSpendingSectionById() {
-        String token = savePersonGetToken(service);
-        SpendingSection spendingSection = generateSpendingSection();
-        Integer updatedSectionID = 0;
-
-        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
-
-        String oldName = getSectionsRs.getPayload()
-                .stream().filter(section -> section.getSectionId().equals(updatedSectionID)).findAny().get().getName();
-        spendingSection.setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
-
-        SpendingSectionUpdateContainer updateContainerById =
-                new SpendingSectionUpdateContainer(Integer.toString(updatedSectionID), spendingSection, BY_ID);
-
-        MoneyCalcRs<List<SpendingSection>> updateSectionRs =
-                sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body();
-        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(oldName)),
-                "Spending Section was not updated!");
-        assertEquals(getSectionsRs.getPayload().size(), updateSectionRs.getPayload().size(), "Number of Spending Sections has changed!");
-        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getId() == null), "Some Section IDs are null!");
-    }
-
-    @Test
-    public void updateSpendingSection_duplicateNames() {
-        String token = savePersonGetToken(service);
-        SpendingSection spendingSection1 = generateSpendingSection();
-        SpendingSection spendingSection2 = generateSpendingSection();
-
-        addSpendingSectionGetRs(service, token, spendingSection1);
-        addSpendingSectionGetRs(service, token, spendingSection2);
-
-        Response<MoneyCalcRs<List<SpendingSection>>> updateSectionRs = sendRequest(service.updateSpendingSection(token,
-                new SpendingSectionUpdateContainer(spendingSection1.getName(),
-                        spendingSection2, BY_NAME)));
-
-        assertFalse(updateSectionRs.isSuccessful(), "Response is not failed!");
-    }
-
-    @Test
-    public void getSpendingSections() {
-        String token = savePersonGetToken(service);
-
-        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
-
-        assertEquals(getSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
     }
 
     /**
@@ -233,12 +148,119 @@ public class SettingsControllerIT extends AbstractIT {
         int addedSection1Id = addSpendingSectionGetId(service, token, spendingSection1);
 
         //deleting added Spending section and adding new spending section
-        deleteSpendingSectionByIdGetRs(service, token, "" + addedSection1Id);
+        deleteSpendingSectionByIdGetRs(service, token, addedSection1Id);
         MoneyCalcRs<List<SpendingSection>> addingSection2Rs = addSpendingSectionGetRs(service, token, generateSpendingSection());
 
         assertTrue(addingSection2Rs.getPayload().stream().noneMatch(section -> section.getName().equals(spendingSection1.getName())),
                 "Spending Section was not deleted!");
         assertEquals(getMaxSpendingSectionId(addingSection2Rs.getPayload()), addedSection1Id + 1,
                 "Spending Section Id is not incremented!");
+
+        //getting removed sections
+        MoneyCalcRs<List<SpendingSection>> removedSectionsRs = sendRequest(service.getSpendingSectionsWithRemovedOnly(token)).body();
+        assertEquals(removedSectionsRs.getPayload().size(), 1, "Removed section size is incorrect!");
+        assertEquals(removedSectionsRs.getPayload().get(0).getName(), spendingSection1.getName() + "_#del",
+                "Removed section name is not equal!");
+    }
+
+    @Test
+    public void updateSpendingSectionById() {
+        String token = savePersonGetToken(service);
+        SpendingSection spendingSection = generateSpendingSection();
+        Integer updatedSectionId = 0;
+
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+
+        String oldName = getSectionsRs.getPayload()
+                .stream().filter(section -> section.getSectionId().equals(updatedSectionId)).findAny().get().getName();
+        spendingSection.setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
+
+        SpendingSectionUpdateContainer updateContainerById = new SpendingSectionUpdateContainer(updatedSectionId, spendingSection);
+
+        MoneyCalcRs<List<SpendingSection>> updateSectionRs =
+                sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body();
+
+        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(oldName)),
+                "Spending Section was not updated!");
+        assertEquals(getSectionsRs.getPayload().size(), updateSectionRs.getPayload().size(), "Number of Spending Sections has changed!");
+        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getId() == null), "Some Section IDs are null!");
+    }
+
+    @Test
+    public void updateSpendingSectionById_onlyBudget() {
+        String token = savePersonGetToken(service);
+        Integer updatedSectionId = 0;
+
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+
+        Integer oldBudget = getSectionsRs.getPayload()
+                .stream().filter(section -> section.getSectionId().equals(updatedSectionId)).findAny().get().getBudget();
+        getSectionsRs.getPayload().get(updatedSectionId).setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
+
+        SpendingSectionUpdateContainer updateContainerById =
+                new SpendingSectionUpdateContainer(updatedSectionId, getSectionsRs.getPayload().get(updatedSectionId));
+
+        MoneyCalcRs<List<SpendingSection>> updateSectionRs =
+                sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body();
+
+        assertNotEquals(updateSectionRs.getPayload().get(updatedSectionId).getBudget(), oldBudget,
+                "Spending Section was not updated!");
+        assertEquals(getSectionsRs.getPayload().size(), updateSectionRs.getPayload().size(), "Number of Spending Sections has changed!");
+        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getId() == null), "Some Section IDs are null!");
+    }
+
+    @Test
+    public void updateSpendingSection_duplicateNames() {
+        String token = savePersonGetToken(service);
+        SpendingSection spendingSection1 = generateSpendingSection();
+        SpendingSection spendingSection2 = generateSpendingSection();
+
+        addSpendingSectionGetRs(service, token, spendingSection1);
+        addSpendingSectionGetRs(service, token, spendingSection2);
+
+        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(spendingSection1.getSectionId(),
+                spendingSection2)), Status.ERROR);
+    }
+
+    @Test
+    public void getSpendingSections() {
+        String token = savePersonGetToken(service);
+
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+
+        assertEquals(getSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
+    }
+
+    @Test
+    public void getSpendingSections_withNonAdded() {
+        String token = savePersonGetToken(service);
+        int nonAddedId = 0;
+        SpendingSection spendingSection = new SpendingSection(null, null, nonAddedId, "Renamed",
+                false, false, 1000);
+
+        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(nonAddedId, spendingSection)), Status.SUCCESS);
+
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSectionsWithNonAdded(token), Status.SUCCESS).body();
+
+        assertEquals(getSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
+        assertFalse(getSectionsRs.getPayload().get(nonAddedId).getIsAdded(), "Section is still added!");
+    }
+
+    @Test
+    public void getSpendingSections_withRemoved() {
+        String token = savePersonGetToken(service);
+        int removedId = 0;
+
+        sendRequest(service.deleteSpendingSection(token, new SpendingSectionDeleteContainer(removedId)), Status.SUCCESS);
+
+        MoneyCalcRs<List<SpendingSection>> getWithRemovedSectionsRs =
+                sendRequest(service.getSpendingSectionsWithRemoved(token), Status.SUCCESS).body();
+        assertEquals(getWithRemovedSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
+        assertTrue(getWithRemovedSectionsRs.getPayload().get(removedId).getIsRemoved(), "Section is not removed!");
+
+        MoneyCalcRs<List<SpendingSection>> getRemovedSectionsOnlyRs =
+                sendRequest(service.getSpendingSectionsWithRemovedOnly(token), Status.SUCCESS).body();
+        assertEquals(getRemovedSectionsOnlyRs.getPayload().size(), 1, "Wrong number of spending sections is returned!");
+        assertTrue(getRemovedSectionsOnlyRs.getPayload().get(removedId).getIsRemoved(), "Section is not removed!");
     }
 }

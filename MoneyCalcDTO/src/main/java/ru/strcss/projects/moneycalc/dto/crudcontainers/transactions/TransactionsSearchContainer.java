@@ -36,8 +36,6 @@ public class TransactionsSearchContainer extends AbstractContainer {
         List<String> reasons = new ArrayList<>();
         if (rangeFrom == null) reasons.add("rangeFrom is empty");
         if (rangeTo == null) reasons.add("rangeTo is empty");
-        //        List<String> reasons = validateStringFields(new FieldPairs("rangeFrom", rangeFrom), new FieldPairs("rangeTo", rangeTo));
-//        if (requiredSections == null) reasons.add("requiredSections are empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

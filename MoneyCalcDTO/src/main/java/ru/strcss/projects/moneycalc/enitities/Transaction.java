@@ -38,8 +38,6 @@ public class Transaction implements Validationable, Serializable {
     @Column(name = "\"sectionId\"")
     private Integer sectionId;
 
-    //    @JsonDeserialize(using = LocalDateDeserializer.class)
-//    @JsonSerialize(using = LocalDateSerializer.class)
     private LocalDate date;
 
     private Integer sum;
@@ -55,5 +53,3 @@ public class Transaction implements Validationable, Serializable {
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }
-
-

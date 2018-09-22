@@ -4,9 +4,11 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import ru.strcss.projects.moneycalc.Validationable;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,7 +18,7 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "\"SpendingSection\"")
-public class SpendingSection {
+public class SpendingSection implements Validationable, Serializable {
     /**
      * id of SpendingSection - spending section id in DB Table
      */
@@ -60,11 +62,18 @@ public class SpendingSection {
      */
     private Integer budget;
 
+    @Override
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
         if (name == null || name.isEmpty()) reasons.add("name is empty");
         if (budget == null) reasons.add("budget is empty");
         if (budget != null && budget <= 0) reasons.add("budget must be >= 0");
+        if (isRemoved != null) reasons.add("isRemoved can not be set as income parameter");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
+
+    public boolean isAnyFieldSet() {
+        return (name != null && !name.isEmpty()) || budget != null || isAdded != null;
+    }
+
 }

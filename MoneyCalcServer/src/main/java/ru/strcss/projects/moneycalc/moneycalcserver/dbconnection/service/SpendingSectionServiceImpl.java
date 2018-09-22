@@ -1,13 +1,18 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.List;
 
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_NOT_DELETED;
+
+@Slf4j
 @Service
 public class SpendingSectionServiceImpl implements SpendingSectionService {
 
@@ -18,13 +23,8 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     }
 
     @Override
-    public Integer getSectionIdByName(Integer personId, String sectionName) {
-        return spendingSectionDao.getSectionIdByName(personId, sectionName);
-    }
-
-    @Override
-    public Integer getSectionIdById(Integer personId, Integer innerSectionId) {
-        return spendingSectionDao.getSectionIdById(personId, innerSectionId);
+    public Integer getSectionIdByInnerId(Integer personId, Integer innerSectionId) {
+        return spendingSectionDao.getSectionIdByInnerId(personId, innerSectionId);
     }
 
     @Override
@@ -57,13 +57,21 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     }
 
     @Override
-    @Transactional
-    public boolean deleteSpendingSection(SpendingSection section) {
-        return spendingSectionDao.deleteSpendingSection(section);
+    public ResultContainer deleteSpendingSection(String login, Integer sectionId) {
+
+        ResultContainer deletionResult = spendingSectionDao.deleteSpendingSectionByInnerId(login, sectionId);
+
+        if (deletionResult.isSuccess())
+            return deletionResult;
+        else {
+            if (deletionResult.getErrorMessage() == null)
+                deletionResult.setErrorMessage(SPENDING_SECTION_NOT_DELETED);
+            log.error("SpendingSection with id: '' was not deleted, having searchType: '{}' for login: '{}'", sectionId, login);
+        }
+        return deletionResult;
     }
 
     @Override
-    @Transactional
     public SpendingSection getSpendingSectionById(Integer sectionId) {
         return spendingSectionDao.getSpendingSectionById(sectionId);
     }
@@ -75,7 +83,8 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     }
 
     @Override
-    public List<SpendingSection> getSpendingSectionsByLogin(String login) {
-        return spendingSectionDao.getSpendingSectionsByLogin(login);
+    public List<SpendingSection> getSpendingSectionsByLogin(String login, boolean withNonAdded,
+                                                            boolean withRemoved, boolean withRemovedOnly) {
+        return spendingSectionDao.getSpendingSectionsByLogin(login, withNonAdded, withRemoved, withRemovedOnly);
     }
 }

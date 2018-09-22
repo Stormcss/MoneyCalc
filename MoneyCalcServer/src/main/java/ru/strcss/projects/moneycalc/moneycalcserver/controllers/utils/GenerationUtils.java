@@ -9,7 +9,7 @@ import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalUnit;
 import java.util.UUID;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.formatDateToString;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.localDate2String;
 
 public class GenerationUtils {
 
@@ -26,7 +26,7 @@ public class GenerationUtils {
     }
 
     public static String currentDateString() {
-        return formatDateToString(LocalDate.now());
+        return localDate2String(LocalDate.now());
     }
 
 //    public static Transaction generateTransactionID(Transaction transaction) {
@@ -62,8 +62,9 @@ public class GenerationUtils {
     public static Settings generateRegisteringSettings(String login) {
         return Settings.builder()
 //                .login(login)
-                .periodFrom(currentDateString())
-                .periodTo(formatDateToString(generateDatePlus(ChronoUnit.MONTHS, 1)))
+                .periodFrom(currentDate())
+                .periodTo(generateDatePlus(ChronoUnit.MONTHS, 1))
+//                .periodTo(localDate2String(generateDatePlus(ChronoUnit.MONTHS, 1)))
 //                .sections(Arrays.asList(SpendingSection.builder()
 //                                .id(0)
 //                                .isAdded(true)
