@@ -99,7 +99,7 @@ public class Generator {
         List<SpendingSection> spendingSections = new ArrayList<>(count);
 
         for (int i = 0; i < count; i++) {
-            SpendingSection section = generateSpendingSection(null, i, i, null, true, false);
+            SpendingSection section = generateSpendingSection(null, i, i, null, null, true, false);
             spendingSections.add(section);
         }
         if (!ordered) {
@@ -109,31 +109,32 @@ public class Generator {
     }
 
     public static SpendingSection generateSpendingSection() {
-        return generateSpendingSection(null, null, null, null, null, null);
+        return generateSpendingSection(null, null, null, null, null, null, null);
     }
 
     public static SpendingSection generateSpendingSection(String name) {
-        return generateSpendingSection(null, null, null, name, null, null);
+        return generateSpendingSection(null, null, null, name, null, null, null);
     }
 
     public static SpendingSection generateSpendingSection(Integer budget) {
-        return generateSpendingSection(budget, null, null, null, null, null);
+        return generateSpendingSection(budget, null, null, null, null, null, null);
     }
 
     public static SpendingSection generateSpendingSection(Integer budget, Integer innerId) {
         int id = innerId + ThreadLocalRandom.current().nextInt(1000);
-        return generateSpendingSection(budget, innerId, id, null, null, null);
+        return generateSpendingSection(budget, innerId, id, null, null, null, null);
     }
 
     public static SpendingSection generateSpendingSection(Integer budget, Integer innerId, String name) {
-        return generateSpendingSection(budget, innerId, null, name, null, null);
+        return generateSpendingSection(budget, innerId, null, name, null, null, null);
     }
 
     public static SpendingSection generateSpendingSection(Integer budget, Integer innerId, Integer id, String name,
-                                                          Boolean isAdded, Boolean isRemoved) {
+                                                          Integer logoId, Boolean isAdded, Boolean isRemoved) {
         return SpendingSection.builder()
                 .id(id == null ? ThreadLocalRandom.current().nextInt(3000) : id)
                 .sectionId(innerId)
+                .logoId(logoId == null ? ThreadLocalRandom.current().nextInt(3000) : logoId)
                 .isAdded(isAdded == null ? true : isAdded)
                 .isRemoved(isRemoved)
                 .name(name == null ? "Магазин" + ThreadLocalRandom.current().nextInt(500_000) : name)

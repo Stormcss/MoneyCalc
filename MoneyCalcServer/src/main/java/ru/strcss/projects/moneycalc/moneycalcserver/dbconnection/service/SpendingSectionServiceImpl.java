@@ -66,7 +66,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
         else {
             if (deletionResult.getErrorMessage() == null)
                 deletionResult.setErrorMessage(SPENDING_SECTION_NOT_DELETED);
-            log.error("SpendingSection with id: '' was not deleted, having searchType: '{}' for login: '{}'", sectionId, login);
+            log.error("SpendingSection with id: '{}' was not deleted, having searchType: 'byInnerId' for login: '{}'", sectionId, login);
         }
         return deletionResult;
     }

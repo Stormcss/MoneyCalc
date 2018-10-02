@@ -70,7 +70,7 @@ public class SettingsControllerIT extends AbstractIT {
 
         assertTrue(addSectionRs.getPayload().stream().anyMatch(section -> section.getName().equals(spendingSection.getName())),
                 "Spending Section was not added!");
-        assertTrue(addSectionRs.getPayload().stream().noneMatch(section -> section.getId() == ignoredId));
+        assertTrue(addSectionRs.getPayload().stream().noneMatch(section -> section.getSectionId() == ignoredId));
     }
 
     @Test
@@ -128,7 +128,7 @@ public class SettingsControllerIT extends AbstractIT {
         String token = savePersonGetToken(service);
         SpendingSection spendingSection = generateSpendingSection();
 
-        int addedSectionId = addSpendingSectionGetId(service, token, spendingSection);
+        int addedSectionId = addSpendingSectionGetSectionId(service, token, spendingSection);
 
         MoneyCalcRs<List<SpendingSection>> deleteSectionRs = deleteSpendingSectionByIdGetRs(service, token, addedSectionId);
 
@@ -145,7 +145,7 @@ public class SettingsControllerIT extends AbstractIT {
         SpendingSection spendingSection1 = generateSpendingSection();
 
         //Adding SpendingSection, adding Transaction to it
-        int addedSection1Id = addSpendingSectionGetId(service, token, spendingSection1);
+        int addedSection1Id = addSpendingSectionGetSectionId(service, token, spendingSection1);
 
         //deleting added Spending section and adding new spending section
         deleteSpendingSectionByIdGetRs(service, token, addedSection1Id);
@@ -235,7 +235,7 @@ public class SettingsControllerIT extends AbstractIT {
     public void getSpendingSections_withNonAdded() {
         String token = savePersonGetToken(service);
         int nonAddedId = 0;
-        SpendingSection spendingSection = new SpendingSection(null, null, nonAddedId, "Renamed",
+        SpendingSection spendingSection = new SpendingSection(null, null, nonAddedId, null, "Renamed",
                 false, false, 1000);
 
         sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(nonAddedId, spendingSection)), Status.SUCCESS);
@@ -262,5 +262,24 @@ public class SettingsControllerIT extends AbstractIT {
                 sendRequest(service.getSpendingSectionsWithRemovedOnly(token), Status.SUCCESS).body();
         assertEquals(getRemovedSectionsOnlyRs.getPayload().size(), 1, "Wrong number of spending sections is returned!");
         assertTrue(getRemovedSectionsOnlyRs.getPayload().get(removedId).getIsRemoved(), "Section is not removed!");
+    }
+
+    @Test
+    public void getSpendingSections_logoId() {
+        String token = savePersonGetToken(service);
+
+        SpendingSection spendingSection = generateSpendingSection();
+        Integer savedLogoId = spendingSection.getLogoId();
+
+        int sectionId = addSpendingSectionGetSectionId(service, token, spendingSection);
+
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+
+        Integer logoId = getSectionsRs.getPayload().stream()
+                .filter(section -> section.getSectionId().equals(sectionId))
+                .map(SpendingSection::getLogoId)
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("No item found"));
+        assertEquals(logoId, savedLogoId, "Logo Id is not the same!");
     }
 }

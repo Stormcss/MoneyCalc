@@ -155,7 +155,7 @@ public class IntegrationTestUtils {
      * @param spendingSection - added SpendingSection
      * @return added Spending Section Id
      */
-    public static int addSpendingSectionGetId(MoneyCalcClient service, String token, SpendingSection spendingSection) {
+    public static int addSpendingSectionGetSectionId(MoneyCalcClient service, String token, SpendingSection spendingSection) {
         MoneyCalcRs<List<SpendingSection>> addSectionRs =
                 sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
 
