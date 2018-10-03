@@ -36,6 +36,7 @@ CREATE TABLE "SpendingSection"
   id NUMERIC PRIMARY KEY auto_increment,
   "personId" numeric REFERENCES  "Person" (id),
   "sectionId" numeric,
+  "logoId" numeric,
   name text,
   "isAdded" boolean,
   "isRemoved" boolean,

@@ -57,7 +57,8 @@ public class SpendingSectionDaoImplTest {
                 .thenReturn(1);
 
         when(mockedQuery.getSingleResult())
-                .thenReturn(generateSpendingSection(null, null, 1, null, null, null));
+                .thenReturn(generateSpendingSection(null, null, 1, null, null,
+                        null, null));
         when(mockedQuery.list())
                 .thenReturn(Arrays.asList(1, 2));
 

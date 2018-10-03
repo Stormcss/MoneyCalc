@@ -28,6 +28,11 @@ public class SpendingSectionLegacy implements Serializable {
     private Integer sectionId;
 
     /**
+     * logoId of SpendingSection - logo id which is showed in UI (e.g. [0, 1, 2])
+     */
+    private Integer logoId;
+
+    /**
      * Name of SpendingSection which is seen in UI
      */
     private String name;

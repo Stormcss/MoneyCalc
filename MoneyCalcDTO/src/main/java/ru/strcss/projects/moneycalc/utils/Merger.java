@@ -13,6 +13,7 @@ public class Merger {
                 .id(sectionOld.getId())
                 .personId(sectionOld.getPersonId())
                 .sectionId(sectionOld.getSectionId())
+                .logoId(sectionNew.getLogoId() == null ? sectionOld.getLogoId() : sectionNew.getLogoId())
                 .isRemoved(sectionNew.getIsRemoved() == null ? sectionOld.getIsRemoved() : sectionNew.getIsRemoved())
                 .name(sectionNew.getName() == null ? sectionOld.getName() : sectionNew.getName())
                 .budget(sectionNew.getBudget() == null ? sectionOld.getBudget() : sectionNew.getBudget())
