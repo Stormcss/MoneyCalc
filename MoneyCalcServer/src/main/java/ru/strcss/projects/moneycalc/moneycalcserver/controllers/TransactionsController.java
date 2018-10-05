@@ -54,7 +54,6 @@ public class TransactionsController extends AbstractController implements Transa
 
         // TODO: 26.08.2018 sort using db
         List<Transaction> transactions = transactionsService.getTransactionsByLogin(login);
-//        List<Transaction> transactions = sortTransactionList(transactionsService.getTransactionsByLogin(login));
 
         log.info("Returning Transactions for login \'{}\'", login);
 

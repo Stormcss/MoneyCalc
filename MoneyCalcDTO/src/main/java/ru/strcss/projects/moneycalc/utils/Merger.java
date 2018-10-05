@@ -1,5 +1,7 @@
 package ru.strcss.projects.moneycalc.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 
@@ -7,6 +9,7 @@ import ru.strcss.projects.moneycalc.enitities.Transaction;
  * Utility class for merging filled object from database with income object with random null values.
  * Merging prevents overwriting non-null values in database with nulls.
  */
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class Merger {
     public static SpendingSection mergeSpendingSections(SpendingSection sectionOld, SpendingSection sectionNew) {
         return SpendingSection.builder()

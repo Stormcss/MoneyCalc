@@ -1,4 +1,4 @@
-# MoneyCalc [![Build Status](https://travis-ci.org/Stormcss/MoneyCalc.svg?branch=master)](https://travis-ci.org/Stormcss/MoneyCalc)
+# MoneyCalc [![Build Status](https://travis-ci.org/Stormcss/MoneyCalc.svg?branch=master)](https://travis-ci.org/Stormcss/MoneyCalc) [![Codacy Badge](https://api.codacy.com/project/badge/Grade/f778035a0b5045988a053ffe346970ab)](https://app.codacy.com/app/Stormcss/MoneyCalc)
 
 Backend service for pocket bookkeeping. 
 Provides REST API for storing and accessing spending history, which could be spent for custom spending sections. 

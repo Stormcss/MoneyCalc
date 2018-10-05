@@ -81,10 +81,5 @@ public class RequestValidation<E> {
         private Supplier<Boolean> action;
         private Supplier<String> actionName;
         private String objectName;
-
-//        Pair(Supplier<Boolean> action, Supplier<String> actionName) {
-//            this.action = action;
-//            this.actionName = actionName;
-//        }
     }
 }
