@@ -8,7 +8,6 @@ import org.hibernate.query.Query;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.Arrays;
@@ -29,7 +28,6 @@ public class SpendingSectionDaoImplTest {
     private Transaction mockedTransaction = mock(Transaction.class);
     private Query mockedQuery = mock(Query.class);
     private NativeQuery mockedNativeQuery = mock(NativeQuery.class);
-    private PersonDao personDao = mock(PersonDao.class);
 
     @BeforeGroups(groups = "SpendingSectionDaoSuccessfulScenario")
     public void setUp() {
@@ -62,15 +60,12 @@ public class SpendingSectionDaoImplTest {
         when(mockedQuery.list())
                 .thenReturn(Arrays.asList(1, 2));
 
-        when(personDao.getPersonIdByLogin("login"))
-                .thenReturn(1);
-
-        spendingSectionDao = new SpendingSectionDaoImpl(sessionFactory, personDao);
+        spendingSectionDao = new SpendingSectionDaoImpl(sessionFactory);
     }
 
     @BeforeGroups(groups = "SpendingSectionDaoSuccessfulScenario_Get")
     public void setUp_getChecks() {
-        spendingSectionDao = new SpendingSectionDaoImpl(sessionFactory, personDao);
+        spendingSectionDao = new SpendingSectionDaoImpl(sessionFactory);
     }
 
     @Test(groups = "SpendingSectionDaoSuccessfulScenario")

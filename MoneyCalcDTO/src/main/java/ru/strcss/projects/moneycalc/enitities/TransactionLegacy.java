@@ -4,14 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.strcss.projects.moneycalc.Validationable;
-import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
-import javax.persistence.*;
 import java.io.Serializable;
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.List;
 
 @Data
 @Builder

@@ -1,15 +1,18 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Period;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class StatisticsHandlerUtils {
 
     public static double round(double value, int places) {
-        return new BigDecimal(value).setScale(places, RoundingMode.HALF_UP).doubleValue();
+        return BigDecimal.valueOf(value).setScale(places, RoundingMode.HALF_UP).doubleValue();
     }
 
     public static TodayPositionRange getTodayPositionRange(FinanceSummaryCalculationContainer container) {

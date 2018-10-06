@@ -8,7 +8,6 @@ import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
@@ -26,12 +25,10 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
 
     @Setter
     private SessionFactory sessionFactory;
-    private PersonDao personDao;
 
 
-    public SpendingSectionDaoImpl(SessionFactory sessionFactory, PersonDao personDao) {
+    public SpendingSectionDaoImpl(SessionFactory sessionFactory) {
         this.sessionFactory = sessionFactory;
-        this.personDao = personDao;
     }
 
     @Override
@@ -200,7 +197,7 @@ public class SpendingSectionDaoImpl implements SpendingSectionDao {
             joiner.add(baseSqlQuery);
             if (!withNonAdded)
                 joiner.add("ss.isAdded IS TRUE");
-            if (!withRemovedOnly & !withRemoved)
+            if (!withRemovedOnly && !withRemoved)
                 joiner.add("ss.isRemoved IS FALSE");
             else if (withRemovedOnly)
                 joiner.add("ss.isRemoved IS TRUE");

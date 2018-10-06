@@ -65,7 +65,7 @@ public class RegisterController extends AbstractController implements RegisterAP
         log.info("Registering new Person with Login: '{}' and name: '{}'", login, credentials.getIdentifications().getName());
 
         Person registeredUser = registerService.registerUser(credentials.getAccess(), credentials.getIdentifications(),
-                generateRegisteringSettings(login));
+                generateRegisteringSettings());
 
         // TODO: 02.02.2018 validate if save is successful
         return responseSuccess(REGISTER_SUCCESSFUL, registeredUser);

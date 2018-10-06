@@ -34,9 +34,7 @@ public class Settings implements Validationable, Serializable {
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
         if (periodFrom == null) reasons.add("periodFrom is empty");
-//        if (periodFrom == null || periodFrom.isEmpty()) reasons.add("periodFrom is empty");
         if (periodTo == null) reasons.add("periodTo is empty");
-//        if (periodTo == null || periodTo.isEmpty()) reasons.add("periodTo is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }
