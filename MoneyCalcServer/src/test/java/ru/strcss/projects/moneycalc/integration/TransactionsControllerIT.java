@@ -81,16 +81,16 @@ public class TransactionsControllerIT extends AbstractIT {
                 "Some Transactions were not saved!");
 
         //Requesting Transactions with Single Section
-        for (int sectionID = 0; sectionID < numOfSections; sectionID++) {
-            int finalSectionID = sectionID;
+        for (int sectionId = 0; sectionId < numOfSections; sectionId++) {
+            int finalSectionId = sectionId;
             // FIXME: 11.02.2018 I suppose it could be done better
 
             MoneyCalcRs<List<Transaction>> singleSectionRs = getTransactions(service, token, LocalDate.now(),
-                    generateDatePlus(ChronoUnit.DAYS, 1), sectionID);
+                    generateDatePlus(ChronoUnit.DAYS, 1), Collections.singletonList(sectionId));
 
             assertEquals(singleSectionRs.getPayload().size(), numOfAddedTransactionsPerSection, INCORRECT_TRANSACTIONS_COUNT);
-            assertTrue(singleSectionRs.getPayload().stream().allMatch(t -> t.getSectionId() == finalSectionID),
-                    "Some of returned Transactions have wrong SectionID");
+            assertTrue(singleSectionRs.getPayload().stream().allMatch(t -> t.getSectionId() == finalSectionId),
+                    "Some of returned Transactions has wrong SectionId");
         }
         //Requesting Transactions with Multiple Sections
         if (numOfSections > 1) {
@@ -207,4 +207,6 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(updatedTransaction.getSectionId(), beforeUpdatedTransaction.getSectionId(), "inner id of updated Transaction has changed!");
         assertTrue(assertTransactionsOrderedByDate(transactionsList), "Transaction list is not ordered by date!");
     }
+
+    // TODO: 23.10.2018 add Transaction filtering test
 }

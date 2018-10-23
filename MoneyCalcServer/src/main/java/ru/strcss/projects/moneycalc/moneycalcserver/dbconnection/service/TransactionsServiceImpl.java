@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
 
 import org.springframework.stereotype.Service;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
@@ -28,13 +29,18 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public List<Transaction> getTransactionsByLogin(String login, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds) {
-        return transactionsDao.getTransactionsByLogin(login, dateFrom, dateTo, sectionIds);
+    public List<Transaction> getTransactions(String login, TransactionsSearchContainer getContainer) {
+        return transactionsDao.getTransactions(login, getContainer);
     }
 
+//    @Override
+//    public List<Transaction> getTransactions(String login, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds) {
+//        return transactionsDao.getTransactions(login, dateFrom, dateTo, sectionIds);
+//    }
+
     @Override
-    public List<Transaction> getTransactionsByLogin(String login) {
-        return transactionsDao.getTransactionsByLogin(login);
+    public List<Transaction> getTransactions(String login) {
+        return transactionsDao.getTransactions(login);
     }
 
     @Override

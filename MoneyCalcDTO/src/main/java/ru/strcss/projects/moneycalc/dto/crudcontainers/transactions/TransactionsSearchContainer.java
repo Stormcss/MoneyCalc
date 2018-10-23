@@ -3,9 +3,11 @@ package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -24,12 +26,17 @@ import java.util.List;
 
 @Data
 @EqualsAndHashCode(callSuper = false)
+@NoArgsConstructor
 @AllArgsConstructor
 public class TransactionsSearchContainer extends AbstractContainer {
 
     private LocalDate rangeFrom;
     private LocalDate rangeTo;
     private List<Integer> requiredSections;
+    private String title;
+    private String description;
+    private BigDecimal priceFrom;
+    private BigDecimal priceTo;
 
     @Override
     public ValidationResult isValid() {

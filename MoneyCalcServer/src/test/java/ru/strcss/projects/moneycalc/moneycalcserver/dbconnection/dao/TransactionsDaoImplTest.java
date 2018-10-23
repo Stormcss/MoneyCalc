@@ -2,9 +2,11 @@ package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao;
 
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
+import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
 
@@ -30,6 +32,7 @@ public class TransactionsDaoImplTest {
     private Session mockedSession = mock(Session.class);
     private org.hibernate.Transaction mockedTransaction = mock(org.hibernate.Transaction.class);
     private Query mockedQuery = mock(Query.class);
+    private NativeQuery mockedNativeQuery = mock(NativeQuery.class);
     private EntityManagerFactory mockedEntityManagerFactory = mock(EntityManagerFactory.class);
     private EntityManager mockedEntityManager = mock(EntityManager.class);
 
@@ -45,6 +48,8 @@ public class TransactionsDaoImplTest {
                 .thenReturn(mockedSession);
         when(mockedSession.createQuery(anyString(), any()))
                 .thenReturn(mockedQuery);
+        when(mockedSession.createNativeQuery(anyString(), any(Class.class)))
+                .thenReturn(mockedNativeQuery);
         when(mockedSession.save(any()))
                 .thenReturn(1);
         when(mockedSession.getEntityManagerFactory())
@@ -60,7 +65,11 @@ public class TransactionsDaoImplTest {
 
         when(mockedQuery.setParameter(anyString(), any()))
                 .thenReturn(mockedQuery);
+        when(mockedNativeQuery.setParameter(anyString(), any()))
+                .thenReturn(mockedNativeQuery);
         when(mockedQuery.list())
+                .thenReturn(generateTransactionList(5, Arrays.asList(0, 1)));
+        when(mockedNativeQuery.list())
                 .thenReturn(generateTransactionList(5, Arrays.asList(0, 1)));
         when(mockedQuery.getSingleResult())
                 .thenReturn(generateTransaction(null, 1, null, 1));
@@ -83,8 +92,8 @@ public class TransactionsDaoImplTest {
     }
 
     @Test(groups = "TransactionsDaoSuccessfulScenario")
-    public void testGetTransactionsByLogin() throws Exception {
-        List<Transaction> transactionList = transactionsDao.getTransactionsByLogin("login", now, tomorrow, sectionIds);
+    public void testGetTransactions() throws Exception {
+        List<Transaction> transactionList = transactionsDao.getTransactions("login", new TransactionsSearchContainer());
         assertFalse(transactionList.isEmpty());
     }
 

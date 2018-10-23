@@ -42,6 +42,7 @@ public class TransactionsController extends AbstractController implements Transa
     }
 
     // TODO: 26.08.2018 test me
+
     /**
      * Get filtered list of Transactions by user's login
      * Returned transactions are filtered by dates range at Settings and active
@@ -52,8 +53,7 @@ public class TransactionsController extends AbstractController implements Transa
     public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        // TODO: 26.08.2018 sort using db
-        List<Transaction> transactions = transactionsService.getTransactionsByLogin(login);
+        List<Transaction> transactions = transactionsService.getTransactions(login);
 
         log.info("Returning Transactions for login \'{}\'", login);
 
@@ -78,11 +78,9 @@ public class TransactionsController extends AbstractController implements Transa
 
         fillDefaultValues(getContainer);
 
-        List<Transaction> transactions = sortTransactionList(transactionsService.getTransactionsByLogin(login,
-                getContainer.getRangeFrom(), getContainer.getRangeTo(), getContainer.getRequiredSections()));
+        List<Transaction> transactions = transactionsService.getTransactions(login, getContainer);
 
-        log.info("Returning Transactions for login \'{}\', applying Filter: dateFrom {}, dateTo {} : {}",
-                login, getContainer.getRangeFrom(), getContainer.getRangeTo(), transactions);
+        log.info("Returning Transactions for login '{}', applying Filter: {} - {}", login, getContainer, transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }

@@ -7,6 +7,7 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
@@ -71,14 +72,56 @@ public class TransactionsDaoImpl implements TransactionsDao {
     }
 
     @Override
-    public List<Transaction> getTransactionsByLogin(String login, LocalDate dateFrom, LocalDate
-            dateTo, List<Integer> sectionIds) {
-        Integer personId = personDao.getPersonIdByLogin(login);
-        return this.getTransactionsByPersonId(personId, dateFrom, dateTo, sectionIds);
+    public List<Transaction> getTransactions(String login, TransactionsSearchContainer getContainer) {
+        try (Session session = sessionFactory.openSession()) {
+            StringBuilder sqlBuilder = new StringBuilder();
+            sqlBuilder.append(
+                    "select t.* from \"Transactions\" t\n" +
+                            "join \"Person\" p on t.\"personId\" = p.id\n" +
+                            "join \"Access\" a on p.\"accessId\" = a.id\n" +
+                            "where\n" +
+                            "    a.login = :login\n" +
+                            "    AND t.date BETWEEN :dateFrom AND :dateTo\n" +
+                            "    AND t.\"sectionId\" IN (select ss.\"sectionId\" from \"SpendingSection\" ss\n" +
+                            "                          where\n" +
+                            "                            ss.\"personId\" = p.id\n" +
+                            "                            AND ss.\"isAdded\" IS TRUE\n" +
+                            "                            AND ss.\"isRemoved\" IS FALSE\n" +
+                            "                         )\n");
+            if (getContainer.getRequiredSections() != null && !getContainer.getRequiredSections().isEmpty())
+                sqlBuilder.append("   AND t.\"sectionId\" IN (:ids)");
+            if (getContainer.getTitle() != null)
+                sqlBuilder.append("    AND t.title LIKE :title\n");
+            if (getContainer.getDescription() != null)
+                sqlBuilder.append("    AND t.description LIKE :description\n");
+            if (getContainer.getPriceFrom() != null)
+                sqlBuilder.append("    AND t.sum >= :priceFrom\n");
+            if (getContainer.getPriceTo() != null)
+                sqlBuilder.append("    AND t.sum <= :priceTo\n");
+            sqlBuilder.append("order by t.date, t.id");
+
+            NativeQuery<Transaction> sqlQuery = session.createNativeQuery(sqlBuilder.toString(), Transaction.class)
+                    .setParameter("login", login)
+                    .setParameter("dateFrom", getContainer.getRangeFrom())
+                    .setParameter("dateTo", getContainer.getRangeTo());
+
+            String title = getContainer.getTitle();
+            if (getContainer.getRequiredSections() != null && !getContainer.getRequiredSections().isEmpty())
+                sqlQuery.setParameter("ids", getContainer.getRequiredSections());
+            if (getContainer.getTitle() != null)
+                sqlQuery.setParameter("title", "%" + title + "%");
+            if (getContainer.getDescription() != null)
+                sqlQuery.setParameter("description", "%" + getContainer.getDescription() + "%");
+            if (getContainer.getPriceFrom() != null)
+                sqlQuery.setParameter("priceFrom", getContainer.getPriceFrom());
+            if (getContainer.getPriceTo() != null)
+                sqlQuery.setParameter("priceTo", getContainer.getPriceTo());
+            return sqlQuery.list();
+        }
     }
 
     @Override
-    public List<Transaction> getTransactionsByLogin(String login) {
+    public List<Transaction> getTransactions(String login) {
         try (Session session = sessionFactory.openSession()) {
             String sql = "select t.* from \"Transactions\" t\n" +
                     "join \"Person\" p on t.\"personId\" = p.id\n" +
