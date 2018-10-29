@@ -204,7 +204,8 @@ public class StatisticsControllerIT extends AbstractIT {
         List<TransactionAddContainer> addContainers = new ArrayList<>();
 
         for (Integer sum : sums) {
-            Transaction transaction = generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionID, sum, null);
+            Transaction transaction = generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionID, sum,
+                    null, null, null);
             addContainers.add(new TransactionAddContainer(transaction));
             minusMin++;
         }

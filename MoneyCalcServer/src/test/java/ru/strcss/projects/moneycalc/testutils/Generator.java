@@ -58,29 +58,34 @@ public class Generator {
     }
 
     public static Transaction generateTransaction() {
-        return generateTransaction(null, null, null, null);
+        return generateTransaction(null, null, null, null, null, null);
+    }
+
+    public static Transaction generateTransaction(String title, String desc) {
+        return generateTransaction(null, null, null, null, title, desc);
     }
 
     public static Transaction generateTransaction(LocalDate date) {
-        return generateTransaction(date, null, null, null);
+        return generateTransaction(date, null, null, null, null, null);
     }
 
     public static Transaction generateTransaction(Integer sectionID) {
-        return generateTransaction(null, sectionID, null, null);
+        return generateTransaction(null, sectionID, null, null, null, null);
     }
 
     public static Transaction generateTransaction(Integer sectionID, Integer sum) {
-        return generateTransaction(null, sectionID, sum, null);
+        return generateTransaction(null, sectionID, sum, null, null, null);
     }
 
-    public static Transaction generateTransaction(LocalDate date, Integer sectionId, Integer sum, Integer id) {
+    public static Transaction generateTransaction(LocalDate date, Integer sectionId, Integer sum, Integer id,
+                                                  String title, String desc) {
         return Transaction.builder()
                 .id(id)
                 .date(date == null ? LocalDate.now() : date)
                 .sum(sum == null ? ThreadLocalRandom.current().nextInt(10, 9000) : sum)
                 .currency("RUR")
-                .title("Магазин")
-                .description("5ка")
+                .title(title == null ? "Магазин" : title)
+                .description(desc == null ? "5ка" : desc)
                 .sectionId(sectionId == null ? ThreadLocalRandom.current().nextInt(0, 1) : sectionId)
                 .build();
     }

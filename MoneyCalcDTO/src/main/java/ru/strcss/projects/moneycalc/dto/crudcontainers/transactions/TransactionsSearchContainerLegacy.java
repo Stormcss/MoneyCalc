@@ -2,13 +2,9 @@ package ru.strcss.projects.moneycalc.dto.crudcontainers.transactions;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
-import ru.strcss.projects.moneycalc.dto.ValidationResult;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
 
-import java.time.LocalDate;
-import java.util.ArrayList;
+import java.math.BigDecimal;
 import java.util.List;
 
 /**
@@ -30,5 +26,9 @@ public class TransactionsSearchContainerLegacy{
     private String rangeFrom;
     private String rangeTo;
     private List<Integer> requiredSections;
+    private String title;
+    private String description;
+    private BigDecimal priceFrom;
+    private BigDecimal priceTo;
 }
 

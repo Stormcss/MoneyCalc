@@ -20,7 +20,6 @@ import ru.strcss.projects.moneycalc.testutils.Generator;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -202,20 +201,17 @@ public class IntegrationTestUtils {
     /**
      * Get Transactions and return Rs from the server
      */
-    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
-                                                                 LocalDate dateTo, Integer sectionId) {
-        List<Integer> requiredSections = Arrays.asList(sectionId);
-        TransactionsSearchContainer container = new TransactionsSearchContainer(dateFrom, dateTo, requiredSections);
-//        TransactionsSearchContainer container = new TransactionsSearchContainer(localDate2String(dateFrom),
-//                localDate2String(dateTo), requiredSections);
-        return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
+    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, TransactionsSearchContainer
+            searchContainer) {
+        return sendRequest(service.getTransactions(token, searchContainer), Status.SUCCESS).body();
     }
 
     public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
                                                                  LocalDate dateTo, List<Integer> sectionIds) {
-        TransactionsSearchContainer container = new TransactionsSearchContainer(dateFrom, dateTo, sectionIds);
-//        TransactionsSearchContainer container = new TransactionsSearchContainer(localDate2String(dateFrom),
-//                localDate2String(dateTo), sectionIds);
+        TransactionsSearchContainer container = new TransactionsSearchContainer();
+        container.setRangeFrom(dateFrom);
+        container.setRangeTo(dateTo);
+        container.setRequiredSections(sectionIds);
         return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
     }
 }

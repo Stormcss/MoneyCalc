@@ -8,8 +8,10 @@ import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.enitities.Transaction;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.*;
@@ -81,16 +83,16 @@ public class TransactionsControllerIT extends AbstractIT {
                 "Some Transactions were not saved!");
 
         //Requesting Transactions with Single Section
-        for (int sectionID = 0; sectionID < numOfSections; sectionID++) {
-            int finalSectionID = sectionID;
+        for (int sectionId = 0; sectionId < numOfSections; sectionId++) {
+            int finalSectionId = sectionId;
             // FIXME: 11.02.2018 I suppose it could be done better
 
             MoneyCalcRs<List<Transaction>> singleSectionRs = getTransactions(service, token, LocalDate.now(),
-                    generateDatePlus(ChronoUnit.DAYS, 1), sectionID);
+                    generateDatePlus(ChronoUnit.DAYS, 1), Collections.singletonList(sectionId));
 
             assertEquals(singleSectionRs.getPayload().size(), numOfAddedTransactionsPerSection, INCORRECT_TRANSACTIONS_COUNT);
-            assertTrue(singleSectionRs.getPayload().stream().allMatch(t -> t.getSectionId() == finalSectionID),
-                    "Some of returned Transactions have wrong SectionID");
+            assertTrue(singleSectionRs.getPayload().stream().allMatch(t -> t.getSectionId() == finalSectionId),
+                    "Some of returned Transactions has wrong SectionId");
         }
         //Requesting Transactions with Multiple Sections
         if (numOfSections > 1) {
@@ -206,5 +208,69 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(updatedTransaction.getId(), beforeUpdatedTransaction.getId(), "id of updated Transaction has changed!");
         assertEquals(updatedTransaction.getSectionId(), beforeUpdatedTransaction.getSectionId(), "inner id of updated Transaction has changed!");
         assertTrue(assertTransactionsOrderedByDate(transactionsList), "Transaction list is not ordered by date!");
+    }
+
+    @Test
+    public void getTransaction_filterByTitle() {
+        int numOfAddedTransactions = 5;
+        String token = savePersonGetToken(service);
+
+        IntStream.range(0, numOfAddedTransactions)
+                .forEach(value -> addTransaction(service, token, generateTransaction("title" + value, "desc" + value)));
+
+        TransactionsSearchContainer searchContainer = new TransactionsSearchContainer();
+        searchContainer.setRangeFrom(generateDateMinus(ChronoUnit.DAYS, 1));
+        searchContainer.setRangeTo(generateDatePlus(ChronoUnit.DAYS, 1));
+
+        // filtering by title by mask
+        searchContainer.setTitle("%itle%");
+        List<Transaction> filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
+        assertEquals(filteredTransactions.size(), numOfAddedTransactions, INCORRECT_TRANSACTIONS_COUNT);
+
+        // filtering by exact match
+        searchContainer.setTitle("title4");
+        filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
+        assertEquals(filteredTransactions.size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+    }
+
+    @Test
+    public void getTransaction_filterByDescription() {
+        int numOfAddedTransactions = 5;
+        String token = savePersonGetToken(service);
+
+        IntStream.range(0, numOfAddedTransactions)
+                .forEach(value -> addTransaction(service, token, generateTransaction("title" + value, "desc" + value)));
+
+        TransactionsSearchContainer searchContainer = new TransactionsSearchContainer();
+        searchContainer.setRangeFrom(generateDateMinus(ChronoUnit.DAYS, 1));
+        searchContainer.setRangeTo(generateDatePlus(ChronoUnit.DAYS, 1));
+
+        // filtering by title by mask
+        searchContainer.setDescription("%esc%");
+        List<Transaction> filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
+        assertEquals(filteredTransactions.size(), numOfAddedTransactions, INCORRECT_TRANSACTIONS_COUNT);
+
+        // filtering by exact match
+        searchContainer.setDescription("desc4");
+        filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
+        assertEquals(filteredTransactions.size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+    }
+
+    @Test
+    public void getTransaction_filterByPrice() {
+        int numOfAddedTransactions = 5;
+        String token = savePersonGetToken(service);
+
+        IntStream.range(0, numOfAddedTransactions)
+                .forEach(value -> addTransaction(service, token, generateTransaction(1, value * 100 + 1)));
+
+        TransactionsSearchContainer searchContainer = new TransactionsSearchContainer();
+        searchContainer.setRangeFrom(generateDateMinus(ChronoUnit.DAYS, 1));
+        searchContainer.setRangeTo(generateDatePlus(ChronoUnit.DAYS, 1));
+
+        searchContainer.setPriceFrom(BigDecimal.valueOf(100));
+        searchContainer.setPriceTo(BigDecimal.valueOf(301));
+        List<Transaction> filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
+        assertEquals(filteredTransactions.size(), 3, INCORRECT_TRANSACTIONS_COUNT);
     }
 }
