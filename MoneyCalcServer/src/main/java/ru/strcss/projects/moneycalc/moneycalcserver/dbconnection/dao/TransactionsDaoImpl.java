@@ -105,13 +105,12 @@ public class TransactionsDaoImpl implements TransactionsDao {
                     .setParameter("dateFrom", getContainer.getRangeFrom())
                     .setParameter("dateTo", getContainer.getRangeTo());
 
-            String title = getContainer.getTitle();
             if (getContainer.getRequiredSections() != null && !getContainer.getRequiredSections().isEmpty())
                 sqlQuery.setParameter("ids", getContainer.getRequiredSections());
             if (getContainer.getTitle() != null)
-                sqlQuery.setParameter("title", "%" + title + "%");
+                sqlQuery.setParameter("title", getContainer.getTitle());
             if (getContainer.getDescription() != null)
-                sqlQuery.setParameter("description", "%" + getContainer.getDescription() + "%");
+                sqlQuery.setParameter("description", getContainer.getDescription());
             if (getContainer.getPriceFrom() != null)
                 sqlQuery.setParameter("priceFrom", getContainer.getPriceFrom());
             if (getContainer.getPriceTo() != null)

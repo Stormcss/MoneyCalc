@@ -72,7 +72,7 @@ public class TransactionsDaoImplTest {
         when(mockedNativeQuery.list())
                 .thenReturn(generateTransactionList(5, Arrays.asList(0, 1)));
         when(mockedQuery.getSingleResult())
-                .thenReturn(generateTransaction(null, 1, null, 1));
+                .thenReturn(generateTransaction(null, 1, null, 1, null, null));
 
         transactionsDao = new TransactionsDaoImpl(sessionFactory, personDao);
     }
