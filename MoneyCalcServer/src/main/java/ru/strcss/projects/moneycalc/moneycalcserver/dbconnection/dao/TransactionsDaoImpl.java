@@ -8,7 +8,7 @@ import org.hibernate.query.Query;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.utils.DaoUtils;

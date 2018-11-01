@@ -1,6 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces;
 
-import ru.strcss.projects.moneycalc.enitities.Access;
+import ru.strcss.projects.moneycalc.entities.Access;
 
 public interface AccessDao {
 

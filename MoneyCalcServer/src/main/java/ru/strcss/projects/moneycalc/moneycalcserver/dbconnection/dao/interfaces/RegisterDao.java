@@ -1,9 +1,9 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces;
 
-import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.enitities.Identifications;
-import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalc.enitities.Settings;
+import ru.strcss.projects.moneycalc.entities.Access;
+import ru.strcss.projects.moneycalc.entities.Identifications;
+import ru.strcss.projects.moneycalc.entities.Person;
+import ru.strcss.projects.moneycalc.entities.Settings;
 
 public interface RegisterDao {
     Person registerPerson(Access access, Identifications identifications, Settings settings);

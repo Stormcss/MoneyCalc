@@ -3,7 +3,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.handlers;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
 
 import java.util.List;
 

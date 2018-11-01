@@ -2,7 +2,7 @@ package ru.strcss.projects.moneycalc.testutils;
 
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.enitities.*;
+import ru.strcss.projects.moneycalc.entities.*;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.api.AccessAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
-import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.AccessService;
+import ru.strcss.projects.moneycalc.entities.Access;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.AccessMapper;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.ACCESS_RETURNED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.NO_PERSON_EXIST;
@@ -23,10 +23,10 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 public class AccessController extends AbstractController implements AccessAPIService {
     // TODO: 06.03.2018 finish me
 
-    private AccessService accessService;
+    private AccessMapper accessMapper;
 
-    public AccessController(AccessService accessService) {
-        this.accessService = accessService;
+    public AccessController(AccessMapper accessMapper) {
+        this.accessMapper = accessMapper;
     }
 
     /**
@@ -38,7 +38,7 @@ public class AccessController extends AbstractController implements AccessAPISer
     public ResponseEntity<MoneyCalcRs<Access>> getAccess() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        Access access = accessService.getAccessByLogin(login);
+        Access access = accessMapper.getAccess(login);
 
         if (access == null) {
             log.error("Can not return Access for login \'{}\' - no Person found", login);

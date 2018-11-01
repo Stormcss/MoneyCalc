@@ -6,7 +6,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.Transaction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import ru.strcss.projects.moneycalc.enitities.Access;
+import ru.strcss.projects.moneycalc.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.AccessDao;
 
 import javax.persistence.NoResultException;

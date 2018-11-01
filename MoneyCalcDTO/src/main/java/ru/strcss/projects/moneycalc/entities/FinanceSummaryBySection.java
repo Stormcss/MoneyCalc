@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.enitities;
+package ru.strcss.projects.moneycalc.entities;
 
 import lombok.Builder;
 import lombok.Data;

@@ -8,10 +8,10 @@ import ru.strcss.projects.moneycalc.api.StatisticsAPIService;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
-import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.enitities.Settings;
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.entities.Settings;
+import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
@@ -60,7 +60,7 @@ public class StatisticsController extends AbstractController implements Statisti
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
         Integer personId = personService.getPersonIdByLogin(login);
 
-        Settings settings = settingsService.getSettingsById(personId);
+        Settings settings = settingsService.getSettings(login);
         List<SpendingSection> spendingSections = sectionService.getSpendingSectionsByLogin(login, false,
                 false, false);
         List<Integer> sectionIds = spendingSections.stream().map(SpendingSection::getSectionId).collect(Collectors.toList());

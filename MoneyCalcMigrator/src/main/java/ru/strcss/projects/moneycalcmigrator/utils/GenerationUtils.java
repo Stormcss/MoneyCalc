@@ -1,7 +1,7 @@
 package ru.strcss.projects.moneycalcmigrator.utils;
 
-import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
+import ru.strcss.projects.moneycalc.entities.Access;
+import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
 
 public class GenerationUtils {

@@ -1,12 +1,10 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces;
 
-import ru.strcss.projects.moneycalc.enitities.Settings;
+import ru.strcss.projects.moneycalc.entities.Settings;
 
 public interface SettingsService {
 
-    int saveSettings(Settings settings);
+    Settings updateSettings(String login, Settings settings);
 
-    Settings updateSettings(Settings settings);
-
-    Settings getSettingsById(Integer id);
+    Settings getSettings(String login);
 }

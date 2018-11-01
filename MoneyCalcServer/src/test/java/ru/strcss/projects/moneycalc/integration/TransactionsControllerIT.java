@@ -9,7 +9,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionA
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;

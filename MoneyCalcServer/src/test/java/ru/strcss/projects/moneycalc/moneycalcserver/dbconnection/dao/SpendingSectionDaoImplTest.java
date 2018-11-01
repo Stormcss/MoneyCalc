@@ -7,7 +7,7 @@ import org.hibernate.query.NativeQuery;
 import org.hibernate.query.Query;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
+import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 
 import java.util.Arrays;

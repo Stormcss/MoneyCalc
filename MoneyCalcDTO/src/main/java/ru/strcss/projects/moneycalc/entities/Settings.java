@@ -1,34 +1,22 @@
-package ru.strcss.projects.moneycalc.enitities;
+package ru.strcss.projects.moneycalc.entities;
 
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.Validationable;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 
-import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Data
-@Builder
-@Entity
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "\"Settings\"")
 public class Settings implements Validationable, Serializable {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
-    @Column(name = "\"periodFrom\"")
     private LocalDate periodFrom;
-
-    @Column(name = "\"periodTo\"")
     private LocalDate periodTo;
 
     public ValidationResult isValid() {

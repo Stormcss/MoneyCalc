@@ -2,8 +2,8 @@ package ru.strcss.projects.moneycalc.dto;
 
 import lombok.Builder;
 import lombok.Data;
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 
 import java.time.LocalDate;
 import java.util.List;

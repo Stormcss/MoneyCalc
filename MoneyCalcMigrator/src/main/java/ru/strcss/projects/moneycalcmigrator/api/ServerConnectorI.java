@@ -1,9 +1,9 @@
 package ru.strcss.projects.moneycalcmigrator.api;
 
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.entities.Access;
+import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 
 import java.util.List;
 

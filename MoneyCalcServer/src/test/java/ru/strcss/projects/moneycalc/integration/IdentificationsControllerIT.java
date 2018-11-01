@@ -7,7 +7,7 @@ import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
-import ru.strcss.projects.moneycalc.enitities.Identifications;
+import ru.strcss.projects.moneycalc.entities.Identifications;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
 
 import static org.testng.Assert.*;

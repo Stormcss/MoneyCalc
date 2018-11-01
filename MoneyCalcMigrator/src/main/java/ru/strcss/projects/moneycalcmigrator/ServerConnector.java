@@ -12,7 +12,7 @@ import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
-import ru.strcss.projects.moneycalc.enitities.*;
+import ru.strcss.projects.moneycalc.entities.*;
 import ru.strcss.projects.moneycalcmigrator.api.MigrationAPI;
 import ru.strcss.projects.moneycalcmigrator.api.ServerConnectorI;
 import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;

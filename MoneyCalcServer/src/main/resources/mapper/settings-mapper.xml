@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.SettingsMapper">
+
+
+    <resultMap id="getSettingsMap" type="ru.strcss.projects.moneycalc.entities.Settings"
+               autoMapping="true">
+    </resultMap>
+    <select id="getSettings" resultMap="getSettingsMap">
+        <![CDATA[
+
+            select s.*
+            from "Settings" s
+            join "Person" p on s.id = p."settingsId"
+            join "Access" a on a.id = p."accessId"
+            where a.login = #{login}
+
+        ]]>
+    </select>
+
+
+    <update id="updateSettings" statementType="CALLABLE">
+    <![CDATA[
+
+        UPDATE "Settings"
+        SET
+          "periodFrom" = #{settings.periodFrom},
+          "periodTo" = #{settings.periodTo}
+        from "Settings" st
+        join "Person" p on st.id = p."settingsId"
+        join "Access" a on a.id = p."accessId"
+        where a.login = #{login};
+
+        ]]>
+    </update>
+
+    <!--<update id="saveSettings" statementType = "CALLABLE">-->
+    <!--<selectKey keyProperty="id" resultType="long" order="BEFORE">-->
+    <!--select ORG_SEQ.NEXTVAL as id from dual-->
+    <!--</selectKey>-->
+
+    <!--DECLARE-->
+    <!--gv_orgst_0 NUMBER := 0; &#45;&#45; статус Загружен-->
+    <!--BEGIN-->
+
+    <!--INSERT INTO ofd_registries-->
+    <!--(org_id,-->
+    <!--registry_id,-->
+    <!--upload_date,-->
+    <!--registry_date,-->
+    <!--ofsrc_ofsrc_id,-->
+    <!--full_registry_yn,-->
+    <!--total_amount,-->
+    <!--total_count)-->
+    <!--VALUES-->
+    <!--(#{id}, #{fiscalRegistryId}, sysdate, TRUNC(#{registryDate}), #{fiscalEventSource.fiscalEventSourceId}, ${isRegistryFull=="0"?"'N'":"'Y'"}, #{totalObjectsAmount}, #{totalObjectsCount});-->
+
+    <!--INSERT INTO OFD_REGISTRY_HISTORIES (ORGH_ID, ORG_ORG_ID, ORGST_ORGST_ID, START_DATE)-->
+    <!--VALUES (ORGH_SEQ.nextval, #{id}, gv_orgst_0, SYSDATE);-->
+    <!--END;-->
+    <!--</update>-->
+
+
+    <!--<insert id="insertRegistryFile">-->
+    <!--INSERT INTO OFD_REGISTRY_DATA (ORGD_ID, ORG_ORG_ID, FILE_DATA)-->
+    <!--VALUES (ORGD_SEQ.nextval, #{registryId}, #{file})-->
+    <!--</insert>-->
+
+    <!--<update id="updateReportStatus" parameterType="com.peterservice.paysofd.report.model.dto.ReportOrder"-->
+    <!--statementType="CALLABLE">-->
+    <!--<![CDATA[-->
+
+    <!--DECLARE-->
+    <!--BEGIN-->
+    <!--update OFD_REPORT_ORDER_HISTORY-->
+    <!--set END_DATE  = SYSDATE,-->
+    <!--NAVI_DATE = SYSDATE-->
+    <!--where ORORD_ORORD_ID = #{reportId};-->
+    <!--insert into OFD_REPORT_ORDER_HISTORY (ORORDH_ID, ORORD_ORORD_ID, ORST_ORST_ID, START_DATE, NAVI_DATE, END_DATE)-->
+    <!--values (ORORDH_SEQ.nextval, #{reportId}, #{statusId}, sysdate, sysdate, (TO_DATE('2999/12/31', 'yyyy/mm/dd')));-->
+    <!--END;-->
+
+    <!--]]>-->
+    <!--</update>-->
+
+    <!--<update id="saveGuiJsonResult">-->
+    <!--UPDATE OFD_REPORT_ORDERS oro-->
+    <!--SET oro.REPORT_LIMITED_FILE = #{guiJson}-->
+    <!--WHERE oro.ORORD_ID = #{reportId}-->
+    <!--</update>-->
+
+    <!--<update id="saveExcelFileResult">-->
+    <!--UPDATE OFD_REPORT_ORDERS oro-->
+    <!--SET oro.REPORT_FILE = #{excelFile,jdbcType=BLOB}-->
+    <!--WHERE oro.ORORD_ID = #{reportId}-->
+    <!--</update>-->
+</mapper>

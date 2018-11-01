@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.enitities;
+package ru.strcss.projects.moneycalc.entities;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -11,9 +11,9 @@ import java.io.Serializable;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class SettingsLegacy implements Serializable {
+public class IdentificationsLegacy implements Serializable {
 
     private int id;
-    private String periodFrom;
-    private String periodTo;
+
+    private String name;
 }

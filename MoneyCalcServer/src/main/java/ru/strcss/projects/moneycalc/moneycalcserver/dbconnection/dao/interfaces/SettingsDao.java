@@ -1,6 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces;
 
-import ru.strcss.projects.moneycalc.enitities.Settings;
+import ru.strcss.projects.moneycalc.entities.Settings;
 
 public interface SettingsDao {
 

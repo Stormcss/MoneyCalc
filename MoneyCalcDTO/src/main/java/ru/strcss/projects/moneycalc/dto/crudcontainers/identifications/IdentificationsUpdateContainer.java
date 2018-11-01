@@ -5,7 +5,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 import ru.strcss.projects.moneycalc.dto.ValidationResult;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.AbstractContainer;
-import ru.strcss.projects.moneycalc.enitities.Identifications;
+import ru.strcss.projects.moneycalc.entities.Identifications;
 
 import java.util.ArrayList;
 import java.util.List;

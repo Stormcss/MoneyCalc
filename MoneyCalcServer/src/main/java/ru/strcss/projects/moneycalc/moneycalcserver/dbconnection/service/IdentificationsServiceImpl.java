@@ -2,7 +2,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import ru.strcss.projects.moneycalc.enitities.Identifications;
+import ru.strcss.projects.moneycalc.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.IdentificationsDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.IdentificationsService;
 

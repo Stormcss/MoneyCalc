@@ -1,9 +1,9 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces;
 
-import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.enitities.Identifications;
-import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalc.enitities.Settings;
+import ru.strcss.projects.moneycalc.entities.Access;
+import ru.strcss.projects.moneycalc.entities.Identifications;
+import ru.strcss.projects.moneycalc.entities.Person;
+import ru.strcss.projects.moneycalc.entities.Settings;
 
 public interface RegisterService {
     Person registerUser(Access access, Identifications identifications, Settings settings);

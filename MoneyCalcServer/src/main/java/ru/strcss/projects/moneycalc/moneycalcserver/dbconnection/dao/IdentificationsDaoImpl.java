@@ -6,7 +6,7 @@ import org.hibernate.SessionFactory;
 import org.hibernate.query.Query;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
-import ru.strcss.projects.moneycalc.enitities.Identifications;
+import ru.strcss.projects.moneycalc.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.IdentificationsDao;
 
 @Repository

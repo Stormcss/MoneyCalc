@@ -2,7 +2,7 @@ package ru.strcss.projects.moneycalcmigrator;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 import ru.strcss.projects.moneycalcmigrator.api.FileReaderI;
 import ru.strcss.projects.moneycalcmigrator.dto.PairFilesContainer;
 import ru.strcss.projects.moneycalcmigrator.dto.TransactionParseContainer;

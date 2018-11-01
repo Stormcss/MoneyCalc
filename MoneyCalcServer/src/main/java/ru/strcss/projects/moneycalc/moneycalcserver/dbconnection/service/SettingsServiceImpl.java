@@ -1,35 +1,27 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
 
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import ru.strcss.projects.moneycalc.enitities.Settings;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SettingsDao;
+import ru.strcss.projects.moneycalc.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SettingsMapper;
 
 @Service
 public class SettingsServiceImpl implements SettingsService {
 
-    private SettingsDao settingsDao;
+    private SettingsMapper settingsMapper;
 
-    public SettingsServiceImpl(SettingsDao settingsDao) {
-        this.settingsDao = settingsDao;
+    public SettingsServiceImpl(SettingsMapper settingsMapper) {
+        this.settingsMapper = settingsMapper;
     }
 
     @Override
-    @Transactional
-    public int saveSettings(Settings settings) {
-        return settingsDao.saveSettings(settings);
+    public Settings updateSettings(String login, Settings settings) {
+        settingsMapper.updateSettings(login, settings);
+        return settingsMapper.getSettings(login);
     }
 
     @Override
-    @Transactional
-    public Settings updateSettings(Settings settings) {
-        return settingsDao.updateSettings(settings);
-    }
-
-    @Override
-    @Transactional
-    public Settings getSettingsById(Integer id) {
-        return settingsDao.getSettingsById(id);
+    public Settings getSettings(String login) {
+        return settingsMapper.getSettings(login);
     }
 }

@@ -6,7 +6,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import ru.strcss.projects.moneycalc.enitities.Access;
+import ru.strcss.projects.moneycalc.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.AccessService;
 
 import static java.util.Collections.emptyList;

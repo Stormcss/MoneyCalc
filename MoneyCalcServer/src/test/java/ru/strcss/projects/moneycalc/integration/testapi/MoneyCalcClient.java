@@ -17,7 +17,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionA
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.*;
+import ru.strcss.projects.moneycalc.entities.*;
 
 import java.util.List;
 

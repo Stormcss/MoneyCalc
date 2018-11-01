@@ -6,7 +6,7 @@ import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.enitities.Person;
+import ru.strcss.projects.moneycalc.entities.Person;
 import ru.strcss.projects.moneycalc.testutils.Generator;
 
 import static org.testng.Assert.assertEquals;

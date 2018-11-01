@@ -1,9 +1,11 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.configuration;
 
+import org.mybatis.spring.SqlSessionFactoryBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
@@ -16,6 +18,8 @@ import java.util.Properties;
 @Configuration
 @EnableTransactionManagement
 public class JpaConfig {
+    // FIXME: 30.10.2018 RENAME ME!!!
+
     @Value("${spring.datasource.driver-class-name}")
     private String driverClassName;
 
@@ -39,8 +43,8 @@ public class JpaConfig {
     public LocalContainerEntityManagerFactoryBean entityManagerFactory() {
         LocalContainerEntityManagerFactoryBean em = new LocalContainerEntityManagerFactoryBean();
 
-        em.setDataSource(getDataSource());
-        em.setPackagesToScan("ru.strcss.projects.moneycalc.enitities");
+        em.setDataSource(dataSource());
+        em.setPackagesToScan("ru.strcss.projects.moneycalc.entities");
 
         JpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
         em.setJpaVendorAdapter(vendorAdapter);
@@ -49,7 +53,7 @@ public class JpaConfig {
     }
 
     @Bean
-    public DataSource getDataSource() {
+    public DataSource dataSource() {
         DriverManagerDataSource dataSource = new DriverManagerDataSource();
         dataSource.setDriverClassName(driverClassName);
         dataSource.setUrl(url);
@@ -63,5 +67,14 @@ public class JpaConfig {
         properties.setProperty("hibernate.ddl-auto", hbm2ddlAuto);
         properties.setProperty("hibernate.dialect", hibernateDialect);
         return properties;
+    }
+
+    @Bean
+    public SqlSessionFactoryBean sqlSessionFactoryBean() {
+        SqlSessionFactoryBean sqlSessionFactoryBean = new SqlSessionFactoryBean();
+        sqlSessionFactoryBean.setDataSource(dataSource());
+        sqlSessionFactoryBean.setConfigLocation(new ClassPathResource("mybatis-config.xml"));
+
+        return sqlSessionFactoryBean;
     }
 }

@@ -6,7 +6,7 @@ import org.hibernate.Transaction;
 import org.hibernate.query.Query;
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.enitities.Settings;
+import ru.strcss.projects.moneycalc.entities.Settings;
 
 import javax.persistence.criteria.CriteriaQuery;
 

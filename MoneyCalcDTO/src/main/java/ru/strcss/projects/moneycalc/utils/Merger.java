@@ -2,8 +2,8 @@ package ru.strcss.projects.moneycalc.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 
 /**
  * Utility class for merging filled object from database with income object with random null values.

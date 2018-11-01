@@ -3,7 +3,7 @@ package ru.strcss.projects.moneycalc.api;
 import org.springframework.http.ResponseEntity;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
-import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
 
 import java.util.List;
 

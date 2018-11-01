@@ -49,6 +49,11 @@ dependencies {
     compile 'org.hibernate:hibernate-entitymanager:5.2.9.Final'
     compile 'org.postgresql:postgresql:9.4.1207'
 
+    //Mybatis
+    compile 'org.mybatis.spring.boot:mybatis-spring-boot-starter:1.3.2'
+//    compile group: 'org.apache.tomcat', name: 'tomcat-jdbc', version: '9.0.12'
+
+
     compile('com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.8.10')
 
     compile 'io.micrometer:micrometer-registry-jmx:latest.release'

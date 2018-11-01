@@ -2,7 +2,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.strcss.projects.moneycalc.enitities.Settings;
+import ru.strcss.projects.moneycalc.entities.Settings;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -24,9 +24,6 @@ public class GenerationUtils {
     }
 
     public static Settings generateRegisteringSettings() {
-        return Settings.builder()
-                .periodFrom(currentDate())
-                .periodTo(generateDatePlus(ChronoUnit.MONTHS, 1))
-                .build();
+        return new Settings(currentDate(), generateDatePlus(ChronoUnit.MONTHS, 1));
     }
 }

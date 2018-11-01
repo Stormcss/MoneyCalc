@@ -3,7 +3,7 @@ package ru.strcss.projects.moneycalc.integration;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.enitities.Access;
+import ru.strcss.projects.moneycalc.entities.Access;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
 
 import static org.testng.Assert.assertEquals;
