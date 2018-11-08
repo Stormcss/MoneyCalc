@@ -61,7 +61,7 @@ public class StatisticsController extends AbstractController implements Statisti
         Integer personId = personService.getPersonIdByLogin(login);
 
         Settings settings = settingsService.getSettings(login);
-        List<SpendingSection> spendingSections = sectionService.getSpendingSectionsByLogin(login, false,
+        List<SpendingSection> spendingSections = sectionService.getSpendingSections(login, false,
                 false, false);
         List<Integer> sectionIds = spendingSections.stream().map(SpendingSection::getSectionId).collect(Collectors.toList());
 
@@ -103,7 +103,8 @@ public class StatisticsController extends AbstractController implements Statisti
                 getContainer.getRangeTo(), getContainer.getSectionIds());
 
         //оставляю только те секции клиента для которых мне нужна статистика
-        List<SpendingSection> spendingSections = sectionService.getSpendingSectionsByPersonId(personId).stream()
+        List<SpendingSection> spendingSections = sectionService.getSpendingSections(login, false,
+                false, false).stream()
                 .filter(section -> getContainer.getSectionIds().stream().anyMatch(id -> id.equals(section.getSectionId())))
                 .collect(Collectors.toList());
 

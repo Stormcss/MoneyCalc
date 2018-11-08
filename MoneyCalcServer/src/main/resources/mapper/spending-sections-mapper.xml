@@ -2,7 +2,6 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper">
 
-
     <resultMap id="getSpendingSectionsMap" type="ru.strcss.projects.moneycalc.entities.SpendingSection"
                autoMapping="true">
     </resultMap>
@@ -24,93 +23,130 @@
         ORDER BY ss."sectionId" ASC
     </select>
 
-    <!--<resultMap id="getSpendingSectionsMap" type="java.lang.Boolean"-->
-    <!--autoMapping="true">-->
-    <!--</resultMap>-->
-    <!--<select id="isSpendingSectionNameNew" resultMap="getSpendingSectionsMap">-->
-    <!--<![CDATA[-->
-    <!--select exists(-->
-    <!--select 1-->
-    <!--FROM "SpendingSection" ss-->
-    <!--join "Person" p on ss."personId" = p.id-->
-    <!--join "Access" a on a.id = p."accessId"-->
-    <!--where a.login = #{login} AND ss.name = #{sectionName}-->
-    <!--)-->
-    <!--]]>-->
-    <!--</select>-->
+    <update id="addSpendingSection" statementType="CALLABLE">
+    <![CDATA[
 
+        DO $$
+        declare
+          personId numeric;
+          newSectionId numeric;
+        begin
+          select ss."personId" into personId from "SpendingSection" ss
+                                                    join "Person" p on ss."personId" = p.id
+                                                    join "Access" a on a.id = p."accessId"
+          where a.login = '${login}'
+              LIMIT 1;
 
-    <!--<update id="updateSpendingSection" statementType = "CALLABLE">-->
-    <!--<![CDATA[-->
-    <!--UPDATE "SpendingSection"-->
-    <!--SET-->
-    <!--"periodFrom" = #{settings.periodFrom},-->
-    <!--"periodTo" = #{settings.periodTo}-->
-    <!--from "Settings" st-->
-    <!--join "Person" p on st.id = p."settingsId"-->
-    <!--join "Access" a on a.id = p."accessId"-->
-    <!--where a.login = #{login};-->
-    <!--]]>-->
-    <!--</update>-->
+          select max("sectionId") + 1 into newSectionId from "SpendingSection" where "personId" = personId;
 
-    <!--<update id="saveSettings" statementType = "CALLABLE">-->
-    <!--<selectKey keyProperty="id" resultType="long" order="BEFORE">-->
-    <!--select ORG_SEQ.NEXTVAL as id from dual-->
-    <!--</selectKey>-->
+          insert into "SpendingSection" ("personId", "sectionId", "name", "isAdded", "isRemoved", "budget", "logoId")
+          VALUES (personId, newSectionId, '${name}', true, false, ${budget}, ${logoId});
+        end $$;
 
-    <!--DECLARE-->
-    <!--gv_orgst_0 NUMBER := 0; &#45;&#45; статус Загружен-->
-    <!--BEGIN-->
+        ]]>
+    </update>
 
-    <!--INSERT INTO ofd_registries-->
-    <!--(org_id,-->
-    <!--registry_id,-->
-    <!--upload_date,-->
-    <!--registry_date,-->
-    <!--ofsrc_ofsrc_id,-->
-    <!--full_registry_yn,-->
-    <!--total_amount,-->
-    <!--total_count)-->
-    <!--VALUES-->
-    <!--(#{id}, #{fiscalRegistryId}, sysdate, TRUNC(#{registryDate}), #{fiscalEventSource.fiscalEventSourceId}, ${isRegistryFull=="0"?"'N'":"'Y'"}, #{totalObjectsAmount}, #{totalObjectsCount});-->
+    <update id="updateSpendingSection">
+        <![CDATA[
+        update "SpendingSection"
+          ]]>
+        <set>
+            <if test="section.name != null">
+                "name" = #{section.name},
+            </if>
+            <if test="section.isAdded != null">
+                "isAdded" = #{section.isAdded},
+            </if>
+            <if test="section.isRemoved != null">
+                "isRemoved" = #{section.isRemoved},
+            </if>
+            <if test="section.budget != null">
+                "budget" = #{section.budget},
+            </if>
+            <if test="section.logoId != null">
+                "logoId" = #{section.logoId},
+            </if>
+        </set>
+        from "SpendingSection" ss
+        join "Person" p on ss."personId" = p.id
+        join "Access" a on a.id = p."accessId"
+        where
+        a.login = #{login}
+        AND ss."sectionId" = #{sectionId};
+    </update>
 
-    <!--INSERT INTO OFD_REGISTRY_HISTORIES (ORGH_ID, ORG_ORG_ID, ORGST_ORGST_ID, START_DATE)-->
-    <!--VALUES (ORGH_SEQ.nextval, #{id}, gv_orgst_0, SYSDATE);-->
-    <!--END;-->
-    <!--</update>-->
+    <delete id="deleteSpendingSection">
+        <![CDATA[
 
+        delete
+        from "SpendingSection" ss
+        USING "Person" p, "Access" a
+        where
+            a.login = #{login}
+            AND ss."personId" = p.id
+            AND a.id = p."accessId"
+            AND ss."sectionId" = #{sectionId};
 
-    <!--<insert id="insertRegistryFile">-->
-    <!--INSERT INTO OFD_REGISTRY_DATA (ORGD_ID, ORG_ORG_ID, FILE_DATA)-->
-    <!--VALUES (ORGD_SEQ.nextval, #{registryId}, #{file})-->
-    <!--</insert>-->
+        ]]>
+    </delete>
 
-    <!--<update id="updateReportStatus" parameterType="com.peterservice.paysofd.report.model.dto.ReportOrder"-->
-    <!--statementType="CALLABLE">-->
-    <!--<![CDATA[-->
+    <resultMap id="isSpendingSectionNameNewMap" type="boolean"
+               autoMapping="true">
+    </resultMap>
+    <select id="isSpendingSectionNameNew" resultMap="isSpendingSectionNameNewMap">
+    <![CDATA[
 
-    <!--DECLARE-->
-    <!--BEGIN-->
-    <!--update OFD_REPORT_ORDER_HISTORY-->
-    <!--set END_DATE  = SYSDATE,-->
-    <!--NAVI_DATE = SYSDATE-->
-    <!--where ORORD_ORORD_ID = #{reportId};-->
-    <!--insert into OFD_REPORT_ORDER_HISTORY (ORORDH_ID, ORORD_ORORD_ID, ORST_ORST_ID, START_DATE, NAVI_DATE, END_DATE)-->
-    <!--values (ORORDH_SEQ.nextval, #{reportId}, #{statusId}, sysdate, sysdate, (TO_DATE('2999/12/31', 'yyyy/mm/dd')));-->
-    <!--END;-->
+        select case when count(*) > 0 then 0 else 1 end
+        FROM "SpendingSection" ss
+        join "Person" p on ss."personId" = p.id
+        join "Access" a on a.id = p."accessId"
+        where a.login = #{login} AND ss.name = #{sectionName}
 
-    <!--]]>-->
-    <!--</update>-->
+        ]]>
+    </select>
 
-    <!--<update id="saveGuiJsonResult">-->
-    <!--UPDATE OFD_REPORT_ORDERS oro-->
-    <!--SET oro.REPORT_LIMITED_FILE = #{guiJson}-->
-    <!--WHERE oro.ORORD_ID = #{reportId}-->
-    <!--</update>-->
+    <resultMap id="isSpendingSectionIdExistsMap" type="boolean"
+               autoMapping="true">
+    </resultMap>
+    <select id="isSpendingSectionIdExists" resultMap="isSpendingSectionIdExistsMap">
+    <![CDATA[
 
-    <!--<update id="saveExcelFileResult">-->
-    <!--UPDATE OFD_REPORT_ORDERS oro-->
-    <!--SET oro.REPORT_FILE = #{excelFile,jdbcType=BLOB}-->
-    <!--WHERE oro.ORORD_ID = #{reportId}-->
-    <!--</update>-->
+        select case when count(*) > 0 then 1 else 0 end
+        FROM "SpendingSection" ss
+        join "Person" p on ss."personId" = p.id
+        join "Access" a on a.id = p."accessId"
+        where a.login = #{login} AND ss."sectionId" = #{sectionId}
+
+        ]]>
+    </select>
+
+    <resultMap id="getSectionBySectionIdMap" type="ru.strcss.projects.moneycalc.entities.SpendingSection"
+               autoMapping="true">
+    </resultMap>
+    <select id="getSectionBySectionId" resultMap="getSectionBySectionIdMap">
+    <![CDATA[
+
+        select *
+        FROM "SpendingSection" ss
+        join "Person" p on ss."personId" = p.id
+        join "Access" a on a.id = p."accessId"
+        where a.login = #{login} AND ss."sectionId" = #{sectionId}
+
+        ]]>
+    </select>
+
+    <resultMap id="getSectionBySectionNameMap" type="ru.strcss.projects.moneycalc.entities.SpendingSection"
+               autoMapping="true">
+    </resultMap>
+    <select id="getSectionBySectionName" resultMap="getSectionBySectionNameMap">
+    <![CDATA[
+
+        select *
+        FROM "SpendingSection" ss
+        join "Person" p on ss."personId" = p.id
+        join "Access" a on a.id = p."accessId"
+        where a.login = #{login} AND ss.name = #{name}
+
+        ]]>
+    </select>
 </mapper>

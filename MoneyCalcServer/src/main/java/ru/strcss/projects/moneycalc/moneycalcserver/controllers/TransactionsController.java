@@ -99,7 +99,7 @@ public class TransactionsController extends AbstractController implements Transa
         RequestValidation<Transaction> requestValidation = new Validator(addContainer, "Adding Transactions")
                 .addValidation(() -> addContainer.getTransaction().isValid().isValidated(),
                         () -> fillLog(TRANSACTION_INCORRECT, addContainer.getTransaction().isValid().getReasons().toString()))
-                .addValidation(() -> spendingSectionService.isSpendingSectionIdExists(personId, addContainer.getTransaction().getSectionId()),
+                .addValidation(() -> spendingSectionService.isSpendingSectionIdExists(login, addContainer.getTransaction().getSectionId()),
                         () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, "" + addContainer.getTransaction().getSectionId()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();

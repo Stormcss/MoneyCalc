@@ -1,10 +1,7 @@
 package ru.strcss.projects.moneycalc.integration.testapi;
 
 import retrofit2.Call;
-import retrofit2.http.Body;
-import retrofit2.http.GET;
-import retrofit2.http.Header;
-import retrofit2.http.POST;
+import retrofit2.http.*;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
@@ -39,28 +36,31 @@ public interface MoneyCalcClient {
     @GET("/api/settings/get")
     Call<MoneyCalcRs<Settings>> getSettings(@Header("Authorization") String token);
 
-    @POST("/api/settings/spendingSection/add")
+    /**
+     * Spending Section
+     */
+    @POST("/api/spendingSections")
     Call<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@Header("Authorization") String token,
                                                                 @Body SpendingSectionAddContainer spendingSectionContainer);
 
-    @POST("/api/settings/spendingSection/update")
+    @PUT("/api/spendingSections")
     Call<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@Header("Authorization") String token,
                                                                    @Body SpendingSectionUpdateContainer updateContainer);
 
-    @POST("/api/settings/spendingSection/delete")
+    @DELETE("/api/spendingSections")
     Call<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@Header("Authorization") String token,
                                                                    @Body SpendingSectionDeleteContainer deleteContainer);
 
-    @GET("/api/settings/spendingSection/get")
+    @GET("/api/spendingSections")
     Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSections(@Header("Authorization") String token);
 
-    @GET("/api/settings/spendingSection/get?withNonAdded=true")
+    @GET("/api/spendingSections?withNonAdded=true")
     Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithNonAdded(@Header("Authorization") String token);
 
-    @GET("/api/settings/spendingSection/get?withRemoved=true")
+    @GET("/api/spendingSections?withRemoved=true")
     Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemoved(@Header("Authorization") String token);
 
-    @GET("/api/settings/spendingSection/get?withRemovedOnly=true")
+    @GET("/api/spendingSections?withRemovedOnly=true")
     Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemovedOnly(@Header("Authorization") String token);
 
     /**

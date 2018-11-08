@@ -28,11 +28,12 @@ public class Generator {
     }
 
     public static Access generateAccess(String login) {
-        return Access.builder()
-                .login(login)
-                .password("qwerty")
-                .email(login + "@mail.ru")
-                .build();
+        return new Access(login, "qwerty", login + "@mail.ru");
+//        return Access.builder()
+//                .login(login)
+//                .password("qwerty")
+//                .email(login + "@mail.ru")
+//                .build();
     }
 
     public static Credentials generateCredentials(String login) {
@@ -45,10 +46,11 @@ public class Generator {
     }
 
     public static Settings generateSettings() {
-        return Settings.builder()
-                .periodFrom(currentDate())
-                .periodTo(generateDatePlus(ChronoUnit.MONTHS, 1))
-                .build();
+        return new Settings(currentDate(), generateDatePlus(ChronoUnit.MONTHS, 1));
+//        return Settings.builder()
+//                .periodFrom(currentDate())
+//                .periodTo()
+//                .build();
     }
 
     public static Identifications generateIdentifications() {
