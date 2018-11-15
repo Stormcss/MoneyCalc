@@ -8,7 +8,6 @@ import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
 import ru.strcss.projects.moneycalc.entities.Access;
@@ -154,7 +153,7 @@ public class IntegrationTestUtils {
      * @param spendingSection - added SpendingSection
      * @return added Spending Section Id
      */
-    public static int addSpendingSectionGetSectionId(MoneyCalcClient service, String token, SpendingSection spendingSection) {
+    public static Integer addSpendingSectionGetSectionId(MoneyCalcClient service, String token, SpendingSection spendingSection) {
         MoneyCalcRs<List<SpendingSection>> addSectionRs =
                 sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
 
@@ -181,9 +180,7 @@ public class IntegrationTestUtils {
      * @return income Rs object
      */
     public static MoneyCalcRs<List<SpendingSection>> deleteSpendingSectionByIdGetRs(MoneyCalcClient service, String token, Integer id) {
-        SpendingSectionDeleteContainer deleteContainerById =
-                new SpendingSectionDeleteContainer(id);
-        return sendRequest(service.deleteSpendingSection(token, deleteContainerById), Status.SUCCESS).body();
+        return sendRequest(service.deleteSpendingSection(token, id), Status.SUCCESS).body();
     }
 
     /**

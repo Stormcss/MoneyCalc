@@ -72,8 +72,8 @@ public class StatisticsControllerIT extends AbstractIT {
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 0, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), budgetPerSection, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 0, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), 0d, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), budgetPerSection, DELTA, "SummaryBalance is incorrect!");
     }
@@ -90,8 +90,8 @@ public class StatisticsControllerIT extends AbstractIT {
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), 0d, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), budgetPerSection - 900, DELTA, "SummaryBalance is incorrect!");
     }
@@ -111,8 +111,8 @@ public class StatisticsControllerIT extends AbstractIT {
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 200, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 200, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), budgetPerSection - 200, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 200, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), round((double) budgetPerSection / rangeDays, DIGITS) - 200,
                 DELTA, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 200,
@@ -133,8 +133,8 @@ public class StatisticsControllerIT extends AbstractIT {
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 200, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 200, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), budgetPerSection - 200, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 200, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), round((double) budgetPerSection / rangeDays, DIGITS) - 200,
                 DELTA, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 200,
@@ -155,8 +155,8 @@ public class StatisticsControllerIT extends AbstractIT {
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 500, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 500, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), budgetPerSection - 500, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 500, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), round((double) budgetPerSection / rangeDays, DIGITS) - 200,
                 DELTA, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 500,
@@ -178,8 +178,8 @@ public class StatisticsControllerIT extends AbstractIT {
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), round((double) budgetPerSection / rangeDays, DIGITS) - 200,
                 DELTA, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 900,

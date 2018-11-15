@@ -61,7 +61,7 @@ public class ControllerUtils {
 
     public static List<SpendingSection> sortSpendingSectionList(List<SpendingSection> incomeList) {
         List<SpendingSection> spendingSectionList = new ArrayList<>(incomeList);
-        spendingSectionList.sort(Comparator.comparingInt(SpendingSection::getId));
+        spendingSectionList.sort(Comparator.comparingLong(SpendingSection::getId));
 
         return spendingSectionList;
     }

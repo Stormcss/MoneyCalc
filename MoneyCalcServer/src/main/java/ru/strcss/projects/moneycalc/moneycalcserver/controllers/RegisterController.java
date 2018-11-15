@@ -2,7 +2,6 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -18,7 +17,6 @@ import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfa
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateRegisteringSettings;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isEmailValid;
 
 @Slf4j
@@ -27,11 +25,9 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 public class RegisterController extends AbstractController implements RegisterAPIService {
 
     private RegisterService registerService;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
 
-    public RegisterController(RegisterService registerService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public RegisterController(RegisterService registerService) {
         this.registerService = registerService;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
     /**
@@ -49,23 +45,18 @@ public class RegisterController extends AbstractController implements RegisterAP
                         () -> fillLog(REGISTER_ERROR, credentials.getAccess().isValid().getReasons().toString()), "Access")
                 .addValidation(() -> credentials.getIdentifications().isValid().isValidated(),
                         () -> fillLog(REGISTER_ERROR, credentials.getIdentifications().isValid().getReasons().toString()), "Identifications")
-                .addValidation(() -> !registerService.isPersonExistsByLogin(credentials.getAccess().getLogin()),
+                .addValidation(() -> !registerService.isUserExistsByLogin(credentials.getAccess().getLogin()),
                         () -> fillLog(PERSON_LOGIN_ALREADY_EXISTS, credentials.getAccess().getLogin()))
-                .addValidation(() -> !registerService.isPersonExistsByEmail(credentials.getAccess().getEmail()),
+                .addValidation(() -> !registerService.isUserExistsByEmail(credentials.getAccess().getEmail()),
                         () -> fillLog(PERSON_EMAIL_ALREADY_EXISTS, credentials.getAccess().getEmail()))
                 .addValidation(() -> isEmailValid(credentials.getAccess().getEmail()),
                         () -> fillLog(PERSON_EMAIL_INCORRECT, credentials.getAccess().getEmail()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        credentials.getAccess().setPassword(bCryptPasswordEncoder.encode(credentials.getAccess().getPassword()));
+        Person registeredUser = registerService.registerUser(credentials);
 
-        String login = credentials.getAccess().getLogin();
 
-        log.info("Registering new Person with Login: '{}' and name: '{}'", login, credentials.getIdentifications().getName());
-
-        Person registeredUser = registerService.registerUser(credentials.getAccess(), credentials.getIdentifications(),
-                generateRegisteringSettings());
 
         // TODO: 02.02.2018 validate if save is successful
         return responseSuccess(REGISTER_SUCCESSFUL, registeredUser);

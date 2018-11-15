@@ -32,7 +32,7 @@ public class SummaryStatisticsHandler {
         for (Integer sectionId : container.getSections()) {
             FinanceSummaryBySection summaryBySection = FinanceSummaryBySection.builder()
                     .sectionId(sectionId)
-                    .moneySpendAll(0)
+                    .moneySpendAll(0d)
                     .build();
             statistics.put(sectionId, summaryBySection);
         }
@@ -50,7 +50,7 @@ public class SummaryStatisticsHandler {
         //Дозаполняем данными
         statistics.forEach((id, financeSummaryBySection) -> {
             SpendingSection currentSection = getSpendingSectionById(container, id);
-            int budget = currentSection.getBudget();
+            Long budget = currentSection.getBudget();
 
             long daysInPeriod = ChronoUnit.DAYS.between(container.getRangeFrom(), container.getRangeTo()) + 1;
             double moneyPerDay = (double) budget / daysInPeriod;
@@ -85,14 +85,14 @@ public class SummaryStatisticsHandler {
 
     private void fillMoneySpend(FinanceSummaryCalculationContainer container, Map<Integer, FinanceSummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
         container.getTransactions().forEach(transaction -> {
-            Integer sectionID = transaction.getSectionId();
-            FinanceSummaryBySection temporary = statistics.get(sectionID);
+            Integer sectionId = transaction.getSectionId();
+            FinanceSummaryBySection temporary = statistics.get(sectionId);
 
             temporary.setMoneySpendAll(temporary.getMoneySpendAll() + transaction.getSum());
             if (spendTodayBySection != null && transaction.getDate().isEqual(container.getToday())) {
-                spendTodayBySection.put(sectionID, spendTodayBySection.getOrDefault(sectionID, 0d) + transaction.getSum());
+                spendTodayBySection.put(sectionId, spendTodayBySection.getOrDefault(sectionId, 0d) + transaction.getSum());
             }
-            statistics.put(sectionID, temporary);
+            statistics.put(sectionId, temporary);
         });
     }
 }

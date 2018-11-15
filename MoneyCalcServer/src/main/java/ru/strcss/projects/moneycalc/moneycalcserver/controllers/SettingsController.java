@@ -10,7 +10,6 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateCo
 import ru.strcss.projects.moneycalc.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
@@ -22,11 +21,9 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 public class SettingsController extends AbstractController implements SettingsAPIService {
 
     private SettingsService settingsService;
-    private PersonService personService;
 
-    public SettingsController(SettingsService settingsService, PersonService personService) {
+    public SettingsController(SettingsService settingsService) {
         this.settingsService = settingsService;
-        this.personService = personService;
     }
 
     /**

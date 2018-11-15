@@ -19,12 +19,12 @@ public class SpendingSection implements Validationable, Serializable {
     /**
      * id of SpendingSection - spending section id in DB Table
      */
-    private Integer id;
+    private Long id;
 
     /**
      * Person Id - used for linking Person with current SpendingSection in DB
      */
-    private Integer personId;
+    private Long personId;
 
     /**
      * sectionId of SpendingSection - inner id of spending section for current Person (e.g. [0, 1, 2])
@@ -55,7 +55,7 @@ public class SpendingSection implements Validationable, Serializable {
     /**
      * Estimated budget for section. Used for Statistics calculation
      */
-    private Integer budget;
+    private Long budget;
 
     @Override
     public ValidationResult isValid() {

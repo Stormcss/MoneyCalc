@@ -6,7 +6,9 @@ import ru.strcss.projects.moneycalc.entities.*;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -71,12 +73,12 @@ public class Generator {
         return generateTransaction(date, null, null, null, null, null);
     }
 
-    public static Transaction generateTransaction(Integer sectionID) {
-        return generateTransaction(null, sectionID, null, null, null, null);
+    public static Transaction generateTransaction(Integer sectionId) {
+        return generateTransaction(null, sectionId, null, null, null, null);
     }
 
-    public static Transaction generateTransaction(Integer sectionID, Integer sum) {
-        return generateTransaction(null, sectionID, sum, null, null, null);
+    public static Transaction generateTransaction(Integer sectionId, Integer sum) {
+        return generateTransaction(null, sectionId, sum, null, null, null);
     }
 
     public static Transaction generateTransaction(LocalDate date, Integer sectionId, Integer sum, Integer id,
@@ -102,18 +104,18 @@ public class Generator {
         return UUID.randomUUID().toString().toUpperCase().replace("-", "");
     }
 
-    public static List<SpendingSection> generateSpendingSectionList(int count, boolean ordered) {
-        List<SpendingSection> spendingSections = new ArrayList<>(count);
-
-        for (int i = 0; i < count; i++) {
-            SpendingSection section = generateSpendingSection(null, i, i, null, null, true, false);
-            spendingSections.add(section);
-        }
-        if (!ordered) {
-            Collections.shuffle(spendingSections);
-        }
-        return spendingSections;
-    }
+//    public static List<SpendingSection> generateSpendingSectionList(int count, boolean ordered) {
+//        List<SpendingSection> spendingSections = new ArrayList<>(count);
+//
+//        for (int i = 0; i < count; i++) {
+//            SpendingSection section = generateSpendingSection(null, i, i, null, null, true, false);
+//            spendingSections.add(section);
+//        }
+//        if (!ordered) {
+//            Collections.shuffle(spendingSections);
+//        }
+//        return spendingSections;
+//    }
 
     public static SpendingSection generateSpendingSection() {
         return generateSpendingSection(null, null, null, null, null, null, null);
@@ -123,36 +125,36 @@ public class Generator {
         return generateSpendingSection(null, null, null, name, null, null, null);
     }
 
-    public static SpendingSection generateSpendingSection(Integer budget) {
+    public static SpendingSection generateSpendingSection(Long budget) {
         return generateSpendingSection(budget, null, null, null, null, null, null);
     }
 
-    public static SpendingSection generateSpendingSection(Integer budget, Integer innerId) {
-        int id = innerId + ThreadLocalRandom.current().nextInt(1000);
+    public static SpendingSection generateSpendingSection(Long budget, Integer innerId) {
+        Long id = innerId + ThreadLocalRandom.current().nextLong(1000);
         return generateSpendingSection(budget, innerId, id, null, null, null, null);
     }
 
-    public static SpendingSection generateSpendingSection(Integer budget, Integer innerId, String name) {
+    public static SpendingSection generateSpendingSection(Long budget, Integer innerId, String name) {
         return generateSpendingSection(budget, innerId, null, name, null, null, null);
     }
 
-    public static SpendingSection generateSpendingSection(Integer budget, Integer innerId, Integer id, String name,
+    public static SpendingSection generateSpendingSection(Long budget, Integer innerId, Long id, String name,
                                                           Integer logoId, Boolean isAdded, Boolean isRemoved) {
         return SpendingSection.builder()
-                .id(id == null ? ThreadLocalRandom.current().nextInt(3000) : id)
+                .id(id == null ? ThreadLocalRandom.current().nextLong(3000) : id)
                 .sectionId(innerId)
                 .logoId(logoId == null ? ThreadLocalRandom.current().nextInt(3000) : logoId)
                 .isAdded(isAdded == null ? true : isAdded)
                 .isRemoved(isRemoved)
-                .name(name == null ? "Магазин" + ThreadLocalRandom.current().nextInt(500_000) : name)
-                .budget(budget == null ? 1000 + ThreadLocalRandom.current().nextInt(9000) : budget)
+                .name(name == null ? "Магазин" + ThreadLocalRandom.current().nextLong(500_000) : name)
+                .budget(budget == null ? 1000 + ThreadLocalRandom.current().nextLong(9000) : budget)
                 .build();
     }
 
     public static FinanceSummaryBySection generateFinanceSummaryBySection() {
         return FinanceSummaryBySection.builder()
-                .moneyLeftAll(5000)
-                .moneySpendAll(1000)
+                .moneyLeftAll(5000d)
+                .moneySpendAll(1000d)
                 .summaryBalance(3000d)
                 .todayBalance(100d)
                 .sectionId(1)
@@ -160,8 +162,8 @@ public class Generator {
     }
 
     public static FinanceSummaryCalculationContainer generateFinSummCalculContainer() {
-        List<SpendingSection> sectionList = Arrays.asList(generateSpendingSection(100, 0, "A"),
-                generateSpendingSection(100, 1, "B"), generateSpendingSection(100, 2, "C"));
+        List<SpendingSection> sectionList = Arrays.asList(generateSpendingSection(100L, 0, "A"),
+                generateSpendingSection(100L, 1, "B"), generateSpendingSection(100L, 2, "C"));
         List<Integer> sectionIds = Arrays.asList(0, 1, 2);
         return generateFinSummCalculContainer(sectionList, generateTransactionList(5, sectionIds));
     }
@@ -170,7 +172,7 @@ public class Generator {
         List<Integer> sectionIds = IntStream.range(0, sections).boxed().collect(Collectors.toList());
 
         List<SpendingSection> sectionList = sectionIds.stream()
-                .map(id -> generateSpendingSection(ThreadLocalRandom.current().nextInt(100, 100000), id, "Name" + id))
+                .map(id -> generateSpendingSection(ThreadLocalRandom.current().nextLong(100, 100000), id, "Name" + id))
                 .collect(Collectors.toList());
 
         return generateFinSummCalculContainer(sectionList, generateTransactionList(transactionsSum, sectionIds));

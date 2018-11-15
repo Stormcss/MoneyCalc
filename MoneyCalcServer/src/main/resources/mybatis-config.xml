@@ -21,6 +21,7 @@
     </typeHandlers>
 
     <mappers>
+        <mapper resource="mapper/registry-mapper.xml"/>
         <mapper resource="mapper/settings-mapper.xml"/>
         <mapper resource="mapper/spending-sections-mapper.xml"/>
     </mappers>

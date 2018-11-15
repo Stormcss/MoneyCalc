@@ -3,9 +3,9 @@ package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interf
 import ru.strcss.projects.moneycalc.entities.Access;
 
 public interface AccessService {
-    Access getAccessById(String id);
+//    Access getAccessById(String id);
 
-    Access getAccessByLogin(String login);
+    Access getAccess(String login);
 
-    int saveAccess(Access access);
+//    int saveAccess(Access access);
 }

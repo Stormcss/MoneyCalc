@@ -23,28 +23,19 @@
         ORDER BY ss."sectionId" ASC
     </select>
 
-    <update id="addSpendingSection" statementType="CALLABLE">
+    <insert id="addSpendingSection">
     <![CDATA[
-
-        DO $$
-        declare
-          personId numeric;
-          newSectionId numeric;
-        begin
-          select ss."personId" into personId from "SpendingSection" ss
-                                                    join "Person" p on ss."personId" = p.id
-                                                    join "Access" a on a.id = p."accessId"
-          where a.login = '${login}'
-              LIMIT 1;
-
-          select max("sectionId") + 1 into newSectionId from "SpendingSection" where "personId" = personId;
-
-          insert into "SpendingSection" ("personId", "sectionId", "name", "isAdded", "isRemoved", "budget", "logoId")
-          VALUES (personId, newSectionId, '${name}', true, false, ${budget}, ${logoId});
-        end $$;
-
+      insert into "SpendingSection"
+      VALUES (nextval('spending_sections_id_seq'),
+          #{userId},
+          (select coalesce(max("sectionId"), 0) + 1 from "SpendingSection" where "personId" = #{userId}),
+          #{section.name},
+          true,
+          false,
+          #{section.budget},
+          #{section.logoId});
         ]]>
-    </update>
+    </insert>
 
     <update id="updateSpendingSection">
         <![CDATA[

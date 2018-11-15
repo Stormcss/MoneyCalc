@@ -3,7 +3,6 @@ package ru.strcss.projects.moneycalc.api;
 import org.springframework.http.ResponseEntity;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
 
@@ -16,5 +15,5 @@ public interface SpendingSectionsAPIService {
 
     ResponseEntity<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(SpendingSectionUpdateContainer sectionUpdateContainer);
 
-    ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(SpendingSectionDeleteContainer sectionDeleteContainer);
+    ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(Integer sectionId);
 }

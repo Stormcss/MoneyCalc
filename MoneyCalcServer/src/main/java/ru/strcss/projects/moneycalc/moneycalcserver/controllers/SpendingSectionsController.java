@@ -7,7 +7,6 @@ import org.springframework.web.bind.annotation.*;
 import ru.strcss.projects.moneycalc.api.SpendingSectionsAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
@@ -60,12 +59,12 @@ public class SpendingSectionsController extends AbstractController implements Sp
 
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        sectionService.addSpendingSection(login, addContainer.getSpendingSection());
+        Boolean isAdded = sectionService.addSpendingSection(login, addContainer.getSpendingSection());
 
-//        if (!isAdded) {
-//            log.error("Saving SpendingSection {} for login \'{}\' has failed", addContainer.getSpendingSection(), login);
-//            return responseError(TRANSACTION_SAVING_ERROR);
-//        }
+        if (!isAdded) {
+            log.error("Saving SpendingSection {} for login \'{}\' has failed", addContainer.getSpendingSection(), login);
+            return responseError(SPENDING_SECTION_SAVING_ERROR);
+        }
         log.debug("Saved new SpendingSection for login \'{}\' : {}", login, addContainer.getSpendingSection());
         return responseSuccess(SPENDING_SECTION_ADDED,
                 sectionService.getSpendingSections(login, false, false, false));
@@ -98,16 +97,17 @@ public class SpendingSectionsController extends AbstractController implements Sp
                 sectionService.getSpendingSections(login, false, false, false));
     }
 
-    @DeleteMapping
-    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@RequestBody SpendingSectionDeleteContainer deleteContainer) {
+    @DeleteMapping(value = "/{sectionId}")
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@PathVariable Integer sectionId) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<SpendingSection>> requestValidation = new RequestValidation.Validator(deleteContainer,
-                "Deleting SpendingSection")
-                .validate();
-        if (!requestValidation.isValid()) return requestValidation.getValidationError();
+//        SpendingSectionDeleteContainer
+//        RequestValidation<List<SpendingSection>> requestValidation = new RequestValidation.Validator(deleteContainer,
+//                "Deleting SpendingSection")
+//                .validate();
+//        if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Boolean isDeleted = sectionService.deleteSpendingSection(login, deleteContainer.getSectionId());
+        Boolean isDeleted = sectionService.deleteSpendingSection(login, sectionId);
 
         if (!isDeleted) {
 //            String errorMessage = deleteResult.getErrorMessage();

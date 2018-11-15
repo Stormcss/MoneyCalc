@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper">
+
+    <update id="registerUser" statementType="CALLABLE">
+        <![CDATA[
+
+        DO $$
+        declare
+          personId numeric;
+          accessId numeric;
+          identificationsId numeric;
+          settingsId numeric;
+        begin
+
+          select nextval('person_id_seq') into personId;
+          select nextval('access_id_seq') into accessId;
+          select nextval('identifications_id_seq') into identificationsId;
+          select nextval('settings_id_seq') into settingsId;
+
+          insert into "Access" ("id", "login", "password", "email")
+          VALUES (accessId, '${credentials.access.login}', '${credentials.access.password}', '${credentials.access.email}');
+
+          insert into "Identifications" ("id", "name")
+          VALUES (identificationsId, '${credentials.identifications.name}');
+
+          insert into "Settings" ("id", "periodFrom", "periodTo")
+          VALUES (settingsId, '${settings.periodFrom}', '${settings.periodTo}');
+
+          insert into "Person"
+          VALUES (personId, accessId, identificationsId, settingsId);
+        end
+        $$;
+
+        ]]>
+    </update>
+</mapper>

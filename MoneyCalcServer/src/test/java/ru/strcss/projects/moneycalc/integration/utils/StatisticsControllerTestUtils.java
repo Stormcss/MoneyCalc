@@ -31,7 +31,7 @@ public class StatisticsControllerTestUtils {
      *
      * @param numOfSections - required number of Person's sections
      */
-    public static void checkPersonsSections(int numOfSections, int budget, MoneyCalcClient service, String token) {
+    public static void checkPersonsSections(int numOfSections, long budget, MoneyCalcClient service, String token) {
         List<SpendingSection> spendingSections = sendRequest(service.getSpendingSections(token)).body().getPayload();
 
         if (numOfSections > spendingSections.size()) {

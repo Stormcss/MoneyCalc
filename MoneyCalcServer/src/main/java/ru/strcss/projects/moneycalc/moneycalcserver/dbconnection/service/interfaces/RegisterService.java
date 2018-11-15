@@ -1,14 +1,12 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces;
 
-import ru.strcss.projects.moneycalc.entities.Access;
-import ru.strcss.projects.moneycalc.entities.Identifications;
+import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.entities.Person;
-import ru.strcss.projects.moneycalc.entities.Settings;
 
 public interface RegisterService {
-    Person registerUser(Access access, Identifications identifications, Settings settings);
+    Person registerUser(Credentials credentials);
 
-    boolean isPersonExistsByLogin(String login);
+    boolean isUserExistsByLogin(String login);
 
-    boolean isPersonExistsByEmail(String email);
+    boolean isUserExistsByEmail(String email);
 }

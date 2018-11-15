@@ -7,7 +7,6 @@ import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.Settings;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
@@ -64,7 +63,7 @@ public class SettingsControllerIT extends AbstractIT {
     public void addSpendingSection() {
         int ignoredId = 6;
         String token = savePersonGetToken(service);
-        SpendingSection spendingSection = generateSpendingSection(1000, ignoredId);
+        SpendingSection spendingSection = generateSpendingSection(1000L, ignoredId);
 
         MoneyCalcRs<List<SpendingSection>> addSectionRs = addSpendingSectionGetRs(service, token, spendingSection);
 
@@ -98,10 +97,10 @@ public class SettingsControllerIT extends AbstractIT {
             assertTrue(addSectionRs.getPayload().stream()
                     .anyMatch(section -> section.getName()
                             .equals(spendingSection.getName())), "Spending Section was not added!");
-            assertEquals((int) addSectionRs.getPayload().stream()
+            assertEquals(addSectionRs.getPayload().stream()
                             .filter(section -> section.getName().equals(spendingSection.getName()))
-                            .findAny().get().getSectionId(),
-                    addSectionRs.getPayload().size() - 1, "Id has been incremented incorrectly!");
+                            .findAny().get().getSectionId().intValue(),
+                    addSectionRs.getPayload().size(), "Id has been incremented incorrectly!");
         }
     }
 
@@ -112,15 +111,16 @@ public class SettingsControllerIT extends AbstractIT {
     public void addSpendingSection_sectionWithDeletedName() {
         String token = savePersonGetToken(service);
 
-        MoneyCalcRs<List<SpendingSection>> sectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
-        SpendingSection deletedSection = sectionsRs.getPayload().get(0);
+        List<SpendingSection> sectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body().getPayload();
+        SpendingSection deletedSection = sectionsRs.get(0);
         String deletedSectionName = deletedSection.getName();
 
-        SpendingSectionDeleteContainer deleteContainer = new SpendingSectionDeleteContainer(deletedSection.getSectionId());
-        Response<MoneyCalcRs<List<SpendingSection>>> deleteRs = sendRequest(service.deleteSpendingSection(token, deleteContainer), Status.SUCCESS);
+        Response<MoneyCalcRs<List<SpendingSection>>> deleteRs = sendRequest(service.deleteSpendingSection(token, deletedSection.getSectionId()), Status.SUCCESS);
         Response<MoneyCalcRs<List<SpendingSection>>> addRs = sendRequest(service.addSpendingSection(token,
                 new SpendingSectionAddContainer(generateSpendingSection(deletedSectionName))),
                 Status.SUCCESS);
+
+        // TODO: 15.11.2018 do assertions
     }
 
     @Test
@@ -167,13 +167,13 @@ public class SettingsControllerIT extends AbstractIT {
     public void updateSpendingSectionById() {
         String token = savePersonGetToken(service);
         SpendingSection spendingSection = generateSpendingSection();
-        Integer updatedSectionId = 0;
+        int updatedSectionId = 1;
 
         MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
 
         String oldName = getSectionsRs.getPayload()
                 .stream().filter(section -> section.getSectionId().equals(updatedSectionId)).findAny().get().getName();
-        spendingSection.setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
+        spendingSection.setBudget(ThreadLocalRandom.current().nextLong(1_000_000));
 
         SpendingSectionUpdateContainer updateContainerById = new SpendingSectionUpdateContainer(updatedSectionId, spendingSection);
 
@@ -189,13 +189,14 @@ public class SettingsControllerIT extends AbstractIT {
     @Test
     public void updateSpendingSectionById_onlyBudget() {
         String token = savePersonGetToken(service);
-        Integer updatedSectionId = 0;
+        int updatedSectionId = 1;
 
         MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
 
-        Integer oldBudget = getSectionsRs.getPayload()
+        Long oldBudget = getSectionsRs.getPayload()
                 .stream().filter(section -> section.getSectionId().equals(updatedSectionId)).findAny().get().getBudget();
-        getSectionsRs.getPayload().get(updatedSectionId).setBudget(ThreadLocalRandom.current().nextInt(1_000_000));
+        //setting new budget
+        getSectionsRs.getPayload().get(updatedSectionId).setBudget(ThreadLocalRandom.current().nextLong(1_000_000));
 
         SpendingSectionUpdateContainer updateContainerById =
                 new SpendingSectionUpdateContainer(updatedSectionId, getSectionsRs.getPayload().get(updatedSectionId));
@@ -234,9 +235,9 @@ public class SettingsControllerIT extends AbstractIT {
     @Test
     public void getSpendingSections_withNonAdded() {
         String token = savePersonGetToken(service);
-        int nonAddedId = 0;
+        int nonAddedId = 1;
         SpendingSection spendingSection = new SpendingSection(null, null, nonAddedId, null, "Renamed",
-                false, false, 1000);
+                false, false, 1000L);
 
         sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(nonAddedId, spendingSection)), Status.SUCCESS);
 
@@ -249,9 +250,9 @@ public class SettingsControllerIT extends AbstractIT {
     @Test
     public void getSpendingSections_withRemoved() {
         String token = savePersonGetToken(service);
-        int removedId = 0;
+        int removedId = 1;
 
-        sendRequest(service.deleteSpendingSection(token, new SpendingSectionDeleteContainer(removedId)), Status.SUCCESS);
+        sendRequest(service.deleteSpendingSection(token, removedId), Status.SUCCESS);
 
         MoneyCalcRs<List<SpendingSection>> getWithRemovedSectionsRs =
                 sendRequest(service.getSpendingSectionsWithRemoved(token), Status.SUCCESS).body();

@@ -12,6 +12,6 @@ public class FinanceSummaryBySection implements Serializable {
     private String sectionName;
     private Double todayBalance;
     private Double summaryBalance;
-    private Integer moneySpendAll;
-    private Integer moneyLeftAll;
+    private Double moneySpendAll;
+    private Double moneyLeftAll;
 }

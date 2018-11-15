@@ -15,9 +15,7 @@ import java.util.List;
 public interface SpendingSectionsMapper {
     List<SpendingSection> getSpendingSections(@Param("login") String login, @Param("filter") SpendingSectionFilter filter);
 
-    void addSpendingSection(@Param("login") String login, @Param("name") String name, @Param("budget") Integer budget,
-                            @Param("logoId") Integer logoId);
-//    void addSpendingSection(@Param("login") String login, @Param("section") SpendingSection section);
+    Integer addSpendingSection(@Param("userId") Long userId, @Param("section") SpendingSection section);
 
     Integer updateSpendingSection(@Param("login") String login, @Param("sectionId") Integer sectionId,
                                   @Param("section") SpendingSection section);
@@ -31,4 +29,5 @@ public interface SpendingSectionsMapper {
     SpendingSection getSectionBySectionId(@Param("login") String login, @Param("sectionId") Integer sectionId);
 
     SpendingSection getSectionBySectionName(@Param("login") String login, @Param("name") String name);
+
 }

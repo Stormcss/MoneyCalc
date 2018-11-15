@@ -8,7 +8,6 @@ import org.springframework.boot.web.server.LocalServerPort;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.init.ScriptUtils;
-import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.testng.AbstractTestNGSpringContextTests;
 import org.testng.annotations.AfterSuite;
 import org.testng.annotations.BeforeClass;
@@ -26,13 +25,13 @@ import java.time.LocalDate;
         Application.class
 //        ServletWebServerFactoryAutoConfiguration.class
 })
-@TestPropertySource(properties = {
-        "spring.datasource.username=h2DB",
-        "spring.datasource.url=jdbc:h2:mem:test;DB_CLOSE_DELAY=-1",
-//        "spring.datasource.url=jdbc:h2:mem:test",
-        "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
-        "spring.datasource.password=password"
-})
+//@TestPropertySource(properties = {
+//        "spring.datasource.username=stormcss_mnclc_t",
+//        "spring.datasource.url=jdbc:postgresql://pg.sweb.ru:5432/stormcss_mnclc_t",
+////        "spring.datasource.url=jdbc:h2:mem:test",
+//        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect",
+//        "spring.datasource.password=M0Nk3yc@lCdb"
+//})
 public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
 
     @LocalServerPort
@@ -49,6 +48,7 @@ public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
     @BeforeSuite
     public void createDbSchema() throws Exception {
         super.springTestContextPrepareTestInstance();
+        ScriptUtils.executeSqlScript(jdbcTemplate.getDataSource().getConnection(), new ClassPathResource(DROP_SCHEMA_PATH));
         ScriptUtils.executeSqlScript(jdbcTemplate.getDataSource().getConnection(), new ClassPathResource(CREATE_SCHEMA_PATH));
     }
 
@@ -70,6 +70,6 @@ public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
 
     @AfterSuite
     public void dropDbSchema() throws SQLException {
-        ScriptUtils.executeSqlScript(jdbcTemplate.getDataSource().getConnection(), new ClassPathResource(DROP_SCHEMA_PATH));
+//        ScriptUtils.executeSqlScript(jdbcTemplate.getDataSource().getConnection(), new ClassPathResource(DROP_SCHEMA_PATH));
     }
 }

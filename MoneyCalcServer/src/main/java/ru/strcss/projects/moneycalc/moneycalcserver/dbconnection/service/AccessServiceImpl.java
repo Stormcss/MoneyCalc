@@ -1,33 +1,36 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
 
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import ru.strcss.projects.moneycalc.entities.Access;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.AccessDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.AccessService;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.AccessMapper;
+
+import static java.util.Collections.emptyList;
 
 @Service
-public class AccessServiceImpl implements AccessService {
+public class AccessServiceImpl implements AccessService, UserDetailsService {
 
-    private AccessDao accessDao;
+    private AccessMapper accessMapper;
 
-    public AccessServiceImpl(AccessDao accessDao) {
-        this.accessDao = accessDao;
+    public AccessServiceImpl(AccessMapper accessMapper) {
+        this.accessMapper = accessMapper;
     }
 
     @Override
-    @Transactional
-    public Access getAccessById(String id) {
-        return accessDao.getAccessById(id);
+    public Access getAccess(String login) {
+        return accessMapper.getAccess(login);
     }
 
     @Override
-    public Access getAccessByLogin(String login) {
-        return accessDao.getAccessByLogin(login);
-    }
-
-    @Override
-    public int saveAccess(Access access) {
-        return accessDao.saveAccess(access);
+    public UserDetails loadUserByUsername(String username) {
+        Access personAccess = accessMapper.getAccess(username);
+        if (personAccess == null) {
+            throw new UsernameNotFoundException(username);
+        }
+        return new User(personAccess.getLogin(), personAccess.getPassword(), emptyList());
     }
 }

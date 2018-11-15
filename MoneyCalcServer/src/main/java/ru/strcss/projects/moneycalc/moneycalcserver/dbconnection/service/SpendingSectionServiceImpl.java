@@ -5,23 +5,24 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.SpendingSectionDao;
 import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
 import ru.strcss.projects.moneycalc.moneycalcserver.dto.SpendingSectionFilter;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @Service
 public class SpendingSectionServiceImpl implements SpendingSectionService {
 
-    private SpendingSectionDao spendingSectionDao;
     private SpendingSectionsMapper sectionsMapper;
+    private RegistryMapper registryMapper;
 
-    public SpendingSectionServiceImpl(SpendingSectionsMapper sectionsMapper, SpendingSectionDao spendingSectionDao) {
+    public SpendingSectionServiceImpl(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper) {
         this.sectionsMapper = sectionsMapper;
-        this.spendingSectionDao = spendingSectionDao;
+        this.registryMapper = registryMapper;
     }
 
     @Override
@@ -32,8 +33,11 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     @Override
     @Transactional
     public Boolean addSpendingSection(String login, SpendingSection section) {
-        sectionsMapper.addSpendingSection(login, section.getName(), section.getBudget(), section.getLogoId());
-        return true;
+        Long userId = registryMapper.geUserIdByLogin(login);
+        if (userId == null)
+            throw new RuntimeException("User not found");
+        return sectionsMapper.addSpendingSection(userId, section) > 0;
+//        return sectionsMapper.addSpendingSection(userId, section.getName(), section.getBudget(), section.getLogoId()) > 0;
     }
 
     @Override
@@ -60,7 +64,8 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
 
     @Override
     public Integer getSectionIdByInnerId(Integer personId, Integer innerSectionId) {
-        return spendingSectionDao.getSectionIdByInnerId(personId, innerSectionId);
+        return null;
+        //        return spendingSectionDao.getSectionIdByInnerId(personId, innerSectionId);
     }
 
     @Override
@@ -73,38 +78,64 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
         return sectionsMapper.isSpendingSectionNameNew(login, name);
     }
 
-    /**
-     * Check if it is allowed to update SpendingSection's name.
-     * Returns false if update will case doubles in SpendingSection names
-     */
     @Override
     public Boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
-
         // if name is not set at all
         if (updateContainer.getSpendingSection().getName() == null)
             return true;
 
-        SpendingSection spendingSection = sectionsMapper.getSectionBySectionId(login, updateContainer.getSectionId());
+        List<SpendingSection> sectionList = sectionsMapper.getSpendingSections(login, new SpendingSectionFilter(true, false, false));
+        String oldName = sectionList.stream()
+                .filter(section -> section.getSectionId().equals(updateContainer.getSectionId()))
+                .map(SpendingSection::getName)
+                .findAny()
+                .orElseThrow(() -> new RuntimeException("Can not update Spending Section - sectionId is not found!"));
 
-//        List<SpendingSection> sectionList = sectionsMapper.getSpendingSectionBySectionId(personId);
+        // if updateContainer has name which does not change
+        if (oldName.equals(updateContainer.getSpendingSection().getName()))
+            return true;
+
+        // looking for other sections with the new name
+        Optional<Integer> existingSectionIdWithSameName = sectionList.stream()
+                .filter(section -> section.getName().equals(updateContainer.getSpendingSection().getName()))
+                .map(SpendingSection::getSectionId)
+                .findAny();
+
+        return !existingSectionIdWithSameName.isPresent();
+    }
+
+    /**
+     * Check if it is allowed to update SpendingSection's name.
+     * Returns false if update will case doubles in SpendingSection names
+     */
+//    @Override
+//    public Boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
+//
+//        // if name is not set at all
+//        if (updateContainer.getSpendingSection().getName() == null)
+//            return true;
+//
+//        SpendingSection spendingSection = sectionsMapper.getSectionBySectionId(login, updateContainer.getSectionId());
+//
+//        List<SpendingSection> sectionList = sectionsMapper.getSpendingSections(login, new SpendingSectionFilter(true, false, false));
 //        String oldName = sectionList.stream()
 //                .filter(section -> section.getSectionId().equals(updateContainer.getSectionId()))
 //                .map(SpendingSection::getName)
 //                .findAny()
 //                .orElseThrow(() -> new RuntimeException("Can not update Spending Section - sectionId is not found!"));
-
-        // if updateContainer has name which does not change
-        if (spendingSection.getName() == null || spendingSection.getName().equals(updateContainer.getSpendingSection().getName()))
-            return true;
-
-        // looking for other sections with the new name
-        SpendingSection otherSection = sectionsMapper.getSectionBySectionName(login, updateContainer.getSpendingSection().getName());
+//
+//        // if updateContainer has name which does not change
+//        if (spendingSection.getName() == null || spendingSection.getName().equals(updateContainer.getSpendingSection().getName()))
+//            return true;
+//
+//        // looking for other sections with the new name
+////        SpendingSection otherSection = sectionsMapper.getSectionBySectionName(login, updateContainer.getSpendingSection().getName());
 //        Optional<Integer> existingSectionIdWithSameName = sectionList.stream()
 //                .filter(section -> section.getName().equals(updateContainer.getSpendingSection().getName()))
 //                .map(SpendingSection::getSectionId)
 //                .findAny();
-
-        return otherSection == null;
+//
+////        return otherSection == null;
 //        return !existingSectionIdWithSameName.isPresent();
-    }
+//    }
 }
