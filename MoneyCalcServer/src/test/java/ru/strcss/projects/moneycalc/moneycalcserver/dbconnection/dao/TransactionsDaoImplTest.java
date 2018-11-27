@@ -6,7 +6,7 @@
 //import org.hibernate.query.Query;
 //import org.testng.annotations.BeforeGroups;
 //import org.testng.annotations.Test;
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
+//import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 //import ru.strcss.projects.moneycalc.entities.Transaction;
 //import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
 //
@@ -93,7 +93,7 @@
 //
 //    @Test(groups = "TransactionsDaoSuccessfulScenario")
 //    public void testGetTransactions() throws Exception {
-//        List<Transaction> transactionList = transactionsDao.getTransactions("login", new TransactionsSearchContainer());
+//        List<Transaction> transactionList = transactionsDao.getTransactions("login", new TransactionsSearchFilter());
 //        assertFalse(transactionList.isEmpty());
 //    }
 //

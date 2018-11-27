@@ -31,22 +31,22 @@
 //
 //        List list = query.list();
 //
-//        Integer personId;
+//        Integer userId;
 //        if (!list.isEmpty())
-//            personId = (Integer) list.get(0);
+//            userId = (Integer) list.get(0);
 //        else
-//            personId = null;
+//            userId = null;
 //        session.close();
-//        return personId;
+//        return userId;
 //    }
 //
 //    @Override
-//    public Integer getSettingsIdByPersonId(Integer personId) {
+//    public Integer getSettingsIdByPersonId(Integer userId) {
 //        Session session = sessionFactory.openSession();
 //
-//        String hql = "SELECT p.settingsId FROM Person p WHERE p.id = :personId";
+//        String hql = "SELECT p.settingsId FROM Person p WHERE p.id = :userId";
 //        Query query = session.createQuery(hql)
-//                .setParameter("personId", personId);
+//                .setParameter("userId", userId);
 //
 //        Integer settingsId = (Integer) query.list().get(0);
 //
@@ -55,21 +55,21 @@
 //    }
 //
 //    @Override
-//    public Integer getAccessIdByPersonId(Integer personId) {
-//        return getIdFromPersonTable("accessId", personId);
+//    public Integer getAccessIdByPersonId(Integer userId) {
+//        return getIdFromPersonTable("accessId", userId);
 //    }
 //
 //    @Override
-//    public Integer getIdentificationsIdByPersonId(Integer personId) {
-//        return getIdFromPersonTable("identificationsId", personId);
+//    public Integer getIdentificationsIdByPersonId(Integer userId) {
+//        return getIdFromPersonTable("identificationsId", userId);
 //    }
 //
-//    private Integer getIdFromPersonTable(String requiredField, Integer personId) {
+//    private Integer getIdFromPersonTable(String requiredField, Integer userId) {
 //        Session session = sessionFactory.openSession();
 //
-//        String hql = "SELECT p." + requiredField + " FROM Person p WHERE p.id = :personId";
+//        String hql = "SELECT p." + requiredField + " FROM Person p WHERE p.id = :userId";
 //        Query query = session.createQuery(hql)
-//                .setParameter("personId", personId);
+//                .setParameter("userId", userId);
 //
 //        Integer settingsId = (Integer) query.list().get(0);
 //

@@ -23,7 +23,7 @@ CREATE TABLE "Settings"
   "periodTo" date
 );
 
-CREATE TABLE "Person"
+CREATE TABLE "User"
 (
   id NUMERIC PRIMARY KEY,
   "accessId" numeric REFERENCES  "Access" (id),
@@ -34,7 +34,7 @@ CREATE TABLE "Person"
 CREATE TABLE "SpendingSection"
 (
   id NUMERIC PRIMARY KEY,
-  "personId" numeric REFERENCES  "Person" (id),
+  "userId" numeric REFERENCES  "User" (id),
   "sectionId" numeric,
   name text,
   "isAdded" boolean,
@@ -46,7 +46,7 @@ CREATE TABLE "SpendingSection"
 CREATE TABLE "Transactions"
 (
   id NUMERIC PRIMARY KEY,
-  "personId" numeric REFERENCES  "Person" (id),
+  "userId" numeric REFERENCES  "User" (id),
   "sectionId" numeric,
   date date,
   currency text,
@@ -61,7 +61,7 @@ CREATE TABLE "Transactions"
 
 CREATE SEQUENCE access_id_seq START 1 owned by "Access".id;
 CREATE SEQUENCE identifications_id_seq START 1 owned by "Identifications".id;
-CREATE SEQUENCE person_id_seq START 1 owned by "Person".id;
+CREATE SEQUENCE user_id_seq START 1 owned by "User".id;
 CREATE SEQUENCE settings_id_seq START 1 owned by "Settings".id;
 CREATE SEQUENCE spending_sections_id_seq START 1 owned by "SpendingSection".id;
 CREATE SEQUENCE transactions_id_seq START 1 owned by "Transactions".id;

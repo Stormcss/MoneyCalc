@@ -26,7 +26,7 @@ public class SummaryStatisticsHandlerTest {
         int transactionsNum = 100;
 
         List<FinanceSummaryBySection> financeSummary =
-                statisticsHandler.calculateSummaryStatisticsBySections(generateFinSummCalculContainer(sections, transactionsNum));
+                statisticsHandler.calculateSummaryStatisticsBySection(generateFinSummCalculContainer(sections, transactionsNum));
 
         assertNotNull(financeSummary, "FinanceSummary is null!");
         assertEquals(financeSummary.size(), sections, "FinanceSummary has wrong size!");
@@ -36,7 +36,7 @@ public class SummaryStatisticsHandlerTest {
     public void testCalculateSummaryStatistics_decimalPlaces() {
         FinanceSummaryCalculationContainer finSummContainer = generateFinSummCalculContainer(50, 500);
 
-        List<FinanceSummaryBySection> financeSummaryList = statisticsHandler.calculateSummaryStatisticsBySections(finSummContainer);
+        List<FinanceSummaryBySection> financeSummaryList = statisticsHandler.calculateSummaryStatisticsBySection(finSummContainer);
 
         for (FinanceSummaryBySection financeSummary : financeSummaryList) {
             int maxDecimalPlaces = maxDecimalPlaces(financeSummary.getTodayBalance(), financeSummary.getSummaryBalance());

@@ -8,8 +8,8 @@
     <select id="getSpendingSections" resultMap="getSpendingSectionsMap">
         <![CDATA[
         select * from "SpendingSection" ss
-                    join "Person" p on ss."personId" = p.id
-                    join "Access" a on a.id = p."accessId"
+                    join "User" u on ss."userId" = u.id
+                    join "Access" a on a.id = u."accessId"
                     where a.login = #{login}]]>
         <if test="filter.withNonAdded == false">
             AND ss."isAdded" IS TRUE
@@ -28,7 +28,7 @@
       insert into "SpendingSection"
       VALUES (nextval('spending_sections_id_seq'),
           #{userId},
-          (select coalesce(max("sectionId"), 0) + 1 from "SpendingSection" where "personId" = #{userId}),
+          (select coalesce(max("sectionId"), 0) + 1 from "SpendingSection" where "userId" = #{userId}),
           #{section.name},
           true,
           false,
@@ -59,8 +59,8 @@
             </if>
         </set>
         from "SpendingSection" ss
-        join "Person" p on ss."personId" = p.id
-        join "Access" a on a.id = p."accessId"
+        join "User" u on ss."userId" = u.id
+        join "Access" a on a.id = u."accessId"
         where
         a.login = #{login}
         AND ss."sectionId" = #{sectionId};
@@ -68,16 +68,18 @@
 
     <delete id="deleteSpendingSection">
         <![CDATA[
-
-        delete
-        from "SpendingSection" ss
-        USING "Person" p, "Access" a
-        where
-            a.login = #{login}
-            AND ss."personId" = p.id
-            AND a.id = p."accessId"
-            AND ss."sectionId" = #{sectionId};
-
+            update "SpendingSection"
+            SET
+                "isRemoved" = true,
+                name = 'del#_' || name
+            where
+               id = (select ss.id
+                       from "SpendingSection" ss
+                              join "User" p on ss."userId" = p.id
+                              join "Access" a on a.id = p."accessId"
+                       where
+                           a.login = #{login}
+                           and ss."sectionId" = #{sectionId});
         ]]>
     </delete>
 
@@ -89,7 +91,7 @@
 
         select case when count(*) > 0 then 0 else 1 end
         FROM "SpendingSection" ss
-        join "Person" p on ss."personId" = p.id
+        join "User" p on ss."userId" = p.id
         join "Access" a on a.id = p."accessId"
         where a.login = #{login} AND ss.name = #{sectionName}
 
@@ -104,7 +106,7 @@
 
         select case when count(*) > 0 then 1 else 0 end
         FROM "SpendingSection" ss
-        join "Person" p on ss."personId" = p.id
+        join "User" p on ss."userId" = p.id
         join "Access" a on a.id = p."accessId"
         where a.login = #{login} AND ss."sectionId" = #{sectionId}
 
@@ -119,8 +121,8 @@
 
         select *
         FROM "SpendingSection" ss
-        join "Person" p on ss."personId" = p.id
-        join "Access" a on a.id = p."accessId"
+        join "User" u on ss."userId" = u.id
+        join "Access" a on a.id = u."accessId"
         where a.login = #{login} AND ss."sectionId" = #{sectionId}
 
         ]]>
@@ -134,8 +136,8 @@
 
         select *
         FROM "SpendingSection" ss
-        join "Person" p on ss."personId" = p.id
-        join "Access" a on a.id = p."accessId"
+        join "User" u on ss."userId" = u.id
+        join "Access" a on a.id = u."accessId"
         where a.login = #{login} AND ss.name = #{name}
 
         ]]>

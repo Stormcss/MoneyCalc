@@ -7,7 +7,7 @@
 //import org.hibernate.query.Query;
 //import org.springframework.stereotype.Repository;
 //import org.springframework.transaction.annotation.Transactional;
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
+//import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 //import ru.strcss.projects.moneycalc.entities.Transaction;
 //import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
 //import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
@@ -44,7 +44,7 @@
 //    }
 //
 //    @Override
-//    public List<Transaction> getTransactionsByPersonId(Integer personId, LocalDate dateFrom, LocalDate
+//    public List<Transaction> getTransactionsByPersonId(Integer userId, LocalDate dateFrom, LocalDate
 //            dateTo, List<Integer> sectionIds) {
 //
 //        List<Transaction> transactionList;
@@ -52,16 +52,16 @@
 //
 //            String hql;
 //            if (sectionIds == null || sectionIds.isEmpty()) {
-//                hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo";
+//                hql = "FROM Transactions t WHERE t.userId = :userId AND t.date BETWEEN :dateFrom AND :dateTo";
 //                transactionList = session.createQuery(hql, Transaction.class)
-//                        .setParameter("personId", personId)
+//                        .setParameter("userId", userId)
 //                        .setParameter("dateFrom", dateFrom)
 //                        .setParameter("dateTo", dateTo)
 //                        .list();
 //            } else {
-//                hql = "FROM Transactions t WHERE t.personId = :personId AND t.date BETWEEN :dateFrom AND :dateTo AND t.sectionId IN (:ids)";
+//                hql = "FROM Transactions t WHERE t.userId = :userId AND t.date BETWEEN :dateFrom AND :dateTo AND t.sectionId IN (:ids)";
 //                transactionList = session.createQuery(hql, Transaction.class)
-//                        .setParameter("personId", personId)
+//                        .setParameter("userId", userId)
 //                        .setParameter("dateFrom", (dateFrom))
 //                        .setParameter("dateTo", dateTo)
 //                        .setParameter("ids", sectionIds)
@@ -72,19 +72,19 @@
 //    }
 //
 //    @Override
-//    public List<Transaction> getTransactions(String login, TransactionsSearchContainer getContainer) {
+//    public List<Transaction> getTransactions(String login, TransactionsSearchFilter getContainer) {
 //        try (Session session = sessionFactory.openSession()) {
 //            StringBuilder sqlBuilder = new StringBuilder();
 //            sqlBuilder.append(
 //                    "select t.* from \"Transactions\" t\n" +
-//                            "join \"Person\" p on t.\"personId\" = p.id\n" +
+//                            "join \"Person\" p on t.\"userId\" = p.id\n" +
 //                            "join \"Access\" a on p.\"accessId\" = a.id\n" +
 //                            "where\n" +
 //                            "    a.login = :login\n" +
 //                            "    AND t.date BETWEEN :dateFrom AND :dateTo\n" +
 //                            "    AND t.\"sectionId\" IN (select ss.\"sectionId\" from \"SpendingSection\" ss\n" +
 //                            "                          where\n" +
-//                            "                            ss.\"personId\" = p.id\n" +
+//                            "                            ss.\"userId\" = p.id\n" +
 //                            "                            AND ss.\"isAdded\" IS TRUE\n" +
 //                            "                            AND ss.\"isRemoved\" IS FALSE\n" +
 //                            "                         )\n");
@@ -123,7 +123,7 @@
 //    public List<Transaction> getTransactions(String login) {
 //        try (Session session = sessionFactory.openSession()) {
 //            String sql = "select t.* from \"Transactions\" t\n" +
-//                    "join \"Person\" p on t.\"personId\" = p.id\n" +
+//                    "join \"Person\" p on t.\"userId\" = p.id\n" +
 //                    "join \"Settings\" s on p.\"settingsId\" = s.id\n" +
 //                    "join \"Access\" a on p.\"accessId\" = a.id\n" +
 //                    "where\n" +
@@ -132,7 +132,7 @@
 //                    "    AND t.date < s.\"periodTo\"\n" +
 //                    "    AND t.\"sectionId\" IN (select ss.\"sectionId\" from \"SpendingSection\" ss\n" +
 //                    "                          where\n" +
-//                    "                            ss.\"personId\" = p.id\n" +
+//                    "                            ss.\"userId\" = p.id\n" +
 //                    "                            AND ss.\"isAdded\" IS TRUE\n" +
 //                    "                            AND ss.\"isRemoved\" IS FALSE\n" +
 //                    "                         )" +
@@ -144,9 +144,9 @@
 //    }
 //
 //    @Override
-//    public Integer addTransaction(Integer personId, Transaction transaction) {
+//    public Integer addTransaction(Integer userId, Transaction transaction) {
 //        try (Session session = sessionFactory.openSession()) {
-//            transaction.setPersonId(personId);
+//            transaction.setUserId(userId);
 //            return (Integer) session.save(transaction);
 //        }
 //    }

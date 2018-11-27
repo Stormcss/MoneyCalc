@@ -9,9 +9,10 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
+@Deprecated
 public class IdsContainer {
-    private int personId;
-    private int settingsId;
-    private int accessId;
-    private int identificationsId;
+    private Long personId;
+    private Long settingsId;
+    private Long accessId;
+    private Long identificationsId;
 }

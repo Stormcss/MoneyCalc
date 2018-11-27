@@ -1,60 +1,48 @@
-//package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
-//
-//import org.springframework.stereotype.Service;
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-//import ru.strcss.projects.moneycalc.entities.Transaction;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.TransactionsDao;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
-//
-//import java.time.LocalDate;
-//import java.util.List;
-//
-//@Service
-//public class TransactionsServiceImpl implements TransactionsService {
-//
-//    private TransactionsDao transactionsDao;
-//
-//    public TransactionsServiceImpl(TransactionsDao transactionsDao) {
-//        this.transactionsDao = transactionsDao;
-//    }
-//
-//    @Override
-//    public Transaction getTransactionById(Integer transactionId) {
-//        return transactionsDao.getTransactionById(transactionId);
-//    }
-//
-//    @Override
-//    public List<Transaction> getTransactionsByPersonId(Integer personId, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds) {
-//        return transactionsDao.getTransactionsByPersonId(personId, dateFrom, dateTo, sectionIds);
-//    }
-//
-//    @Override
-//    public List<Transaction> getTransactions(String login, TransactionsSearchContainer getContainer) {
-//        return transactionsDao.getTransactions(login, getContainer);
-//    }
-//
-////    @Override
-////    public List<Transaction> getTransactions(String login, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds) {
-////        return transactionsDao.getTransactions(login, dateFrom, dateTo, sectionIds);
-////    }
-//
-//    @Override
-//    public List<Transaction> getTransactions(String login) {
-//        return transactionsDao.getTransactions(login);
-//    }
-//
-//    @Override
-//    public Integer addTransaction(Integer personId, Transaction transaction) {
-//        return transactionsDao.addTransaction(personId, transaction);
-//    }
-//
-//    @Override
-//    public boolean updateTransaction(Transaction transaction) {
-//        return transactionsDao.updateTransaction(transaction);
-//    }
-//
-//    @Override
-//    public boolean deleteTransaction(Transaction transaction) {
-//        return transactionsDao.deleteTransaction(transaction);
-//    }
-//}
+package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
+
+import org.springframework.stereotype.Service;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.TransactionsMapper;
+
+import java.util.List;
+
+@Service
+public class TransactionsServiceImpl implements TransactionsService {
+
+    private TransactionsMapper transactionsMapper;
+
+    public TransactionsServiceImpl(TransactionsMapper transactionsMapper) {
+        this.transactionsMapper = transactionsMapper;
+    }
+
+    @Override
+    public Transaction getTransactionById(String login, Long transactionId) {
+        return transactionsMapper.getTransactionById(login, transactionId);
+    }
+
+    @Override
+    public List<Transaction> getTransactions(String login, TransactionsSearchFilter getContainer) {
+        return transactionsMapper.getTransactions(login, getContainer);
+    }
+
+    @Override
+    public Long addTransaction(Long userId, Transaction transaction) {
+        transaction.setUserId(userId);
+        return transactionsMapper.addTransaction(transaction);
+    }
+
+    @Override
+    public boolean updateTransaction(String login, Transaction transaction) {
+//        transactionsMapper.updateTransaction(login, transaction)
+        return false;
+    }
+
+    @Override
+    public boolean deleteTransaction(String login, Long transactionId) {
+        transactionsMapper.deleteTransaction(login, transactionId);
+        return true;
+    }
+
+}

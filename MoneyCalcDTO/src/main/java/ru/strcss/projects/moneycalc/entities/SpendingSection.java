@@ -24,7 +24,7 @@ public class SpendingSection implements Validationable, Serializable {
     /**
      * Person Id - used for linking Person with current SpendingSection in DB
      */
-    private Long personId;
+    private Long userId;
 
     /**
      * sectionId of SpendingSection - inner id of spending section for current Person (e.g. [0, 1, 2])

@@ -14,7 +14,7 @@ public class Merger {
     public static SpendingSection mergeSpendingSections(SpendingSection sectionOld, SpendingSection sectionNew) {
         return SpendingSection.builder()
                 .id(sectionOld.getId())
-                .personId(sectionOld.getPersonId())
+                .userId(sectionOld.getUserId())
                 .sectionId(sectionOld.getSectionId())
                 .logoId(sectionNew.getLogoId() == null ? sectionOld.getLogoId() : sectionNew.getLogoId())
                 .isRemoved(sectionNew.getIsRemoved() == null ? sectionOld.getIsRemoved() : sectionNew.getIsRemoved())
@@ -27,7 +27,7 @@ public class Merger {
     public static Transaction mergeTransactions(Transaction transactionOld, Transaction transactionNew) {
         return Transaction.builder()
                 .id(transactionOld.getId())
-                .personId(transactionOld.getPersonId())
+                .userId(transactionOld.getUserId())
                 .sectionId(transactionNew.getSectionId() == null ? transactionOld.getSectionId() : transactionNew.getSectionId())
                 .title(transactionNew.getTitle() == null ? transactionOld.getTitle() : transactionNew.getTitle())
                 .currency(transactionNew.getCurrency() == null ? transactionOld.getCurrency() : transactionNew.getCurrency())

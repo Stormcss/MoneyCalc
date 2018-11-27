@@ -120,6 +120,7 @@ public class SettingsControllerIT extends AbstractIT {
                 new SpendingSectionAddContainer(generateSpendingSection(deletedSectionName))),
                 Status.SUCCESS);
 
+
         // TODO: 15.11.2018 do assertions
     }
 
@@ -159,7 +160,7 @@ public class SettingsControllerIT extends AbstractIT {
         //getting removed sections
         MoneyCalcRs<List<SpendingSection>> removedSectionsRs = sendRequest(service.getSpendingSectionsWithRemovedOnly(token)).body();
         assertEquals(removedSectionsRs.getPayload().size(), 1, "Removed section size is incorrect!");
-        assertEquals(removedSectionsRs.getPayload().get(0).getName(), spendingSection1.getName() + "_#del",
+        assertEquals(removedSectionsRs.getPayload().get(0).getName(), "#del_" + spendingSection1.getName(),
                 "Removed section name is not equal!");
     }
 
@@ -191,23 +192,23 @@ public class SettingsControllerIT extends AbstractIT {
         String token = savePersonGetToken(service);
         int updatedSectionId = 1;
 
-        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+        List<SpendingSection> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body().getPayload();
 
-        Long oldBudget = getSectionsRs.getPayload()
+        Long oldBudget = getSectionsRs
                 .stream().filter(section -> section.getSectionId().equals(updatedSectionId)).findAny().get().getBudget();
         //setting new budget
-        getSectionsRs.getPayload().get(updatedSectionId).setBudget(ThreadLocalRandom.current().nextLong(1_000_000));
+        getSectionsRs.get(updatedSectionId - 1).setBudget(ThreadLocalRandom.current().nextLong(1_000_000));
 
         SpendingSectionUpdateContainer updateContainerById =
-                new SpendingSectionUpdateContainer(updatedSectionId, getSectionsRs.getPayload().get(updatedSectionId));
+                new SpendingSectionUpdateContainer(updatedSectionId, getSectionsRs.get(updatedSectionId - 1));
 
-        MoneyCalcRs<List<SpendingSection>> updateSectionRs =
-                sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body();
+        List<SpendingSection> updateSectionRs =
+                sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body().getPayload();
 
-        assertNotEquals(updateSectionRs.getPayload().get(updatedSectionId).getBudget(), oldBudget,
+        assertNotEquals(updateSectionRs.get(updatedSectionId).getBudget(), oldBudget,
                 "Spending Section was not updated!");
-        assertEquals(getSectionsRs.getPayload().size(), updateSectionRs.getPayload().size(), "Number of Spending Sections has changed!");
-        assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getId() == null), "Some Section IDs are null!");
+        assertEquals(getSectionsRs.size(), updateSectionRs.size(), "Number of Spending Sections has changed!");
+        assertTrue(updateSectionRs.stream().noneMatch(section -> section.getId() == null), "Some Section Ids are null!");
     }
 
     @Test

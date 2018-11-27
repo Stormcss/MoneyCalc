@@ -49,8 +49,8 @@
 //
 //    @Test(groups = "PersonDaoSuccessfulScenario")
 //    public void testGetPersonIdByLogin() throws Exception {
-//        Integer personId = personDao.getPersonIdByLogin("login");
-//        assertEquals((int) personId, 1);
+//        Integer userId = personDao.getPersonIdByLogin("login");
+//        assertEquals((int) userId, 1);
 //    }
 //
 //    @Test(groups = "PersonDaoSuccessfulScenario")

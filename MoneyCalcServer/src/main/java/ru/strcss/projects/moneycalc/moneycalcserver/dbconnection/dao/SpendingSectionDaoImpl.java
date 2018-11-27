@@ -32,11 +32,11 @@
 //    }
 //
 //    @Override
-//    public Integer getSectionIdByName(Integer personId, String sectionName) {
+//    public Integer getSectionIdByName(Integer userId, String sectionName) {
 //        try (Session session = sessionFactory.openSession()) {
-//            String hql = "SELECT ss.id FROM SpendingSection ss WHERE ss.personId = :personId AND ss.name = :sectionName";
+//            String hql = "SELECT ss.id FROM SpendingSection ss WHERE ss.userId = :userId AND ss.name = :sectionName";
 //            Query query = session.createQuery(hql)
-//                    .setParameter("personId", personId)
+//                    .setParameter("userId", userId)
 //                    .setParameter("sectionName", sectionName);
 //
 //            Integer settingsId = (Integer) query.list().get(0);
@@ -46,11 +46,11 @@
 //    }
 //
 //    @Override
-//    public Integer getSectionIdByInnerId(Integer personId, Integer innerSectionId) {
+//    public Integer getSectionIdByInnerId(Integer userId, Integer innerSectionId) {
 //        try (Session session = sessionFactory.openSession()) {
-//            String hql = "SELECT ss.id FROM SpendingSection ss WHERE ss.personId = :personId AND ss.sectionId = :sectionId";
+//            String hql = "SELECT ss.id FROM SpendingSection ss WHERE ss.userId = :userId AND ss.sectionId = :sectionId";
 //            List list = session.createQuery(hql)
-//                    .setParameter("personId", personId)
+//                    .setParameter("userId", userId)
 //                    .setParameter("sectionId", innerSectionId)
 //                    .list();
 //
@@ -63,11 +63,11 @@
 //    }
 //
 //    @Override
-//    public Boolean isSpendingSectionIdExists(Integer personId, Integer sectionId) {
+//    public Boolean isSpendingSectionIdExists(Integer userId, Integer sectionId) {
 //        try (Session session = sessionFactory.openSession()) {
-//            String hql = "SELECT COUNT(*) FROM SpendingSection ss WHERE ss.personId = :personId AND ss.sectionId = :sectionId";
+//            String hql = "SELECT COUNT(*) FROM SpendingSection ss WHERE ss.userId = :userId AND ss.sectionId = :sectionId";
 //            Query<Long> query = session.createQuery(hql, Long.class)
-//                    .setParameter("personId", personId)
+//                    .setParameter("userId", userId)
 //                    .setParameter("sectionId", sectionId);
 //
 //            Long count = query.list().get(0);
@@ -78,10 +78,10 @@
 //    @Override
 //    public boolean isSpendingSectionNameNew(Integer id, String name) {
 //        try (Session session = sessionFactory.openSession()) {
-//            String hql = "SELECT 1 from SpendingSection ss WHERE ss.personId = :personId AND ss.name = :name";
+//            String hql = "SELECT 1 from SpendingSection ss WHERE ss.userId = :userId AND ss.name = :name";
 //
 //            Query query = session.createQuery(hql)
-//                    .setParameter("personId", id)
+//                    .setParameter("userId", id)
 //                    .setParameter("name", name);
 //            boolean isNew = query.uniqueResult() == null;
 //            return isNew;
@@ -89,11 +89,11 @@
 //    }
 //
 //    @Override
-//    public int getMaxSpendingSectionId(Integer personId) {
+//    public int getMaxSpendingSectionId(Integer userId) {
 //        try (Session session = sessionFactory.openSession()) {
-//            String hql = "SELECT MAX(sectionId) FROM SpendingSection ss WHERE ss.personId = :personId";
+//            String hql = "SELECT MAX(sectionId) FROM SpendingSection ss WHERE ss.userId = :userId";
 //            Query query = session.createQuery(hql)
-//                    .setParameter("personId", personId);
+//                    .setParameter("userId", userId);
 //
 //            Integer integer = (Integer) query.list().get(0);
 //            return integer;
@@ -101,9 +101,9 @@
 //    }
 //
 //    @Override
-//    public Integer addSpendingSection(Integer personId, SpendingSection section) {
+//    public Integer addSpendingSection(Integer userId, SpendingSection section) {
 //        try (Session session = sessionFactory.openSession()) {
-//            section.setPersonId(personId);
+//            section.setUserId(userId);
 //
 //            Integer addedSectionId = (Integer) session.save(section);
 //            return addedSectionId;
@@ -126,7 +126,7 @@
 //                            "WHERE ss.id = (select ss.id\n" +
 //                            "                from \"Person\" p\n" +
 //                            "                       join \"Access\" a on p.\"accessId\" = a.id\n" +
-//                            "                       join \"SpendingSection\" ss on ss.\"personId\" = p.id\n" +
+//                            "                       join \"SpendingSection\" ss on ss.\"userId\" = p.id\n" +
 //                            "                WHERE a.login = :login\n" +
 //                            "                  AND ss.\"sectionId\" = :innerId)";
 //            Query isAlreadyDeletedQuery = session.createNativeQuery(isAlreadyDeletedSqlQuery)
@@ -147,7 +147,7 @@
 //                            "WHERE s.id = (select ss.id\n" +
 //                            "                from \"Person\" p\n" +
 //                            "                       join \"Access\" a on p.\"accessId\" = a.id\n" +
-//                            "                       join \"SpendingSection\" ss on ss.\"personId\" = p.id\n" +
+//                            "                       join \"SpendingSection\" ss on ss.\"userId\" = p.id\n" +
 //                            "                WHERE a.login = :login\n" +
 //                            "                  AND ss.\"sectionId\" = :innerId)";
 //            Query query = session.createNativeQuery(sqlQuery)
@@ -190,7 +190,7 @@
 //
 //        try (Session session = sessionFactory.openSession()) {
 //            String baseSqlQuery = "select ss from SpendingSection ss \n" +
-//                    "join Person p on ss.personId = p.id \n" +
+//                    "join Person p on ss.userId = p.id \n" +
 //                    "join Access a on a.id = p.accessId \n" +
 //                    "where a.login = :login";
 //
@@ -212,25 +212,25 @@
 //    }
 //
 //    @Override
-//    public List<SpendingSection> getSpendingSectionsByPersonId(Integer personId) {
+//    public List<SpendingSection> getSpendingSectionsByPersonId(Integer userId) {
 //        try (Session session = sessionFactory.openSession()) {
-//            String hql = "FROM SpendingSection ss WHERE ss.personId = :personId";
+//            String hql = "FROM SpendingSection ss WHERE ss.userId = :userId";
 //
 //            Query<SpendingSection> query = session.createQuery(hql, SpendingSection.class)
-//                    .setParameter("personId", personId);
+//                    .setParameter("userId", userId);
 //
 //            return query.list();
 //        }
 //    }
 //
 //    @Override
-//    public List<SpendingSection> getActiveSpendingSectionsByPersonId(Integer personId) {
+//    public List<SpendingSection> getActiveSpendingSectionsByPersonId(Integer userId) {
 //        List<SpendingSection> sectionList;
 //        try (Session session = sessionFactory.openSession()) {
-//            String hql = "FROM SpendingSection ss where ss.personId = :personId AND ss.isAdded IS TRUE";
+//            String hql = "FROM SpendingSection ss where ss.userId = :userId AND ss.isAdded IS TRUE";
 //
 //            Query<SpendingSection> query = session.createQuery(hql, SpendingSection.class)
-//                    .setParameter("personId", personId);
+//                    .setParameter("userId", userId);
 //
 //            sectionList = query.list();
 //        }
@@ -242,7 +242,7 @@
 //        List<SpendingSection> sectionList;
 //        try (Session session = sessionFactory.openSession()) {
 //            // TODO: 29.08.2018 finish me
-//            String hql = "FROM SpendingSection ss where ss.personId = :personId AND ss.isAdded IS TRUE";
+//            String hql = "FROM SpendingSection ss where ss.userId = :userId AND ss.isAdded IS TRUE";
 //
 //            Query<SpendingSection> query = session.createQuery(hql, SpendingSection.class)
 //                    .setParameter("login", login);
@@ -253,17 +253,17 @@
 //    }
 //
 //    @Override
-//    public List<Integer> getActiveSpendingSectionIdsByPersonId(Integer personId) {
+//    public List<Integer> getActiveSpendingSectionIdsByPersonId(Integer userId) {
 //        List<Integer> idsList;
 //        try (Session session = sessionFactory.openSession()) {
 //            String hql = "SELECT ss.sectionId " +
 //                    "FROM SpendingSection ss " +
-//                    "where ss.personId = :personId " +
+//                    "where ss.userId = :userId " +
 //                    "AND ss.isAdded IS TRUE " +
 //                    "ORDER BY sectionId ASC";
 //
 //            Query<Integer> query = session.createQuery(hql, Integer.class)
-//                    .setParameter("personId", personId);
+//                    .setParameter("userId", userId);
 //            idsList = query.list();
 //        }
 //        return idsList;

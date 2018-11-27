@@ -27,7 +27,7 @@ public interface SpendingSectionService {
 //    List<SpendingSection> getSpendingSectionsByLogin(String login, boolean withNonAdded,
 //                                                     boolean withRemoved, boolean withRemovedOnly);
 
-//    List<SpendingSection> getSpendingSectionsByPersonId(Integer personId);
+//    List<SpendingSection> getSpendingSectionsByPersonId(Integer userId);
 
     Boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer);
 }

@@ -1,6 +1,6 @@
 //package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces;
 //
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
+//import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 //import ru.strcss.projects.moneycalc.entities.Transaction;
 //
 //import java.time.LocalDate;
@@ -10,13 +10,13 @@
 //
 //    Transaction getTransactionById(Integer transactionId);
 //
-//    List<Transaction> getTransactionsByPersonId(Integer personId, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds);
+//    List<Transaction> getTransactionsByPersonId(Integer userId, LocalDate dateFrom, LocalDate dateTo, List<Integer> sectionIds);
 //
-//    List<Transaction> getTransactions(String login, TransactionsSearchContainer getContainer);
+//    List<Transaction> getTransactions(String login, TransactionsSearchFilter getContainer);
 //
 //    List<Transaction> getTransactions(String login);
 //
-//    Integer addTransaction(Integer personId, Transaction transaction);
+//    Integer addTransaction(Integer userId, Transaction transaction);
 //
 //    boolean updateTransaction(Transaction transaction);
 //

@@ -33,7 +33,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     @Override
     @Transactional
     public Boolean addSpendingSection(String login, SpendingSection section) {
-        Long userId = registryMapper.geUserIdByLogin(login);
+        Long userId = registryMapper.getUserIdByLogin(login);
         if (userId == null)
             throw new RuntimeException("User not found");
         return sectionsMapper.addSpendingSection(userId, section) > 0;
@@ -65,7 +65,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     @Override
     public Integer getSectionIdByInnerId(Integer personId, Integer innerSectionId) {
         return null;
-        //        return spendingSectionDao.getSectionIdByInnerId(personId, innerSectionId);
+        //        return spendingSectionDao.getSectionIdByInnerId(userId, innerSectionId);
     }
 
     @Override
@@ -78,6 +78,10 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
         return sectionsMapper.isSpendingSectionNameNew(login, name);
     }
 
+    /**
+     * Check if it is allowed to update SpendingSection's name.
+     * Returns false if update will case doubles in SpendingSection names
+     */
     @Override
     public Boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
         // if name is not set at all
@@ -104,10 +108,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
         return !existingSectionIdWithSameName.isPresent();
     }
 
-    /**
-     * Check if it is allowed to update SpendingSection's name.
-     * Returns false if update will case doubles in SpendingSection names
-     */
+
 //    @Override
 //    public Boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
 //

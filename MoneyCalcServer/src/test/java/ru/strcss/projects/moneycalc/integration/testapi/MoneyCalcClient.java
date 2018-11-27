@@ -8,11 +8,10 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.Identific
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.entities.*;
 
 import java.util.List;
@@ -77,17 +76,17 @@ public interface MoneyCalcClient {
      */
     @POST("/api/transactions/getFiltered")
     Call<MoneyCalcRs<List<Transaction>>> getTransactions(@Header("Authorization") String token,
-                                                         @Body TransactionsSearchContainer container);
+                                                         @Body TransactionsSearchFilter container);
 
-    @POST("/api/transactions/add")
+    @POST("/api/transactions")
     Call<MoneyCalcRs<Transaction>> addTransaction(@Header("Authorization") String token,
                                                   @Body TransactionAddContainer transactionContainer);
 
-    @POST("/api/transactions/delete")
+    @DELETE("/api/transactions/{transactionId}")
     Call<MoneyCalcRs<Void>> deleteTransaction(@Header("Authorization") String token,
-                                              @Body TransactionDeleteContainer transactionContainer);
+                                              @Path("transactionId") Long transactionId);
 
-    @POST("/api/transactions/update")
+    @PUT("/api/transactions")
     Call<MoneyCalcRs<Transaction>> updateTransaction(@Header("Authorization") String token,
                                                      @Body TransactionUpdateContainer transactionUpdateContainer);
 
@@ -99,7 +98,7 @@ public interface MoneyCalcClient {
 
     @POST("/api/stats/summaryBySection/getFiltered")
     Call<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@Header("Authorization") String token,
-                                                                                @Body FinanceSummaryGetContainer getContainer);
+                                                                                @Body FinanceSummaryFilter getContainer);
 
     /**
      * Access

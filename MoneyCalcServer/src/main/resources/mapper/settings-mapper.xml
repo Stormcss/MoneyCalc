@@ -11,8 +11,8 @@
 
             select s.*
             from "Settings" s
-            join "Person" p on s.id = p."settingsId"
-            join "Access" a on a.id = p."accessId"
+            join "User" u on s.id = u."settingsId"
+            join "Access" a on a.id = u."accessId"
             where a.login = #{login}
 
         ]]>
@@ -27,8 +27,8 @@
           "periodFrom" = #{settings.periodFrom},
           "periodTo" = #{settings.periodTo}
         from "Settings" st
-        join "Person" p on st.id = p."settingsId"
-        join "Access" a on a.id = p."accessId"
+        join "User" u on st.id = u."settingsId"
+        join "Access" a on a.id = u."accessId"
         where a.login = #{login};
 
         ]]>

@@ -4,6 +4,7 @@ import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import ru.strcss.projects.moneycalc.dto.Credentials;
+import ru.strcss.projects.moneycalc.entities.Person;
 import ru.strcss.projects.moneycalc.entities.Settings;
 
 /**
@@ -12,12 +13,14 @@ import ru.strcss.projects.moneycalc.entities.Settings;
  */
 @Mapper
 public interface RegistryMapper {
-    Integer registerUser(@Param("credentials") Credentials credentials,
-//                           @Param("identifications") Identifications identifications,
-                         @Param("settings") Settings settings);
+    Person registerIds();
 
-    @Select("select p.id from \"Person\" p join \"Access\" a on a.id = p.\"accessId\" where a.login = #{login} LIMIT 1")
-    Long geUserIdByLogin(@Param("login") String login);
+    Integer registerUser(@Param("credentials") Credentials credentials,
+                         @Param("settings") Settings settings,
+                         @Param("person") Person person);
+
+    @Select("select u.id from \"User\" u join \"Access\" a on a.id = u.\"accessId\" where a.login = #{login} LIMIT 1")
+    Long getUserIdByLogin(@Param("login") String login);
 
     @Select("select case when count(*) > 0 then 1 else 0 end FROM \"Access\" where login = #{login}")
     boolean isUserExistsByLogin(@Param("login") String login);

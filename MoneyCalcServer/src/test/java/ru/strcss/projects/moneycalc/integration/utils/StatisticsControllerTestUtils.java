@@ -3,7 +3,7 @@ package ru.strcss.projects.moneycalc.integration.utils;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
@@ -21,7 +21,7 @@ public class StatisticsControllerTestUtils {
      * @param getContainer - container with parameters of requested statistics
      * @return
      */
-    public static FinanceSummaryBySection getFinanceSummaryBySection(FinanceSummaryGetContainer getContainer, MoneyCalcClient service, String token) {
+    public static FinanceSummaryBySection getFinanceSummaryBySection(FinanceSummaryFilter getContainer, MoneyCalcClient service, String token) {
         MoneyCalcRs<List<FinanceSummaryBySection>> responseGetStats = sendRequest(service.getFinanceSummaryBySection(token, getContainer), Status.SUCCESS).body();
         return responseGetStats.getPayload().get(0);
     }

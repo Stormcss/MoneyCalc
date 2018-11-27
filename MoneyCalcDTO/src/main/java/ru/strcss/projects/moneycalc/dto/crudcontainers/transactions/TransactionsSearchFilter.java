@@ -28,10 +28,9 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionsSearchContainer extends AbstractContainer {
-
-    private LocalDate rangeFrom;
-    private LocalDate rangeTo;
+public class TransactionsSearchFilter extends AbstractContainer {
+    private LocalDate dateFrom;
+    private LocalDate dateTo;
     private List<Integer> requiredSections;
     private String title;
     private String description;
@@ -41,8 +40,8 @@ public class TransactionsSearchContainer extends AbstractContainer {
     @Override
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
-        if (rangeFrom == null) reasons.add("rangeFrom is empty");
-        if (rangeTo == null) reasons.add("rangeTo is empty");
+        if (dateFrom == null) reasons.add("dateFrom is empty");
+        if (dateTo == null) reasons.add("dateTo is empty");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

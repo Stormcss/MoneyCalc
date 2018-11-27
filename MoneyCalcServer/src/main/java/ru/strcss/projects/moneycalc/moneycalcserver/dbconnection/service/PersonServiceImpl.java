@@ -1,36 +1,35 @@
-//package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
-//
-//import org.springframework.stereotype.Service;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.dao.interfaces.PersonDao;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
-//
-//@Service
-//public class PersonServiceImpl implements PersonService {
-//
-//    private PersonDao personDao;
-//
-//    public PersonServiceImpl(PersonDao personDao) {
-//        this.personDao = personDao;
-//    }
-//
-//
+package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
+
+import org.springframework.stereotype.Service;
+import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.UserMapper;
+
+@Service
+public class PersonServiceImpl implements PersonService {
+
+    private UserMapper userMapper;
+
+    public PersonServiceImpl(UserMapper userMapper) {
+        this.userMapper = userMapper;
+    }
+
+    @Override
+    public Long getUserIdByLogin(String login) {
+        return userMapper.getUserIdByLogin(login);
+    }
+
 //    @Override
-//    public Integer getPersonIdByLogin(String login) {
-//        return personDao.getPersonIdByLogin(login);
-//    }
-//
-//    @Override
-//    public Integer getSettingsIdByPersonId(Integer personId) {
-//        return personDao.getSettingsIdByPersonId(personId);
-//    }
-//
-//    @Override
-//    public Integer getAccessIdByPersonId(Integer personId) {
-//        return personDao.getAccessIdByPersonId(personId);
+//    public Integer getSettingsIdByPersonId(Integer userId) {
+//        return personDao.getSettingsIdByPersonId(userId);
 //    }
 //
 //    @Override
-//    public Integer getIdentificationsIdByPersonId(Integer personId) {
-//        return personDao.getIdentificationsIdByPersonId(personId);
+//    public Integer getAccessIdByPersonId(Integer userId) {
+//        return personDao.getAccessIdByPersonId(userId);
 //    }
-//}
+//
+//    @Override
+//    public Integer getIdentificationsIdByPersonId(Integer userId) {
+//        return personDao.getIdentificationsIdByPersonId(userId);
+//    }
+}

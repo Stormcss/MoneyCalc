@@ -47,8 +47,8 @@
 //
 //        if (!requestValidation.isValid()) return requestValidation.getValidationError();
 //
-//        Integer personId = personService.getPersonIdByLogin(login);
-//        Integer identificationsId = personService.getIdentificationsIdByPersonId(personId);
+//        Integer userId = personService.getPersonIdByLogin(login);
+//        Integer identificationsId = personService.getIdentificationsIdByPersonId(userId);
 //
 //        updateContainer.getIdentifications().setId(identificationsId);
 //
@@ -70,8 +70,8 @@
 //    public ResponseEntity<MoneyCalcRs<Identifications>> getIdentifications() {
 //        String login = SecurityContextHolder.getContext().getAuthentication().getName();
 //
-//        Integer personId = personService.getPersonIdByLogin(login);
-//        Integer identificationsId = personService.getIdentificationsIdByPersonId(personId);
+//        Integer userId = personService.getPersonIdByLogin(login);
+//        Integer identificationsId = personService.getIdentificationsIdByPersonId(userId);
 //
 //
 //        Identifications identifications = identificationsService.getIdentificationsById(identificationsId);

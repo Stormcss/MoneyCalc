@@ -40,14 +40,14 @@ public class RegisterServiceImpl implements RegisterService {
         SpendingSection section1 = generateRegisteringSpendingSection("Еда", 1000L, 0);
         SpendingSection section2 = generateRegisteringSpendingSection("Свое", 1000L, 1);
 
-        registryMapper.registerUser(credentials, generateRegisteringSettings());
-        Long userId = registryMapper.geUserIdByLogin(login);
-        sectionsMapper.addSpendingSection(userId, section1);
-//        sectionsMapper.addSpendingSection(userId, section1.getName(), section1.getBudget(), section1.getLogoId());
-        sectionsMapper.addSpendingSection(userId, section2);
-//        sectionsMapper.addSpendingSection(userId, section2.getName(), section2.getBudget(), section2.getLogoId());
+        Person person = registryMapper.registerIds();
 
-        return new Person();
+        registryMapper.registerUser(credentials, generateRegisteringSettings(), person);
+//        Long userId = registryMapper.getUserIdByLogin(login);
+        sectionsMapper.addSpendingSection(person.getId(), section1);
+        sectionsMapper.addSpendingSection(person.getId(), section2);
+
+        return person;
     }
 
     @Override

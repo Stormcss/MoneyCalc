@@ -7,11 +7,11 @@ import java.io.Serializable;
 @Data
 public class Person implements Serializable {
 
-    private int id;
+    private Long id;
 
-    private int accessId;
+    private Long accessId;
 
-    private int identificationsId;
+    private Long identificationsId;
 
-    private int settingsId;
+    private Long settingsId;
 }

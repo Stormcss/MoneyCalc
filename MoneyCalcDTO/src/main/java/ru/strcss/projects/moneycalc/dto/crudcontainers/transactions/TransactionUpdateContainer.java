@@ -18,7 +18,7 @@ public class TransactionUpdateContainer extends AbstractContainer {
     /**
      * transaction Id which will be updated
      */
-    private Integer id;
+    private Long id;
 
     /**
      * Transaction object with new values

@@ -22,9 +22,9 @@ public class SummaryStatisticsHandler {
     /**
      * Accuracy of calculations - number of decimal places
      */
-    private final int DIGITS = 2;
+    private static final int DIGITS = 2;
 
-    public List<FinanceSummaryBySection> calculateSummaryStatisticsBySections(FinanceSummaryCalculationContainer container) {
+    public List<FinanceSummaryBySection> calculateSummaryStatisticsBySection(FinanceSummaryCalculationContainer container) {
 
         final Map<Integer, FinanceSummaryBySection> statistics = new HashMap<>();
 
@@ -58,14 +58,16 @@ public class SummaryStatisticsHandler {
             long daysPassed = getDaysPassed(container, todayPositionRange, daysInPeriod);
 
             financeSummaryBySection.setTodayBalance(getTodayBalance(todayPositionRange, spendTodayBySection, id, moneyPerDay));
-            financeSummaryBySection.setSummaryBalance(round(moneyPerDay * daysPassed - financeSummaryBySection.getMoneySpendAll(), DIGITS));
+            financeSummaryBySection.setSummaryBalance(
+                    round(moneyPerDay * daysPassed - financeSummaryBySection.getMoneySpendAll(), DIGITS));
             financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
             financeSummaryBySection.setSectionName(currentSection.getName());
         });
         return new ArrayList<>(statistics.values());
     }
 
-    private Double getTodayBalance(TodayPositionRange todayPositionRange, Map<Integer, Double> spendTodayBySection, Integer id, double moneyPerDay) {
+    private Double getTodayBalance(TodayPositionRange todayPositionRange, Map<Integer, Double> spendTodayBySection,
+                                   Integer id, double moneyPerDay) {
         if (todayPositionRange.equals(TodayPositionRange.IN))
             return round(moneyPerDay - spendTodayBySection.getOrDefault(id, 0d), DIGITS);
         else
@@ -83,7 +85,8 @@ public class SummaryStatisticsHandler {
         fillMoneySpend(container, statistics, null);
     }
 
-    private void fillMoneySpend(FinanceSummaryCalculationContainer container, Map<Integer, FinanceSummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
+    private void fillMoneySpend(FinanceSummaryCalculationContainer container,
+                                Map<Integer, FinanceSummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
         container.getTransactions().forEach(transaction -> {
             Integer sectionId = transaction.getSectionId();
             FinanceSummaryBySection temporary = statistics.get(sectionId);

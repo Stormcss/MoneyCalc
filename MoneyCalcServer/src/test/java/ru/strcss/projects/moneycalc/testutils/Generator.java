@@ -31,11 +31,6 @@ public class Generator {
 
     public static Access generateAccess(String login) {
         return new Access(login, "qwerty", login + "@mail.ru");
-//        return Access.builder()
-//                .login(login)
-//                .password("qwerty")
-//                .email(login + "@mail.ru")
-//                .build();
     }
 
     public static Credentials generateCredentials(String login) {
@@ -49,10 +44,6 @@ public class Generator {
 
     public static Settings generateSettings() {
         return new Settings(currentDate(), generateDatePlus(ChronoUnit.MONTHS, 1));
-//        return Settings.builder()
-//                .periodFrom(currentDate())
-//                .periodTo()
-//                .build();
     }
 
     public static Identifications generateIdentifications() {
@@ -81,7 +72,7 @@ public class Generator {
         return generateTransaction(null, sectionId, sum, null, null, null);
     }
 
-    public static Transaction generateTransaction(LocalDate date, Integer sectionId, Integer sum, Integer id,
+    public static Transaction generateTransaction(LocalDate date, Integer sectionId, Integer sum, Long id,
                                                   String title, String desc) {
         return Transaction.builder()
                 .id(id)
@@ -90,7 +81,7 @@ public class Generator {
                 .currency("RUR")
                 .title(title == null ? "Магазин" : title)
                 .description(desc == null ? "5ка" : desc)
-                .sectionId(sectionId == null ? ThreadLocalRandom.current().nextInt(0, 1) : sectionId)
+                .sectionId(sectionId == null ? ThreadLocalRandom.current().nextInt(1, 2) : sectionId)
                 .build();
     }
 

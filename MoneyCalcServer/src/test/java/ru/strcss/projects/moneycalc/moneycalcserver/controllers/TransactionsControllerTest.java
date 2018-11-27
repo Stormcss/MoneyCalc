@@ -13,7 +13,7 @@
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
+//import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 //import ru.strcss.projects.moneycalc.entities.Transaction;
 //import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
 //import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
@@ -57,7 +57,7 @@
 //        List<Transaction> transactionList = generateTransactionList(transactionsCount, requiredSections);
 //        transactionList.get(1).setDate(LocalDate.now().minus(1, ChronoUnit.DAYS));
 //
-//        when(transactionsService.getTransactions(anyString(), any(TransactionsSearchContainer.class))).thenReturn(transactionList);
+//        when(transactionsService.getTransactions(anyString(), any(TransactionsSearchFilter.class))).thenReturn(transactionList);
 //        when(transactionsService.getTransactionById(anyInt()))
 //                .thenReturn(generateTransaction());
 //        when(transactionsService.addTransaction(anyInt(), any(Transaction.class)))
@@ -80,7 +80,7 @@
 //    @Test(groups = "successfulScenario")
 //    public void testGetTransactions() {
 //        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-//                new TransactionsSearchContainer(dateFrom, dateTo, requiredSections, null, null, null, null));
+//                new TransactionsSearchFilter(dateFrom, dateTo, requiredSections, null, null, null, null));
 //
 //        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, getTransactionsRs.getBody().getMessage());
 //        assertEquals(getTransactionsRs.getBody().getPayload().size(), (int) transactionsCount, getTransactionsRs.getBody().getMessage());
@@ -114,7 +114,7 @@
 //    @Test(groups = "incorrectContainers")
 //    public void testGetTransactions_emptyRangeFrom() {
 //        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-//                new TransactionsSearchContainer(null, dateTo, requiredSections, null, null, null, null));
+//                new TransactionsSearchFilter(null, dateTo, requiredSections, null, null, null, null));
 //
 //        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
 //    }
@@ -122,7 +122,7 @@
 //    @Test(groups = "incorrectContainers")
 //    public void testGetTransactions_emptyRangeTo() {
 //        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-//                new TransactionsSearchContainer(dateFrom, null, requiredSections, null, null, null, null));
+//                new TransactionsSearchFilter(dateFrom, null, requiredSections, null, null, null, null));
 //
 //        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
 //    }
@@ -130,7 +130,7 @@
 //    @Test(groups = "incorrectContainers", enabled = false)
 //    public void testGetTransactions_emptySectionsId() {
 //        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-//                new TransactionsSearchContainer(dateFrom, dateTo, null, null, null, null, null));
+//                new TransactionsSearchFilter(dateFrom, dateTo, null, null, null, null, null));
 //
 //        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
 //    }
@@ -138,7 +138,7 @@
 //    @Test(groups = "incorrectContainers")
 //    public void testGetTransactions_RangeFrom_after_RangeTo() {
 //        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-//                new TransactionsSearchContainer(dateTo, dateFrom, requiredSections, null, null, null, null));
+//                new TransactionsSearchFilter(dateTo, dateFrom, requiredSections, null, null, null, null));
 //
 //        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
 //    }

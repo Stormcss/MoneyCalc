@@ -6,17 +6,17 @@
 //import java.util.List;
 //
 //public interface SpendingSectionDao {
-//    Integer getSectionIdByName(Integer personId, String sectionName);
+//    Integer getSectionIdByName(Integer userId, String sectionName);
 //
-//    Integer getSectionIdByInnerId(Integer personId, Integer innerSectionId);
+//    Integer getSectionIdByInnerId(Integer userId, Integer innerSectionId);
 //
-//    Boolean isSpendingSectionIdExists(Integer personId, Integer sectionId);
+//    Boolean isSpendingSectionIdExists(Integer userId, Integer sectionId);
 //
-//    boolean isSpendingSectionNameNew(Integer personId, String name);
+//    boolean isSpendingSectionNameNew(Integer userId, String name);
 //
-//    int getMaxSpendingSectionId(Integer personId);
+//    int getMaxSpendingSectionId(Integer userId);
 //
-//    Integer addSpendingSection(Integer personId, SpendingSection section);
+//    Integer addSpendingSection(Integer userId, SpendingSection section);
 //
 //    boolean updateSpendingSection(SpendingSection section);
 //
@@ -27,11 +27,11 @@
 //    List<SpendingSection> getSpendingSectionsByLogin(String login, boolean withNonAdded,
 //                                                     boolean withRemoved, boolean withRemovedOnly);
 //
-//    List<SpendingSection> getSpendingSectionsByPersonId(Integer personId);
+//    List<SpendingSection> getSpendingSectionsByPersonId(Integer userId);
 //
 //    List<SpendingSection> getActiveSpendingSectionsByLogin(String login);
 //
-//    List<SpendingSection> getActiveSpendingSectionsByPersonId(Integer personId);
+//    List<SpendingSection> getActiveSpendingSectionsByPersonId(Integer userId);
 //
-//    List<Integer> getActiveSpendingSectionIdsByPersonId(Integer personId);
+//    List<Integer> getActiveSpendingSectionIdsByPersonId(Integer userId);
 //}

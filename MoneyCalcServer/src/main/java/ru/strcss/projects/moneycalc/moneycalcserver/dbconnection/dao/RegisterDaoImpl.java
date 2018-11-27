@@ -49,7 +49,7 @@
 //                .settingsId(savedSettingsId)
 //                .build();
 //
-//        Integer personId = (Integer) session.save(person);
+//        Integer userId = (Integer) session.save(person);
 //
 //        SpendingSection section1 = SpendingSection.builder()
 //                .sectionId(0)
@@ -67,8 +67,8 @@
 //                .name("Прочее")
 //                .build();
 //
-//        spendingSectionDao.addSpendingSection(personId, section1);
-//        spendingSectionDao.addSpendingSection(personId, section2);
+//        spendingSectionDao.addSpendingSection(userId, section1);
+//        spendingSectionDao.addSpendingSection(userId, section2);
 //
 //        session.close();
 //        return person;

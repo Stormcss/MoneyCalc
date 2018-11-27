@@ -3,9 +3,9 @@
 //public interface PersonDao {
 //    Integer getPersonIdByLogin(String login);
 //
-//    Integer getSettingsIdByPersonId(Integer personId);
+//    Integer getSettingsIdByPersonId(Integer userId);
 //
-//    Integer getAccessIdByPersonId(Integer personId);
+//    Integer getAccessIdByPersonId(Integer userId);
 //
-//    Integer getIdentificationsIdByPersonId(Integer personId);
+//    Integer getIdentificationsIdByPersonId(Integer userId);
 //}

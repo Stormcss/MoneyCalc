@@ -9,7 +9,7 @@ import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.entities.Access;
 import ru.strcss.projects.moneycalc.entities.Person;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
@@ -198,16 +198,16 @@ public class IntegrationTestUtils {
     /**
      * Get Transactions and return Rs from the server
      */
-    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, TransactionsSearchContainer
+    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, TransactionsSearchFilter
             searchContainer) {
         return sendRequest(service.getTransactions(token, searchContainer), Status.SUCCESS).body();
     }
 
     public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
                                                                  LocalDate dateTo, List<Integer> sectionIds) {
-        TransactionsSearchContainer container = new TransactionsSearchContainer();
-        container.setRangeFrom(dateFrom);
-        container.setRangeTo(dateTo);
+        TransactionsSearchFilter container = new TransactionsSearchFilter();
+        container.setDateFrom(dateFrom);
+        container.setDateTo(dateTo);
         container.setRequiredSections(sectionIds);
         return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
     }
