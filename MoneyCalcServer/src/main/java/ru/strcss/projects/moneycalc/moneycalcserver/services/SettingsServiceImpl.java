@@ -1,9 +1,9 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
+package ru.strcss.projects.moneycalc.moneycalcserver.services;
 
 import org.springframework.stereotype.Service;
 import ru.strcss.projects.moneycalc.entities.Settings;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SettingsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
 
 @Service
 public class SettingsServiceImpl implements SettingsService {

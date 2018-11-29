@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces;
+package ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces;
 
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
@@ -21,13 +21,6 @@ public interface SpendingSectionService {
     Boolean isSpendingSectionIdExists(String login, Integer sectionId);
 
     Boolean isSpendingSectionNameNew(String login, String name);
-
-//    SpendingSection getSpendingSectionById(Integer sectionId);
-
-//    List<SpendingSection> getSpendingSectionsByLogin(String login, boolean withNonAdded,
-//                                                     boolean withRemoved, boolean withRemovedOnly);
-
-//    List<SpendingSection> getSpendingSectionsByPersonId(Integer userId);
 
     Boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer);
 }

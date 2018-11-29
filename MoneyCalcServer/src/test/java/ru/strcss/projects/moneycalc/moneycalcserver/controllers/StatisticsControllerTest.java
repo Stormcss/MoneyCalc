@@ -14,10 +14,10 @@
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
 //import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
 //import ru.strcss.projects.moneycalc.entities.Settings;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
 //import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
 //
 //import java.time.LocalDate;

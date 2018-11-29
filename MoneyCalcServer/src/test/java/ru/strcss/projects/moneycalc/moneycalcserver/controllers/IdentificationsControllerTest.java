@@ -12,8 +12,8 @@
 //import ru.strcss.projects.moneycalc.dto.Status;
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 //import ru.strcss.projects.moneycalc.entities.Identifications;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.IdentificationsService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.IdentificationsService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
 //
 //import java.util.Collections;
 //
@@ -39,7 +39,7 @@
 //
 //    @BeforeGroups(groups = {"IdentificationsSuccessfulScenario", "IdentificationsIncorrectContainers"})
 //    public void prepare_successfulScenario_incorrectContainers() {
-//        when(identificationsService.getIdentificationsById(anyInt()))
+//        when(identificationsService.getIdentifications(anyInt()))
 //                .thenReturn(generateIdentifications());
 //        when(identificationsService.updateIdentifications(any(Identifications.class)))
 //                .thenReturn(generateIdentifications());
@@ -52,7 +52,7 @@
 //
 //    @BeforeGroups(groups = "IdentificationsFailedScenario")
 //    public void prepare_failedScenario() {
-//        when(identificationsService.getIdentificationsById(anyInt()))
+//        when(identificationsService.getIdentifications(anyInt()))
 //                .thenReturn(null);
 //        when(identificationsService.updateIdentifications(any(Identifications.class)))
 //                .thenReturn(null);

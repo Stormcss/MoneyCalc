@@ -15,7 +15,7 @@
 //import ru.strcss.projects.moneycalc.entities.Access;
 //import ru.strcss.projects.moneycalc.entities.Identifications;
 //import ru.strcss.projects.moneycalc.entities.Person;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.RegisterService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.RegisterService;
 //
 //import java.util.Collections;
 //

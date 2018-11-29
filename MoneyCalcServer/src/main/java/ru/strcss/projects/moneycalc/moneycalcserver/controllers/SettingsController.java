@@ -10,14 +10,14 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateCo
 import ru.strcss.projects.moneycalc.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
 
 @Slf4j
 @RestController
-@RequestMapping("/api/settings/")
+@RequestMapping("/api/settings")
 public class SettingsController extends AbstractController implements SettingsAPIService {
 
     private SettingsService settingsService;
@@ -32,7 +32,7 @@ public class SettingsController extends AbstractController implements SettingsAP
      * @param updateContainer - income container with Settings object
      * @return response object
      */
-    @PostMapping(value = "/update")
+    @PutMapping
     public ResponseEntity<MoneyCalcRs<Settings>> updateSettings(@RequestBody SettingsUpdateContainer updateContainer) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
@@ -58,7 +58,7 @@ public class SettingsController extends AbstractController implements SettingsAP
      *
      * @return response object
      */
-    @GetMapping(value = "/get")
+    @GetMapping
     public ResponseEntity<MoneyCalcRs<Settings>> getSettings() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 

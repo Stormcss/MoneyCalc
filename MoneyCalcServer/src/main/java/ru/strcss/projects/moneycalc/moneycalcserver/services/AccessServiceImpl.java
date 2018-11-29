@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
+package ru.strcss.projects.moneycalc.moneycalcserver.services;
 
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -6,8 +6,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import ru.strcss.projects.moneycalc.entities.Access;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.AccessService;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.AccessMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.AccessService;
 
 import static java.util.Collections.emptyList;
 

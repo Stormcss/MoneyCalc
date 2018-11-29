@@ -38,14 +38,6 @@ public class StatisticsControllerTestUtils {
             for (int i = 0; i < numOfSections - spendingSections.size(); i++) {
                 sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(generateSpendingSection(budget))), Status.SUCCESS).body();
             }
-//            for (SpendingSection section : spendingSections) {
-//                if (section.getBudget() != budget) section.setBudget(budget);
-//            }
-//
-//            assertTrue(spendingSections.stream().allMatch(spendingSection -> spendingSection.getBudget() == budget));
-//
-//            sendRequest(service.updateSettings(personSettings), Status.SUCCESS).body();
         }
     }
-
 }

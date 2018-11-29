@@ -88,7 +88,7 @@
 //
 //    @Test(groups = "IdentificationsDaoSuccessfulScenario")
 //    public void testGetIdentificationsById() throws Exception {
-//        Identifications identificationsById = identificationsDao.getIdentificationsById(1);
+//        Identifications identificationsById = identificationsDao.getIdentifications(1);
 //        assertNotNull(identificationsById);
 //    }
 //

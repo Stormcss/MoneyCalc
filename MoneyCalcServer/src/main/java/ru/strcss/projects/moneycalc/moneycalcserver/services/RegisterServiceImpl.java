@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
+package ru.strcss.projects.moneycalc.moneycalcserver.services;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -6,9 +6,9 @@ import org.springframework.stereotype.Service;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.entities.Person;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.RegisterService;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.RegisterService;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateRegisteringSettings;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateRegisteringSpendingSection;
@@ -37,13 +37,12 @@ public class RegisterServiceImpl implements RegisterService {
 
         log.info("Registering new User with Login: '{}' and name: '{}'", login, credentials.getIdentifications().getName());
 
-        SpendingSection section1 = generateRegisteringSpendingSection("Еда", 1000L, 0);
-        SpendingSection section2 = generateRegisteringSpendingSection("Свое", 1000L, 1);
+        SpendingSection section1 = generateRegisteringSpendingSection("Еда", 5000L, 0);
+        SpendingSection section2 = generateRegisteringSpendingSection("Свое", 5000L, 1);
 
         Person person = registryMapper.registerIds();
 
         registryMapper.registerUser(credentials, generateRegisteringSettings(), person);
-//        Long userId = registryMapper.getUserIdByLogin(login);
         sectionsMapper.addSpendingSection(person.getId(), section1);
         sectionsMapper.addSpendingSection(person.getId(), section2);
 

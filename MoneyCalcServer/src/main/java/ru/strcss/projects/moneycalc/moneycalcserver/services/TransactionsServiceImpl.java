@@ -1,10 +1,10 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service;
+package ru.strcss.projects.moneycalc.moneycalcserver.services;
 
 import org.springframework.stereotype.Service;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.entities.Transaction;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.TransactionsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
 
 import java.util.List;
 
@@ -34,14 +34,14 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public boolean updateTransaction(String login, Transaction transaction) {
-//        transactionsMapper.updateTransaction(login, transaction)
-        return false;
+    public boolean updateTransaction(String login, Long transactionId, Transaction transaction) {
+        return transactionsMapper.updateTransaction(login, transactionId, transaction) > 0;
     }
 
     @Override
     public boolean deleteTransaction(String login, Long transactionId) {
         transactionsMapper.deleteTransaction(login, transactionId);
+        // FIXME: 29.11.2018 finish me
         return true;
     }
 

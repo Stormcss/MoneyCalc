@@ -69,7 +69,7 @@ public class TransactionsControllerIT extends AbstractIT {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = new ArrayList<>();
-        for (int i = 0; i < numOfSections; i++) {
+        for (int i = 1; i <= numOfSections; i++) {
             int sectionId = i;
             addedTransactions.addAll(IntStream.range(0, numOfAddedTransactionsPerSection)
                     .mapToObj(s -> sendRequest(service.addTransaction(token, new TransactionAddContainer(generateTransaction(sectionId)))).body())
@@ -81,7 +81,7 @@ public class TransactionsControllerIT extends AbstractIT {
                 "Some Transactions were not saved!");
 
         //Requesting Transactions with Single Section
-        for (int sectionId = 0; sectionId < numOfSections; sectionId++) {
+        for (int sectionId = 1; sectionId <= numOfSections; sectionId++) {
             int finalSectionId = sectionId;
 
             MoneyCalcRs<List<Transaction>> singleSectionRs = getTransactions(service, token, LocalDate.now(),
@@ -94,7 +94,7 @@ public class TransactionsControllerIT extends AbstractIT {
         //Requesting Transactions with Multiple Sections
         if (numOfSections > 1) {
             MoneyCalcRs<List<Transaction>> multipleSectionsRs = getTransactions(service, token, LocalDate.now(),
-                    generateDatePlus(ChronoUnit.DAYS, 1), Arrays.asList(0, 1));
+                    generateDatePlus(ChronoUnit.DAYS, 1), Arrays.asList(1, 2));
             assertEquals(multipleSectionsRs.getPayload().size(), numOfAddedTransactionsPerSection * 2,
                     INCORRECT_TRANSACTIONS_COUNT);
         }

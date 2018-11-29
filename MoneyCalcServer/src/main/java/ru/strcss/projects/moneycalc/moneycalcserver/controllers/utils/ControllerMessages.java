@@ -41,6 +41,7 @@ public class ControllerMessages {
     //Identifications
     public static final String IDENTIFICATIONS_SAVED = "Identifications successfully saved";
     public static final String IDENTIFICATIONS_RETURNED = "Identifications successfully returned";
+    public static final String IDENTIFICATIONS_NOT_RETURNED = "Identifications were not returned!";
     public static final String IDENTIFICATIONS_SAVING_ERROR = "Identifications were not updated!";
     public static final String IDENTIFICATIONS_INCORRECT = "Can not perform updating Identifications: %s";
 

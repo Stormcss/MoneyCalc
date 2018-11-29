@@ -13,16 +13,15 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.Transactions
 import ru.strcss.projects.moneycalc.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
 
 import java.util.List;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
-import static ru.strcss.projects.moneycalc.utils.Merger.mergeTransactions;
 
 @Timed
 @Slf4j
@@ -74,8 +73,6 @@ public class TransactionsController extends AbstractController implements Transa
                         () -> DATE_SEQUENCE_INCORRECT)
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
-
-//        fillDefaultValues(getFilter);
 
         List<Transaction> transactions = transactionsService.getTransactions(login, getFilter);
 
@@ -134,21 +131,15 @@ public class TransactionsController extends AbstractController implements Transa
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Transaction oldTransaction = transactionsService.getTransactionById(login, updateContainer.getId());
-
-        if (oldTransaction == null) {
-            log.error("Transaction with id {} was not found", updateContainer.getId());
-            return responseError(TRANSACTION_NOT_FOUND);
-        }
-
-        Transaction resultTransaction = mergeTransactions(oldTransaction, updateContainer.getTransaction());
-
-        boolean isUpdateSuccessful = transactionsService.updateTransaction(login, resultTransaction);
+        boolean isUpdateSuccessful = transactionsService.updateTransaction(login, updateContainer.getId(),
+                updateContainer.getTransaction());
 
         if (!isUpdateSuccessful) {
             log.error("Updating Transaction for login \'{}\' has failed", login);
             return responseError(TRANSACTION_UPDATED);
         }
+
+        Transaction resultTransaction = transactionsService.getTransactionById(login, updateContainer.getId());
 
         log.info("Updated Transaction {}: for login: \'{}\' with values: {}", resultTransaction, login, updateContainer.getTransaction());
         return responseSuccess(TRANSACTION_UPDATED, resultTransaction);
@@ -174,7 +165,6 @@ public class TransactionsController extends AbstractController implements Transa
         }
         log.info("Deleted Transaction id \'{}\': for login: \'{}\'", transactionId, login);
 
-        // TODO: 06.02.2018 some payload should be returned
         return responseSuccess(TRANSACTION_DELETED, null);
     }
 }

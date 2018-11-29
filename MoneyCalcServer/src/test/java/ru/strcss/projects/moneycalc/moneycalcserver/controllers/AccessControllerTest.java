@@ -12,7 +12,7 @@
 //import ru.strcss.projects.moneycalc.dto.Status;
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 //import ru.strcss.projects.moneycalc.entities.Access;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.AccessService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.AccessService;
 //
 //import java.util.Collections;
 //

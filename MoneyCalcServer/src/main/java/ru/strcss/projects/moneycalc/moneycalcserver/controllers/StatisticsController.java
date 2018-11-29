@@ -15,10 +15,10 @@ import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -54,7 +54,7 @@ public class StatisticsController extends AbstractController implements Statisti
      * Get finance summary for all active sections
      */
     @Override
-    @GetMapping(value = "/get")
+    @GetMapping
     public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 //        Integer userId = personService.getPersonIdByLogin(login);
@@ -71,7 +71,6 @@ public class StatisticsController extends AbstractController implements Statisti
                 null, null, null, null);
 
         List<Transaction> transactionsList = transactionsService.getTransactions(login, transactionsFilter);
-//        List<Transaction> transactionsList = transactionsService.getTransactions(login, dateFrom, dateTo, sectionIds);
 
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
                 .rangeFrom(dateFrom)

@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces;
+package ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces;
 
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.entities.Person;

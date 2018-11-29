@@ -25,5 +25,6 @@
         <mapper resource="mapper/settings-mapper.xml"/>
         <mapper resource="mapper/spending-sections-mapper.xml"/>
         <mapper resource="mapper/transactions-mapper.xml"/>
+        <mapper resource="mapper/identifications-mapper.xml"/>
     </mappers>
 </configuration>

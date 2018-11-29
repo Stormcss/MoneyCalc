@@ -34,11 +34,10 @@ public class Generator {
     }
 
     public static Credentials generateCredentials(String login) {
+        int randomInt = ThreadLocalRandom.current().nextInt(names.length);
         return Credentials.builder()
                 .access(generateAccess(login))
-                .identifications(Identifications.builder()
-                        .name(names[ThreadLocalRandom.current().nextInt(names.length)])
-                        .build())
+                .identifications(new Identifications((long) randomInt + 1, names[randomInt]))
                 .build();
     }
 
@@ -47,9 +46,7 @@ public class Generator {
     }
 
     public static Identifications generateIdentifications() {
-        return Identifications.builder()
-                .name(UUID())
-                .build();
+        return new Identifications(null, UUID());
     }
 
     public static Transaction generateTransaction() {

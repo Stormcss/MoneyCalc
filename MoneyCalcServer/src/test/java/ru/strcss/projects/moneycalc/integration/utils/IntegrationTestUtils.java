@@ -37,7 +37,7 @@ public class IntegrationTestUtils {
     }
 
     public static <T> Response<MoneyCalcRs<T>> sendRequest(Call<MoneyCalcRs<T>> call, Status expectedStatus) {
-        Response<MoneyCalcRs<T>> response = null;
+        Response<MoneyCalcRs<T>> response;
         try {
             response = call.execute();
         } catch (IOException e) {
@@ -81,7 +81,7 @@ public class IntegrationTestUtils {
     /**
      * Save Person with random login and return Token
      *
-     * @param service - Retrofit configured service
+     * @param service - Retrofit configured services
      * @return token for created and logged in person
      */
     public static String savePersonGetToken(MoneyCalcClient service) {
@@ -94,7 +94,7 @@ public class IntegrationTestUtils {
     /**
      * Save Person with random login and return login with token
      *
-     * @param service - Retrofit configured service
+     * @param service - Retrofit configured services
      * @return login and token for created and logged in person
      */
     public static Pair<String, String> savePersonGetLoginAndToken(MoneyCalcClient service) {
@@ -108,7 +108,7 @@ public class IntegrationTestUtils {
     /**
      * Save Person with random login and return container with Entity IDs
      *
-     * @param service - Retrofit configured service
+     * @param service - Retrofit configured services
      */
     public static Pair<IdsContainer, String> savePersonGetIdsAndToken(MoneyCalcClient service) {
         Credentials credentials = generateCredentials(Generator.UUID());
@@ -127,7 +127,7 @@ public class IntegrationTestUtils {
     /**
      * Save Person with random login and return credentials with token
      *
-     * @param service - Retrofit configured service
+     * @param service - Retrofit configured services
      * @return Credentials and token for created and logged in person
      */
     public static Pair<Credentials, String> savePersonGetCredentialsAndToken(MoneyCalcClient service) {

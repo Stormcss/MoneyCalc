@@ -205,7 +205,7 @@ public class SettingsControllerIT extends AbstractIT {
         List<SpendingSection> updateSectionRs =
                 sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body().getPayload();
 
-        assertNotEquals(updateSectionRs.get(updatedSectionId).getBudget(), oldBudget,
+        assertNotEquals(updateSectionRs.get(updatedSectionId - 1).getBudget(), oldBudget,
                 "Spending Section was not updated!");
         assertEquals(getSectionsRs.size(), updateSectionRs.size(), "Number of Spending Sections has changed!");
         assertTrue(updateSectionRs.stream().noneMatch(section -> section.getId() == null), "Some Section Ids are null!");
@@ -245,7 +245,7 @@ public class SettingsControllerIT extends AbstractIT {
         MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSectionsWithNonAdded(token), Status.SUCCESS).body();
 
         assertEquals(getSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
-        assertFalse(getSectionsRs.getPayload().get(nonAddedId).getIsAdded(), "Section is still added!");
+        assertFalse(getSectionsRs.getPayload().get(nonAddedId - 1).getIsAdded(), "Section is still added!");
     }
 
     @Test
@@ -258,12 +258,12 @@ public class SettingsControllerIT extends AbstractIT {
         MoneyCalcRs<List<SpendingSection>> getWithRemovedSectionsRs =
                 sendRequest(service.getSpendingSectionsWithRemoved(token), Status.SUCCESS).body();
         assertEquals(getWithRemovedSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
-        assertTrue(getWithRemovedSectionsRs.getPayload().get(removedId).getIsRemoved(), "Section is not removed!");
+        assertTrue(getWithRemovedSectionsRs.getPayload().get(removedId - 1).getIsRemoved(), "Section is not removed!");
 
         MoneyCalcRs<List<SpendingSection>> getRemovedSectionsOnlyRs =
                 sendRequest(service.getSpendingSectionsWithRemovedOnly(token), Status.SUCCESS).body();
         assertEquals(getRemovedSectionsOnlyRs.getPayload().size(), 1, "Wrong number of spending sections is returned!");
-        assertTrue(getRemovedSectionsOnlyRs.getPayload().get(removedId).getIsRemoved(), "Section is not removed!");
+        assertTrue(getRemovedSectionsOnlyRs.getPayload().get(removedId - 1).getIsRemoved(), "Section is not removed!");
     }
 
     @Test

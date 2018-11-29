@@ -14,7 +14,7 @@ public class ConfigurationBeans {
     private final JettyProperties jettyProperties;
 
     @Autowired
-    public ConfigurationBeans(JettyProperties jettyProperties /*,EntityManagerFactory entityManagerFactory*/) {
+    public ConfigurationBeans(JettyProperties jettyProperties) {
         this.jettyProperties = jettyProperties;
     }
 

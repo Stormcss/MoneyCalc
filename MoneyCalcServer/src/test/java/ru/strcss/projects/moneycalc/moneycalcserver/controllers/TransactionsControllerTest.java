@@ -15,9 +15,9 @@
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 //import ru.strcss.projects.moneycalc.entities.Transaction;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
 //
 //import java.time.LocalDate;
 //import java.time.temporal.ChronoUnit;

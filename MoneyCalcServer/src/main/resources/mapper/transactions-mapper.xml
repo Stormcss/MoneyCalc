@@ -56,7 +56,6 @@
         ORDER BY t."date" ASC;
     </select>
 
-    <!--<insert id="addTransaction" statementType = "CALLABLE">-->
     <insert id="addTransaction" useGeneratedKeys="true" keyProperty="userId" keyColumn="userId"
             statementType="CALLABLE">
 
@@ -66,13 +65,13 @@
         <![CDATA[
         insert into "Transactions"
         VALUES (#{id},
-        #{userId},
-        #{sectionId},
-        #{date},
-        #{currency},
-        #{title},
-        #{description},
-        #{sum});
+            #{userId},
+            #{sectionId},
+            #{date},
+            #{currency},
+            #{title},
+            #{description},
+            #{sum});
     ]]>
     </insert>
 
@@ -101,87 +100,27 @@
             </if>
         </set>
         from "Transactions" t
-        join "User" u on ss."userId" = u.id
-        join "Access" a on a.id = u."accessId"
         where
-        a.login = #{login}
-        AND t."id" = #{transactionId};
+            t.id = #{transactionId}
+            AND t."userId" = (
+              select u.id
+              from "User" u
+                join "Access" a on a.id = u."accessId"
+              where
+                a.login = #{login}
+            )
     </update>
 
     <delete id="deleteTransaction">
         <![CDATA[
-
-
         delete
         from "Transactions" t
-        USING "User" p, "Access" a
+          USING "User" p, "Access" a
         where
             a.login = #{login}
             AND t."userId" = p.id
             AND a.id = p."accessId"
             AND t.id = #{transactionId};
-
-
         ]]>
     </delete>
-
-    <!--<resultMap id="isSpendingSectionNameNewMap" type="boolean"-->
-    <!--autoMapping="true">-->
-    <!--</resultMap>-->
-    <!--<select id="isSpendingSectionNameNew" resultMap="isSpendingSectionNameNewMap">-->
-    <!--<![CDATA[-->
-
-    <!--select case when count(*) > 0 then 0 else 1 end-->
-    <!--FROM "SpendingSection" ss-->
-    <!--join "User" p on ss."userId" = p.id-->
-    <!--join "Access" a on a.id = p."accessId"-->
-    <!--where a.login = #{login} AND ss.name = #{sectionName}-->
-
-    <!--]]>-->
-    <!--</select>-->
-
-    <!--<resultMap id="isSpendingSectionIdExistsMap" type="boolean"-->
-    <!--autoMapping="true">-->
-    <!--</resultMap>-->
-    <!--<select id="isSpendingSectionIdExists" resultMap="isSpendingSectionIdExistsMap">-->
-    <!--<![CDATA[-->
-
-    <!--select case when count(*) > 0 then 1 else 0 end-->
-    <!--FROM "SpendingSection" ss-->
-    <!--join "User" p on ss."userId" = p.id-->
-    <!--join "Access" a on a.id = p."accessId"-->
-    <!--where a.login = #{login} AND ss."sectionId" = #{sectionId}-->
-
-    <!--]]>-->
-    <!--</select>-->
-
-    <!--<resultMap id="getSectionBySectionIdMap" type="ru.strcss.projects.moneycalc.entities.SpendingSection"-->
-    <!--autoMapping="true">-->
-    <!--</resultMap>-->
-    <!--<select id="getSectionBySectionId" resultMap="getSectionBySectionIdMap">-->
-    <!--<![CDATA[-->
-
-    <!--select *-->
-    <!--FROM "SpendingSection" ss-->
-    <!--join "User" p on ss."userId" = p.id-->
-    <!--join "Access" a on a.id = p."accessId"-->
-    <!--where a.login = #{login} AND ss."sectionId" = #{sectionId}-->
-
-    <!--]]>-->
-    <!--</select>-->
-
-    <!--<resultMap id="getSectionBySectionNameMap" type="ru.strcss.projects.moneycalc.entities.SpendingSection"-->
-    <!--autoMapping="true">-->
-    <!--</resultMap>-->
-    <!--<select id="getSectionBySectionName" resultMap="getSectionBySectionNameMap">-->
-    <!--<![CDATA[-->
-
-    <!--select *-->
-    <!--FROM "SpendingSection" ss-->
-    <!--join "User" p on ss."userId" = p.id-->
-    <!--join "Access" a on a.id = p."accessId"-->
-    <!--where a.login = #{login} AND ss.name = #{name}-->
-
-    <!--]]>-->
-    <!--</select>-->
 </mapper>

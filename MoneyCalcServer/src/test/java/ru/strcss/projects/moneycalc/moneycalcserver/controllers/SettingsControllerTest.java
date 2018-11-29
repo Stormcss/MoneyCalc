@@ -16,9 +16,9 @@
 //import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 //import ru.strcss.projects.moneycalc.entities.Settings;
 //import ru.strcss.projects.moneycalc.entities.SpendingSection;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
+//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 //import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
 //
 //import java.util.Collections;

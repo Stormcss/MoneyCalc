@@ -12,7 +12,7 @@ import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.entities.Person;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.RegisterService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.RegisterService;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
@@ -56,9 +56,6 @@ public class RegisterController extends AbstractController implements RegisterAP
 
         Person registeredUser = registerService.registerUser(credentials);
 
-
-
-        // TODO: 02.02.2018 validate if save is successful
         return responseSuccess(REGISTER_SUCCESSFUL, registeredUser);
     }
 }

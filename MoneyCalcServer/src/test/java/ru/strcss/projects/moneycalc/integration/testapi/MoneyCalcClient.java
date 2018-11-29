@@ -4,7 +4,6 @@ import retrofit2.Call;
 import retrofit2.http.*;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
@@ -27,11 +26,11 @@ public interface MoneyCalcClient {
     /**
      * Settings
      */
-    @POST("/api/settings/update")
+    @PUT("/api/settings")
     Call<MoneyCalcRs<Settings>> updateSettings(@Header("Authorization") String token,
                                                @Body SettingsUpdateContainer updateContainer);
 
-    @GET("/api/settings/get")
+    @GET("/api/settings")
     Call<MoneyCalcRs<Settings>> getSettings(@Header("Authorization") String token);
 
     /**
@@ -64,11 +63,11 @@ public interface MoneyCalcClient {
     /**
      * Identifications
      */
-    @POST("/api/identifications/update")
+    @PUT("/api/identifications")
     Call<MoneyCalcRs<Identifications>> saveIdentifications(@Header("Authorization") String token,
-                                                           @Body IdentificationsUpdateContainer updateContainer);
+                                                           @Body Identifications identifications);
 
-    @GET("/api/identifications/get")
+    @GET("/api/identifications")
     Call<MoneyCalcRs<Identifications>> getIdentifications(@Header("Authorization") String token);
 
     /**
@@ -93,7 +92,7 @@ public interface MoneyCalcClient {
     /**
      * Statistics
      */
-    @POST("/api/stats/summaryBySection/get")
+    @POST("/api/stats/summaryBySection")
     Call<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@Header("Authorization") String token);
 
     @POST("/api/stats/summaryBySection/getFiltered")

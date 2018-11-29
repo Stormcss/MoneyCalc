@@ -32,14 +32,18 @@
           #{section.name},
           true,
           false,
-          #{section.budget},
-          #{section.logoId});
-        ]]>
+          #{section.budget},]]>
+          <if test="section.logoId == null">
+              -1);
+          </if>
+          <if test="section.logoId != null">
+              #{section.logoId});
+          </if>
     </insert>
 
     <update id="updateSpendingSection">
         <![CDATA[
-        update "SpendingSection"
+        update "SpendingSection" ss
           ]]>
         <set>
             <if test="section.name != null">
@@ -58,12 +62,13 @@
                 "logoId" = #{section.logoId},
             </if>
         </set>
-        from "SpendingSection" ss
-        join "User" u on ss."userId" = u.id
-        join "Access" a on a.id = u."accessId"
         where
-        a.login = #{login}
-        AND ss."sectionId" = #{sectionId};
+            "userId" = (select u.id
+                        from "User" u
+                          join "Access" a on a.id = u."accessId"
+                        where
+                          a.login = #{login})
+            and ss."sectionId" = #{sectionId};
     </update>
 
     <delete id="deleteSpendingSection">
@@ -71,7 +76,7 @@
             update "SpendingSection"
             SET
                 "isRemoved" = true,
-                name = 'del#_' || name
+                name = '#del_' || name
             where
                id = (select ss.id
                        from "SpendingSection" ss

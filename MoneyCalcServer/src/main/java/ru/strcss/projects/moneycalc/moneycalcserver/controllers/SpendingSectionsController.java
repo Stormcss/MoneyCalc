@@ -10,7 +10,7 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionA
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 
 import java.util.List;
 
@@ -101,17 +101,9 @@ public class SpendingSectionsController extends AbstractController implements Sp
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@PathVariable Integer sectionId) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-//        SpendingSectionDeleteContainer
-//        RequestValidation<List<SpendingSection>> requestValidation = new RequestValidation.Validator(deleteContainer,
-//                "Deleting SpendingSection")
-//                .validate();
-//        if (!requestValidation.isValid()) return requestValidation.getValidationError();
-
         Boolean isDeleted = sectionService.deleteSpendingSection(login, sectionId);
 
         if (!isDeleted) {
-//            String errorMessage = deleteResult.getErrorMessage();
-//            return responseError(errorMessage != null ? errorMessage : DEFAULT_ERROR);
             return responseError(DEFAULT_ERROR);
         }
         return responseSuccess(SPENDING_SECTION_DELETED,

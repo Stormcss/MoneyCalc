@@ -6,7 +6,6 @@ import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.Identifications;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
 
@@ -25,7 +24,7 @@ public class IdentificationsControllerIT extends AbstractIT {
 
         //Updating default Identifications
         MoneyCalcRs<Identifications> saveIdentificationsRs =
-                sendRequest(service.saveIdentifications(token, new IdentificationsUpdateContainer(credentials.getIdentifications())), Status.SUCCESS).body();
+                sendRequest(service.saveIdentifications(token, credentials.getIdentifications()), Status.SUCCESS).body();
         assertNotNull(saveIdentificationsRs.getPayload().getName(), "Identifications object is empty!");
 
         //Requesting updated Identifications
@@ -37,11 +36,10 @@ public class IdentificationsControllerIT extends AbstractIT {
     @Test
     public void saveIdentificationsIncorrectName() {
         String token = savePersonGetToken(service);
-        Identifications identificationsIncorrect = generateIdentifications();
-        identificationsIncorrect.setName(null);
-        IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(identificationsIncorrect);
+        Identifications incorrectIdentifications = generateIdentifications();
+        incorrectIdentifications.setName(null);
 
-        Response<MoneyCalcRs<Identifications>> saveIdentificationsRs = sendRequest(service.saveIdentifications(token, updateContainer));
+        Response<MoneyCalcRs<Identifications>> saveIdentificationsRs = sendRequest(service.saveIdentifications(token, incorrectIdentifications));
 
         assertFalse(saveIdentificationsRs.isSuccessful(), "Identifications object with incorrect Name is saved!");
     }
