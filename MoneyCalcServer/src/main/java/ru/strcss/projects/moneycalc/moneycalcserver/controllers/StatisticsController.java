@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ru.strcss.projects.moneycalc.api.StatisticsAPIService;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
@@ -33,7 +32,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @Slf4j
 @RestController
 @RequestMapping("/api/stats/summaryBySection")
-public class StatisticsController extends AbstractController implements StatisticsAPIService {
+public class StatisticsController extends AbstractController {
 
     private TransactionsService transactionsService;
     private SpendingSectionService sectionService;
@@ -53,7 +52,6 @@ public class StatisticsController extends AbstractController implements Statisti
     /**
      * Get finance summary for all active sections
      */
-    @Override
     @GetMapping
     public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
@@ -88,7 +86,6 @@ public class StatisticsController extends AbstractController implements Statisti
         return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
     }
 
-    @Override
     @PostMapping(value = "/getFiltered")
     public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(
             @RequestBody FinanceSummaryFilter summaryFilter) {

@@ -5,9 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ru.strcss.projects.moneycalc.api.TransactionsAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.entities.Transaction;
@@ -27,7 +25,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @Slf4j
 @RestController
 @RequestMapping("/api/transactions")
-public class TransactionsController extends AbstractController implements TransactionsAPIService {
+public class TransactionsController extends AbstractController {
 
     private TransactionsService transactionsService;
     private PersonService personService;
@@ -82,34 +80,34 @@ public class TransactionsController extends AbstractController implements Transa
     }
 
     @PostMapping
-    public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody TransactionAddContainer addContainer) {
+    public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody Transaction transaction) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        log.debug("addTransaction Request received {}", addContainer);
+        log.debug("New transaction for login '{}' is received: {}", login, transaction);
 
         Long userId = personService.getUserIdByLogin(login);
 
         if (userId == null)
             return responseError(fillLog(NO_PERSON_LOGIN_EXISTS, login));
 
-        RequestValidation<Transaction> requestValidation = new Validator(addContainer, "Adding Transactions")
-                .addValidation(() -> addContainer.getTransaction().isValid().isValidated(),
-                        () -> fillLog(TRANSACTION_INCORRECT, addContainer.getTransaction().isValid().getReasons().toString()))
-                .addValidation(() -> spendingSectionService.isSpendingSectionIdExists(login, addContainer.getTransaction().getSectionId()),
-                        () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, "" + addContainer.getTransaction().getSectionId()))
+        RequestValidation<Transaction> requestValidation = new Validator(transaction, "Adding Transaction")
+                .addValidation(() -> transaction.isValid().isValidated(),
+                        () -> fillLog(TRANSACTION_INCORRECT, transaction.isValid().getReasons().toString()))
+                .addValidation(() -> spendingSectionService.isSpendingSectionIdExists(login, transaction.getSectionId()),
+                        () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, "" + transaction.getSectionId()))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        fillDefaultValues(addContainer.getTransaction());
+        fillDefaultValues(transaction);
 
-        Long addedTransactionId = transactionsService.addTransaction(userId, addContainer.getTransaction());
+        Long addedTransactionId = transactionsService.addTransaction(userId, transaction);
 
         if (addedTransactionId == null) {
-            log.error("Saving Transaction {} for login '{}' has failed", addContainer.getTransaction(), login);
+            log.error("Saving Transaction {} for login '{}' has failed", transaction, login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
-        log.info("Saved new Transaction for login '{}' : {}", login, addContainer.getTransaction());
-        return responseSuccess(TRANSACTION_SAVED, addContainer.getTransaction());
+        log.info("Saved new Transaction for login '{}' : {}", login, transaction);
+        return responseSuccess(TRANSACTION_SAVED, transaction);
     }
 
     /**

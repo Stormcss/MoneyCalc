@@ -7,8 +7,6 @@ import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.entities.Access;
 import ru.strcss.projects.moneycalc.entities.Person;
@@ -155,7 +153,7 @@ public class IntegrationTestUtils {
      */
     public static Integer addSpendingSectionGetSectionId(MoneyCalcClient service, String token, SpendingSection spendingSection) {
         MoneyCalcRs<List<SpendingSection>> addSectionRs =
-                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
+                sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
 
         return addSectionRs.getPayload().stream().filter(section -> section.getName().equals(spendingSection.getName()))
                 .findAny()
@@ -169,7 +167,7 @@ public class IntegrationTestUtils {
      * @return income Rs object
      */
     public static MoneyCalcRs<List<SpendingSection>> addSpendingSectionGetRs(MoneyCalcClient service, String token, SpendingSection spendingSection) {
-        return sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
+        return sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
     }
 
     /**
@@ -191,8 +189,7 @@ public class IntegrationTestUtils {
      * @return income Rs object
      */
     public static MoneyCalcRs<Transaction> addTransaction(MoneyCalcClient service, String token, Transaction transaction) {
-        TransactionAddContainer transactionContainer = new TransactionAddContainer(transaction);
-        return sendRequest(service.addTransaction(token, transactionContainer), Status.SUCCESS).body();
+        return sendRequest(service.addTransaction(token, transaction), Status.SUCCESS).body();
     }
 
     /**

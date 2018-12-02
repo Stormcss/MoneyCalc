@@ -37,7 +37,6 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
         if (userId == null)
             throw new RuntimeException("User not found");
         return sectionsMapper.addSpendingSection(userId, section) > 0;
-//        return sectionsMapper.addSpendingSection(userId, section.getName(), section.getBudget(), section.getLogoId()) > 0;
     }
 
     @Override

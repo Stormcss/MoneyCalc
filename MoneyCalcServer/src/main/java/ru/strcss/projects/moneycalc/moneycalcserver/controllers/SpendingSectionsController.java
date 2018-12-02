@@ -4,9 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ru.strcss.projects.moneycalc.api.SpendingSectionsAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
@@ -20,7 +18,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @Slf4j
 @RestController
 @RequestMapping("/api/spendingSections")
-public class SpendingSectionsController extends AbstractController implements SpendingSectionsAPIService {
+public class SpendingSectionsController extends AbstractController {
     private SpendingSectionService sectionService;
 
     public SpendingSectionsController(SpendingSectionService sectionService) {
@@ -47,25 +45,25 @@ public class SpendingSectionsController extends AbstractController implements Sp
     }
 
     @PostMapping
-    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSectionAddContainer addContainer) {
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSection spendingSection) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<SpendingSection>> requestValidation = new RequestValidation.Validator(addContainer, "Adding SpendingSection")
-                .addValidation(() -> addContainer.getSpendingSection().isValid().isValidated(),
-                        () -> fillLog(SPENDING_SECTION_INCORRECT, addContainer.getSpendingSection().isValid().getReasons().toString()))
-                .addValidation(() -> sectionService.isSpendingSectionNameNew(login, addContainer.getSpendingSection().getName()),
-                        () -> fillLog(SPENDING_SECTION_NAME_EXISTS, addContainer.getSpendingSection().getName()))
+        RequestValidation<List<SpendingSection>> requestValidation = new RequestValidation.Validator(spendingSection, "Adding SpendingSection")
+                .addValidation(() -> spendingSection.isValid().isValidated(),
+                        () -> fillLog(SPENDING_SECTION_INCORRECT, spendingSection.isValid().getReasons().toString()))
+                .addValidation(() -> sectionService.isSpendingSectionNameNew(login, spendingSection.getName()),
+                        () -> fillLog(SPENDING_SECTION_NAME_EXISTS, spendingSection.getName()))
                 .validate();
 
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Boolean isAdded = sectionService.addSpendingSection(login, addContainer.getSpendingSection());
+        Boolean isAdded = sectionService.addSpendingSection(login, spendingSection);
 
         if (!isAdded) {
-            log.error("Saving SpendingSection {} for login \'{}\' has failed", addContainer.getSpendingSection(), login);
+            log.error("Saving SpendingSection {} for login \'{}\' has failed", spendingSection, login);
             return responseError(SPENDING_SECTION_SAVING_ERROR);
         }
-        log.debug("Saved new SpendingSection for login \'{}\' : {}", login, addContainer.getSpendingSection());
+        log.debug("Saved new SpendingSection for login \'{}\' : {}", login, spendingSection);
         return responseSuccess(SPENDING_SECTION_ADDED,
                 sectionService.getSpendingSections(login, false, false, false));
     }

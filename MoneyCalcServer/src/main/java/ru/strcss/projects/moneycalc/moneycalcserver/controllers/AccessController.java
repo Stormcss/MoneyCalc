@@ -6,7 +6,6 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalc.api.AccessAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.Access;
@@ -20,7 +19,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @Slf4j
 @RestController
 @RequestMapping("/api/access/")
-public class AccessController extends AbstractController implements AccessAPIService {
+public class AccessController extends AbstractController {
     // TODO: 06.03.2018 finish me
 
     private AccessMapper accessMapper;
@@ -48,7 +47,6 @@ public class AccessController extends AbstractController implements AccessAPISer
         return responseSuccess(ACCESS_RETURNED, access);
     }
 
-    @Override
     public ResponseEntity<MoneyCalcRs<Access>> saveAccess(IdentificationsUpdateContainer updateContainer) {
         throw new UnsupportedOperationException("Not supported yet");
     }

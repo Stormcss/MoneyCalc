@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ru.strcss.projects.moneycalc.api.SettingsAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.Settings;
@@ -18,7 +17,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @Slf4j
 @RestController
 @RequestMapping("/api/settings")
-public class SettingsController extends AbstractController implements SettingsAPIService {
+public class SettingsController extends AbstractController {
 
     private SettingsService settingsService;
 

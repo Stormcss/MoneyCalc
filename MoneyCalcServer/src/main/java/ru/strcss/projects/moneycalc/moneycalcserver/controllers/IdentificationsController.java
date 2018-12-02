@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import ru.strcss.projects.moneycalc.api.IdentificationsAPIService;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
@@ -17,7 +16,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @Slf4j
 @RestController
 @RequestMapping("/api/identifications")
-public class IdentificationsController extends AbstractController implements IdentificationsAPIService {
+public class IdentificationsController extends AbstractController {
 
     private IdentificationsService identificationsService;
 

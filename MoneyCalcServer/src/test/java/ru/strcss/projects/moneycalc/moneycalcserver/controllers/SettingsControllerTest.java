@@ -1,48 +1,87 @@
-//package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
-//
-//import org.springframework.http.ResponseEntity;
-//import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-//import org.springframework.security.core.Authentication;
-//import org.springframework.security.core.context.SecurityContextHolder;
-//import org.springframework.security.core.userdetails.User;
-//import org.testng.annotations.BeforeClass;
-//import org.testng.annotations.BeforeGroups;
-//import org.testng.annotations.Test;
-//import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-//import ru.strcss.projects.moneycalc.dto.Status;
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
-//import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
-//import ru.strcss.projects.moneycalc.entities.Settings;
-//import ru.strcss.projects.moneycalc.entities.SpendingSection;
-//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
-//import ru.strcss.projects.moneycalc.moneycalcserver.dto.ResultContainer;
-//
-//import java.util.Collections;
-//import java.util.List;
-//
-//import static org.mockito.ArgumentMatchers.*;
-//import static org.mockito.Mockito.mock;
-//import static org.mockito.Mockito.when;
-//import static org.testng.Assert.assertEquals;
-//import static org.testng.Assert.assertTrue;
-//import static ru.strcss.projects.moneycalc.testutils.Generator.*;
-//
-//public class SettingsControllerTest {
-//
-//    private SettingsService settingsService = mock(SettingsService.class);
-//    private PersonService personService = mock(PersonService.class);
-//    private SpendingSectionService sectionService = mock(SpendingSectionService.class);
-//
-//    private SettingsController settingsController;
-//
-//    private final String duplicatingSectionName = "duplicate";
-//
-//    private List<SpendingSection> sectionList = generateSpendingSectionList(5, false);
-//
+package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Import;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.web.servlet.MvcResult;
+import org.testng.annotations.Test;
+import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
+import ru.strcss.projects.moneycalc.entities.Settings;
+import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateSettings;
+import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
+
+@WebMvcTest(controllers = SettingsController.class)
+@ContextConfiguration(classes = {SettingsController.class})
+@Import(BaseTestContextConfiguration.class)
+public class SettingsControllerTest extends AbstractControllerTest {
+
+    @MockBean
+    @Autowired
+    private SettingsService settingsService;
+
+    @WithMockUser
+    @Test(groups = "SettingsSuccessfulScenario")
+    public void shouldUpdateSettings() throws Exception {
+        when(settingsService.updateSettings(anyString(), any(Settings.class)))
+                .thenReturn(generateSettings());
+
+        String content = serializeToJson(new SettingsUpdateContainer(generateSettings()));
+        MvcResult mvcResult = mockMvc.perform(put("/api/settings")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user("User"))
+                .content(content))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        System.out.println("mvcResult.getResponse().getContentAsString() = " + mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test(groups = "SettingsSuccessfulScenario")
+    public void shouldGetSettings() throws Exception {
+        when(settingsService.getSettings(anyString()))
+                .thenReturn(generateSettings());
+
+        MvcResult mvcResult = mockMvc.perform(get("/api/settings")
+                .with(user("User")))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        System.out.println("mvcResult.getResponse().getContentAsString() = " + mvcResult.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void shouldReturnEmptyFieldsError() throws Exception {
+        String content = serializeToJson(new SettingsUpdateContainer(new Settings(null, null)));
+        MvcResult mvcResult = mockMvc.perform(put("/api/settings")
+                .with(user("User"))
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .content(content))
+                .andExpect(status().isBadRequest())
+                .andReturn();
+
+        System.out.println("mvcResult.getResponse().getContentAsString() = " + mvcResult.getResponse().getContentAsString());
+    }
+
+//    @Configuration
+//    static class Config {
+//        @Bean
+//        BCryptPasswordEncoder bCryptPasswordEncoder() {
+//            return new BCryptPasswordEncoder();
+//        }
+//    }
 //    @BeforeClass
 //    public void setUp() {
 //        User user = new User("login", "password", Collections.emptyList());
@@ -281,13 +320,13 @@
 //
 //        assertEquals(sectionUpdateRs.getBody().getServerStatus(), Status.ERROR, sectionUpdateRs.getBody().getMessage());
 //    }
-//
-////    /**
-////     * Asserting that incoming list has no removed sections.
-////     */
-////    private void assertNoRemovedSections(List<SpendingSection> spendingSections) {
-////        assertTrue(spendingSections.stream().noneMatch(SpendingSection::getIsRemoved), "Some removed sections are returned!");
-////    }
-//
-//
-//}
+
+//    /**
+//     * Asserting that incoming list has no removed sections.
+//     */
+//    private void assertNoRemovedSections(List<SpendingSection> spendingSections) {
+//        assertTrue(spendingSections.stream().noneMatch(SpendingSection::getIsRemoved), "Some removed sections are returned!");
+//    }
+
+
+}

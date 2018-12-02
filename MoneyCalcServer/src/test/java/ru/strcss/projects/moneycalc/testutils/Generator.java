@@ -6,9 +6,7 @@ import ru.strcss.projects.moneycalc.entities.*;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -92,18 +90,19 @@ public class Generator {
         return UUID.randomUUID().toString().toUpperCase().replace("-", "");
     }
 
-//    public static List<SpendingSection> generateSpendingSectionList(int count, boolean ordered) {
-//        List<SpendingSection> spendingSections = new ArrayList<>(count);
-//
-//        for (int i = 0; i < count; i++) {
-//            SpendingSection section = generateSpendingSection(null, i, i, null, null, true, false);
-//            spendingSections.add(section);
-//        }
-//        if (!ordered) {
-//            Collections.shuffle(spendingSections);
-//        }
-//        return spendingSections;
-//    }
+    public static List<SpendingSection> generateSpendingSectionList(int count, boolean ordered) {
+        List<SpendingSection> spendingSections = new ArrayList<>(count);
+
+        for (int i = 0; i < count; i++) {
+            SpendingSection section = generateSpendingSection(null, i, (long) i, null,
+                    null, true, false);
+            spendingSections.add(section);
+        }
+        if (!ordered) {
+            Collections.shuffle(spendingSections);
+        }
+        return spendingSections;
+    }
 
     public static SpendingSection generateSpendingSection() {
         return generateSpendingSection(null, null, null, null, null, null, null);
@@ -128,15 +127,16 @@ public class Generator {
 
     public static SpendingSection generateSpendingSection(Long budget, Integer innerId, Long id, String name,
                                                           Integer logoId, Boolean isAdded, Boolean isRemoved) {
-        return SpendingSection.builder()
-                .id(id == null ? ThreadLocalRandom.current().nextLong(3000) : id)
-                .sectionId(innerId)
-                .logoId(logoId == null ? ThreadLocalRandom.current().nextInt(3000) : logoId)
-                .isAdded(isAdded == null ? true : isAdded)
-                .isRemoved(isRemoved)
-                .name(name == null ? "Магазин" + ThreadLocalRandom.current().nextLong(500_000) : name)
-                .budget(budget == null ? 1000 + ThreadLocalRandom.current().nextLong(9000) : budget)
-                .build();
+        SpendingSection spendingSection = new SpendingSection();
+        spendingSection.setId(id == null ? ThreadLocalRandom.current().nextLong(3000) : id);
+        spendingSection.setUserId(1L);
+        spendingSection.setSectionId(innerId);
+        spendingSection.setLogoId(logoId == null ? ThreadLocalRandom.current().nextInt(3000) : logoId);
+        spendingSection.setIsAdded(isAdded == null ? true : isAdded);
+        spendingSection.setIsRemoved(isRemoved);
+        spendingSection.setName(name == null ? "Магазин" + ThreadLocalRandom.current().nextLong(500_000) : name);
+        spendingSection.setBudget(budget == null ? 1000 + ThreadLocalRandom.current().nextLong(9000) : budget);
+        return spendingSection;
     }
 
     public static FinanceSummaryBySection generateFinanceSummaryBySection() {

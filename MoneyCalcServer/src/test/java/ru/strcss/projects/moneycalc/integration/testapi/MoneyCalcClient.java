@@ -5,10 +5,8 @@ import retrofit2.http.*;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.entities.*;
@@ -38,7 +36,7 @@ public interface MoneyCalcClient {
      */
     @POST("/api/spendingSections")
     Call<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@Header("Authorization") String token,
-                                                                @Body SpendingSectionAddContainer spendingSectionContainer);
+                                                                @Body SpendingSection spendingSection);
 
     @PUT("/api/spendingSections")
     Call<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@Header("Authorization") String token,
@@ -79,7 +77,7 @@ public interface MoneyCalcClient {
 
     @POST("/api/transactions")
     Call<MoneyCalcRs<Transaction>> addTransaction(@Header("Authorization") String token,
-                                                  @Body TransactionAddContainer transactionContainer);
+                                                  @Body Transaction transaction);
 
     @DELETE("/api/transactions/{transactionId}")
     Call<MoneyCalcRs<Void>> deleteTransaction(@Header("Authorization") String token,

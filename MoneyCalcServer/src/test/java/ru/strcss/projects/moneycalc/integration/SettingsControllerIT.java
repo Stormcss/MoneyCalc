@@ -6,7 +6,6 @@ import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.Settings;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
@@ -78,9 +77,9 @@ public class SettingsControllerIT extends AbstractIT {
         String token = loginAndToken.getRight();
         SpendingSection spendingSection = generateSpendingSection();
 
-        sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
+        sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
         Response<MoneyCalcRs<List<SpendingSection>>> addSectionRs =
-                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)));
+                sendRequest(service.addSpendingSection(token, spendingSection));
 
         assertFalse(addSectionRs.isSuccessful(), "Response is not failed!");
     }
@@ -117,7 +116,7 @@ public class SettingsControllerIT extends AbstractIT {
 
         Response<MoneyCalcRs<List<SpendingSection>>> deleteRs = sendRequest(service.deleteSpendingSection(token, deletedSection.getSectionId()), Status.SUCCESS);
         Response<MoneyCalcRs<List<SpendingSection>>> addRs = sendRequest(service.addSpendingSection(token,
-                new SpendingSectionAddContainer(generateSpendingSection(deletedSectionName))),
+                generateSpendingSection(deletedSectionName)),
                 Status.SUCCESS);
 
 

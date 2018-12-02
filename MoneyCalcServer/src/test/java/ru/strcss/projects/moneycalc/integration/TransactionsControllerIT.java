@@ -5,7 +5,6 @@ import org.testng.annotations.Test;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.entities.Transaction;
@@ -72,7 +71,7 @@ public class TransactionsControllerIT extends AbstractIT {
         for (int i = 1; i <= numOfSections; i++) {
             int sectionId = i;
             addedTransactions.addAll(IntStream.range(0, numOfAddedTransactionsPerSection)
-                    .mapToObj(s -> sendRequest(service.addTransaction(token, new TransactionAddContainer(generateTransaction(sectionId)))).body())
+                    .mapToObj(s -> sendRequest(service.addTransaction(token, generateTransaction(sectionId))).body())
                     .filter(Objects::nonNull)
                     .map(MoneyCalcRs::getPayload)
                     .collect(Collectors.toList()));
@@ -122,7 +121,7 @@ public class TransactionsControllerIT extends AbstractIT {
         String token = savePersonGetToken(service);
 
         Response<MoneyCalcRs<Transaction>> addTransactionRs = sendRequest(service.addTransaction(token,
-                new TransactionAddContainer(generateTransaction(10))));
+                generateTransaction(10)));
 
         assertFalse(addTransactionRs.isSuccessful(), "Response is not failed!");
     }
@@ -137,7 +136,7 @@ public class TransactionsControllerIT extends AbstractIT {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
-                .mapToObj(s -> sendRequest(service.addTransaction(token, new TransactionAddContainer(generateTransaction()))).body())
+                .mapToObj(s -> sendRequest(service.addTransaction(token, generateTransaction())).body())
                 .filter(Objects::nonNull)
                 .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());
@@ -168,7 +167,7 @@ public class TransactionsControllerIT extends AbstractIT {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
-                .mapToObj(s -> sendRequest(service.addTransaction(token, new TransactionAddContainer(generateTransaction()))).body())
+                .mapToObj(s -> sendRequest(service.addTransaction(token, generateTransaction())).body())
                 .filter(Objects::nonNull)
                 .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());

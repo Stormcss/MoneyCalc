@@ -4,7 +4,6 @@ import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
 import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.entities.Transaction;
 
@@ -205,17 +204,16 @@ public class StatisticsControllerIT extends AbstractIT {
                 .boxed()
                 .collect(Collectors.toList());
 
-        List<TransactionAddContainer> addContainers = new ArrayList<>();
+        List<Transaction> transactions = new ArrayList<>();
 
         for (Integer sum : sums) {
-            Transaction transaction = generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionId, sum,
-                    null, null, null);
-            addContainers.add(new TransactionAddContainer(transaction));
+            transactions.add(generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionId, sum,
+                    null, null, null));
             minusMin++;
         }
 
-        return addContainers.stream()
-                .map(transactionAddContainer -> sendRequest(service.addTransaction(token, transactionAddContainer)).body())
+        return transactions.stream()
+                .map(transaction -> sendRequest(service.addTransaction(token, transaction)).body())
                 .filter(Objects::nonNull)
                 .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());

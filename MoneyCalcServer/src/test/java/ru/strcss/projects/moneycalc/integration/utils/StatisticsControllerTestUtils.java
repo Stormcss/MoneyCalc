@@ -2,7 +2,6 @@ package ru.strcss.projects.moneycalc.integration.utils;
 
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
@@ -36,7 +35,7 @@ public class StatisticsControllerTestUtils {
 
         if (numOfSections > spendingSections.size()) {
             for (int i = 0; i < numOfSections - spendingSections.size(); i++) {
-                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(generateSpendingSection(budget))), Status.SUCCESS).body();
+                sendRequest(service.addSpendingSection(token, generateSpendingSection(budget)), Status.SUCCESS).body();
             }
         }
     }

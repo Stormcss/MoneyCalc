@@ -16,7 +16,12 @@ import java.util.List;
 @AllArgsConstructor
 public class Settings implements Validationable, Serializable {
 
+    //    @JsonSerialize(using = IsoJsonLocalDateSerializer.class)
+//    @JsonDeserialize(using = IsoJsonLocalDateDeserializer.class)
     private LocalDate periodFrom;
+
+    //    @JsonSerialize(using = IsoJsonLocalDateSerializer.class)
+//    @JsonDeserialize(using = IsoJsonLocalDateDeserializer.class)
     private LocalDate periodTo;
 
     public ValidationResult isValid() {
