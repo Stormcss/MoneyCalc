@@ -2,11 +2,19 @@ package ru.strcss.projects.moneycalc.testutils;
 
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.entities.*;
+import ru.strcss.projects.moneycalc.entities.Access;
+import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.entities.Identifications;
+import ru.strcss.projects.moneycalc.entities.Settings;
+import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
+import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
@@ -90,17 +98,29 @@ public class Generator {
         return UUID.randomUUID().toString().toUpperCase().replace("-", "");
     }
 
-    public static List<SpendingSection> generateSpendingSectionList(int count, boolean ordered) {
+    /**
+     * Generates {@link List} of {@link SpendingSection} objects with required parameters
+     * @param count - required count of objects
+     * @param isNonAdded - last list item will have {@code isAdded} field as false
+     * @param isRemoved - last list item will have {@code isRemoved} field as true
+     * @param isRemovedOnly - each object will have {@code isRemoved} field as true
+     */
+    public static List<SpendingSection> generateSpendingSectionList(int count, boolean isNonAdded,
+                                                                    boolean isRemoved,
+                                                                    boolean isRemovedOnly) {
         List<SpendingSection> spendingSections = new ArrayList<>(count);
 
-        for (int i = 0; i < count; i++) {
-            SpendingSection section = generateSpendingSection(null, i, (long) i, null,
-                    null, true, false);
+        for (int id = 0; id < count; id++) {
+            SpendingSection section = generateSpendingSection(null, id + 1, (long) id, null,
+                    null, true, isRemovedOnly);
             spendingSections.add(section);
         }
-        if (!ordered) {
-            Collections.shuffle(spendingSections);
-        }
+
+        if (isNonAdded)
+            spendingSections.get(spendingSections.size() - 1).setIsAdded(false);
+        if (isRemoved)
+            spendingSections.get(spendingSections.size() - 1).setIsRemoved(true);
+
         return spendingSections;
     }
 

@@ -19,6 +19,8 @@ public abstract class AbstractControllerTest extends AbstractTestNGSpringContext
     @MockBean
     private UserDetailsService detailsService;
 
+    String USER_LOGIN = "User";
+
     @BeforeSuite
     void init() throws Exception {
         super.springTestContextPrepareTestInstance();

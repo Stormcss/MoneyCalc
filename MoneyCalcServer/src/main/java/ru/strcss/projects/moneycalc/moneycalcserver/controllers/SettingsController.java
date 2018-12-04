@@ -3,7 +3,11 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.Settings;
@@ -11,8 +15,14 @@ import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.Reque
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SETTINGS_INCORRECT;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SETTINGS_NOT_FOUND;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SETTINGS_RETURNED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SETTINGS_UPDATED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SETTINGS_UPDATING_ERROR;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 
 @Slf4j
 @RestController
@@ -45,7 +55,7 @@ public class SettingsController extends AbstractController {
 
         if (updatedSettings == null) {
             log.error("Updating Settings for login \'{}\' has failed", login);
-            return responseError("Settings were not updated!");
+            return responseError(SETTINGS_UPDATING_ERROR);
         }
 
         log.debug("Updating Settings {} for login \'{}\'", updatedSettings, login);
@@ -67,9 +77,8 @@ public class SettingsController extends AbstractController {
             log.debug("returning PersonalSettings for login \'{}\': {}", login, settings);
             return responseSuccess(SETTINGS_RETURNED, settings);
         } else {
-            log.error("Can not return PersonalSettings for login \'{}\' - no Person found", login);
-            return responseError(NO_PERSON_EXIST);
+            log.error("Can not return PersonalSettings for login \'{}\' - no Settings found", login);
+            return responseError(SETTINGS_NOT_FOUND);
         }
     }
-
 }

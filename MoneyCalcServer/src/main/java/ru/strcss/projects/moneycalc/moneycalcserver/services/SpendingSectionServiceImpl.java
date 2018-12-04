@@ -47,9 +47,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
 
     @Override
     public Boolean deleteSpendingSection(String login, Integer sectionId) {
-
         Integer rowsAffected = sectionsMapper.deleteSpendingSection(login, sectionId);
-
         return rowsAffected > 0;
     }
 

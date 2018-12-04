@@ -1,5 +1,9 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ControllerMessages {
 
     //Other Errors
@@ -18,7 +22,9 @@ public class ControllerMessages {
 
     //Settings
     public static final String SETTINGS_UPDATED = "Settings successfully updated";
+    public static final String SETTINGS_UPDATING_ERROR = "Settings were not updated!";
     public static final String SETTINGS_RETURNED = "Settings successfully returned";
+    public static final String SETTINGS_NOT_FOUND = "Settings are not found!";
     public static final String SETTINGS_INCORRECT = "Settings has incorrect fields: %s";
 
     //Access

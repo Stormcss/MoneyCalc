@@ -20,7 +20,7 @@ public class RequestValidation<E> {
     private boolean isValid;
     private ResponseEntity<MoneyCalcRs<E>> validationError;
 
-    public RequestValidation(boolean isValid, ResponseEntity<MoneyCalcRs<E>> validationError) {
+    private RequestValidation(boolean isValid, ResponseEntity<MoneyCalcRs<E>> validationError) {
         this.isValid = isValid;
         this.validationError = validationError;
     }
@@ -77,7 +77,7 @@ public class RequestValidation<E> {
 
     @Getter
     @AllArgsConstructor
-    public static class Pair {
+    private static class Pair {
         private Supplier<Boolean> action;
         private Supplier<String> actionName;
         private String objectName;
