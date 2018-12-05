@@ -42,7 +42,7 @@ public class Transaction implements Validationable, Serializable {
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
         if (sum == null || sum == 0) reasons.add("Transaction sum can not be empty or 0!");
-        if (sectionId == null || sectionId < 0) reasons.add("SectionID can not be empty or < 0!");
+        if (sectionId == null || sectionId < 0) reasons.add("sectionId can not be empty or < 0!");
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
 }

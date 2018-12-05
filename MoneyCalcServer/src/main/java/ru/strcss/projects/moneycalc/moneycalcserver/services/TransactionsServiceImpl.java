@@ -40,9 +40,7 @@ public class TransactionsServiceImpl implements TransactionsService {
 
     @Override
     public boolean deleteTransaction(String login, Long transactionId) {
-        transactionsMapper.deleteTransaction(login, transactionId);
-        // FIXME: 29.11.2018 finish me
-        return true;
+        return transactionsMapper.deleteTransaction(login, transactionId) > 0;
     }
 
 }

@@ -8,7 +8,7 @@ public class ControllerMessages {
 
     //Other Errors
     public static final String DATE_INCORRECT = "Date [%s] is incorrect: must be [yyyy-MM-dd]";
-    public static final String DATE_SEQUENCE_INCORRECT = "Incorrect dates: dateTo must be after dateFrom";
+    public static final String DATE_SEQUENCE_INCORRECT = "Incorrect date sequence: dateFrom must be before dateTo";
     public static final String DEFAULT_ERROR = "Error";
 
     //Register
@@ -55,6 +55,7 @@ public class ControllerMessages {
     public static final String TRANSACTION_SAVING_ERROR = "ERROR has occurred while saving Transaction";
     public static final String TRANSACTION_SAVED = "TRANSACTION successfully saved";
     public static final String TRANSACTION_DELETED = "TRANSACTION successfully deleted";
+    public static final String TRANSACTION_NOT_DELETED = "Transaction was not deleted!";
     public static final String TRANSACTION_UPDATED = "TRANSACTION successfully updated";
     public static final String TRANSACTION_NOT_UPDATED = "Updating transaction has failed!";
     public static final String TRANSACTIONS_RETURNED = "TRANSACTIONS successfully returned";

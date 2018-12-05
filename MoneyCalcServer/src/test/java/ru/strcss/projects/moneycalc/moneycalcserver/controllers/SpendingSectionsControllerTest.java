@@ -109,7 +109,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     @Test
     void shouldGetSpendingSectionsWithNoParams() throws Exception {
         mockMvc.perform(get("/api/spendingSections")
-                .with(user("User")))
+                .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
                 .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
@@ -120,7 +120,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     @Test
     void shouldGetSpendingSectionsWithNonAdded() throws Exception {
         mockMvc.perform(get("/api/spendingSections?withNonAdded=true")
-                .with(user("User")))
+                .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
                 .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
@@ -132,7 +132,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     @Test
     void shouldGetSpendingSectionsWithRemoved() throws Exception {
         mockMvc.perform(get("/api/spendingSections?withRemoved=true")
-                .with(user("User")))
+                .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
                 .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
@@ -144,7 +144,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     @Test
     void shouldGetSpendingSectionsWithRemovedOnly() throws Exception {
         mockMvc.perform(get("/api/spendingSections?withRemovedOnly=true")
-                .with(user("User")))
+                .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
                 .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
@@ -156,7 +156,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     void shouldAddSpendingSections() throws Exception {
         mockMvc.perform(post("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(generateSpendingSection())))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
@@ -167,7 +167,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     void shouldUpdateSpendingSection() throws Exception {
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection()))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
@@ -190,7 +190,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(sectionId, generateSpendingSection(sectionName)))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
@@ -207,7 +207,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, spendingSection))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
@@ -218,25 +218,12 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     void shouldDeleteSpendingSection() throws Exception {
         mockMvc.perform(delete("/api/spendingSections/{sectionId}", 1)
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User")))
+                .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
                 .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
                 .andExpect(jsonPath("$.payload[*].isAdded", everyItem(is(true))))
                 .andExpect(jsonPath("$.payload[*].isRemoved", everyItem(is(false))));
-    }
-
-    @DataProvider(name = "incorrectSectionAddDataProvider")
-    public Object[][] dataProvider() {
-        SpendingSection nullName = generateSpendingSection();
-        nullName.setName(null);
-        SpendingSection nullBudget = generateSpendingSection();
-        nullBudget.setBudget(null);
-        SpendingSection zeroBudget = generateSpendingSection(0L);
-        SpendingSection isRemovedTrue = generateSpendingSection();
-        isRemovedTrue.setIsRemoved(true);
-        return new Object[][]{{nullBudget, "budget is empty"}, {nullName, "name is empty"},
-                {zeroBudget, "budget must be >= 0"}, {isRemovedTrue, "isRemoved can not be set as income parameter"}};
     }
 
     @Test(dataProvider = "incorrectSectionAddDataProvider")
@@ -245,7 +232,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
         mockMvc.perform(post("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(content))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
@@ -262,7 +249,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
         mockMvc.perform(post("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(generateSpendingSection(sectionName))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
@@ -276,7 +263,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
         mockMvc.perform(post("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(generateSpendingSection())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
@@ -291,7 +278,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(sectionId, generateSpendingSection()))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
@@ -302,7 +289,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     void shouldNotUpdateSpendingSection_sectionIsEmpty() throws Exception {
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, new SpendingSection()))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
@@ -321,7 +308,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection(sectionName)))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
@@ -335,7 +322,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection()))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
@@ -349,18 +336,30 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
         mockMvc.perform(delete("/api/spendingSections/{sectionId}", 1)
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .with(user("User"))
+                .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection()))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
                 .andExpect(jsonPath("$.message", is(SPENDING_SECTION_NOT_DELETED)));
     }
 
+    @DataProvider(name = "incorrectSectionAddDataProvider")
+    public Object[][] dataProvider() {
+        SpendingSection nullName = generateSpendingSection();
+        nullName.setName(null);
+        SpendingSection nullBudget = generateSpendingSection();
+        nullBudget.setBudget(null);
+        SpendingSection zeroBudget = generateSpendingSection(0L);
+        SpendingSection isRemovedTrue = generateSpendingSection();
+        isRemovedTrue.setIsRemoved(true);
+        return new Object[][]{{nullBudget, "budget is empty"}, {nullName, "name is empty"},
+                {zeroBudget, "budget must be >= 0"}, {isRemovedTrue, "isRemoved can not be set as income parameter"}};
+    }
 
     @TestConfiguration
     static class Config {
         @Bean
-        SpendingSectionService settingsService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper) {
+        SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper) {
             return new SpendingSectionServiceImpl(sectionsMapper, registryMapper);
         }
     }

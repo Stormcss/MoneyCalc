@@ -79,6 +79,7 @@ public class Generator {
                                                   String title, String desc) {
         return Transaction.builder()
                 .id(id)
+                .userId(1L)
                 .date(date == null ? LocalDate.now() : date)
                 .sum(sum == null ? ThreadLocalRandom.current().nextInt(10, 9000) : sum)
                 .currency("RUR")
@@ -88,9 +89,15 @@ public class Generator {
                 .build();
     }
 
-    public static List<Transaction> generateTransactionList(int count, List<Integer> ids) {
+    /**
+     * Generates {@link List} of {@link Transaction} objects with required parameters
+     *
+     * @param count      - required objects count
+     * @param sectionIds - desired sectionIds for these Transactions
+     */
+    public static List<Transaction> generateTransactionList(int count, List<Integer> sectionIds) {
         return IntStream.range(0, count)
-                .mapToObj(value -> generateTransaction(ids.get(ThreadLocalRandom.current().nextInt(ids.size()))))
+                .mapToObj(value -> generateTransaction(sectionIds.get(ThreadLocalRandom.current().nextInt(sectionIds.size()))))
                 .collect(Collectors.toList());
     }
 
@@ -100,9 +107,10 @@ public class Generator {
 
     /**
      * Generates {@link List} of {@link SpendingSection} objects with required parameters
-     * @param count - required count of objects
-     * @param isNonAdded - last list item will have {@code isAdded} field as false
-     * @param isRemoved - last list item will have {@code isRemoved} field as true
+     *
+     * @param count         - required objects count
+     * @param isNonAdded    - last list item will have {@code isAdded} field as false
+     * @param isRemoved     - last list item will have {@code isRemoved} field as true
      * @param isRemovedOnly - each object will have {@code isRemoved} field as true
      */
     public static List<SpendingSection> generateSpendingSectionList(int count, boolean isNonAdded,
