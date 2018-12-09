@@ -3,7 +3,7 @@ package ru.strcss.projects.moneycalcmigrator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.strcss.projects.moneycalc.entities.Transaction;
-import ru.strcss.projects.moneycalcmigrator.api.FileReaderI;
+import ru.strcss.projects.moneycalcmigrator.api.FileReader;
 import ru.strcss.projects.moneycalcmigrator.dto.PairFilesContainer;
 import ru.strcss.projects.moneycalcmigrator.dto.TransactionParseContainer;
 
@@ -23,7 +23,7 @@ import java.util.stream.Stream;
 
 @Slf4j
 @Component
-public class FileReader implements FileReaderI {
+public class FileReaderImpl implements FileReader {
 
     public Map<String, PairFilesContainer> groupFiles(String filesPath) {
         Pattern periodPattern = Pattern.compile("MoneyCalc(Data|Info)_(.*?).txt");

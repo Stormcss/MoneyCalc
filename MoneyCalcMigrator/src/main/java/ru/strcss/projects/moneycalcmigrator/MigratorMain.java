@@ -4,18 +4,15 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import ru.strcss.projects.moneycalcmigrator.dto.MigrationType;
-import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = DataSourceAutoConfiguration.class)
 public class MigratorMain implements ApplicationRunner {
 
     private final FileParser parser;
-    private final MigrationProperties migrationProperties;
 
-    public MigratorMain(FileParser parser, MigrationProperties migrationProperties) {
+    public MigratorMain(FileParser parser) {
         this.parser = parser;
-        this.migrationProperties = migrationProperties;
     }
 
     public static void main(String[] args) {
@@ -24,13 +21,6 @@ public class MigratorMain implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) {
-        if (migrationProperties.getMigrationType().equals(MigrationType.OLD_MONEYCALC_TO_NEW)) {
-            parser.parseOldFiles(true);
-
-        } else if (migrationProperties.getMigrationType().equals(MigrationType.DB_TO_FILE_BACKUP)) {
-            throw new UnsupportedOperationException("Not supported yet");
-        } else {
-            throw new UnsupportedOperationException("Not supported yet");
-        }
+        parser.parseOldFiles(true);
     }
 }

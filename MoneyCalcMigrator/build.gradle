@@ -10,6 +10,6 @@ dependencies {
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
 
-    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
+//    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }

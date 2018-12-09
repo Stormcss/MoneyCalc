@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import ru.strcss.projects.moneycalc.dto.Status;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.entities.Transaction;
-import ru.strcss.projects.moneycalcmigrator.api.FileReaderI;
+import ru.strcss.projects.moneycalcmigrator.api.FileReader;
 import ru.strcss.projects.moneycalcmigrator.dto.PairFilesContainer;
 import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
 
@@ -24,18 +24,17 @@ class FileParser {
 
     private final MigrationProperties properties;
     private final ServerConnector serverConnector;
-    private final FileReaderI fileReader;
+    private final FileReader fileReader;
 
     private int transactionsAdded;
     private int spendingSectionsAdded;
 
     @Autowired
-    public FileParser(MigrationProperties properties, ServerConnector serverConnector, FileReaderI fileReader) {
+    public FileParser(MigrationProperties properties, ServerConnector serverConnector, FileReader fileReader) {
         this.properties = properties;
         this.serverConnector = serverConnector;
         this.fileReader = fileReader;
     }
-
 
     /**
      * Parse data files for outdated version of MoneyCalc
@@ -49,7 +48,7 @@ class FileParser {
         log.debug("Logging in ...");
         String token = serverConnector.login(generateAccess(properties));
 
-        System.out.println("token = " + token);
+        log.info("token = " + token);
 
         log.debug("Getting section names ...");
         List<SpendingSection> personSectionsList = serverConnector.getSectionsList(token);
@@ -80,8 +79,8 @@ class FileParser {
         spendingSectionsAdded += personSectionsList.size();
 
         if (printStatistics) {
-            System.out.println("Added " + transactionsAdded + " transactions.");
-            System.out.println("Added " + spendingSectionsAdded + " spendingSections.");
+            log.info("Added " + transactionsAdded + " transactions.");
+            log.info("Added " + spendingSectionsAdded + " spendingSections.");
         }
 
     }

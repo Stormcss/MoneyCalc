@@ -1,9 +1,12 @@
 package ru.strcss.projects.moneycalcmigrator.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import ru.strcss.projects.moneycalc.entities.Access;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class GenerationUtils {
     /**
      * Generate SpendingSection with required fields
@@ -12,19 +15,13 @@ public class GenerationUtils {
      * @return SpendingSection object
      */
     public static SpendingSection generateSpendingSection(String sectionName) {
-        return SpendingSection.builder()
-                .budget(5000)
-                .isAdded(true)
-                .name(sectionName)
-                .build();
+        SpendingSection spendingSection = new SpendingSection();
+        spendingSection.setName(sectionName);
+        spendingSection.setBudget(5000L);
+        return spendingSection;
     }
 
     public static Access generateAccess(MigrationProperties properties) {
-        return Access.builder()
-                .login(properties.getLogin())
-                .password(properties.getPassword())
-                .email(properties.getEmail())
-                .build();
+        return new Access(properties.getLogin(), properties.getPassword(), properties.getEmail());
     }
-
 }

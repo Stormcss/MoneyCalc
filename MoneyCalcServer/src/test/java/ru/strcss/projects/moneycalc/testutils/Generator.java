@@ -27,6 +27,10 @@ public class Generator {
     private static String[] names = {"Вася", "Петя", "Вова", "Дуся", "Дима", "Ваня", "Митя", "Шура", "Тоня", "Ася", "Зина",
             "Жора", "Коля", "Гриша", "Слава", "Пелагея", "Митрофана"};
 
+    public static Credentials generateCredentials(Access access, Identifications identifications) {
+        return new Credentials(access, identifications);
+    }
+
     public static Credentials generateCredentials() {
         return generateCredentials(UUID());
     }

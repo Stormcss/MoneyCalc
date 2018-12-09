@@ -1,59 +1,41 @@
 package ru.strcss.projects.moneycalcmigrator;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
+import retrofit2.Call;
+import retrofit2.Response;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
-import ru.strcss.projects.moneycalc.entities.*;
+import ru.strcss.projects.moneycalc.entities.Access;
+import ru.strcss.projects.moneycalc.entities.Identifications;
+import ru.strcss.projects.moneycalc.entities.Person;
+import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 import ru.strcss.projects.moneycalcmigrator.api.MigrationAPI;
 import ru.strcss.projects.moneycalcmigrator.api.ServerConnectorI;
 import ru.strcss.projects.moneycalcmigrator.properties.MigrationProperties;
-import ru.strcss.projects.moneycalcmigrator.utils.LocalDateAdapter;
 
-import javax.annotation.PostConstruct;
 import java.io.IOException;
-import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Component
 @Slf4j
+@AllArgsConstructor
 class ServerConnector implements ServerConnectorI {
 
     private MigrationAPI service;
     private MigrationProperties properties;
 
-    @PostConstruct
-    public void init() {
-        Gson gson = new GsonBuilder()
-                .setPrettyPrinting()
-                .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
-                .create();
-
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(properties.getMoneyCalcServerHost() + ":" + properties.getMoneyCalcServerPort())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .build();
-        service = retrofit.create(MigrationAPI.class);
-    }
-
-    public ServerConnector(MigrationProperties properties) {
-        this.properties = properties;
-    }
-
     @Override
     public String login(Access access) {
         String token;
         try {
-            token = service.login(access).execute().headers().get("Authorization");
+            final Call<Void> login = service.login(access);
+            final Response<Void> execute = login.execute();
+            token = execute.headers().get("Authorization");
             if (token == null) {
                 token = registerPerson(access);
             }
@@ -66,7 +48,7 @@ class ServerConnector implements ServerConnectorI {
     @Override
     public List<SpendingSection> saveSpendingSection(String token, SpendingSection spendingSection) {
         try {
-            return service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)).execute().body().getPayload();
+            return service.addSpendingSection(token, spendingSection).execute().body().getPayload();
         } catch (IOException e) {
             throw new RuntimeException("Saving SpendingSection has failed", e);
         }
@@ -78,9 +60,7 @@ class ServerConnector implements ServerConnectorI {
      * @return token Authorization header
      */
     private String registerPerson(Access access) {
-        Identifications identifications = Identifications.builder()
-                .name(properties.getName())
-                .build();
+        Identifications identifications = new Identifications(null, properties.getName());
         try {
             MoneyCalcRs<Person> registerResponse = service.registerPerson(new Credentials(access, identifications)).execute().body();
             if (registerResponse.getServerStatus() != Status.SUCCESS)
@@ -109,7 +89,7 @@ class ServerConnector implements ServerConnectorI {
 
         for (Transaction transaction : transactionsToAdd) {
             try {
-                MoneyCalcRs<Transaction> response = service.addTransaction(token, new TransactionAddContainer(transaction)).execute().body();
+                MoneyCalcRs<Transaction> response = service.addTransaction(token, transaction).execute().body();
                 if (response == null || response.getServerStatus() != Status.SUCCESS || response.getPayload() == null) {
                     rollback = true;
                     break;
@@ -128,7 +108,7 @@ class ServerConnector implements ServerConnectorI {
 
             addedTransactions.forEach(transaction -> {
                         try {
-                            service.deleteTransaction(token, new TransactionDeleteContainer(transaction.getId())).execute().body();
+                            service.deleteTransaction(token, transaction.getId()).execute().body();
                         } catch (IOException e) {
                             log.error("Rollback for transaction id \"{}\" has failed", transaction.getId());
                             e.printStackTrace();

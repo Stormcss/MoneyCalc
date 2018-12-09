@@ -7,7 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-public interface FileReaderI {
+public interface FileReader {
 
     /**
      * Get Map of date and grouped Files

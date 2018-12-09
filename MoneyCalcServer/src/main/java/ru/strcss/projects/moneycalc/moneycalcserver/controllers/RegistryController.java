@@ -13,7 +13,11 @@ import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.Reque
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.RegisterService;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.PERSON_EMAIL_ALREADY_EXISTS;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.PERSON_EMAIL_INCORRECT;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.PERSON_LOGIN_ALREADY_EXISTS;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.REGISTER_ERROR;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.REGISTER_SUCCESSFUL;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isEmailValid;
@@ -21,11 +25,11 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @Slf4j
 @RestController
 @RequestMapping("/api/registration/")
-public class RegisterController extends AbstractController {
+public class RegistryController extends AbstractController {
 
     private RegisterService registerService;
 
-    public RegisterController(RegisterService registerService) {
+    public RegistryController(RegisterService registerService) {
         this.registerService = registerService;
     }
 
