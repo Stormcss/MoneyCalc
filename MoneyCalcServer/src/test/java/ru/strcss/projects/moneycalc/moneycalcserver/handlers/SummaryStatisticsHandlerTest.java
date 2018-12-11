@@ -7,7 +7,9 @@ import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
 
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateFinSummCalculContainer;
 
 public class SummaryStatisticsHandlerTest {

@@ -1,9 +1,14 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
@@ -32,6 +37,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @Slf4j
 @RestController
 @RequestMapping("/api/stats/summaryBySection")
+@AllArgsConstructor
 public class StatisticsController extends AbstractController {
 
     private TransactionsService transactionsService;
@@ -39,23 +45,12 @@ public class StatisticsController extends AbstractController {
     private SettingsService settingsService;
     private SummaryStatisticsHandler statisticsHandler;
 
-    public StatisticsController(TransactionsService transactionsService, SpendingSectionService spendingSectionService,
-                                SettingsService settingsService, SummaryStatisticsHandler statisticsHandler) {
-        this.transactionsService = transactionsService;
-        this.sectionService = spendingSectionService;
-        this.settingsService = settingsService;
-        this.statisticsHandler = statisticsHandler;
-    }
-
-    // TODO: 26.08.2018 test me
-
     /**
      * Get finance summary for all active sections
      */
     @GetMapping
     public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-//        Integer userId = personService.getPersonIdByLogin(login);
 
         Settings settings = settingsService.getSettings(login);
         List<SpendingSection> spendingSections = sectionService.getSpendingSections(login, false,
@@ -110,8 +105,8 @@ public class StatisticsController extends AbstractController {
                 .collect(Collectors.toList());
 
         if (spendingSections.size() != summaryFilter.getSectionIds().size()) {
-            log.error("List of required IDs is not equal with list filtered Person's list for login: \'{}\'", login);
-            return responseError("List of required IDs is not equal with list filtered Person's list");
+            log.error("List of required IDs is not equal with filtered Person's list for login: \'{}\'", login);
+            return responseError("List of required IDs is not equal with filtered Person's list");
         }
 
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()

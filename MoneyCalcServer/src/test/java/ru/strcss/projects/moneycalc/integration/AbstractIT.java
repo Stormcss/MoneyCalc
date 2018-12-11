@@ -14,13 +14,13 @@ import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
 import ru.strcss.projects.moneycalc.integration.utils.LocalDateAdapter;
-import ru.strcss.projects.moneycalc.moneycalcserver.Application;
+import ru.strcss.projects.moneycalc.moneycalcserver.MoneyCalcApplication;
 
 import java.sql.SQLException;
 import java.time.LocalDate;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {
-        Application.class
+        MoneyCalcApplication.class
 //        ServletWebServerFactoryAutoConfiguration.class
 })
 //@TestPropertySource(properties = {

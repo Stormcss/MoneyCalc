@@ -171,13 +171,19 @@ public class Generator {
         return spendingSection;
     }
 
-    public static FinanceSummaryBySection generateFinanceSummaryBySection() {
+    public static List<FinanceSummaryBySection> generateFinanceSummaryBySectionList(int count){
+        return IntStream.range(0, count)
+                .mapToObj(Generator::generateFinanceSummaryBySection)
+                .collect(Collectors.toList());
+    }
+
+    public static FinanceSummaryBySection generateFinanceSummaryBySection(int sectionId) {
         return FinanceSummaryBySection.builder()
-                .moneyLeftAll(5000d)
-                .moneySpendAll(1000d)
-                .summaryBalance(3000d)
-                .todayBalance(100d)
-                .sectionId(1)
+                .moneyLeftAll(ThreadLocalRandom.current().nextDouble(0, 1000))
+                .moneySpendAll(ThreadLocalRandom.current().nextDouble(0, 1000))
+                .summaryBalance(ThreadLocalRandom.current().nextDouble(0, 1000))
+                .todayBalance(ThreadLocalRandom.current().nextDouble(0, 1000))
+                .sectionId(sectionId)
                 .build();
     }
 

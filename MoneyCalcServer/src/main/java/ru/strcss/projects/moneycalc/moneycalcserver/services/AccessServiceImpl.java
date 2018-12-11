@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.services;
 
+import lombok.AllArgsConstructor;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -12,13 +13,10 @@ import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.AccessSe
 import static java.util.Collections.emptyList;
 
 @Service
+@AllArgsConstructor
 public class AccessServiceImpl implements AccessService, UserDetailsService {
 
     private AccessMapper accessMapper;
-
-    public AccessServiceImpl(AccessMapper accessMapper) {
-        this.accessMapper = accessMapper;
-    }
 
     @Override
     public Access getAccess(String login) {

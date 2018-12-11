@@ -108,18 +108,13 @@ public class IntegrationTestUtils {
      *
      * @param service - Retrofit configured services
      */
-    public static Pair<IdsContainer, String> savePersonGetIdsAndToken(MoneyCalcClient service) {
+    public static Pair<Person, String> savePersonGetIdsAndToken(MoneyCalcClient service) {
         Credentials credentials = generateCredentials(Generator.UUID());
         Person registerRs = sendRequest(service.registerPerson(credentials), Status.SUCCESS).body().getPayload();
 
-        IdsContainer idsContainer = IdsContainer.builder()
-                .personId(registerRs.getId())
-                .accessId(registerRs.getAccessId())
-                .settingsId(registerRs.getSettingsId())
-                .identificationsId(registerRs.getIdentificationsId())
-                .build();
+        Person person = new Person(registerRs.getId(), registerRs.getAccessId(), registerRs.getIdentificationsId(), registerRs.getSettingsId());
 
-        return new Pair<>(idsContainer, getToken(service, credentials.getAccess()));
+        return new Pair<>(person, getToken(service, credentials.getAccess()));
     }
 
     /**

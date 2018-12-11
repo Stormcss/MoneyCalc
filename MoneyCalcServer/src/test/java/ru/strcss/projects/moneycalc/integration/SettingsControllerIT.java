@@ -9,15 +9,23 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateCo
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.entities.Settings;
 import ru.strcss.projects.moneycalc.entities.SpendingSection;
-import ru.strcss.projects.moneycalc.integration.utils.IdsContainer;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
 
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
-import static org.testng.Assert.*;
-import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.addSpendingSectionGetRs;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.addSpendingSectionGetSectionId;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.deleteSpendingSectionByIdGetRs;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetLoginAndToken;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetToken;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSettings;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSection;
@@ -31,13 +39,12 @@ public class SettingsControllerIT extends AbstractIT {
      */
     @Test
     public void getSettings() {
-        Pair<IdsContainer, String> idsAndToken = savePersonGetIdsAndToken(service);
-        IdsContainer idsContainer = idsAndToken.getLeft();
-        String token = idsAndToken.getRight();
+        String token = savePersonGetToken(service);
 
         MoneyCalcRs<Settings> getSettingsRs = sendRequest(service.getSettings(token), Status.SUCCESS).body();
 
-//        assertEquals(getSettingsRs.getPayload().getId(), idsContainer.getSettingsId(), "wrong settingsId!");
+        assertNotNull(getSettingsRs.getPayload(), "Settings are null!");
+        assertTrue(getSettingsRs.getPayload().isValid().isValidated(), "Settings are not valid!");
     }
 
     @Test

@@ -1,7 +1,13 @@
 package ru.strcss.projects.moneycalc.integration.testapi;
 
 import retrofit2.Call;
-import retrofit2.http.*;
+import retrofit2.http.Body;
+import retrofit2.http.DELETE;
+import retrofit2.http.GET;
+import retrofit2.http.Header;
+import retrofit2.http.POST;
+import retrofit2.http.PUT;
+import retrofit2.http.Path;
 import ru.strcss.projects.moneycalc.dto.Credentials;
 import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
@@ -9,7 +15,13 @@ import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionU
 import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
-import ru.strcss.projects.moneycalc.entities.*;
+import ru.strcss.projects.moneycalc.entities.Access;
+import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.entities.Identifications;
+import ru.strcss.projects.moneycalc.entities.Person;
+import ru.strcss.projects.moneycalc.entities.Settings;
+import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.entities.Transaction;
 
 import java.util.List;
 
@@ -100,6 +112,6 @@ public interface MoneyCalcClient {
     /**
      * Access
      */
-    @GET("/api/access/get")
+    @GET("/api/access")
     Call<MoneyCalcRs<Access>> getAccess(@Header("Authorization") String token);
 }

@@ -7,10 +7,10 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 
 @Slf4j
 @SpringBootApplication(exclude = HibernateJpaAutoConfiguration.class)
-public class Application {
+public class MoneyCalcApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
+        SpringApplication.run(MoneyCalcApplication.class, args);
         log.info("MoneyCalcServer has started");
     }
 }
