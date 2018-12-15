@@ -10,10 +10,11 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
-import ru.strcss.projects.moneycalc.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.TransactionsMapper;
@@ -48,8 +49,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.strcss.projects.moneycalc.dto.Status.ERROR;
-import static ru.strcss.projects.moneycalc.dto.Status.SUCCESS;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.ERROR;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.DATE_SEQUENCE_INCORRECT;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_ID_NOT_EXISTS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_DELETED;
@@ -313,13 +314,14 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     @TestConfiguration
     static class Config {
         @Bean
-        TransactionsService transactionsService(TransactionsMapper transactionsMapper) {
-            return new TransactionsServiceImpl(transactionsMapper);
+        TransactionsService transactionsService(TransactionsMapper transactionsMapper, MetricsService metricsService) {
+            return new TransactionsServiceImpl(transactionsMapper, metricsService);
         }
 
         @Bean
-        SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper) {
-            return new SpendingSectionServiceImpl(sectionsMapper, registryMapper);
+        SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper,
+                                              MetricsService metricsService) {
+            return new SpendingSectionServiceImpl(sectionsMapper, registryMapper, metricsService);
         }
 
         @Bean

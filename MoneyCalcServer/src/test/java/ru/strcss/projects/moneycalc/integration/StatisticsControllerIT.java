@@ -2,10 +2,10 @@ package ru.strcss.projects.moneycalc.integration;
 
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
-import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

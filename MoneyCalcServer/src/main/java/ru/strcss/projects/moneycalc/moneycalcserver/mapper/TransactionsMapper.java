@@ -2,8 +2,8 @@ package ru.strcss.projects.moneycalc.moneycalcserver.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
-import ru.strcss.projects.moneycalc.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.util.List;
 

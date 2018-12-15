@@ -3,9 +3,9 @@ package ru.strcss.projects.moneycalc.moneycalcserver.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
-import ru.strcss.projects.moneycalc.dto.Credentials;
-import ru.strcss.projects.moneycalc.entities.Person;
-import ru.strcss.projects.moneycalc.entities.Settings;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 
 /**
  * Created by Stormcss

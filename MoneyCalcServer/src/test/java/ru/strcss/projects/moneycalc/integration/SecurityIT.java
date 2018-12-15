@@ -1,10 +1,10 @@
 package ru.strcss.projects.moneycalc.integration;
 
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.entities.Access;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 
 import static org.testng.Assert.assertEquals;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetLoginAndToken;

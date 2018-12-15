@@ -1,13 +1,13 @@
 package ru.strcss.projects.moneycalc.testutils;
 
-import ru.strcss.projects.moneycalc.dto.Credentials;
-import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.entities.Access;
-import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.entities.Identifications;
-import ru.strcss.projects.moneycalc.entities.Settings;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
-import ru.strcss.projects.moneycalc.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;

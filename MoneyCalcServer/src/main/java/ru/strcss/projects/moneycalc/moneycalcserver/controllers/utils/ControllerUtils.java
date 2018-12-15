@@ -6,9 +6,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.time.LocalDate;
 

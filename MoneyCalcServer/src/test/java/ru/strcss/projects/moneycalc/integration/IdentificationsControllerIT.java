@@ -3,14 +3,18 @@ package ru.strcss.projects.moneycalc.integration;
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
 import retrofit2.Response;
-import ru.strcss.projects.moneycalc.dto.Credentials;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.entities.Identifications;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
 
-import static org.testng.Assert.*;
-import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotNull;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetCredentialsAndToken;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetToken;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateIdentifications;
 
 @Slf4j

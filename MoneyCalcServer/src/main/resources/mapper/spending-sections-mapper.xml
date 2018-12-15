@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper">
 
-    <resultMap id="getSpendingSectionsMap" type="ru.strcss.projects.moneycalc.entities.SpendingSection"
+    <resultMap id="getSpendingSectionsMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection"
                autoMapping="true">
     </resultMap>
     <select id="getSpendingSections" resultMap="getSpendingSectionsMap">
@@ -118,7 +118,7 @@
         ]]>
     </select>
 
-    <resultMap id="getSectionBySectionIdMap" type="ru.strcss.projects.moneycalc.entities.SpendingSection"
+    <resultMap id="getSectionBySectionIdMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection"
                autoMapping="true">
     </resultMap>
     <select id="getSectionBySectionId" resultMap="getSectionBySectionIdMap">
@@ -133,7 +133,7 @@
         ]]>
     </select>
 
-    <resultMap id="getSectionBySectionNameMap" type="ru.strcss.projects.moneycalc.entities.SpendingSection"
+    <resultMap id="getSectionBySectionNameMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection"
                autoMapping="true">
     </resultMap>
     <select id="getSectionBySectionName" resultMap="getSectionBySectionNameMap">

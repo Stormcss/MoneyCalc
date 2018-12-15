@@ -7,7 +7,7 @@
 
     <logger name="deng" level="DEBUG"/>
     <logger name="ru.strcss.projects.moneycalcmigrator" level="DEBUG" />
-    <logger name="ru.strcss.projects.moneycalcmigrator.MigratorMain" level="ERROR" />
+    <logger name="ru.strcss.projects.moneycalc.moneycalcmigrator.MigratorMain" level="ERROR"/>
     <logger name="org.mongodb.driver" level="ERROR" />
     <logger name="org.springframework.context.annotation" level="ERROR" />
     <logger name="org.springframework.jmx.export.annotation.AnnotationMBeanExporter" level="ERROR" />

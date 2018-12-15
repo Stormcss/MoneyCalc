@@ -10,12 +10,13 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
-import ru.strcss.projects.moneycalc.entities.Settings;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.dto.SpendingSectionFilter;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
@@ -48,7 +49,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testng.AssertJUnit.assertEquals;
-import static ru.strcss.projects.moneycalc.dto.Status.SUCCESS;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.STATISTICS_RETURNED;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateFinanceSummaryBySectionList;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSectionList;
@@ -178,18 +179,19 @@ public class StatisticsControllerTest extends AbstractControllerTest {
     @TestConfiguration
     static class Config {
         @Bean
-        TransactionsService transactionsService(TransactionsMapper transactionsMapper) {
-            return new TransactionsServiceImpl(transactionsMapper);
+        TransactionsService transactionsService(TransactionsMapper transactionsMapper, MetricsService metricsService) {
+            return new TransactionsServiceImpl(transactionsMapper, metricsService);
         }
 
         @Bean
-        SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper) {
-            return new SpendingSectionServiceImpl(sectionsMapper, registryMapper);
+        SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper,
+                                              MetricsService metricsService) {
+            return new SpendingSectionServiceImpl(sectionsMapper, registryMapper, metricsService);
         }
 
         @Bean
-        SettingsService personService(SettingsMapper settingsMapper) {
-            return new SettingsServiceImpl(settingsMapper);
+        SettingsService personService(SettingsMapper settingsMapper, MetricsService metricsService) {
+            return new SettingsServiceImpl(settingsMapper, metricsService);
         }
     }
 }

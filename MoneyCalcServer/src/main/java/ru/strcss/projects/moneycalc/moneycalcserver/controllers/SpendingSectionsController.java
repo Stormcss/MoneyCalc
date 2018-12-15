@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,9 +13,9 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 
@@ -38,12 +39,9 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @Slf4j
 @RestController
 @RequestMapping("/api/spendingSections")
+@AllArgsConstructor
 public class SpendingSectionsController extends AbstractController {
     private SpendingSectionService sectionService;
-
-    public SpendingSectionsController(SpendingSectionService sectionService) {
-        this.sectionService = sectionService;
-    }
 
     /**
      * Get list of SpendingSections for specific login
@@ -54,7 +52,7 @@ public class SpendingSectionsController extends AbstractController {
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> getSpendingSections(
             @RequestParam(required = false) boolean withNonAdded,
             @RequestParam(required = false) boolean withRemoved,
-            @RequestParam(required = false) boolean withRemovedOnly) {
+            @RequestParam(required = false) boolean withRemovedOnly) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         List<SpendingSection> spendingSectionList =
@@ -65,7 +63,7 @@ public class SpendingSectionsController extends AbstractController {
     }
 
     @PostMapping
-    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSection spendingSection) {
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSection spendingSection) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<SpendingSection>> requestValidation = new RequestValidation.Validator(spendingSection, "Adding SpendingSection")
@@ -89,7 +87,7 @@ public class SpendingSectionsController extends AbstractController {
     }
 
     @PutMapping
-    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) {
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<SpendingSection>> requestValidation = new RequestValidation.Validator(updateContainer,
@@ -116,7 +114,7 @@ public class SpendingSectionsController extends AbstractController {
     }
 
     @DeleteMapping(value = "/{sectionId}")
-    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@PathVariable Integer sectionId) {
+    public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@PathVariable Integer sectionId) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Boolean isDeleted = sectionService.deleteSpendingSection(login, sectionId);

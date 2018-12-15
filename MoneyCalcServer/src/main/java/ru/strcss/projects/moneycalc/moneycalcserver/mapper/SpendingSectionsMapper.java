@@ -2,7 +2,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.dto.SpendingSectionFilter;
 
 import java.util.List;

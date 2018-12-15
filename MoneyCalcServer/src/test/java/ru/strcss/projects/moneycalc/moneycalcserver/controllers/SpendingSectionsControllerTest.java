@@ -10,9 +10,10 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.dto.SpendingSectionFilter;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
@@ -39,8 +40,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.strcss.projects.moneycalc.dto.Status.ERROR;
-import static ru.strcss.projects.moneycalc.dto.Status.SUCCESS;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.ERROR;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_EMPTY;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_ID_NOT_EXISTS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_NAME_EXISTS;
@@ -359,8 +360,9 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     @TestConfiguration
     static class Config {
         @Bean
-        SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper) {
-            return new SpendingSectionServiceImpl(sectionsMapper, registryMapper);
+        SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper,
+                                              MetricsService metricsService) {
+            return new SpendingSectionServiceImpl(sectionsMapper, registryMapper, metricsService);
         }
     }
 }

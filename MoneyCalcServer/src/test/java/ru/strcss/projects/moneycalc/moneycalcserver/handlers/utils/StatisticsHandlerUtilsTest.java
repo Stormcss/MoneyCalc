@@ -1,13 +1,15 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils;
 
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 
 import static org.testng.Assert.assertEquals;
-import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.getDaysPassed;
+import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.getTodayPositionRange;
+import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.round;
 
 public class StatisticsHandlerUtilsTest {
     @Test

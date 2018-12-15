@@ -1,4 +1,4 @@
-group 'ru.strcss.projects.moneycalc.migrator'
+group 'ru.strcss.projects.moneycalc.moneycalcmigrator'
 version '1.0.0'
 
 apply plugin: 'org.springframework.boot'

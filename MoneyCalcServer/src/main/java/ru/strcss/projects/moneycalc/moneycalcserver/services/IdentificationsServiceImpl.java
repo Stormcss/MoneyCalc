@@ -1,18 +1,16 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.services;
 
+import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
-import ru.strcss.projects.moneycalc.entities.Identifications;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.IdentificationsMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.IdentificationsService;
 
 @Service
+@AllArgsConstructor
 public class IdentificationsServiceImpl implements IdentificationsService {
 
     private IdentificationsMapper identificationsMapper;
-
-    public IdentificationsServiceImpl(IdentificationsMapper identificationsMapper) {
-        this.identificationsMapper = identificationsMapper;
-    }
 
     @Override
     public Identifications getIdentifications(String login) {

@@ -2,9 +2,9 @@ package ru.strcss.projects.moneycalc.moneycalcserver.handlers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.TodayPositionRange;
 
 import java.time.temporal.ChronoUnit;
@@ -13,7 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.getDaysPassed;
+import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.getTodayPositionRange;
+import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.round;
 
 @Slf4j
 @Component

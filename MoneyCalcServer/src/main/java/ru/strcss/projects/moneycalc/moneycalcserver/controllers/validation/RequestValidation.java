@@ -4,9 +4,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
-import ru.strcss.projects.moneycalc.Validationable;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.ValidationResult;
+import ru.strcss.projects.moneycalc.moneycalcdto.Validationable;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;

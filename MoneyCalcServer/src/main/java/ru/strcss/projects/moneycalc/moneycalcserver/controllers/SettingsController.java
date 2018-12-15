@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -8,9 +9,9 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SettingsUpdateContainer;
-import ru.strcss.projects.moneycalc.entities.Settings;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SettingsUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
@@ -27,13 +28,10 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @Slf4j
 @RestController
 @RequestMapping("/api/settings")
+@AllArgsConstructor
 public class SettingsController extends AbstractController {
 
     private SettingsService settingsService;
-
-    public SettingsController(SettingsService settingsService) {
-        this.settingsService = settingsService;
-    }
 
     /**
      * Update Settings object using user's login stored inside
@@ -42,7 +40,7 @@ public class SettingsController extends AbstractController {
      * @return response object
      */
     @PutMapping
-    public ResponseEntity<MoneyCalcRs<Settings>> updateSettings(@RequestBody SettingsUpdateContainer updateContainer) {
+    public ResponseEntity<MoneyCalcRs<Settings>> updateSettings(@RequestBody SettingsUpdateContainer updateContainer) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Settings> requestValidation = new Validator(updateContainer, "Updating Settings")
@@ -54,11 +52,11 @@ public class SettingsController extends AbstractController {
         Settings updatedSettings = settingsService.updateSettings(login, updateContainer.getSettings());
 
         if (updatedSettings == null) {
-            log.error("Updating Settings for login \'{}\' has failed", login);
+            log.error("Updating Settings for login '{}' has failed", login);
             return responseError(SETTINGS_UPDATING_ERROR);
         }
 
-        log.debug("Updating Settings {} for login \'{}\'", updatedSettings, login);
+        log.debug("Updating Settings {} for login '{}'", updatedSettings, login);
         return responseSuccess(SETTINGS_UPDATED, updatedSettings);
     }
 
@@ -68,7 +66,7 @@ public class SettingsController extends AbstractController {
      * @return response object
      */
     @GetMapping
-    public ResponseEntity<MoneyCalcRs<Settings>> getSettings() {
+    public ResponseEntity<MoneyCalcRs<Settings>> getSettings() throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Settings settings = settingsService.getSettings(login);

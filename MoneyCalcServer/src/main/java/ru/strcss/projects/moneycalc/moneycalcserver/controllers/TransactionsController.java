@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import io.micrometer.core.annotation.Timed;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -12,10 +13,10 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
-import ru.strcss.projects.moneycalc.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
@@ -46,19 +47,12 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @Slf4j
 @RestController
 @RequestMapping("/api/transactions")
+@AllArgsConstructor
 public class TransactionsController extends AbstractController {
 
     private TransactionsService transactionsService;
     private PersonService personService;
     private SpendingSectionService spendingSectionService;
-
-    public TransactionsController(TransactionsService transactionsService, SpendingSectionService spendingSectionService, PersonService personService) {
-        this.transactionsService = transactionsService;
-        this.spendingSectionService = spendingSectionService;
-        this.personService = personService;
-    }
-
-    // TODO: 26.08.2018 test me
 
     /**
      * Get filtered list of Transactions by user's login
@@ -67,7 +61,7 @@ public class TransactionsController extends AbstractController {
      * @return response object with list of Transactions
      */
     @GetMapping
-    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions() {
+    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions() throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         List<Transaction> transactions = transactionsService.getTransactions(login, null);
@@ -84,7 +78,7 @@ public class TransactionsController extends AbstractController {
      * @return response object with list of Transactions
      */
     @PostMapping(value = "/getFiltered")
-    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions(@RequestBody TransactionsSearchFilter getFilter) {
+    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions(@RequestBody TransactionsSearchFilter getFilter) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<Transaction>> requestValidation = new Validator(getFilter, "Getting Transactions")
@@ -101,7 +95,7 @@ public class TransactionsController extends AbstractController {
     }
 
     @PostMapping
-    public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody Transaction transaction) {
+    public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody Transaction transaction) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         log.debug("New transaction for login '{}' is received: {}", login, transaction);
@@ -136,11 +130,9 @@ public class TransactionsController extends AbstractController {
      *
      * id field in Income Transaction object will be ignored and overwritten with given transactionID
      *
-     * @param updateContainer
-     * @return
      */
     @PutMapping
-    public ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) {
+    public ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Transaction> requestValidation = new Validator(updateContainer, "Updating Transaction")
@@ -164,7 +156,7 @@ public class TransactionsController extends AbstractController {
     }
 
     @DeleteMapping(value = "/{transactionId}")
-    public ResponseEntity<MoneyCalcRs<Void>> deleteTransaction(@PathVariable Long transactionId) {
+    public ResponseEntity<MoneyCalcRs<Void>> deleteTransaction(@PathVariable Long transactionId) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Transaction deletedTransaction = transactionsService.getTransactionById(login, transactionId);

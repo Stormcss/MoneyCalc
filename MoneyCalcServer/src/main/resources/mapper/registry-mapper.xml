@@ -3,7 +3,7 @@
 <mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper">
     <!--parameterType="map"-->
 
-    <resultMap id="registerIdsMap" type="ru.strcss.projects.moneycalc.entities.Person"
+    <resultMap id="registerIdsMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.Person"
                autoMapping="true">
     </resultMap>
     <select id="registerIds" resultMap="registerIdsMap">

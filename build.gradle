@@ -46,6 +46,8 @@ subprojects{
         useTestNG() {
         }
         include 'ru/strcss/projects/moneycalc/moneycalcserver/**'
+        include 'ru/strcss/projects/moneycalc/moneycalcdto/**'
+        include 'ru/strcss/projects/moneycalc/moneycalcmigrator/**'
         maxHeapSize = "512m"
     }
 

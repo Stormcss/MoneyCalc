@@ -3,7 +3,7 @@
 <mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.SettingsMapper">
 
 
-    <resultMap id="getSettingsMap" type="ru.strcss.projects.moneycalc.entities.Settings"
+    <resultMap id="getSettingsMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings"
                autoMapping="true">
     </resultMap>
     <select id="getSettings" resultMap="getSettingsMap">

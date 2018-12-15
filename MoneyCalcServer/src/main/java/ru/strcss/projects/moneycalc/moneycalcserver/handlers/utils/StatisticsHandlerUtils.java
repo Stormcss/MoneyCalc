@@ -2,7 +2,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;

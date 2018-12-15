@@ -18,8 +18,8 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.strcss.projects.moneycalc.dto.Status.ERROR;
-import static ru.strcss.projects.moneycalc.dto.Status.SUCCESS;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.ERROR;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.ACCESS_RETURNED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.NO_PERSON_EXIST;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateAccess;

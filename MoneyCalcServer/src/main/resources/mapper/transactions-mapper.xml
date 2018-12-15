@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
 <mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.TransactionsMapper">
 
-    <resultMap id="getTransactionByIdMap" type="ru.strcss.projects.moneycalc.entities.Transaction"
+    <resultMap id="getTransactionByIdMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction"
                autoMapping="true">
     </resultMap>
     <select id="getTransactionById" resultMap="getTransactionByIdMap">
@@ -17,7 +17,7 @@
         ]]>
     </select>
 
-    <resultMap id="getTransactionsMap" type="ru.strcss.projects.moneycalc.entities.Transaction"
+    <resultMap id="getTransactionsMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction"
                autoMapping="true">
     </resultMap>
     <select id="getTransactions" resultMap="getTransactionsMap">

@@ -3,8 +3,8 @@ package ru.strcss.projects.moneycalc.testutils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
-import ru.strcss.projects.moneycalc.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.io.IOException;
 import java.time.LocalDate;

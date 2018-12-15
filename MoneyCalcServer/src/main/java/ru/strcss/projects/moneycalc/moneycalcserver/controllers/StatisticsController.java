@@ -1,5 +1,6 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
+import io.micrometer.core.annotation.Timed;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
@@ -9,14 +10,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchFilter;
-import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.entities.Settings;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
-import ru.strcss.projects.moneycalc.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.TimerType;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
@@ -44,12 +47,14 @@ public class StatisticsController extends AbstractController {
     private SpendingSectionService sectionService;
     private SettingsService settingsService;
     private SummaryStatisticsHandler statisticsHandler;
+    private MetricsService metricsService;
 
     /**
      * Get finance summary for all active sections
      */
     @GetMapping
-    public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection() {
+    @Timed(value = "stats.summaryBySection.get", extraTags = {"time", "formGetToDbSave"})
+    public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection() throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Settings settings = settingsService.getSettings(login);
@@ -75,7 +80,8 @@ public class StatisticsController extends AbstractController {
                 .build();
         // TODO: 13.02.2018 should be client's time
 
-        List<FinanceSummaryBySection> financeSummaryResult = statisticsHandler.calculateSummaryStatisticsBySection(calculationContainer);
+        List<FinanceSummaryBySection> financeSummaryResult = metricsService.getTimersStorage().get(TimerType.STATS_PROCESS_TIMER)
+                .recordCallable(() -> statisticsHandler.calculateSummaryStatisticsBySection(calculationContainer));
 
         log.debug("Returned List of FinanceSummaryBySections for login \'{}\' : {}", login, financeSummaryResult);
         return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
@@ -83,7 +89,7 @@ public class StatisticsController extends AbstractController {
 
     @PostMapping(value = "/getFiltered")
     public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(
-            @RequestBody FinanceSummaryFilter summaryFilter) {
+            @RequestBody FinanceSummaryFilter summaryFilter) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(summaryFilter,
@@ -119,7 +125,8 @@ public class StatisticsController extends AbstractController {
                 .build();
         // TODO: 13.02.2018 should be client's time
 
-        List<FinanceSummaryBySection> financeSummaryResult = statisticsHandler.calculateSummaryStatisticsBySection(calculationContainer);
+        List<FinanceSummaryBySection> financeSummaryResult = metricsService.getTimersStorage().get(TimerType.STATS_PROCESS_TIMER)
+                .recordCallable(() -> statisticsHandler.calculateSummaryStatisticsBySection(calculationContainer));
 
         log.debug("Returned List of FinanceSummaryBySection for login \'{}\' : {}", login, financeSummaryResult);
         return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);

@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.entities.Access;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.AccessMapper;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.ACCESS_RETURNED;

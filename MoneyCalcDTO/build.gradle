@@ -1,6 +1,7 @@
-group 'ru.strcss.projects.moneycalc.dto'
+group 'ru.strcss.projects.moneycalc.moneycalcdto.dto'
 version '1.0.0-SNAPSHOT'
 
 dependencies {
-    compile('org.springframework.boot:spring-boot-starter-data-jpa:1.5.9.RELEASE')
+    //for POJO testing
+    testCompile 'com.openpojo:openpojo:0.8.10'
 }

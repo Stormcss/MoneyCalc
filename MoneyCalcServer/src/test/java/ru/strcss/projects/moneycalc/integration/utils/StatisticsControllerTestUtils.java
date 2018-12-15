@@ -1,11 +1,11 @@
 package ru.strcss.projects.moneycalc.integration.utils;
 
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryFilter;
-import ru.strcss.projects.moneycalc.entities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 
 import java.util.List;
 

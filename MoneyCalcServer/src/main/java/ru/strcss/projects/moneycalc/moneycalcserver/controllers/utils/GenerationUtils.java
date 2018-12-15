@@ -2,8 +2,8 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
-import ru.strcss.projects.moneycalc.entities.Settings;
-import ru.strcss.projects.moneycalc.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
