@@ -10,7 +10,6 @@ import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
@@ -38,7 +37,7 @@ public interface MoneyCalcClient {
      */
     @PUT("/api/settings")
     Call<MoneyCalcRs<Settings>> updateSettings(@Header("Authorization") String token,
-                                               @Body SettingsUpdateContainer updateContainer);
+                                               @Body Settings settings);
 
     @GET("/api/settings")
     Call<MoneyCalcRs<Settings>> getSettings(@Header("Authorization") String token);

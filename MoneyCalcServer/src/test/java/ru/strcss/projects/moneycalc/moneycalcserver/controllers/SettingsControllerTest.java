@@ -9,7 +9,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.web.servlet.MvcResult;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SettingsUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
@@ -39,8 +38,6 @@ import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
 @Import(BaseTestContextConfiguration.class)
 public class SettingsControllerTest extends AbstractControllerTest {
 
-    private final String SERIALIZED_UPDATE_CONTAINER = serializeToJson(new SettingsUpdateContainer(generateSettings()));
-
     @MockBean
     @Autowired
     private SettingsMapper settingsMapper;
@@ -66,7 +63,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
         MvcResult mvcResult = mockMvc.perform(put("/api/settings")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user("User"))
-                .content(SERIALIZED_UPDATE_CONTAINER))
+                .content(serializeToJson(generateSettings())))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -75,7 +72,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
 
     @Test
     public void shouldReturnEmptyFieldsError() throws Exception {
-        String content = serializeToJson(new SettingsUpdateContainer(new Settings(null, null)));
+        String content = serializeToJson(new Settings(null, null));
 
         mockMvc.perform(put("/api/settings")
                 .with(user("User"))
@@ -85,7 +82,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
                 .andExpect(jsonPath("$.message",
                         stringContainsInOrder(
-                                Arrays.asList("Settings has incorrect fields", "periodFrom is empty", "periodTo is empty")
+                                Arrays.asList("Required fields are incorrect", "periodFrom is empty", "periodTo is empty")
                         )));
     }
 
@@ -109,7 +106,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
         mockMvc.perform(put("/api/settings")
                 .with(user(USER_LOGIN))
                 .header("Content-Type", "application/json;charset=UTF-8")
-                .content(SERIALIZED_UPDATE_CONTAINER))
+                .content(serializeToJson(generateSettings())))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
                 .andExpect(jsonPath("$.message", is(SETTINGS_UPDATING_ERROR)));

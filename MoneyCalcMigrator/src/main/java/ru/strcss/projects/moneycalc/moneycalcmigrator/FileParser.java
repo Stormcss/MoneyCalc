@@ -84,25 +84,4 @@ class FileParser {
         }
 
     }
-
-
-//    private List<Transaction> getTransactionList(Map<String, PairFilesContainer> filesEntries, List<SpendingSection> spendingSections) {
-//        List<Transaction> transactions = new ArrayList<>();
-//        for (PairFilesContainer pair : filesEntries.values()) {
-//            transactions.addAll(fileReader.parseInfoFile(properties.getDataPath(), pair.getPathInfoFile()));
-//        }
-//        return transactions;
-//    }
-//
-//    private Set<String> getSectionNames(Map<String, PairFilesContainer> filesEntries) {
-//        Set<String> sectionNames = new HashSet<>();
-//
-//        for (PairFilesContainer pair : filesEntries.values()) {
-////            sectionNames.addAll(parseDataFile(pair.getPathDataFile()));
-//            sectionNames.addAll(fileReader.parseDataFile(properties.getDataPath(), pair.getPathDataFile()));
-//        }
-//        return sectionNames;
-//    }
-
-
 }
