@@ -53,7 +53,7 @@ public class FileReaderImpl implements FileReader {
      * @return Set of SpendingSection names
      */
     public Set<String> parseDataFile(String folderPath, String fileName) {
-        try (Stream<String> stream = Files.lines(Paths.get(folderPath + "\\" + fileName))) {
+        try (Stream<String> stream = Files.lines(Paths.get(folderPath + "/" + fileName))) {
             return stream
                     .skip(14)
                     .limit(2)
@@ -70,7 +70,7 @@ public class FileReaderImpl implements FileReader {
      * @return List of Transactions
      */
     public List<Transaction> parseInfoFile(String folderPath, String fileName) {
-        try (Stream<String> stream = Files.lines(Paths.get(folderPath + "\\" + fileName))) {
+        try (Stream<String> stream = Files.lines(Paths.get(folderPath + "/" + fileName))) {
             // TODO: 19.02.2018 add other sections as well
             return stream.map(this::buildTransaction)
                     .peek(t -> log.trace("transaction: {}", t))
