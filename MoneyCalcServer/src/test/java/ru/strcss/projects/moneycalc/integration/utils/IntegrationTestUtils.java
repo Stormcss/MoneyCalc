@@ -188,11 +188,18 @@ public class IntegrationTestUtils {
     }
 
     /**
-     * Get Transactions and return Rs from the server
+     * Get Transactions with applied filter
      */
     public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, TransactionsSearchFilter
             searchContainer) {
         return sendRequest(service.getTransactions(token, searchContainer), Status.SUCCESS).body();
+    }
+
+    /**
+     * Get Transactions without filter
+     */
+    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token) {
+        return sendRequest(service.getTransactions(token), Status.SUCCESS).body();
     }
 
     public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,

@@ -9,7 +9,7 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class FinanceSummaryGetContainerLegacy {
+public class FinanceSummaryFilterLegacy {
     private String rangeFrom;
     private String rangeTo;
     private List<Integer> sectionIds;

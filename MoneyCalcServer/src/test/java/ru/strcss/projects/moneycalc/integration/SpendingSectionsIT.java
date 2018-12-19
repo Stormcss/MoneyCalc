@@ -22,6 +22,7 @@ import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtil
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetLoginAndToken;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetToken;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSection;
 import static ru.strcss.projects.moneycalc.testutils.TestUtils.getMaxSpendingSectionId;
 
@@ -54,7 +55,7 @@ public class SpendingSectionsIT extends AbstractIT {
         String token = loginAndToken.getRight();
         SpendingSection spendingSection = generateSpendingSection();
 
-        sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
+        sendRequest(service.addSpendingSection(token, spendingSection), SUCCESS).body();
         Response<MoneyCalcRs<List<SpendingSection>>> addSectionRs =
                 sendRequest(service.addSpendingSection(token, spendingSection));
 
@@ -88,19 +89,19 @@ public class SpendingSectionsIT extends AbstractIT {
         String token = savePersonGetToken(service);
 
         List<SpendingSection> sectionsRs =
-                sendRequest(service.getSpendingSections(token), Status.SUCCESS).body().getPayload();
+                sendRequest(service.getSpendingSections(token), SUCCESS).body().getPayload();
         SpendingSection deletedSection = sectionsRs.get(0);
         String deletedSectionName = deletedSection.getName();
 
         MoneyCalcRs<List<SpendingSection>> deleteRs =
-                sendRequest(service.deleteSpendingSection(token, deletedSection.getSectionId()), Status.SUCCESS).body();
+                sendRequest(service.deleteSpendingSection(token, deletedSection.getSectionId()), SUCCESS).body();
         assertTrue(deleteRs.getPayload().stream().noneMatch(sections -> sections.getName().equals(deletedSectionName)), SECTION_NOT_REMOVED);
 
         MoneyCalcRs<List<SpendingSection>> addRs = sendRequest(service.addSpendingSection(token,
-                generateSpendingSection(deletedSectionName)), Status.SUCCESS).body();
+                generateSpendingSection(deletedSectionName)), SUCCESS).body();
         assertEquals(addRs.getPayload().get(addRs.getPayload().size() - 1).getName(), deletedSectionName, SECTION_NOT_ADDED);
 
-        MoneyCalcRs<List<SpendingSection>> removedSections = sendRequest(service.getSpendingSectionsWithRemovedOnly(token), Status.SUCCESS).body();
+        MoneyCalcRs<List<SpendingSection>> removedSections = sendRequest(service.getSpendingSectionsWithRemovedOnly(token), SUCCESS).body();
 
         assertEquals(removedSections.getPayload().get(0).getName(), "#del_" + deletedSectionName, "Deleted section has wrong name!");
     }
@@ -151,7 +152,7 @@ public class SpendingSectionsIT extends AbstractIT {
         SpendingSection spendingSection = generateSpendingSection();
         int updatedSectionId = 1;
 
-        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), SUCCESS).body();
 
         String oldName = getSectionsRs.getPayload()
                 .stream().filter(section -> section.getSectionId().equals(updatedSectionId)).findAny().get().getName();
@@ -160,7 +161,7 @@ public class SpendingSectionsIT extends AbstractIT {
         SpendingSectionUpdateContainer updateContainerById = new SpendingSectionUpdateContainer(updatedSectionId, spendingSection);
 
         MoneyCalcRs<List<SpendingSection>> updateSectionRs =
-                sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body();
+                sendRequest(service.updateSpendingSection(token, updateContainerById), SUCCESS).body();
 
         assertTrue(updateSectionRs.getPayload().stream().noneMatch(section -> section.getName().equals(oldName)),
                 "Spending Section was not updated!");
@@ -173,7 +174,7 @@ public class SpendingSectionsIT extends AbstractIT {
         String token = savePersonGetToken(service);
         int updatedSectionId = 1;
 
-        List<SpendingSection> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body().getPayload();
+        List<SpendingSection> getSectionsRs = sendRequest(service.getSpendingSections(token), SUCCESS).body().getPayload();
 
         Long oldBudget = getSectionsRs
                 .stream().filter(section -> section.getSectionId().equals(updatedSectionId)).findAny().get().getBudget();
@@ -184,7 +185,7 @@ public class SpendingSectionsIT extends AbstractIT {
                 new SpendingSectionUpdateContainer(updatedSectionId, getSectionsRs.get(updatedSectionId - 1));
 
         List<SpendingSection> updateSectionRs =
-                sendRequest(service.updateSpendingSection(token, updateContainerById), Status.SUCCESS).body().getPayload();
+                sendRequest(service.updateSpendingSection(token, updateContainerById), SUCCESS).body().getPayload();
 
         assertNotEquals(updateSectionRs.get(updatedSectionId - 1).getBudget(), oldBudget, SECTION_NOT_UPDATED);
         assertEquals(getSectionsRs.size(), updateSectionRs.size(), "Number of Spending Sections has changed!");
@@ -204,11 +205,34 @@ public class SpendingSectionsIT extends AbstractIT {
                 spendingSection2)), Status.ERROR);
     }
 
+    /**
+     * Checking that updating single SpendingSection won't lead to updating others
+     */
+    @Test
+    public void shouldUpdateOnlyOneSpendingSection() {
+        String token = savePersonGetToken(service);
+
+        String name1 = "name";
+        String newName = "newName!";
+
+        addSpendingSectionGetRs(service, token, generateSpendingSection(name1));
+        Integer updatedSectionId = addSpendingSectionGetRs(service, token, generateSpendingSection("name1"))
+                .getPayload().stream().reduce((first, second) -> second).orElse(null).getSectionId();
+
+        SpendingSection newSpendingSection = generateSpendingSection(newName);
+        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(updatedSectionId, newSpendingSection)), SUCCESS).body();
+
+        List<SpendingSection> spendingSectionList = sendRequest(service.getSpendingSections(token), SUCCESS).body().getPayload();
+
+        assertEquals(spendingSectionList.get(2).getName(), name1, "Old SpendingSection name has changed!");
+        assertEquals(spendingSectionList.get(3).getName(), newName, "SpendingSection name has not changed!");
+    }
+
     @Test
     public void getSpendingSections() {
         String token = savePersonGetToken(service);
 
-        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), SUCCESS).body();
 
         assertEquals(getSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
     }
@@ -220,9 +244,9 @@ public class SpendingSectionsIT extends AbstractIT {
         SpendingSection spendingSection = new SpendingSection(null, null, nonAddedId, null, "Renamed",
                 false, false, 1000L);
 
-        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(nonAddedId, spendingSection)), Status.SUCCESS);
+        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(nonAddedId, spendingSection)), SUCCESS);
 
-        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSectionsWithNonAdded(token), Status.SUCCESS).body();
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSectionsWithNonAdded(token), SUCCESS).body();
 
         assertEquals(getSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
         assertFalse(getSectionsRs.getPayload().get(nonAddedId - 1).getIsAdded(), "Section is still added!");
@@ -233,15 +257,15 @@ public class SpendingSectionsIT extends AbstractIT {
         String token = savePersonGetToken(service);
         int removedId = 1;
 
-        sendRequest(service.deleteSpendingSection(token, removedId), Status.SUCCESS);
+        sendRequest(service.deleteSpendingSection(token, removedId), SUCCESS);
 
         MoneyCalcRs<List<SpendingSection>> getWithRemovedSectionsRs =
-                sendRequest(service.getSpendingSectionsWithRemoved(token), Status.SUCCESS).body();
+                sendRequest(service.getSpendingSectionsWithRemoved(token), SUCCESS).body();
         assertEquals(getWithRemovedSectionsRs.getPayload().size(), 2, "Wrong number of spending sections is returned!");
         assertTrue(getWithRemovedSectionsRs.getPayload().get(removedId - 1).getIsRemoved(), SECTION_NOT_REMOVED);
 
         MoneyCalcRs<List<SpendingSection>> getRemovedSectionsOnlyRs =
-                sendRequest(service.getSpendingSectionsWithRemovedOnly(token), Status.SUCCESS).body();
+                sendRequest(service.getSpendingSectionsWithRemovedOnly(token), SUCCESS).body();
         assertEquals(getRemovedSectionsOnlyRs.getPayload().size(), 1, "Wrong number of spending sections is returned!");
         assertTrue(getRemovedSectionsOnlyRs.getPayload().get(removedId - 1).getIsRemoved(), SECTION_NOT_REMOVED);
     }
@@ -255,7 +279,7 @@ public class SpendingSectionsIT extends AbstractIT {
 
         int sectionId = addSpendingSectionGetSectionId(service, token, spendingSection);
 
-        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), Status.SUCCESS).body();
+        MoneyCalcRs<List<SpendingSection>> getSectionsRs = sendRequest(service.getSpendingSections(token), SUCCESS).body();
 
         Integer logoId = getSectionsRs.getPayload().stream()
                 .filter(section -> section.getSectionId().equals(sectionId))

@@ -4,7 +4,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
@@ -29,6 +28,7 @@ import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtil
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.getTransactions;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetToken;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDateMinus;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
@@ -156,7 +156,7 @@ public class TransactionsControllerIT extends AbstractIT {
         //Getting random Transactions to delete
         Long idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).getId();
 
-        sendRequest(service.deleteTransaction(token, idToDelete), Status.SUCCESS).body();
+        sendRequest(service.deleteTransaction(token, idToDelete), SUCCESS).body();
 
         //Getting Transactions list
         MoneyCalcRs<List<Transaction>> getTransactionsRs = getTransactions(service, token, LocalDate.now(), LocalDate.now(),
@@ -191,7 +191,7 @@ public class TransactionsControllerIT extends AbstractIT {
         //Update Transaction
         LocalDate newDate = LocalDate.now().minus(1, ChronoUnit.DAYS);
         sendRequest(service.updateTransaction(token,
-                new TransactionUpdateContainer(idToUpdate, generateTransaction(newDate))), Status.SUCCESS);
+                new TransactionUpdateContainer(idToUpdate, generateTransaction(newDate))), SUCCESS);
 
         //Getting Transactions list
         List<Transaction> transactionsList = getTransactions(service, token, newDate, LocalDate.now(),
@@ -215,6 +215,29 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(updatedTransaction.getId(), beforeUpdatedTransaction.getId(), "id of updated Transaction has changed!");
         assertEquals(updatedTransaction.getSectionId(), beforeUpdatedTransaction.getSectionId(), "inner id of updated Transaction has changed!");
         assertTrue(assertTransactionsOrderedByDate(transactionsList), "Transaction list is not ordered by date!");
+    }
+
+    /**
+     * Checking that updating single transaction won't lead to updating others
+     */
+    @Test
+    public void shouldUpdateOnlyOneTransaction() {
+        String token = savePersonGetToken(service);
+
+        String title1 = "title1";
+        String newTitle = "newTitle!";
+
+        addTransaction(service, token, generateTransaction(title1, "123"));
+        Long updatedTransactionId = addTransaction(service, token, generateTransaction("title2", "desc2"))
+                .getPayload().getId();
+
+        Transaction newTransaction = generateTransaction(newTitle, "newDesc");
+        sendRequest(service.updateTransaction(token, new TransactionUpdateContainer(updatedTransactionId, newTransaction)), SUCCESS).body();
+
+        List<Transaction> transactionList = getTransactions(service, token).getPayload();
+
+        assertEquals(transactionList.get(0).getTitle(), title1, "Old transaction title has changed!");
+        assertEquals(transactionList.get(1).getTitle(), newTitle, "Transaction title has not changed!");
     }
 
     @Test

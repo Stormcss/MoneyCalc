@@ -99,16 +99,13 @@
                 "sum" = #{transaction.sum},
             </if>
         </set>
-        from "Transactions" t
         where
-            t.id = #{transactionId}
-            AND t."userId" = (
-              select u.id
-              from "User" u
-                join "Access" a on a.id = u."accessId"
-              where
-                a.login = #{login}
-            )
+        "userId" = (select u.id
+        from "User" u
+        join "Access" a on a.id = u."accessId"
+        where
+        a.login = #{login})
+        and id = #{transactionId}
     </update>
 
     <delete id="deleteTransaction">

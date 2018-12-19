@@ -43,7 +43,7 @@
 
     <update id="updateSpendingSection">
         <![CDATA[
-        update "SpendingSection" ss
+        update "SpendingSection"
           ]]>
         <set>
             <if test="section.name != null">
@@ -68,7 +68,7 @@
                           join "Access" a on a.id = u."accessId"
                         where
                           a.login = #{login})
-            and ss."sectionId" = #{sectionId};
+        and "sectionId" = #{sectionId};
     </update>
 
     <delete id="deleteSpendingSection">

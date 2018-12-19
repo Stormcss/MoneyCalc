@@ -20,17 +20,16 @@ public class StatisticsHandlerUtils {
             return TodayPositionRange.BEFORE;
         } else if (container.getToday().isAfter(container.getRangeTo())) {
             return TodayPositionRange.AFTER;
-        } else return TodayPositionRange.IN;
+        } else
+            return TodayPositionRange.IN;
     }
 
     public static long getDaysPassed(FinanceSummaryCalculationContainer container, TodayPositionRange todayPositionRange, long daysInPeriod) {
-        long daysPassed;
         if (todayPositionRange.equals(TodayPositionRange.IN))
-            daysPassed = Period.between(container.getRangeFrom(), container.getToday()).getDays() + 1;
+            return Period.between(container.getRangeFrom(), container.getToday()).getDays() + 1L;
         else if (todayPositionRange.equals(TodayPositionRange.BEFORE))
-            daysPassed = 0;
+            return 0;
         else
-            daysPassed = daysInPeriod;
-        return daysPassed;
+            return daysInPeriod;
     }
 }

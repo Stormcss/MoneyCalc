@@ -17,6 +17,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
+import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 
 import java.util.List;
@@ -66,7 +67,8 @@ public class SpendingSectionsController extends AbstractController {
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@RequestBody SpendingSection spendingSection) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<SpendingSection>> requestValidation = new RequestValidation.Validator(spendingSection, "Adding SpendingSection")
+        RequestValidation<List<SpendingSection>> requestValidation = new Validator(spendingSection,
+                "Adding SpendingSection")
                 .addValidation(() -> spendingSection.isValid().isValidated(),
                         () -> fillLog(SPENDING_SECTION_INCORRECT, spendingSection.isValid().getReasons().toString()))
                 .addValidation(() -> sectionService.isSpendingSectionNameNew(login, spendingSection.getName()),
@@ -78,10 +80,10 @@ public class SpendingSectionsController extends AbstractController {
         Boolean isAdded = sectionService.addSpendingSection(login, spendingSection);
 
         if (!isAdded) {
-            log.error("Saving SpendingSection {} for login \'{}\' has failed", spendingSection, login);
+            log.error("Saving SpendingSection {} for login '{}' has failed", spendingSection, login);
             return responseError(SPENDING_SECTION_SAVING_ERROR);
         }
-        log.debug("Saved new SpendingSection for login \'{}\' : {}", login, spendingSection);
+        log.debug("Saved new SpendingSection for login '{}' : {}", login, spendingSection);
         return responseSuccess(SPENDING_SECTION_ADDED,
                 sectionService.getSpendingSections(login, false, false, false));
     }
@@ -90,7 +92,7 @@ public class SpendingSectionsController extends AbstractController {
     public ResponseEntity<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<SpendingSection>> requestValidation = new RequestValidation.Validator(updateContainer,
+        RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer,
                 "Updating SpendingSection")
                 .addValidation(() -> sectionService.isSpendingSectionIdExists(login, updateContainer.getSectionId()),
                         () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, "" + updateContainer.getSectionId()))
