@@ -3,24 +3,32 @@ package ru.strcss.projects.moneycalc.integration;
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
 import retrofit2.Response;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.ThreadLocalRandom;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
-import static org.testng.Assert.*;
-import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertNotEquals;
+import static org.testng.Assert.assertTrue;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.addTransaction;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.getTransactions;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetToken;
+import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDateMinus;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
@@ -62,7 +70,7 @@ public class TransactionsControllerIT extends AbstractIT {
      * Checks for correct Transactions returning for requested sections
      */
     @Test
-    public void getTransaction_SectionFilter() {
+    public void getTransaction_sectionFilter() {
         int numOfAddedTransactionsPerSection = 5;
         int numOfSections = 2; //currently Person by default has only 2 sections
 
@@ -70,11 +78,10 @@ public class TransactionsControllerIT extends AbstractIT {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = new ArrayList<>();
-        for (int i = 0; i < numOfSections; i++) {
-            // FIXME: 11.02.2018 I suppose it could be done better
-            int sectionID = i;
+        for (int i = 1; i <= numOfSections; i++) {
+            int sectionId = i;
             addedTransactions.addAll(IntStream.range(0, numOfAddedTransactionsPerSection)
-                    .mapToObj(s -> sendRequest(service.addTransaction(token, new TransactionAddContainer(generateTransaction(sectionID)))).body())
+                    .mapToObj(s -> sendRequest(service.addTransaction(token, generateTransaction(sectionId))).body())
                     .filter(Objects::nonNull)
                     .map(MoneyCalcRs::getPayload)
                     .collect(Collectors.toList()));
@@ -83,9 +90,8 @@ public class TransactionsControllerIT extends AbstractIT {
                 "Some Transactions were not saved!");
 
         //Requesting Transactions with Single Section
-        for (int sectionId = 0; sectionId < numOfSections; sectionId++) {
+        for (int sectionId = 1; sectionId <= numOfSections; sectionId++) {
             int finalSectionId = sectionId;
-            // FIXME: 11.02.2018 I suppose it could be done better
 
             MoneyCalcRs<List<Transaction>> singleSectionRs = getTransactions(service, token, LocalDate.now(),
                     generateDatePlus(ChronoUnit.DAYS, 1), Collections.singletonList(sectionId));
@@ -97,7 +103,7 @@ public class TransactionsControllerIT extends AbstractIT {
         //Requesting Transactions with Multiple Sections
         if (numOfSections > 1) {
             MoneyCalcRs<List<Transaction>> multipleSectionsRs = getTransactions(service, token, LocalDate.now(),
-                    generateDatePlus(ChronoUnit.DAYS, 1), Arrays.asList(0, 1));
+                    generateDatePlus(ChronoUnit.DAYS, 1), Arrays.asList(1, 2));
             assertEquals(multipleSectionsRs.getPayload().size(), numOfAddedTransactionsPerSection * 2,
                     INCORRECT_TRANSACTIONS_COUNT);
         }
@@ -125,7 +131,7 @@ public class TransactionsControllerIT extends AbstractIT {
         String token = savePersonGetToken(service);
 
         Response<MoneyCalcRs<Transaction>> addTransactionRs = sendRequest(service.addTransaction(token,
-                new TransactionAddContainer(generateTransaction(10))));
+                generateTransaction(10)));
 
         assertFalse(addTransactionRs.isSuccessful(), "Response is not failed!");
     }
@@ -140,7 +146,7 @@ public class TransactionsControllerIT extends AbstractIT {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
-                .mapToObj(s -> sendRequest(service.addTransaction(token, new TransactionAddContainer(generateTransaction()))).body())
+                .mapToObj(s -> sendRequest(service.addTransaction(token, generateTransaction())).body())
                 .filter(Objects::nonNull)
                 .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());
@@ -148,9 +154,9 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(addedTransactions.size(), numOfAddedTransactions, "Some Transactions were not created!");
 
         //Getting random Transactions to delete
-        Integer idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).getId();
+        Long idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).getId();
 
-        sendRequest(service.deleteTransaction(token, new TransactionDeleteContainer(idToDelete)), Status.SUCCESS).body();
+        sendRequest(service.deleteTransaction(token, idToDelete), SUCCESS).body();
 
         //Getting Transactions list
         MoneyCalcRs<List<Transaction>> getTransactionsRs = getTransactions(service, token, LocalDate.now(), LocalDate.now(),
@@ -171,7 +177,7 @@ public class TransactionsControllerIT extends AbstractIT {
 
         //Adding new Transactions
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
-                .mapToObj(s -> sendRequest(service.addTransaction(token, new TransactionAddContainer(generateTransaction()))).body())
+                .mapToObj(s -> sendRequest(service.addTransaction(token, generateTransaction())).body())
                 .filter(Objects::nonNull)
                 .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());
@@ -179,12 +185,13 @@ public class TransactionsControllerIT extends AbstractIT {
         assertEquals(addedTransactions.size(), numOfAddedTransactions, "Some Transactions were not created!");
 
         //Getting random Transactions to update
-        Integer idToUpdate = addedTransactions.get(ThreadLocalRandom.current().nextInt(1, addedTransactions.size())).getId();
+        Long idToUpdate = addedTransactions.get(ThreadLocalRandom.current().nextInt(0, addedTransactions.size()))
+                .getId();
 
         //Update Transaction
         LocalDate newDate = LocalDate.now().minus(1, ChronoUnit.DAYS);
         sendRequest(service.updateTransaction(token,
-                new TransactionUpdateContainer(idToUpdate, generateTransaction(newDate))), Status.SUCCESS);
+                new TransactionUpdateContainer(idToUpdate, generateTransaction(newDate))), SUCCESS);
 
         //Getting Transactions list
         List<Transaction> transactionsList = getTransactions(service, token, newDate, LocalDate.now(),
@@ -210,6 +217,29 @@ public class TransactionsControllerIT extends AbstractIT {
         assertTrue(assertTransactionsOrderedByDate(transactionsList), "Transaction list is not ordered by date!");
     }
 
+    /**
+     * Checking that updating single transaction won't lead to updating others
+     */
+    @Test
+    public void shouldUpdateOnlyOneTransaction() {
+        String token = savePersonGetToken(service);
+
+        String title1 = "title1";
+        String newTitle = "newTitle!";
+
+        addTransaction(service, token, generateTransaction(title1, "123"));
+        Long updatedTransactionId = addTransaction(service, token, generateTransaction("title2", "desc2"))
+                .getPayload().getId();
+
+        Transaction newTransaction = generateTransaction(newTitle, "newDesc");
+        sendRequest(service.updateTransaction(token, new TransactionUpdateContainer(updatedTransactionId, newTransaction)), SUCCESS).body();
+
+        List<Transaction> transactionList = getTransactions(service, token).getPayload();
+
+        assertEquals(transactionList.get(0).getTitle(), title1, "Old transaction title has changed!");
+        assertEquals(transactionList.get(1).getTitle(), newTitle, "Transaction title has not changed!");
+    }
+
     @Test
     public void getTransaction_filterByTitle() {
         int numOfAddedTransactions = 5;
@@ -218,9 +248,9 @@ public class TransactionsControllerIT extends AbstractIT {
         IntStream.range(0, numOfAddedTransactions)
                 .forEach(value -> addTransaction(service, token, generateTransaction("title" + value, "desc" + value)));
 
-        TransactionsSearchContainer searchContainer = new TransactionsSearchContainer();
-        searchContainer.setRangeFrom(generateDateMinus(ChronoUnit.DAYS, 1));
-        searchContainer.setRangeTo(generateDatePlus(ChronoUnit.DAYS, 1));
+        TransactionsSearchFilter searchContainer = new TransactionsSearchFilter();
+        searchContainer.setDateFrom(generateDateMinus(ChronoUnit.DAYS, 1));
+        searchContainer.setDateTo(generateDatePlus(ChronoUnit.DAYS, 1));
 
         // filtering by title by mask
         searchContainer.setTitle("%itle%");
@@ -241,9 +271,9 @@ public class TransactionsControllerIT extends AbstractIT {
         IntStream.range(0, numOfAddedTransactions)
                 .forEach(value -> addTransaction(service, token, generateTransaction("title" + value, "desc" + value)));
 
-        TransactionsSearchContainer searchContainer = new TransactionsSearchContainer();
-        searchContainer.setRangeFrom(generateDateMinus(ChronoUnit.DAYS, 1));
-        searchContainer.setRangeTo(generateDatePlus(ChronoUnit.DAYS, 1));
+        TransactionsSearchFilter searchContainer = new TransactionsSearchFilter();
+        searchContainer.setDateFrom(generateDateMinus(ChronoUnit.DAYS, 1));
+        searchContainer.setDateTo(generateDatePlus(ChronoUnit.DAYS, 1));
 
         // filtering by title by mask
         searchContainer.setDescription("%esc%");
@@ -264,9 +294,9 @@ public class TransactionsControllerIT extends AbstractIT {
         IntStream.range(0, numOfAddedTransactions)
                 .forEach(value -> addTransaction(service, token, generateTransaction(1, value * 100 + 1)));
 
-        TransactionsSearchContainer searchContainer = new TransactionsSearchContainer();
-        searchContainer.setRangeFrom(generateDateMinus(ChronoUnit.DAYS, 1));
-        searchContainer.setRangeTo(generateDatePlus(ChronoUnit.DAYS, 1));
+        TransactionsSearchFilter searchContainer = new TransactionsSearchFilter();
+        searchContainer.setDateFrom(generateDateMinus(ChronoUnit.DAYS, 1));
+        searchContainer.setDateTo(generateDatePlus(ChronoUnit.DAYS, 1));
 
         searchContainer.setPriceFrom(BigDecimal.valueOf(100));
         searchContainer.setPriceTo(BigDecimal.valueOf(301));

@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper">
+    <!--parameterType="map"-->
+
+    <resultMap id="registerIdsMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.Person"
+               autoMapping="true">
+    </resultMap>
+    <select id="registerIds" resultMap="registerIdsMap">
+        <![CDATA[
+            select
+                   nextval('user_id_seq') as id,
+                   nextval('access_id_seq') as accessId,
+                   nextval('identifications_id_seq') as identificationsId,
+                   nextval('settings_id_seq') as settingsId
+            from user_id_seq;
+
+        ]]>
+    </select>
+
+    <update id="registerUser">
+        <![CDATA[
+          insert into "Access" ("id", "login", "password", "email")
+          VALUES (#{person.accessId}, #{credentials.access.login}, #{credentials.access.password}, #{credentials.access.email});
+
+          insert into "Identifications" ("id", "name")
+          VALUES (#{person.identificationsId}, #{credentials.identifications.name});
+
+          insert into "Settings" ("id", "periodFrom", "periodTo")
+          VALUES (#{person.settingsId}, #{settings.periodFrom}, #{settings.periodTo});
+
+          insert into "User"
+          VALUES (#{person.id}, #{person.accessId}, #{person.identificationsId}, #{person.settingsId});
+        ]]>
+    </update>
+</mapper>
+        <!--#{accessId,jdbcType=long,mode=OUT} := accessId;-->
+        <!--#{identificationsId,jdbcType=long,mode=OUT} := identificationsId;-->
+        <!--#{settingsId,jdbcType=long,mode=OUT} := settingsId;-->

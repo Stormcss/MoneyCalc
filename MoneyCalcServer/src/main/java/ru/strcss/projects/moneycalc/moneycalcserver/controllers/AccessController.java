@@ -1,16 +1,17 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import ru.strcss.projects.moneycalc.api.AccessAPIService;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
-import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.AccessService;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.AccessMapper;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.ACCESS_RETURNED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.NO_PERSON_EXIST;
@@ -19,26 +20,22 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 
 @Slf4j
 @RestController
-@RequestMapping("/api/access/")
-public class AccessController extends AbstractController implements AccessAPIService {
+@AllArgsConstructor
+@RequestMapping("/api/access")
+public class AccessController extends AbstractController {
     // TODO: 06.03.2018 finish me
-
-    private AccessService accessService;
-
-    public AccessController(AccessService accessService) {
-        this.accessService = accessService;
-    }
+    private AccessMapper accessMapper;
 
     /**
      * Get Access object
      *
      * @return response object with Identifications payload
      */
-    @GetMapping(value = "/get")
+    @GetMapping
     public ResponseEntity<MoneyCalcRs<Access>> getAccess() {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        Access access = accessService.getAccessByLogin(login);
+        Access access = accessMapper.getAccess(login);
 
         if (access == null) {
             log.error("Can not return Access for login \'{}\' - no Person found", login);
@@ -48,9 +45,8 @@ public class AccessController extends AbstractController implements AccessAPISer
         return responseSuccess(ACCESS_RETURNED, access);
     }
 
-    @Override
-    public ResponseEntity<MoneyCalcRs<Access>> saveAccess(IdentificationsUpdateContainer updateContainer) {
+    @PutMapping
+    public ResponseEntity<MoneyCalcRs<Access>> updateAccess(@RequestBody Access access) {
         throw new UnsupportedOperationException("Not supported yet");
     }
-
 }

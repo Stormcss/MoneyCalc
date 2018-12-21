@@ -1,115 +1,108 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeGroups;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.identifications.IdentificationsUpdateContainer;
-import ru.strcss.projects.moneycalc.enitities.Identifications;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.IdentificationsService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
+import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.IdentificationsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.IdentificationsServiceImpl;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.IdentificationsService;
 
-import java.util.Collections;
+import java.util.Arrays;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertNotNull;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.ERROR;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.IDENTIFICATIONS_SAVING_ERROR;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateIdentifications;
+import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
 
-public class IdentificationsControllerTest {
+@WebMvcTest(controllers = IdentificationsController.class)
+@ContextConfiguration(classes = {IdentificationsController.class, IdentificationsControllerTest.Config.class})
+@Import(BaseTestContextConfiguration.class)
+public class IdentificationsControllerTest extends AbstractControllerTest {
 
-    private IdentificationsService identificationsService = mock(IdentificationsService.class);
-    private PersonService personService = mock(PersonService.class);
-    private IdentificationsController identificationsController;
+    @MockBean
+    @Autowired
+    private IdentificationsMapper identificationsMapper;
 
-    @BeforeClass
-    public void setUp() {
-        User user = new User("login", "password", Collections.emptyList());
-        Authentication auth = new UsernamePasswordAuthenticationToken(user, null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-    }
-
-    @BeforeGroups(groups = {"IdentificationsSuccessfulScenario", "IdentificationsIncorrectContainers"})
-    public void prepare_successfulScenario_incorrectContainers() {
-        when(identificationsService.getIdentificationsById(anyInt()))
-                .thenReturn(generateIdentifications());
-        when(identificationsService.updateIdentifications(any(Identifications.class)))
-                .thenReturn(generateIdentifications());
-        when(personService.getPersonIdByLogin(anyString()))
+    @BeforeMethod
+    public void prepareIdentificationsSuccessfulScenario() {
+        when(identificationsMapper.getIdentifications(anyString()))
+                .thenReturn(new Identifications(1L, "Vasya"));
+        when(identificationsMapper.updateIdentifications(anyString(), any(Identifications.class)))
                 .thenReturn(1);
-        when(personService.getIdentificationsIdByPersonId(anyInt()))
-                .thenReturn(1);
-        identificationsController = new IdentificationsController(identificationsService, personService);
     }
 
-    @BeforeGroups(groups = "IdentificationsFailedScenario")
-    public void prepare_failedScenario() {
-        when(identificationsService.getIdentificationsById(anyInt()))
-                .thenReturn(null);
-        when(identificationsService.updateIdentifications(any(Identifications.class)))
-                .thenReturn(null);
-        when(personService.getPersonIdByLogin(anyString()))
-                .thenReturn(1);
-        when(personService.getIdentificationsIdByPersonId(anyInt()))
-                .thenReturn(1);
-        identificationsController = new IdentificationsController(identificationsService, personService);
+    @Test
+    void shouldGetIdentifications() throws Exception {
+        mockMvc.perform(get("/api/identifications")
+                .with(user(USER_LOGIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
+                .andExpect(jsonPath("$.payload[*]", hasSize(2)));
     }
 
-    @Test(groups = "IdentificationsSuccessfulScenario")
-    public void testSaveIdentifications() {
-        IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(generateIdentifications());
-        ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.updateIdentifications(updateContainer);
-
-        assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.SUCCESS, saveIdentificationsRs.getBody().getMessage());
-        assertEquals(updateContainer.getIdentifications(), saveIdentificationsRs.getBody().getPayload(), "Identifications are not equal!");
+    @Test
+    void shouldUpdateIdentifications() throws Exception {
+        mockMvc.perform(put("/api/identifications")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(generateIdentifications())))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
+                .andExpect(jsonPath("$.payload[*]", hasSize(2)));
     }
 
-    @Test(groups = "IdentificationsSuccessfulScenario")
-    public void testGetIdentifications() {
-        ResponseEntity<MoneyCalcRs<Identifications>> getIdentificationsRs = identificationsController.getIdentifications();
-
-        assertEquals(getIdentificationsRs.getBody().getServerStatus(), Status.SUCCESS, getIdentificationsRs.getBody().getMessage());
-        assertNotNull(getIdentificationsRs.getBody().getPayload(), "Identifications is null!");
+    @Test
+    void shouldNotUpdateIdentifications_incorrectData() throws Exception {
+        mockMvc.perform(put("/api/identifications")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(new Identifications())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                        Arrays.asList("Required fields are incorrect", "name is empty")
+                )));
     }
 
-    @Test(groups = "IdentificationsIncorrectContainers")
-    public void testSaveIdentifications_emptyIdentifications() {
-        IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(null);
-        ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.updateIdentifications(updateContainer);
+    @Test
+    void shouldNotUpdateIdentifications_updatingFaied() throws Exception {
+        when(identificationsMapper.updateIdentifications(anyString(), any(Identifications.class)))
+                .thenReturn(0);
 
-        assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
+        mockMvc.perform(put("/api/identifications")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(generateIdentifications())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", is(IDENTIFICATIONS_SAVING_ERROR)));
     }
 
-    @Test(groups = "IdentificationsIncorrectContainers")
-    public void testSaveIdentifications_Identifications_emptyFields() {
-        Identifications identifications = Identifications.builder().build();
-        IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(identifications);
-
-        ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.updateIdentifications(updateContainer);
-
-        assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
-    }
-
-    @Test(groups = "IdentificationsFailedScenario", dependsOnGroups = {"IdentificationsSuccessfulScenario", "IdentificationsIncorrectContainers"})
-    public void testSaveIdentifications_failed() {
-        IdentificationsUpdateContainer updateContainer = new IdentificationsUpdateContainer(generateIdentifications());
-        ResponseEntity<MoneyCalcRs<Identifications>> saveIdentificationsRs = identificationsController.updateIdentifications(updateContainer);
-
-        assertEquals(saveIdentificationsRs.getBody().getServerStatus(), Status.ERROR, saveIdentificationsRs.getBody().getMessage());
-    }
-
-    @Test(groups = "IdentificationsFailedScenario", dependsOnGroups = {"IdentificationsSuccessfulScenario", "IdentificationsIncorrectContainers"})
-    public void testGetIdentifications_failed() {
-        ResponseEntity<MoneyCalcRs<Identifications>> getIdentificationsRs = identificationsController.getIdentifications();
-
-        assertEquals(getIdentificationsRs.getBody().getServerStatus(), Status.ERROR, getIdentificationsRs.getBody().getMessage());
+    @TestConfiguration
+    static class Config {
+        @Bean
+        IdentificationsService identificationsService(IdentificationsMapper identificationsMapper) {
+            return new IdentificationsServiceImpl(identificationsMapper);
+        }
     }
 }

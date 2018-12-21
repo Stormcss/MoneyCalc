@@ -1,47 +1,58 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import io.micrometer.core.annotation.Timed;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.web.bind.annotation.*;
-import ru.strcss.projects.moneycalc.api.TransactionsAPIService;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
 
 import java.util.List;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.*;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.DATE_SEQUENCE_INCORRECT;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.NO_PERSON_LOGIN_EXISTS;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_ID_NOT_EXISTS;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTIONS_RETURNED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_DELETED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_INCORRECT;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_DELETED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_FOUND;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_UPDATED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_SAVED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_SAVING_ERROR;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_UPDATED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillDefaultValues;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
-import static ru.strcss.projects.moneycalc.utils.Merger.mergeTransactions;
 
 @Timed
 @Slf4j
 @RestController
 @RequestMapping("/api/transactions")
-public class TransactionsController extends AbstractController implements TransactionsAPIService {
+@AllArgsConstructor
+public class TransactionsController extends AbstractController {
 
     private TransactionsService transactionsService;
     private PersonService personService;
     private SpendingSectionService spendingSectionService;
-
-    public TransactionsController(TransactionsService transactionsService, SpendingSectionService spendingSectionService, PersonService personService) {
-        this.transactionsService = transactionsService;
-        this.spendingSectionService = spendingSectionService;
-        this.personService = personService;
-    }
-
-    // TODO: 26.08.2018 test me
 
     /**
      * Get filtered list of Transactions by user's login
@@ -49,11 +60,11 @@ public class TransactionsController extends AbstractController implements Transa
      *
      * @return response object with list of Transactions
      */
-    @GetMapping(value = "/get")
-    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions() {
+    @GetMapping
+    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions() throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        List<Transaction> transactions = transactionsService.getTransactions(login);
+        List<Transaction> transactions = transactionsService.getTransactions(login, null);
 
         log.info("Returning Transactions for login \'{}\'", login);
 
@@ -63,70 +74,65 @@ public class TransactionsController extends AbstractController implements Transa
     /**
      * Get filtered list of Transactions by user's login - return transactions only for specific dates range and Ids
      *
-     * @param getContainer - TransactionsSearchContainer
+     * @param getFilter - TransactionsSearchFilter
      * @return response object with list of Transactions
      */
     @PostMapping(value = "/getFiltered")
-    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions(@RequestBody TransactionsSearchContainer getContainer) {
+    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions(@RequestBody TransactionsSearchFilter getFilter) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<Transaction>> requestValidation = new Validator(getContainer, "Getting Transactions")
-                .addValidation(() -> isDateSequenceValid(getContainer.getRangeFrom(), getContainer.getRangeTo()),
+        RequestValidation<List<Transaction>> requestValidation = new Validator(getFilter, "Getting Transactions")
+                .addValidation(() -> isDateSequenceValid(getFilter.getDateFrom(), getFilter.getDateTo()),
                         () -> DATE_SEQUENCE_INCORRECT)
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        fillDefaultValues(getContainer);
+        List<Transaction> transactions = transactionsService.getTransactions(login, getFilter);
 
-        List<Transaction> transactions = transactionsService.getTransactions(login, getContainer);
-
-        log.info("Returning Transactions for login '{}', applying Filter: {} - {}", login, getContainer, transactions);
+        log.info("Returning Transactions for login '{}', applying Filter: {} - {}", login, getFilter, transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }
 
-    @PostMapping(value = "/add")
-    public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody TransactionAddContainer addContainer) {
+    @PostMapping
+    public ResponseEntity<MoneyCalcRs<Transaction>> addTransaction(@RequestBody Transaction transaction) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        log.debug("addTransaction Request received {}", addContainer);
+        log.debug("New transaction for login '{}' is received: {}", login, transaction);
 
-        Integer personId = personService.getPersonIdByLogin(login);
+        Long userId = personService.getUserIdByLogin(login);
 
-        if (personId == null)
+        if (userId == null)
             return responseError(fillLog(NO_PERSON_LOGIN_EXISTS, login));
 
-        RequestValidation<Transaction> requestValidation = new Validator(addContainer, "Adding Transactions")
-                .addValidation(() -> addContainer.getTransaction().isValid().isValidated(),
-                        () -> fillLog(TRANSACTION_INCORRECT, addContainer.getTransaction().isValid().getReasons().toString()))
-                .addValidation(() -> spendingSectionService.isSpendingSectionIdExists(personId, addContainer.getTransaction().getSectionId()),
-                        () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, "" + addContainer.getTransaction().getSectionId()))
+        RequestValidation<Transaction> requestValidation = new Validator(transaction, "Adding Transaction")
+                .addValidation(() -> transaction.isValid().isValidated(),
+                        () -> fillLog(TRANSACTION_INCORRECT, transaction.isValid().getReasons().toString()))
+                .addValidation(() -> spendingSectionService.isSpendingSectionIdExists(login, transaction.getSectionId()),
+                        () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, String.valueOf(transaction.getSectionId())))
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        fillDefaultValues(addContainer.getTransaction());
+        fillDefaultValues(transaction);
 
-        Integer addedTransactionId = transactionsService.addTransaction(personId, addContainer.getTransaction());
+        Long addedTransactionId = transactionsService.addTransaction(userId, transaction);
 
         if (addedTransactionId == null) {
-            log.error("Saving Transaction {} for login '{}' has failed", addContainer.getTransaction(), login);
+            log.error("Saving Transaction {} for login '{}' has failed", transaction, login);
             return responseError(TRANSACTION_SAVING_ERROR);
         }
-        log.info("Saved new Transaction for login '{}' : {}", login, addContainer.getTransaction());
-        return responseSuccess(TRANSACTION_SAVED, addContainer.getTransaction());
+        log.info("Saved new Transaction for login '{}' : {}", login, transaction);
+        return responseSuccess(TRANSACTION_SAVED, transaction);
     }
 
     /**
      * Update Person's Transaction
-     * <p>
+     *
      * id field in Income Transaction object will be ignored and overwritten with given transactionID
      *
-     * @param updateContainer
-     * @return
      */
-
-    @PostMapping(value = "/update")
-    public ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) {
+    @PutMapping
+    public ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<Transaction> requestValidation = new Validator(updateContainer, "Updating Transaction")
@@ -135,50 +141,39 @@ public class TransactionsController extends AbstractController implements Transa
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
-        Transaction oldTransaction = transactionsService.getTransactionById(updateContainer.getId());
-
-        if (oldTransaction == null) {
-            log.error("Transaction with id {} was not found", updateContainer.getId());
-            return responseError(TRANSACTION_NOT_FOUND);
-        }
-
-        Transaction resultTransaction = mergeTransactions(oldTransaction, updateContainer.getTransaction());
-
-        boolean isUpdateSuccessful = transactionsService.updateTransaction(resultTransaction);
+        boolean isUpdateSuccessful = transactionsService.updateTransaction(login, updateContainer.getId(),
+                updateContainer.getTransaction());
 
         if (!isUpdateSuccessful) {
             log.error("Updating Transaction for login \'{}\' has failed", login);
-            return responseError(TRANSACTION_UPDATED);
+            return responseError(TRANSACTION_NOT_UPDATED);
         }
+
+        Transaction resultTransaction = transactionsService.getTransactionById(login, updateContainer.getId());
 
         log.info("Updated Transaction {}: for login: \'{}\' with values: {}", resultTransaction, login, updateContainer.getTransaction());
         return responseSuccess(TRANSACTION_UPDATED, resultTransaction);
     }
 
-    @PostMapping(value = "/delete")
-    public ResponseEntity<MoneyCalcRs<Void>> deleteTransaction(@RequestBody TransactionDeleteContainer deleteContainer) {
+    @DeleteMapping(value = "/{transactionId}")
+    public ResponseEntity<MoneyCalcRs<Void>> deleteTransaction(@PathVariable Long transactionId) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<Void> requestValidation = new Validator(deleteContainer, "Deleting Transaction")
-                .validate();
-        if (!requestValidation.isValid()) return requestValidation.getValidationError();
-
-        Transaction deletedTransaction = transactionsService.getTransactionById(deleteContainer.getId());
+        Transaction deletedTransaction = transactionsService.getTransactionById(login, transactionId);
 
         if (deletedTransaction == null) {
-            log.error("Transaction with id: \'{}\' was not found", deleteContainer.getId());
+            log.error("Transaction with id: \'{}\' was not found", transactionId);
             return responseError(TRANSACTION_NOT_FOUND);
         }
 
-        boolean isDeleteSuccessful = transactionsService.deleteTransaction(deletedTransaction);
+        boolean isDeleteSuccessful = transactionsService.deleteTransaction(login, transactionId);
 
         if (!isDeleteSuccessful) {
             log.error("Deleting Transaction for login \'{}\' has failed", login);
-            return responseError("Transaction was not deleted!");
+            return responseError(TRANSACTION_NOT_DELETED);
         }
-        log.info("Deleted Transaction id \'{}\': for login: \'{}\'", deleteContainer.getId(), login);
+        log.info("Deleted Transaction id \'{}\': for login: \'{}\'", transactionId, login);
 
-        // TODO: 06.02.2018 some payload should be returned
         return responseSuccess(TRANSACTION_DELETED, null);
     }
 }

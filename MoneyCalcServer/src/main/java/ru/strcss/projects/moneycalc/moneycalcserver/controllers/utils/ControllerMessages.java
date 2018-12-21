@@ -1,10 +1,14 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
+
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ControllerMessages {
 
     //Other Errors
     public static final String DATE_INCORRECT = "Date [%s] is incorrect: must be [yyyy-MM-dd]";
-    public static final String DATE_SEQUENCE_INCORRECT = "Incorrect dates: dateTo must be after dateFrom";
+    public static final String DATE_SEQUENCE_INCORRECT = "Incorrect date sequence: dateFrom must be before dateTo";
     public static final String DEFAULT_ERROR = "Error";
 
     //Register
@@ -18,7 +22,9 @@ public class ControllerMessages {
 
     //Settings
     public static final String SETTINGS_UPDATED = "Settings successfully updated";
+    public static final String SETTINGS_UPDATING_ERROR = "Settings were not updated!";
     public static final String SETTINGS_RETURNED = "Settings successfully returned";
+    public static final String SETTINGS_NOT_FOUND = "Settings are not found!";
     public static final String SETTINGS_INCORRECT = "Settings has incorrect fields: %s";
 
     //Access
@@ -41,6 +47,7 @@ public class ControllerMessages {
     //Identifications
     public static final String IDENTIFICATIONS_SAVED = "Identifications successfully saved";
     public static final String IDENTIFICATIONS_RETURNED = "Identifications successfully returned";
+    public static final String IDENTIFICATIONS_NOT_RETURNED = "Identifications were not returned!";
     public static final String IDENTIFICATIONS_SAVING_ERROR = "Identifications were not updated!";
     public static final String IDENTIFICATIONS_INCORRECT = "Can not perform updating Identifications: %s";
 
@@ -48,6 +55,7 @@ public class ControllerMessages {
     public static final String TRANSACTION_SAVING_ERROR = "ERROR has occurred while saving Transaction";
     public static final String TRANSACTION_SAVED = "TRANSACTION successfully saved";
     public static final String TRANSACTION_DELETED = "TRANSACTION successfully deleted";
+    public static final String TRANSACTION_NOT_DELETED = "Transaction was not deleted!";
     public static final String TRANSACTION_UPDATED = "TRANSACTION successfully updated";
     public static final String TRANSACTION_NOT_UPDATED = "Updating transaction has failed!";
     public static final String TRANSACTIONS_RETURNED = "TRANSACTIONS successfully returned";

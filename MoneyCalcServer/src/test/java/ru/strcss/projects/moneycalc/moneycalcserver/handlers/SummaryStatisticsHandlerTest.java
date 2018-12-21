@@ -2,12 +2,14 @@ package ru.strcss.projects.moneycalc.moneycalcserver.handlers;
 
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 
 import java.util.List;
 
-import static org.testng.Assert.*;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertNotNull;
+import static org.testng.Assert.assertTrue;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateFinSummCalculContainer;
 
 public class SummaryStatisticsHandlerTest {
@@ -26,7 +28,7 @@ public class SummaryStatisticsHandlerTest {
         int transactionsNum = 100;
 
         List<FinanceSummaryBySection> financeSummary =
-                statisticsHandler.calculateSummaryStatisticsBySections(generateFinSummCalculContainer(sections, transactionsNum));
+                statisticsHandler.calculateSummaryStatisticsBySection(generateFinSummCalculContainer(sections, transactionsNum));
 
         assertNotNull(financeSummary, "FinanceSummary is null!");
         assertEquals(financeSummary.size(), sections, "FinanceSummary has wrong size!");
@@ -36,7 +38,7 @@ public class SummaryStatisticsHandlerTest {
     public void testCalculateSummaryStatistics_decimalPlaces() {
         FinanceSummaryCalculationContainer finSummContainer = generateFinSummCalculContainer(50, 500);
 
-        List<FinanceSummaryBySection> financeSummaryList = statisticsHandler.calculateSummaryStatisticsBySections(finSummContainer);
+        List<FinanceSummaryBySection> financeSummaryList = statisticsHandler.calculateSummaryStatisticsBySection(finSummContainer);
 
         for (FinanceSummaryBySection financeSummary : financeSummaryList) {
             int maxDecimalPlaces = maxDecimalPlaces(financeSummary.getTodayBalance(), financeSummary.getSummaryBalance());

@@ -1,30 +1,20 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import org.apache.commons.validator.routines.EmailValidator;
 
-import java.time.DateTimeException;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ValidationUtils {
 
-    public static boolean isEmailValid(String email){
-        return EmailValidator.getInstance().isValid(email);
-    }
-
-    public static boolean isDateCorrect(String date) {
-        try {
-            LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
-        } catch (DateTimeException e) {
-            return false;
-        }
-        return true;
+    public static Boolean isEmailValid(String email) {
+        final boolean valid = EmailValidator.getInstance().isValid(email);
+        return valid;
     }
 
     public static boolean isDateSequenceValid(LocalDate dateFrom, LocalDate dateTo) {
-//        LocalDate localDateFrom = LocalDate.parse(dateFrom, DateTimeFormatter.ISO_LOCAL_DATE);
-//        LocalDate localDateTo = LocalDate.parse(dateTo, DateTimeFormatter.ISO_LOCAL_DATE);
-//        return localDateFrom.isBefore(localDateTo) || localDateFrom.isEqual(localDateTo);
         return dateFrom.isBefore(dateTo) || dateFrom.isEqual(dateTo);
     }
 }

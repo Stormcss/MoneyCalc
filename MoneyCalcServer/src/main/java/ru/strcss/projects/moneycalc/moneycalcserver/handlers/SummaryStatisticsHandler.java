@@ -2,9 +2,9 @@ package ru.strcss.projects.moneycalc.moneycalcserver.handlers;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.TodayPositionRange;
 
 import java.time.temporal.ChronoUnit;
@@ -13,8 +13,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.string2LocalDate;
-import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.*;
+import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.getDaysPassed;
+import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.getTodayPositionRange;
+import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.round;
 
 @Slf4j
 @Component
@@ -23,9 +24,9 @@ public class SummaryStatisticsHandler {
     /**
      * Accuracy of calculations - number of decimal places
      */
-    private final int DIGITS = 2;
+    private static final int DIGITS = 2;
 
-    public List<FinanceSummaryBySection> calculateSummaryStatisticsBySections(FinanceSummaryCalculationContainer container) {
+    public List<FinanceSummaryBySection> calculateSummaryStatisticsBySection(FinanceSummaryCalculationContainer container) {
 
         final Map<Integer, FinanceSummaryBySection> statistics = new HashMap<>();
 
@@ -33,7 +34,7 @@ public class SummaryStatisticsHandler {
         for (Integer sectionId : container.getSections()) {
             FinanceSummaryBySection summaryBySection = FinanceSummaryBySection.builder()
                     .sectionId(sectionId)
-                    .moneySpendAll(0)
+                    .moneySpendAll(0d)
                     .build();
             statistics.put(sectionId, summaryBySection);
         }
@@ -51,7 +52,7 @@ public class SummaryStatisticsHandler {
         //Дозаполняем данными
         statistics.forEach((id, financeSummaryBySection) -> {
             SpendingSection currentSection = getSpendingSectionById(container, id);
-            int budget = currentSection.getBudget();
+            Long budget = currentSection.getBudget();
 
             long daysInPeriod = ChronoUnit.DAYS.between(container.getRangeFrom(), container.getRangeTo()) + 1;
             double moneyPerDay = (double) budget / daysInPeriod;
@@ -59,14 +60,16 @@ public class SummaryStatisticsHandler {
             long daysPassed = getDaysPassed(container, todayPositionRange, daysInPeriod);
 
             financeSummaryBySection.setTodayBalance(getTodayBalance(todayPositionRange, spendTodayBySection, id, moneyPerDay));
-            financeSummaryBySection.setSummaryBalance(round(moneyPerDay * daysPassed - financeSummaryBySection.getMoneySpendAll(), DIGITS));
+            financeSummaryBySection.setSummaryBalance(
+                    round(moneyPerDay * daysPassed - financeSummaryBySection.getMoneySpendAll(), DIGITS));
             financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
             financeSummaryBySection.setSectionName(currentSection.getName());
         });
         return new ArrayList<>(statistics.values());
     }
 
-    private Double getTodayBalance(TodayPositionRange todayPositionRange, Map<Integer, Double> spendTodayBySection, Integer id, double moneyPerDay) {
+    private Double getTodayBalance(TodayPositionRange todayPositionRange, Map<Integer, Double> spendTodayBySection,
+                                   Integer id, double moneyPerDay) {
         if (todayPositionRange.equals(TodayPositionRange.IN))
             return round(moneyPerDay - spendTodayBySection.getOrDefault(id, 0d), DIGITS);
         else
@@ -84,16 +87,17 @@ public class SummaryStatisticsHandler {
         fillMoneySpend(container, statistics, null);
     }
 
-    private void fillMoneySpend(FinanceSummaryCalculationContainer container, Map<Integer, FinanceSummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
+    private void fillMoneySpend(FinanceSummaryCalculationContainer container,
+                                Map<Integer, FinanceSummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
         container.getTransactions().forEach(transaction -> {
-            Integer sectionID = transaction.getSectionId();
-            FinanceSummaryBySection temporary = statistics.get(sectionID);
+            Integer sectionId = transaction.getSectionId();
+            FinanceSummaryBySection temporary = statistics.get(sectionId);
 
             temporary.setMoneySpendAll(temporary.getMoneySpendAll() + transaction.getSum());
             if (spendTodayBySection != null && transaction.getDate().isEqual(container.getToday())) {
-                spendTodayBySection.put(sectionID, spendTodayBySection.getOrDefault(sectionID, 0d) + transaction.getSum());
+                spendTodayBySection.put(sectionId, spendTodayBySection.getOrDefault(sectionId, 0d) + transaction.getSum());
             }
-            statistics.put(sectionID, temporary);
+            statistics.put(sectionId, temporary);
         });
     }
 }

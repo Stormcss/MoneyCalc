@@ -1,157 +1,197 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeGroups;
+import org.mockito.ArgumentCaptor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
-import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.enitities.Settings;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SettingsService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.dto.SpendingSectionFilter;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SettingsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.TransactionsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.SettingsServiceImpl;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.SpendingSectionServiceImpl;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.TransactionsServiceImpl;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static ru.strcss.projects.moneycalc.testutils.Generator.*;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static org.testng.AssertJUnit.assertEquals;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.STATISTICS_RETURNED;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateFinanceSummaryBySectionList;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSectionList;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionList;
+import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
 
-public class StatisticsControllerTest {
+@WebMvcTest(controllers = StatisticsController.class)
+@ContextConfiguration(classes = {StatisticsController.class, StatisticsControllerTest.Config.class})
+@Import(BaseTestContextConfiguration.class)
+public class StatisticsControllerTest extends AbstractControllerTest {
 
-    private TransactionsService transactionsService = mock(TransactionsService.class);
-    private SpendingSectionService spendingSectionService = mock(SpendingSectionService.class);
-    private PersonService personService = mock(PersonService.class);
-    private SettingsService settingsService = mock(SettingsService.class);
-    private SummaryStatisticsHandler statisticsHandler = mock(SummaryStatisticsHandler.class);
-    private StatisticsController statisticsController;
-    private List<Integer> sectionIDs = Arrays.asList(0, 1);
+    private final int TRANSACTIONS_COUNT = 50;
+    private final int SECTIONS_COUNT = Arrays.asList(1, 2, 3, 4, 5).size();
+    private final LocalDate settingsDateFrom = LocalDate.now();
+    private final LocalDate settingsDateTo = LocalDate.now().plus(2, ChronoUnit.DAYS);
+    private final LocalDate customDateFrom = LocalDate.now().minus(1, ChronoUnit.MONTHS);
+    private final LocalDate customDateTo = LocalDate.now().minus(1, ChronoUnit.DAYS);
 
-    @BeforeClass
-    public void setUp() {
-        User user = new User("login", "password", Collections.emptyList());
-        Authentication auth = new UsernamePasswordAuthenticationToken(user, null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
+    private List<SpendingSection> sectionList = generateSpendingSectionList(SECTIONS_COUNT, false, false, false);
+
+    @MockBean
+    @Autowired
+    private TransactionsMapper transactionsMapper;
+
+    @MockBean
+    @Autowired
+    private SpendingSectionsMapper sectionsMapper;
+
+    @MockBean
+    @Autowired
+    private SettingsMapper settingsMapper;
+
+    @MockBean
+    @Autowired
+    private RegistryMapper registryMapper;
+
+    @MockBean
+    @Autowired
+    private SummaryStatisticsHandler statisticsHandler;
+
+    @BeforeMethod
+    public void prepareStatisticsSuccessfulScenario() {
+        resetMocks();
+
+        when(settingsMapper.getSettings(anyString()))
+                .thenReturn(new Settings(settingsDateFrom, settingsDateTo));
+        when(sectionsMapper.getSpendingSections(anyString(), any(SpendingSectionFilter.class)))
+                .thenReturn(sectionList);
+
+        doAnswer(invocation -> {
+            List<Integer> sections = ((TransactionsSearchFilter) invocation.getArgument(1)).getRequiredSections();
+            return generateTransactionList(TRANSACTIONS_COUNT, sections);
+        }).when(transactionsMapper).getTransactions(anyString(), any(TransactionsSearchFilter.class));
+
+        doAnswer(invocation -> {
+            int size = ((FinanceSummaryCalculationContainer) invocation.getArgument(0)).getSections().size();
+            return generateFinanceSummaryBySectionList(size);
+        }).when(statisticsHandler).calculateSummaryStatisticsBySection(any(FinanceSummaryCalculationContainer.class));
     }
 
-    @BeforeGroups(groups = {"successfulScenario", "incorrectContainers"})
-    public void prepare_successfulScenario_incorrectContainers() {
-        when(transactionsService.getTransactionsByPersonId(anyInt(), any(LocalDate.class), any(LocalDate.class), anyList()))
-                .thenReturn(generateTransactionList(50, Arrays.asList(0, 1)));
-        when(spendingSectionService.getSpendingSectionsByPersonId(anyInt()))
-                .thenReturn(Arrays.asList(generateSpendingSection(5000, 0), generateSpendingSection(5000, 1)));
-        when(settingsService.getSettingsById(anyInt()))
-                .thenReturn(new Settings(1, LocalDate.now(), LocalDate.now().plus(1, ChronoUnit.MONTHS)));
+    @Test
+    void shouldGetStatsWithNoFilter() throws Exception {
+        mockMvc.perform(get("/api/stats/summaryBySection")
+                .with(user(USER_LOGIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
+                .andExpect(jsonPath("$.message", is(STATISTICS_RETURNED)))
+                .andExpect(jsonPath("$.payload.length()", is(SECTIONS_COUNT)))
+                .andExpect(jsonPath("$.payload[0].*", hasSize(6)));
 
-        when(personService.getPersonIdByLogin(anyString()))
-                .thenReturn(1);
+        //asserting that correct transactions are requested
+        ArgumentCaptor<TransactionsSearchFilter> transactionSearchArgument = ArgumentCaptor.forClass(TransactionsSearchFilter.class);
+        verify(transactionsMapper).getTransactions(anyString(), transactionSearchArgument.capture());
+        assertEquals(transactionSearchArgument.getValue().getDateFrom(), settingsDateFrom);
+        assertEquals(transactionSearchArgument.getValue().getDateTo(), settingsDateTo);
+        assertEquals(transactionSearchArgument.getValue().getRequiredSections().size(), SECTIONS_COUNT);
 
-        when(statisticsHandler.calculateSummaryStatisticsBySections(any(FinanceSummaryCalculationContainer.class)))
-                .thenReturn(Arrays.asList(generateFinanceSummaryBySection(), generateFinanceSummaryBySection()));
-
-        statisticsController = new StatisticsController(transactionsService, spendingSectionService, personService, settingsService, statisticsHandler);
+        //asserting that correct data for statistics processing is passed
+        ArgumentCaptor<FinanceSummaryCalculationContainer> statsArgument = ArgumentCaptor.forClass(FinanceSummaryCalculationContainer.class);
+        verify(statisticsHandler).calculateSummaryStatisticsBySection(statsArgument.capture());
+        assertEquals(statsArgument.getValue().getSections().size(), SECTIONS_COUNT);
+        assertEquals(statsArgument.getValue().getRangeFrom(), settingsDateFrom);
+        assertEquals(statsArgument.getValue().getRangeTo(), settingsDateTo);
     }
 
-    @Test(groups = "successfulScenario")
-    public void testGetFinanceSummaryBySection() {
-        LocalDate dateFrom = LocalDate.of(2017, 2, 10);
-        LocalDate dateTo = LocalDate.of(2017, 2, 20);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(dateFrom, dateTo, sectionIDs);
+    @Test
+    void shouldGetStatsWithFilter() throws Exception {
+        List<Integer> sectionIds = Arrays.asList(1, 2);
 
-        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        FinanceSummaryFilter financeSummaryFilter = new FinanceSummaryFilter();
+        financeSummaryFilter.setRangeFrom(customDateFrom);
+        financeSummaryFilter.setRangeTo(customDateTo);
+        financeSummaryFilter.setSectionIds(sectionIds);
 
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.SUCCESS, financeSummaryBySectionRs.getBody().getMessage());
-        assertEquals(financeSummaryBySectionRs.getBody().getPayload().size(), sectionIDs.size(), financeSummaryBySectionRs.getBody().getMessage());
+        mockMvc.perform(post("/api/stats/summaryBySection/getFiltered")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(financeSummaryFilter)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
+                .andExpect(jsonPath("$.message", is(STATISTICS_RETURNED)))
+                .andExpect(jsonPath("$.payload.length()", is(2)))
+                .andExpect(jsonPath("$.payload[0].*", hasSize(6)));
+
+        //asserting that correct transactions are requested
+        ArgumentCaptor<TransactionsSearchFilter> transactionSearchArgument = ArgumentCaptor.forClass(TransactionsSearchFilter.class);
+        verify(transactionsMapper).getTransactions(anyString(), transactionSearchArgument.capture());
+        assertEquals(transactionSearchArgument.getValue().getDateFrom(), customDateFrom);
+        assertEquals(transactionSearchArgument.getValue().getDateTo(), customDateTo);
+        assertEquals(transactionSearchArgument.getValue().getRequiredSections().size(), sectionIds.size());
+
+        //asserting that correct data for statistics processing is passed
+        ArgumentCaptor<FinanceSummaryCalculationContainer> statsArgument = ArgumentCaptor.forClass(FinanceSummaryCalculationContainer.class);
+        verify(statisticsHandler).calculateSummaryStatisticsBySection(statsArgument.capture());
+        assertEquals(statsArgument.getValue().getSections().size(), sectionIds.size());
+        assertEquals(statsArgument.getValue().getRangeFrom(), customDateFrom);
+        assertEquals(statsArgument.getValue().getRangeTo(), customDateTo);
     }
 
-    @Test(groups = "incorrectContainer")
-    public void testGetFinanceSummaryBySection_emptyContainer() {
-        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(null);
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
+    private void resetMocks() {
+        reset(transactionsMapper);
+        reset(statisticsHandler);
+        reset(sectionsMapper);
+        reset(settingsMapper);
     }
 
-    @Test(groups = "incorrectContainer")
-    public void testGetFinanceSummaryBySection_emptySectionIds() {
-        LocalDate dateFrom = LocalDate.of(2017, 2, 10);
-        LocalDate dateTo = LocalDate.of(2017, 2, 20);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(dateFrom, dateTo, null);
+    @TestConfiguration
+    static class Config {
+        @Bean
+        TransactionsService transactionsService(TransactionsMapper transactionsMapper, MetricsService metricsService) {
+            return new TransactionsServiceImpl(transactionsMapper, metricsService);
+        }
 
-        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
+        @Bean
+        SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper,
+                                              MetricsService metricsService) {
+            return new SpendingSectionServiceImpl(sectionsMapper, registryMapper, metricsService);
+        }
 
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
+        @Bean
+        SettingsService personService(SettingsMapper settingsMapper, MetricsService metricsService) {
+            return new SettingsServiceImpl(settingsMapper, metricsService);
+        }
     }
-
-//    @Test(groups = "incorrectContainer")
-//    public void testGetFinanceSummaryBySection_incorrect_RangeFrom() {
-//        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017.02.10", "2017-02-20", sectionIDs);
-//        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
-//
-//        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-//
-//        getContainer = new FinanceSummaryGetContainer("10-02-2017", "2017-02-20", sectionIDs);
-//        financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
-//
-//        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-//    }
-
-//    @Test(groups = "incorrectContainer")
-//    public void testGetFinanceSummaryBySection_incorrect_RangeTo() {
-//        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer("2017-02-10", "2017.02.20", sectionIDs);
-//        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
-//
-//        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-//
-//        getContainer = new FinanceSummaryGetContainer("2017-02-10", "20-02-2017", sectionIDs);
-//        financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
-//
-//        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-//    }
-
-    @Test(groups = "incorrectContainer")
-    public void testGetFinanceSummaryBySection_RangeFrom_after_RangeTo() {
-        LocalDate dateFrom = LocalDate.of(2017, 2, 20);
-        LocalDate dateTo = LocalDate.of(2017, 2, 10);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(dateFrom, dateTo, sectionIDs);
-
-        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
-
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-    }
-
-    @Test(groups = "incorrectContainer")
-    public void testGetFinanceSummaryBySection_empty_RangeFrom() {
-        LocalDate dateTo = LocalDate.of(2017, 2, 10);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(null, dateTo, sectionIDs);
-
-        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs =
-                statisticsController.getFinanceSummaryBySection(getContainer);
-
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-    }
-
-    @Test(groups = "incorrectContainer")
-    public void testGetFinanceSummaryBySection_empty_RangeTo() {
-        LocalDate dateFrom = LocalDate.of(2017, 2, 20);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(dateFrom, null, sectionIDs);
-
-        ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> financeSummaryBySectionRs = statisticsController.getFinanceSummaryBySection(getContainer);
-
-        assertEquals(financeSummaryBySectionRs.getBody().getServerStatus(), Status.ERROR, financeSummaryBySectionRs.getBody().getMessage());
-    }
-
 }

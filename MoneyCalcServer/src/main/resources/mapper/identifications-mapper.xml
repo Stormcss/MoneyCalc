@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.IdentificationsMapper">
+
+    <update id="updateIdentifications">
+        <![CDATA[
+        update "Identifications" i
+          ]]>
+        SET
+            <if test="identifications.name != null">
+                "name" = #{identifications.name}
+            </if>
+        where
+            i.id = (select p."identificationsId"
+                    from "User" p
+                      join "Access" a on a.id = p."accessId"
+                    where
+                      a.login = #{login});
+    </update>
+</mapper>

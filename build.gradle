@@ -1,19 +1,19 @@
 buildscript{
     ext {
         //dependency versions
-        springBootVersion = '2.0.4.RELEASE'
+        springBootVersion = '2.1.0.RELEASE'
 
     }
     dependencies {
         classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
-        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:4.6.2"
+        classpath "org.jfrog.buildinfo:build-info-extractor-gradle:latest.release"
     }
 }
 
 plugins{
     id 'java'
     id 'idea'
-    id 'org.springframework.boot' version '2.0.4.RELEASE' apply false
+    id 'org.springframework.boot' version '2.1.0.RELEASE' apply false
 }
 
 subprojects{
@@ -46,6 +46,8 @@ subprojects{
         useTestNG() {
         }
         include 'ru/strcss/projects/moneycalc/moneycalcserver/**'
+        include 'ru/strcss/projects/moneycalc/moneycalcdto/**'
+        include 'ru/strcss/projects/moneycalc/moneycalcmigrator/**'
         maxHeapSize = "512m"
     }
 
