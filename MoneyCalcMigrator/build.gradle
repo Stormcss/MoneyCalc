@@ -1,16 +1,15 @@
-group 'ru.strcss.projects.moneycalc.migrator'
+group 'ru.strcss.projects.moneycalc.moneycalcmigrator'
 version '1.0.0'
 
 apply plugin: 'org.springframework.boot'
 
 dependencies {
-    compile (project(':MoneyCalcAPI')){
-        exclude group: 'org.springframework.boot', module:'spring-boot-starter-data-jpa'
-    }
+    compile (project(':MoneyCalcDTO'))
     compile("org.springframework.boot:spring-boot-starter:${springBootVersion}")
 
     compile 'com.squareup.retrofit2:retrofit:2.3.0'
     compile 'com.squareup.retrofit2:converter-gson:2.3.0'
 
-    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
+//    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
+    testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
 }

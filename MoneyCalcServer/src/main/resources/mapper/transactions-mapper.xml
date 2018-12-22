@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.TransactionsMapper">
+
+    <resultMap id="getTransactionByIdMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction"
+               autoMapping="true">
+    </resultMap>
+    <select id="getTransactionById" resultMap="getTransactionByIdMap">
+        <![CDATA[
+
+            select t.* from "Transactions" t
+            join "User" p on t."userId" = p.id
+            join "Access" a on p."accessId" = a.id
+            where t.id = #{transactionId}
+            and a.login = #{login}
+
+        ]]>
+    </select>
+
+    <resultMap id="getTransactionsMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction"
+               autoMapping="true">
+    </resultMap>
+    <select id="getTransactions" resultMap="getTransactionsMap">
+        <![CDATA[
+            select t.* from "Transactions" t
+                            join "User" u on t."userId" = u.id
+                            join "Access" a on a.id = u."accessId"
+            where a.login = #{login}
+        ]]>
+        <if test="filter != null">
+            <if test="filter.dateFrom != null">
+                AND t.date >= #{filter.dateFrom}
+            </if>
+            <if test="filter.dateTo != null">
+                AND t.date &lt;= #{filter.dateTo}
+            </if>
+            <if test="filter.requiredSections != null and !filter.requiredSections.isEmpty()">
+                AND t."sectionId" IN
+                <foreach item="id" collection="filter.requiredSections" open="(" separator="," close=")">
+                    #{id}
+                </foreach>
+            </if>
+            <if test="filter.title != null">
+                AND t.title LIKE #{filter.title}
+            </if>
+            <if test="filter.description != null">
+                AND t.description LIKE #{filter.description}
+            </if>
+            <if test="filter.priceFrom != null">
+                AND t.sum >= #{filter.priceFrom}
+            </if>
+            <if test="filter.priceTo != null">
+                AND t.sum &lt;= #{filter.priceTo}
+            </if>
+        </if>
+        ORDER BY t."date" ASC;
+    </select>
+
+    <insert id="addTransaction" useGeneratedKeys="true" keyProperty="userId" keyColumn="userId"
+            statementType="CALLABLE">
+
+        <selectKey keyProperty="id" keyColumn="id" resultType="long" order="BEFORE">
+            select nextval('transactions_id_seq') as id from transactions_id_seq;
+        </selectKey>
+        <![CDATA[
+        insert into "Transactions"
+        VALUES (#{id},
+            #{userId},
+            #{sectionId},
+            #{date},
+            #{currency},
+            #{title},
+            #{description},
+            #{sum});
+    ]]>
+    </insert>
+
+    <update id="updateTransaction">
+        <![CDATA[
+        update "Transactions"
+          ]]>
+        <set>
+            <if test="transaction.sectionId != null">
+                "sectionId" = #{transaction.sectionId},
+            </if>
+            <if test="transaction.date != null">
+                "date" = #{transaction.date},
+            </if>
+            <if test="transaction.currency != null">
+                "currency" = #{transaction.currency},
+            </if>
+            <if test="transaction.title != null">
+                "title" = #{transaction.title},
+            </if>
+            <if test="transaction.description != null">
+                "description" = #{transaction.description},
+            </if>
+            <if test="transaction.sum != null">
+                "sum" = #{transaction.sum},
+            </if>
+        </set>
+        where
+        "userId" = (select u.id
+        from "User" u
+        join "Access" a on a.id = u."accessId"
+        where
+        a.login = #{login})
+        and id = #{transactionId}
+    </update>
+
+    <delete id="deleteTransaction">
+        <![CDATA[
+        delete
+        from "Transactions" t
+          USING "User" p, "Access" a
+        where
+            a.login = #{login}
+            AND t."userId" = p.id
+            AND a.id = p."accessId"
+            AND t.id = #{transactionId};
+        ]]>
+    </delete>
+</mapper>

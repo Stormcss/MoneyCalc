@@ -2,21 +2,20 @@ package ru.strcss.projects.moneycalc.integration;
 
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.statistics.FinanceSummaryGetContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
-import ru.strcss.projects.moneycalc.enitities.FinanceSummaryBySection;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
+import static java.util.Collections.singletonList;
 import static org.testng.Assert.assertEquals;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetToken;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
@@ -40,8 +39,10 @@ public class StatisticsControllerIT extends AbstractIT {
      */
     private final double DELTA = 2 / StrictMath.pow(10, DIGITS);
 
-    private int budgetPerSection = 5000;
-    private int numOfSections = 3;
+    private final int budgetPerSection = 5000;
+    private final int numOfSections = 3;
+    private final int IN_PERIOD_SECTION_ID = 1;
+    private final int OUT_PERIOD_SECTION_ID = 2;
     private String token;
 
     @BeforeGroups(groups = "inPeriodTest")
@@ -49,7 +50,8 @@ public class StatisticsControllerIT extends AbstractIT {
         token = savePersonGetToken(service);
 
         checkPersonsSections(numOfSections, budgetPerSection, service, token);
-        addTransactions(0, 3, 0);
+        List<Transaction> transactions = addTransactions(IN_PERIOD_SECTION_ID, 3, 0);
+        System.out.println("transactions = " + transactions);
     }
 
     @BeforeGroups(groups = "outPeriodTest")
@@ -57,7 +59,8 @@ public class StatisticsControllerIT extends AbstractIT {
         token = savePersonGetToken(service);
 
         checkPersonsSections(numOfSections, budgetPerSection, service, token);
-        addTransactions(1, 5, 2);
+        List<Transaction> transactions = addTransactions(OUT_PERIOD_SECTION_ID, 5, 2);
+        System.out.println("transactions = " + transactions);
     }
 
     /**
@@ -68,12 +71,12 @@ public class StatisticsControllerIT extends AbstractIT {
 
         LocalDate rangeFrom = generateDateMinus(ChronoUnit.DAYS, 7);
         LocalDate rangeTo = generateDateMinus(ChronoUnit.DAYS, 5);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(1));
+        FinanceSummaryFilter getContainer = new FinanceSummaryFilter(rangeFrom, rangeTo, singletonList(OUT_PERIOD_SECTION_ID));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 0, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), (double) budgetPerSection, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 0d, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), 0d, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), budgetPerSection, DELTA, "SummaryBalance is incorrect!");
     }
@@ -86,12 +89,12 @@ public class StatisticsControllerIT extends AbstractIT {
 
         LocalDate rangeFrom = generateDateMinus(ChronoUnit.DAYS, 4);
         LocalDate rangeTo = generateDateMinus(ChronoUnit.DAYS, 2);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(1));
+        FinanceSummaryFilter getContainer = new FinanceSummaryFilter(rangeFrom, rangeTo, singletonList(OUT_PERIOD_SECTION_ID));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), (double) budgetPerSection - 900, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 900d, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), 0d, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), budgetPerSection - 900, DELTA, "SummaryBalance is incorrect!");
     }
@@ -107,12 +110,12 @@ public class StatisticsControllerIT extends AbstractIT {
 
         LocalDate rangeFrom = LocalDate.now();
         LocalDate rangeTo = generateDatePlus(ChronoUnit.DAYS, rangeDays - 1);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
+        FinanceSummaryFilter getContainer = new FinanceSummaryFilter(rangeFrom, rangeTo, singletonList(IN_PERIOD_SECTION_ID));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 200, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 200, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), (double) budgetPerSection - 200, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 200d, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), round((double) budgetPerSection / rangeDays, DIGITS) - 200,
                 DELTA, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 200,
@@ -129,12 +132,12 @@ public class StatisticsControllerIT extends AbstractIT {
         int daysPassed = 1;
 
         LocalDate rangeTo = dateFrom.plus(1, ChronoUnit.MONTHS);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(dateFrom, rangeTo, Collections.singletonList(0));
+        FinanceSummaryFilter getContainer = new FinanceSummaryFilter(dateFrom, rangeTo, singletonList(IN_PERIOD_SECTION_ID));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 200, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 200, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), (double) budgetPerSection - 200, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 200d, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), round((double) budgetPerSection / rangeDays, DIGITS) - 200,
                 DELTA, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 200,
@@ -151,12 +154,12 @@ public class StatisticsControllerIT extends AbstractIT {
 
         LocalDate rangeFrom = generateDateMinus(ChronoUnit.DAYS, 1);
         LocalDate rangeTo = generateDatePlus(ChronoUnit.DAYS, 1);
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
+        FinanceSummaryFilter getContainer = new FinanceSummaryFilter(rangeFrom, rangeTo, singletonList(IN_PERIOD_SECTION_ID));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 500, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 500, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), (double) budgetPerSection - 500, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 500d, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), round((double) budgetPerSection / rangeDays, DIGITS) - 200,
                 DELTA, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 500,
@@ -174,12 +177,12 @@ public class StatisticsControllerIT extends AbstractIT {
 
         LocalDate rangeFrom = generateDateMinus(ChronoUnit.DAYS, rangeDays - 1);
         LocalDate rangeTo = LocalDate.now();
-        FinanceSummaryGetContainer getContainer = new FinanceSummaryGetContainer(rangeFrom, rangeTo, Collections.singletonList(0));
+        FinanceSummaryFilter getContainer = new FinanceSummaryFilter(rangeFrom, rangeTo, singletonList(IN_PERIOD_SECTION_ID));
 
         FinanceSummaryBySection summary = getFinanceSummaryBySection(getContainer, service, token);
 
-        assertEquals((int) summary.getMoneyLeftAll(), budgetPerSection - 900, "MoneyLeftAll is incorrect!");
-        assertEquals((int) summary.getMoneySpendAll(), 900, "MoneySpendAll is incorrect!");
+        assertEquals(summary.getMoneyLeftAll(), (double) budgetPerSection - 900, "MoneyLeftAll is incorrect!");
+        assertEquals(summary.getMoneySpendAll(), 900d, "MoneySpendAll is incorrect!");
         assertEquals(summary.getTodayBalance(), round((double) budgetPerSection / rangeDays, DIGITS) - 200,
                 DELTA, "TodayBalance is incorrect!");
         assertEquals(summary.getSummaryBalance(), round((double) budgetPerSection / rangeDays * daysPassed, DIGITS) - 900,
@@ -190,27 +193,27 @@ public class StatisticsControllerIT extends AbstractIT {
      * Add transactions for test suite
      * Both minusMax and minusMin will be used to calculate date of adding Transaction and sum for Transaction
      *
-     * @param sectionID - sectionId of added Transaction
+     * @param sectionId - sectionId of added Transaction
      * @param minusMax  - maximum sum for Transaction (will be multiplied by 100).
      * @param minusMin  - minimum sum for Transaction (will be multiplied by 100)
      * @return List of already added Transactions
      */
-    private List<Transaction> addTransactions(int sectionID, int minusMax, int minusMin) {
+    private List<Transaction> addTransactions(int sectionId, int minusMax, int minusMin) {
         List<Integer> sums = IntStream.range(0, minusMax - minusMin)
                 .map(num -> (num + 2) * 100)
                 .boxed()
                 .collect(Collectors.toList());
 
-        List<TransactionAddContainer> addContainers = new ArrayList<>();
+        List<Transaction> transactions = new ArrayList<>();
 
         for (Integer sum : sums) {
-            Transaction transaction = generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionID, sum, null);
-            addContainers.add(new TransactionAddContainer(transaction));
+            transactions.add(generateTransaction(generateDateMinus(ChronoUnit.DAYS, minusMin), sectionId, sum,
+                    null, null, null));
             minusMin++;
         }
 
-        return addContainers.stream()
-                .map(transactionAddContainer -> sendRequest(service.addTransaction(token, transactionAddContainer)).body())
+        return transactions.stream()
+                .map(transaction -> sendRequest(service.addTransaction(token, transaction)).body())
                 .filter(Objects::nonNull)
                 .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());

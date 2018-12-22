@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper">
+
+    <resultMap id="getSpendingSectionsMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection"
+               autoMapping="true">
+    </resultMap>
+    <select id="getSpendingSections" resultMap="getSpendingSectionsMap">
+        <![CDATA[
+        select * from "SpendingSection" ss
+                    join "User" u on ss."userId" = u.id
+                    join "Access" a on a.id = u."accessId"
+                    where a.login = #{login}]]>
+        <if test="filter.withNonAdded == false">
+            AND ss."isAdded" IS TRUE
+        </if>
+        <if test="filter.withRemovedOnly == false and filter.withRemoved == false">
+            AND ss."isRemoved" IS FALSE
+        </if>
+        <if test="filter.withRemovedOnly == true">
+            AND ss."isRemoved" IS TRUE
+        </if>
+        ORDER BY ss."sectionId" ASC
+    </select>
+
+    <insert id="addSpendingSection">
+    <![CDATA[
+      insert into "SpendingSection"
+      VALUES (nextval('spending_sections_id_seq'),
+          #{userId},
+          (select coalesce(max("sectionId"), 0) + 1 from "SpendingSection" where "userId" = #{userId}),
+          #{section.name},
+          true,
+          false,
+          #{section.budget},]]>
+          <if test="section.logoId == null">
+              -1);
+          </if>
+          <if test="section.logoId != null">
+              #{section.logoId});
+          </if>
+    </insert>
+
+    <update id="updateSpendingSection">
+        <![CDATA[
+        update "SpendingSection"
+          ]]>
+        <set>
+            <if test="section.name != null">
+                "name" = #{section.name},
+            </if>
+            <if test="section.isAdded != null">
+                "isAdded" = #{section.isAdded},
+            </if>
+            <if test="section.isRemoved != null">
+                "isRemoved" = #{section.isRemoved},
+            </if>
+            <if test="section.budget != null">
+                "budget" = #{section.budget},
+            </if>
+            <if test="section.logoId != null">
+                "logoId" = #{section.logoId},
+            </if>
+        </set>
+        where
+            "userId" = (select u.id
+                        from "User" u
+                          join "Access" a on a.id = u."accessId"
+                        where
+                          a.login = #{login})
+        and "sectionId" = #{sectionId};
+    </update>
+
+    <delete id="deleteSpendingSection">
+        <![CDATA[
+            update "SpendingSection"
+            SET
+                "isRemoved" = true,
+                name = '#del_' || name
+            where
+               id = (select ss.id
+                       from "SpendingSection" ss
+                              join "User" p on ss."userId" = p.id
+                              join "Access" a on a.id = p."accessId"
+                       where
+                           a.login = #{login}
+                           and ss."sectionId" = #{sectionId});
+        ]]>
+    </delete>
+
+    <resultMap id="isSpendingSectionNameNewMap" type="boolean"
+               autoMapping="true">
+    </resultMap>
+    <select id="isSpendingSectionNameNew" resultMap="isSpendingSectionNameNewMap">
+    <![CDATA[
+
+        select case when count(*) > 0 then 0 else 1 end
+        FROM "SpendingSection" ss
+        join "User" p on ss."userId" = p.id
+        join "Access" a on a.id = p."accessId"
+        where a.login = #{login} AND ss.name = #{sectionName}
+
+        ]]>
+    </select>
+
+    <resultMap id="isSpendingSectionIdExistsMap" type="boolean"
+               autoMapping="true">
+    </resultMap>
+    <select id="isSpendingSectionIdExists" resultMap="isSpendingSectionIdExistsMap">
+    <![CDATA[
+
+        select case when count(*) > 0 then 1 else 0 end
+        FROM "SpendingSection" ss
+        join "User" p on ss."userId" = p.id
+        join "Access" a on a.id = p."accessId"
+        where a.login = #{login} AND ss."sectionId" = #{sectionId}
+
+        ]]>
+    </select>
+
+    <resultMap id="getSectionBySectionIdMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection"
+               autoMapping="true">
+    </resultMap>
+    <select id="getSectionBySectionId" resultMap="getSectionBySectionIdMap">
+    <![CDATA[
+
+        select *
+        FROM "SpendingSection" ss
+        join "User" u on ss."userId" = u.id
+        join "Access" a on a.id = u."accessId"
+        where a.login = #{login} AND ss."sectionId" = #{sectionId}
+
+        ]]>
+    </select>
+
+    <resultMap id="getSectionBySectionNameMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection"
+               autoMapping="true">
+    </resultMap>
+    <select id="getSectionBySectionName" resultMap="getSectionBySectionNameMap">
+    <![CDATA[
+
+        select *
+        FROM "SpendingSection" ss
+        join "User" u on ss."userId" = u.id
+        join "Access" a on a.id = u."accessId"
+        where a.login = #{login} AND ss.name = #{name}
+
+        ]]>
+    </select>
+</mapper>

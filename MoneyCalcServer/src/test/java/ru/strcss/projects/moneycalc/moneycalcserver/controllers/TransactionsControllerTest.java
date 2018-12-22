@@ -1,23 +1,30 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.User;
-import org.testng.annotations.BeforeClass;
-import org.testng.annotations.BeforeGroups;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.test.context.TestConfiguration;
+import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Import;
+import org.springframework.test.context.ContextConfiguration;
+import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionDeleteContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionUpdateContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.PersonService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.SpendingSectionService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dbconnection.service.interfaces.TransactionsService;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.TransactionsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.mapper.UserMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.PersonServiceImpl;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.SpendingSectionServiceImpl;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.TransactionsServiceImpl;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
+import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
@@ -25,194 +32,301 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import static org.mockito.Matchers.*;
-import static org.mockito.Mockito.mock;
+import static org.hamcrest.Matchers.greaterThan;
+import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.stringContainsInOrder;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.ERROR;
+import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.DATE_SEQUENCE_INCORRECT;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_ID_NOT_EXISTS;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_DELETED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_DELETED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_FOUND;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_UPDATED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_SAVED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_SAVING_ERROR;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_UPDATED;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionList;
-import static ru.strcss.projects.moneycalc.testutils.TestUtils.assertTransactionsOrderedByDate;
+import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
 
-public class TransactionsControllerTest {
+@WebMvcTest(controllers = TransactionsController.class)
+@ContextConfiguration(classes = {TransactionsController.class, TransactionsControllerTest.Config.class})
+@Import(BaseTestContextConfiguration.class)
+public class TransactionsControllerTest extends AbstractControllerTest {
 
-    private TransactionsService transactionsService = mock(TransactionsService.class);
-    private PersonService personService = mock(PersonService.class);
-    private SpendingSectionService sectionService = mock(SpendingSectionService.class);
+    private final int TRANSACTIONS_COUNT = 5;
+    private List<Integer> sectionIds = Arrays.asList(1, 2, 3);
 
-    private TransactionsController transactionsController;
-    private List<Integer> requiredSections = Arrays.asList(0, 1);
-    private Integer transactionsCount = 50;
+    @MockBean
+    @Autowired
+    private TransactionsMapper transactionsMapper;
 
-    private LocalDate dateFrom = LocalDate.of(2017, 2, 10);
-    private LocalDate dateTo = LocalDate.of(2017, 2, 20);
+    @MockBean
+    @Autowired
+    private SpendingSectionsMapper sectionsMapper;
 
-    @BeforeClass
-    public void setUp() {
-        User user = new User("login", "password", Collections.emptyList());
-        Authentication auth = new UsernamePasswordAuthenticationToken(user, null);
-        SecurityContextHolder.getContext().setAuthentication(auth);
-    }
+    @MockBean
+    @Autowired
+    private UserMapper userMapper;
 
-    @BeforeGroups(groups = {"successfulScenario", "incorrectContainers"})
-    public void prepare_successfulScenario_incorrectContainers() {
-        List<Transaction> transactionList = generateTransactionList(transactionsCount, requiredSections);
-        transactionList.get(1).setDate(LocalDate.now().minus(1, ChronoUnit.DAYS));
+    @MockBean
+    @Autowired
+    private RegistryMapper registryMapper;
 
-        when(transactionsService.getTransactionsByLogin(anyString(), any(LocalDate.class), any(LocalDate.class),
-                anyListOf(Integer.class))).thenReturn(transactionList);
-        when(transactionsService.getTransactionById(anyInt()))
-                .thenReturn(generateTransaction());
-        when(transactionsService.addTransaction(anyInt(), any(Transaction.class)))
+    @BeforeMethod
+    public void prepareTransactionsSuccessfulScenario() {
+        List<Transaction> transactionList = generateTransactionList(TRANSACTIONS_COUNT, sectionIds);
+
+        when(transactionsMapper.getTransactions(anyString(), eq(null)))
+                .thenReturn(transactionList);
+        when(transactionsMapper.getTransactions(anyString(), any(TransactionsSearchFilter.class)))
+                .thenReturn(transactionList);
+        when(userMapper.getUserIdByLogin(anyString()))
+                .thenReturn(1L);
+        when(sectionsMapper.isSpendingSectionIdExists(anyString(), anyInt()))
+                .thenReturn(true);
+        when(transactionsMapper.addTransaction(any(Transaction.class)))
+                .thenReturn(1L);
+        when(transactionsMapper.updateTransaction(anyString(), anyLong(), any(Transaction.class)))
                 .thenReturn(1);
-        when(transactionsService.deleteTransaction(any(Transaction.class)))
-                .thenReturn(true);
-        when(transactionsService.updateTransaction(any(Transaction.class)))
-                .thenReturn(true);
-        when(sectionService.isSpendingSectionIdExists(anyInt(), anyInt()))
-                .thenReturn(true);
-
-        transactionsController = new TransactionsController(transactionsService, sectionService, personService);
+        when(transactionsMapper.getTransactionById(anyString(), anyLong()))
+                .thenReturn(generateTransaction());
+        when(transactionsMapper.deleteTransaction(anyString(), anyLong()))
+                .thenReturn(1);
     }
 
-    @BeforeGroups(groups = "failedScenario")
-    public void prepare_failedScenario() {
-        transactionsController = new TransactionsController(transactionsService, sectionService, personService);
+    @Test
+    void shouldGetTransactionsWithNoFilter() throws Exception {
+        mockMvc.perform(get("/api/transactions")
+                .with(user(USER_LOGIN)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
+                .andExpect(jsonPath("$.payload[*]", hasSize(TRANSACTIONS_COUNT)));
     }
 
-    @Test(groups = "successfulScenario")
-    public void testGetTransactions() {
-        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer(dateFrom, dateTo, requiredSections));
+    @Test
+    void shouldGetTransactionsWithFilter() throws Exception {
+        TransactionsSearchFilter searchFilter = new TransactionsSearchFilter();
+        searchFilter.setDateFrom(LocalDate.now().minus(1, ChronoUnit.DAYS));
+        searchFilter.setDateTo(LocalDate.now());
 
-        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, getTransactionsRs.getBody().getMessage());
-        assertEquals(getTransactionsRs.getBody().getPayload().size(), (int) transactionsCount, getTransactionsRs.getBody().getMessage());
-        assertTrue(assertTransactionsOrderedByDate(getTransactionsRs.getBody().getPayload()), "Transactions are not ordered by date!");
+        mockMvc.perform(post("/api/transactions/getFiltered")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(searchFilter)))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
+                .andExpect(jsonPath("$.payload[*]", hasSize(TRANSACTIONS_COUNT)));
     }
 
-    @Test(groups = "successfulScenario")
-    public void testAddTransaction() {
-        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs = transactionsController.addTransaction(
-                new TransactionAddContainer(generateTransaction()));
-
-        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, addTransactionsRs.getBody().getMessage());
+    @Test
+    void shouldAddTransaction() throws Exception {
+        mockMvc.perform(post("/api/transactions")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(generateTransaction("title", "desc"))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
+                .andExpect(jsonPath("$.message", is(TRANSACTION_SAVED)))
+                .andExpect(jsonPath("$.payload.title", is("title")))
+                .andExpect(jsonPath("$.payload.description", is("desc")));
     }
 
-    @Test(groups = "successfulScenario")
-    public void testUpdateTransaction() {
-        ResponseEntity<MoneyCalcRs<Transaction>> updateTransactionsRs = transactionsController.updateTransaction(
-                new TransactionUpdateContainer(33, generateTransaction()));
-
-        assertEquals(updateTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, updateTransactionsRs.getBody().getMessage());
+    @Test
+    void shouldUpdateTransaction() throws Exception {
+        mockMvc.perform(put("/api/transactions")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
+                .andExpect(jsonPath("$.message", is(TRANSACTION_UPDATED)))
+                .andExpect(jsonPath("$.payload[*]", hasSize(greaterThan(0))));
     }
 
-    @Test(groups = "successfulScenario")
-    public void testDeleteTransaction() {
-        ResponseEntity<MoneyCalcRs<Void>> deleteTransactionsRs =
-                transactionsController.deleteTransaction(new TransactionDeleteContainer(2));
-
-        assertEquals(deleteTransactionsRs.getBody().getServerStatus(), Status.SUCCESS, deleteTransactionsRs.getBody().getMessage());
+    @Test
+    void shouldDeleteTransaction() throws Exception {
+        mockMvc.perform(delete("/api/transactions/{transactionId}", 1)
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
+                .andExpect(jsonPath("$.message", is(TRANSACTION_DELETED)));
     }
 
-    @Test(groups = "incorrectContainers")
-    public void testGetTransactions_emptyRangeFrom() {
-        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer(null, dateTo, requiredSections));
-
-        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
+    @Test
+    void shouldNotGetTransactionsWithFilter_rangeIsEmpty() throws Exception {
+        mockMvc.perform(post("/api/transactions/getFiltered")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(new TransactionsSearchFilter())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                        Arrays.asList("Required fields are incorrect:", "dateFrom is empty", "dateTo is empty")
+                )));
     }
 
-    @Test(groups = "incorrectContainers")
-    public void testGetTransactions_emptyRangeTo() {
-        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer(dateFrom, null, requiredSections));
+    @Test
+    void shouldNotGetTransactionsWithFilter_dateSequenceInvalid() throws Exception {
+        TransactionsSearchFilter searchFilter = new TransactionsSearchFilter();
+        searchFilter.setDateFrom(LocalDate.now());
+        searchFilter.setDateTo(LocalDate.now().minus(1, ChronoUnit.DAYS));
 
-        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
+        mockMvc.perform(post("/api/transactions/getFiltered")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(searchFilter)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", is(DATE_SEQUENCE_INCORRECT)));
     }
 
-    @Test(groups = "incorrectContainers", enabled = false)
-    public void testGetTransactions_emptySectionsId() {
-        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer(dateFrom, dateTo, null));
-
-        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
+    @Test(dataProvider = "incorrectTransactionAddDataProvider")
+    void shouldNotAddTransaction_incorrectData(Transaction transaction, String expectedHint) throws Exception {
+        mockMvc.perform(post("/api/transactions")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(transaction)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                        Arrays.asList("Required fields are incorrect:", expectedHint)
+                )));
     }
 
-    @Test(groups = "incorrectContainers")
-    public void testGetTransactions_RangeFrom_after_RangeTo() {
-        ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactionsRs = transactionsController.getTransactions(
-                new TransactionsSearchContainer(dateTo, dateFrom, requiredSections));
-
-        assertEquals(getTransactionsRs.getBody().getServerStatus(), Status.ERROR, getTransactionsRs.getBody().getMessage());
-    }
-
-    @Test(groups = "incorrectContainers")
-    public void testAddTransaction_emptyTransaction() {
-        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs = transactionsController.addTransaction(
-                new TransactionAddContainer(Transaction.builder().build()));
-
-        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.ERROR, addTransactionsRs.getBody().getMessage());
-    }
-
-    @Test(groups = "incorrectContainers")
-    public void testAddTransaction_Transaction_emptyFields() {
-        Transaction transaction = Transaction.builder()
-                .date(dateTo)
-                .currency("RUR")
-                .sectionId(0)
-                .build();
-
-        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs =
-                transactionsController.addTransaction(new TransactionAddContainer(transaction));
-
-        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.ERROR, addTransactionsRs.getBody().getMessage());
-    }
-
-    @Test(groups = "incorrectContainers")
-    public void testUpdateTransaction_emptyId() {
-        ResponseEntity<MoneyCalcRs<Transaction>> updateTransactionsRs = transactionsController.updateTransaction(
-                new TransactionUpdateContainer(null, generateTransaction()));
-
-        assertEquals(updateTransactionsRs.getBody().getServerStatus(), Status.ERROR, updateTransactionsRs.getBody().getMessage());
-    }
-
-    @Test(groups = "incorrectContainers")
-    public void testUpdateTransaction_emptyTransaction() {
-        ResponseEntity<MoneyCalcRs<Transaction>> updateTransactionsRs = transactionsController.updateTransaction(
-                new TransactionUpdateContainer(2, null));
-
-        assertEquals(updateTransactionsRs.getBody().getServerStatus(), Status.ERROR, updateTransactionsRs.getBody().getMessage());
-    }
-
-    @Test(groups = "incorrectContainers")
-    public void testDeleteTransaction_emptyId() {
-        ResponseEntity<MoneyCalcRs<Void>> deleteTransactionsRs = transactionsController.deleteTransaction(
-                new TransactionDeleteContainer(null));
-
-        assertEquals(deleteTransactionsRs.getBody().getServerStatus(), Status.ERROR, deleteTransactionsRs.getBody().getMessage());
-    }
-
-    @Test(groups = "failedScenario")
-    public void testAddTransaction_missingSectionId() {
-        when(sectionService.isSpendingSectionIdExists(anyInt(), anyInt()))
+    @Test
+    void shouldNotAddTransaction_nonexistentSectionId() throws Exception {
+        when(sectionsMapper.isSpendingSectionIdExists(anyString(), anyInt()))
                 .thenReturn(false);
-        transactionsController = new TransactionsController(transactionsService, sectionService, personService);
+        int sectionId = 1;
 
-        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs = transactionsController.addTransaction(
-                new TransactionAddContainer(generateTransaction()));
-
-        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.ERROR, addTransactionsRs.getBody().getMessage());
+        mockMvc.perform(post("/api/transactions")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(generateTransaction(sectionId))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", is(fillLog(SPENDING_SECTION_ID_NOT_EXISTS, String.valueOf(sectionId)))));
     }
 
-    @Test(groups = "failedScenario")
-    public void testUpdateTransaction_incorrectTransaction() {
+    @Test
+    void shouldNotAddTransaction_addingFailed() throws Exception {
+        when(transactionsMapper.addTransaction(any(Transaction.class)))
+                .thenReturn(null);
+
+        mockMvc.perform(post("/api/transactions")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(generateTransaction())))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", is(TRANSACTION_SAVING_ERROR)));
+    }
+
+    @Test
+    void shouldNotUpdateTransaction_incorrectData() throws Exception {
         Transaction transaction = generateTransaction();
-        transaction.setSectionId(null);
-        ResponseEntity<MoneyCalcRs<Transaction>> addTransactionsRs = transactionsController.addTransaction(
-                new TransactionAddContainer(transaction));
+        transaction.setSum(null);
 
-        assertEquals(addTransactionsRs.getBody().getServerStatus(), Status.ERROR, addTransactionsRs.getBody().getMessage());
+        mockMvc.perform(put("/api/transactions")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(new TransactionUpdateContainer(1L, transaction))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                        Collections.singletonList("TRANSACTION has incorrect fields")
+                )));
     }
 
+    @Test
+    void shouldNotUpdateTransaction_updatingFailed() throws Exception {
+        when(transactionsMapper.updateTransaction(anyString(), anyLong(), any(Transaction.class)))
+                .thenReturn(0);
 
+        mockMvc.perform(put("/api/transactions")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", is(TRANSACTION_NOT_UPDATED)));
+    }
+
+    @Test
+    void shouldNotDeleteTransaction_idNotFound() throws Exception {
+        when(transactionsMapper.getTransactionById(anyString(), anyLong()))
+                .thenReturn(null);
+
+        mockMvc.perform(delete("/api/transactions/{transactionId}", 1)
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", is(TRANSACTION_NOT_FOUND)));
+    }
+
+    @Test
+    void shouldNotDeleteTransaction_deletionFailed() throws Exception {
+        when(transactionsMapper.deleteTransaction(anyString(), anyLong()))
+                .thenReturn(0);
+
+        mockMvc.perform(delete("/api/transactions/{transactionId}", 1)
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
+                .andExpect(jsonPath("$.message", is(TRANSACTION_NOT_DELETED)));
+    }
+
+    @DataProvider(name = "incorrectTransactionAddDataProvider")
+    public Object[][] dataProvider() {
+        Transaction nullSum = generateTransaction();
+        nullSum.setSum(null);
+        Transaction zeroSum = generateTransaction();
+        zeroSum.setSum(0);
+        Transaction nullSectionId = generateTransaction();
+        nullSectionId.setSectionId(null);
+        return new Object[][]{{nullSum, "Transaction sum can not be empty or 0!"},
+                {zeroSum, "Transaction sum can not be empty or 0!"}, {nullSectionId, "sectionId can not be empty or < 0!"}};
+    }
+
+    @TestConfiguration
+    static class Config {
+        @Bean
+        TransactionsService transactionsService(TransactionsMapper transactionsMapper, MetricsService metricsService) {
+            return new TransactionsServiceImpl(transactionsMapper, metricsService);
+        }
+
+        @Bean
+        SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper,
+                                              MetricsService metricsService) {
+            return new SpendingSectionServiceImpl(sectionsMapper, registryMapper, metricsService);
+        }
+
+        @Bean
+        PersonService personService(UserMapper userMapper) {
+            return new PersonServiceImpl(userMapper);
+        }
+    }
 }

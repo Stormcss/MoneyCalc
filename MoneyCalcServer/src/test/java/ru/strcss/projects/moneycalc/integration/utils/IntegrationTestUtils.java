@@ -4,23 +4,19 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import retrofit2.Call;
 import retrofit2.Response;
-import ru.strcss.projects.moneycalc.dto.Credentials;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.settings.SpendingSectionDeleteContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionAddContainer;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.Access;
-import ru.strcss.projects.moneycalc.enitities.Person;
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.testutils.Generator;
 
 import java.io.IOException;
 import java.time.LocalDate;
-import java.util.Arrays;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -39,7 +35,7 @@ public class IntegrationTestUtils {
     }
 
     public static <T> Response<MoneyCalcRs<T>> sendRequest(Call<MoneyCalcRs<T>> call, Status expectedStatus) {
-        Response<MoneyCalcRs<T>> response = null;
+        Response<MoneyCalcRs<T>> response;
         try {
             response = call.execute();
         } catch (IOException e) {
@@ -83,7 +79,7 @@ public class IntegrationTestUtils {
     /**
      * Save Person with random login and return Token
      *
-     * @param service - Retrofit configured service
+     * @param service - Retrofit configured services
      * @return token for created and logged in person
      */
     public static String savePersonGetToken(MoneyCalcClient service) {
@@ -96,7 +92,7 @@ public class IntegrationTestUtils {
     /**
      * Save Person with random login and return login with token
      *
-     * @param service - Retrofit configured service
+     * @param service - Retrofit configured services
      * @return login and token for created and logged in person
      */
     public static Pair<String, String> savePersonGetLoginAndToken(MoneyCalcClient service) {
@@ -110,26 +106,21 @@ public class IntegrationTestUtils {
     /**
      * Save Person with random login and return container with Entity IDs
      *
-     * @param service - Retrofit configured service
+     * @param service - Retrofit configured services
      */
-    public static Pair<IdsContainer, String> savePersonGetIdsAndToken(MoneyCalcClient service) {
+    public static Pair<Person, String> savePersonGetIdsAndToken(MoneyCalcClient service) {
         Credentials credentials = generateCredentials(Generator.UUID());
         Person registerRs = sendRequest(service.registerPerson(credentials), Status.SUCCESS).body().getPayload();
 
-        IdsContainer idsContainer = IdsContainer.builder()
-                .personId(registerRs.getId())
-                .accessId(registerRs.getAccessId())
-                .settingsId(registerRs.getSettingsId())
-                .identificationsId(registerRs.getIdentificationsId())
-                .build();
+        Person person = new Person(registerRs.getId(), registerRs.getAccessId(), registerRs.getIdentificationsId(), registerRs.getSettingsId());
 
-        return new Pair<>(idsContainer, getToken(service, credentials.getAccess()));
+        return new Pair<>(person, getToken(service, credentials.getAccess()));
     }
 
     /**
      * Save Person with random login and return credentials with token
      *
-     * @param service - Retrofit configured service
+     * @param service - Retrofit configured services
      * @return Credentials and token for created and logged in person
      */
     public static Pair<Credentials, String> savePersonGetCredentialsAndToken(MoneyCalcClient service) {
@@ -155,9 +146,9 @@ public class IntegrationTestUtils {
      * @param spendingSection - added SpendingSection
      * @return added Spending Section Id
      */
-    public static int addSpendingSectionGetSectionId(MoneyCalcClient service, String token, SpendingSection spendingSection) {
+    public static Integer addSpendingSectionGetSectionId(MoneyCalcClient service, String token, SpendingSection spendingSection) {
         MoneyCalcRs<List<SpendingSection>> addSectionRs =
-                sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
+                sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
 
         return addSectionRs.getPayload().stream().filter(section -> section.getName().equals(spendingSection.getName()))
                 .findAny()
@@ -171,7 +162,7 @@ public class IntegrationTestUtils {
      * @return income Rs object
      */
     public static MoneyCalcRs<List<SpendingSection>> addSpendingSectionGetRs(MoneyCalcClient service, String token, SpendingSection spendingSection) {
-        return sendRequest(service.addSpendingSection(token, new SpendingSectionAddContainer(spendingSection)), Status.SUCCESS).body();
+        return sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
     }
 
     /**
@@ -182,9 +173,7 @@ public class IntegrationTestUtils {
      * @return income Rs object
      */
     public static MoneyCalcRs<List<SpendingSection>> deleteSpendingSectionByIdGetRs(MoneyCalcClient service, String token, Integer id) {
-        SpendingSectionDeleteContainer deleteContainerById =
-                new SpendingSectionDeleteContainer(id);
-        return sendRequest(service.deleteSpendingSection(token, deleteContainerById), Status.SUCCESS).body();
+        return sendRequest(service.deleteSpendingSection(token, id), Status.SUCCESS).body();
     }
 
     /**
@@ -195,27 +184,30 @@ public class IntegrationTestUtils {
      * @return income Rs object
      */
     public static MoneyCalcRs<Transaction> addTransaction(MoneyCalcClient service, String token, Transaction transaction) {
-        TransactionAddContainer transactionContainer = new TransactionAddContainer(transaction);
-        return sendRequest(service.addTransaction(token, transactionContainer), Status.SUCCESS).body();
+        return sendRequest(service.addTransaction(token, transaction), Status.SUCCESS).body();
     }
 
     /**
-     * Get Transactions and return Rs from the server
+     * Get Transactions with applied filter
      */
-    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
-                                                                 LocalDate dateTo, Integer sectionId) {
-        List<Integer> requiredSections = Arrays.asList(sectionId);
-        TransactionsSearchContainer container = new TransactionsSearchContainer(dateFrom, dateTo, requiredSections);
-//        TransactionsSearchContainer container = new TransactionsSearchContainer(localDate2String(dateFrom),
-//                localDate2String(dateTo), requiredSections);
-        return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
+    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, TransactionsSearchFilter
+            searchContainer) {
+        return sendRequest(service.getTransactions(token, searchContainer), Status.SUCCESS).body();
+    }
+
+    /**
+     * Get Transactions without filter
+     */
+    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token) {
+        return sendRequest(service.getTransactions(token), Status.SUCCESS).body();
     }
 
     public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
                                                                  LocalDate dateTo, List<Integer> sectionIds) {
-        TransactionsSearchContainer container = new TransactionsSearchContainer(dateFrom, dateTo, sectionIds);
-//        TransactionsSearchContainer container = new TransactionsSearchContainer(localDate2String(dateFrom),
-//                localDate2String(dateTo), sectionIds);
+        TransactionsSearchFilter container = new TransactionsSearchFilter();
+        container.setDateFrom(dateFrom);
+        container.setDateTo(dateTo);
+        container.setRequiredSections(sectionIds);
         return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
     }
 }

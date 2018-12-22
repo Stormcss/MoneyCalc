@@ -1,23 +1,19 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.MultiValueMap;
-import ru.strcss.projects.moneycalc.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.dto.Status;
-import ru.strcss.projects.moneycalc.dto.crudcontainers.transactions.TransactionsSearchContainer;
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class ControllerUtils {
 
     public static <E> ResponseEntity<MoneyCalcRs<E>> responseSuccess(String message, E payload) {
@@ -44,45 +40,16 @@ public class ControllerUtils {
         return new ResponseEntity<>(new MoneyCalcRs<>(Status.ERROR, null, message), headers, httpStatus);
     }
 
-    public static String localDate2String(LocalDate date) {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        return date.format(formatter);
-    }
-
-    public static LocalDate string2LocalDate(String date) {
-        return LocalDate.parse(date, DateTimeFormatter.ISO_LOCAL_DATE);
-    }
-
     public static String fillLog(String template, String... data) {
         if (data.length == 0)
             return template;
         return String.format(template, data);
     }
 
-    public static List<SpendingSection> sortSpendingSectionList(List<SpendingSection> incomeList) {
-        List<SpendingSection> spendingSectionList = new ArrayList<>(incomeList);
-        spendingSectionList.sort(Comparator.comparingInt(SpendingSection::getId));
-
-        return spendingSectionList;
-    }
-
-    public static List<Transaction> sortTransactionList(List<Transaction> incomeList) {
-        List<Transaction> transactionList = new ArrayList<>(incomeList);
-        transactionList.sort(Comparator.comparing(Transaction::getDate));
-//        transactionList.sort(Comparator.comparing(tr -> string2LocalDate(tr.getDate())));
-        return transactionList;
-    }
-
     public static void fillDefaultValues(Transaction transaction) {
         if (transaction.getDate() == null)
             transaction.setDate(LocalDate.now());
-//            transaction.setDate(localDate2String(LocalDate.now()));
         if (transaction.getCurrency() == null)
             transaction.setCurrency("RUR");
-    }
-
-    public static void fillDefaultValues(TransactionsSearchContainer searchContainer) {
-        if (searchContainer.getRequiredSections() == null)
-            searchContainer.setRequiredSections(Collections.emptyList());
     }
 }

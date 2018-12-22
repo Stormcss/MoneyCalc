@@ -1,14 +1,25 @@
 package ru.strcss.projects.moneycalc.testutils;
 
-import ru.strcss.projects.moneycalc.enitities.SpendingSection;
-import ru.strcss.projects.moneycalc.enitities.Transaction;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.testng.Assert.assertTrue;
 
 public class TestUtils {
+    private static final ObjectMapper OBJECT_MAPPER = new ObjectMapper();
+
+    static {
+        OBJECT_MAPPER.registerModule(new JavaTimeModule());
+        OBJECT_MAPPER.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+    }
+
     /**
      * Asserting that List is ordered ASC by Id
      */
@@ -45,11 +56,22 @@ public class TestUtils {
     }
 
     /**
-     *  Return max Spending Section Id
+     * Return max Spending Section Id
      */
     public static int getMaxSpendingSectionId(List<SpendingSection> spendingSections) {
         return spendingSections.stream().map(SpendingSection::getSectionId).mapToInt(Integer::intValue).max().orElse(-1);
     }
 
-
+    /**
+     * Serialize object to json
+     */
+    public static String serializeToJson(Object obj) {
+        String json;
+        try {
+            json = OBJECT_MAPPER.writeValueAsString(obj);
+        } catch (IOException e) {
+            throw new RuntimeException("Serialization has failed", e);
+        }
+        return json;
+    }
 }
