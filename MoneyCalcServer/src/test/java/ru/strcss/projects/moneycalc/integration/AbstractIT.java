@@ -21,15 +21,7 @@ import java.time.LocalDate;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {
         MoneyCalcApplication.class
-//        ServletWebServerFactoryAutoConfiguration.class
 })
-//@TestPropertySource(properties = {
-//        "spring.datasource.username=stormcss_mnclc_t",
-//        "spring.datasource.url=jdbc:postgresql://pg.sweb.ru:5432/stormcss_mnclc_t",
-////        "spring.datasource.url=jdbc:h2:mem:test",
-//        "spring.jpa.database-platform=org.hibernate.dialect.PostgreSQL9Dialect",
-//        "spring.datasource.password=M0Nk3yc@lCdb"
-//})
 public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
 
     @LocalServerPort
