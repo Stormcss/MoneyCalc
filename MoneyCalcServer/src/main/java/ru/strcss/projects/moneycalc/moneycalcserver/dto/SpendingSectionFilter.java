@@ -12,7 +12,7 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class SpendingSectionFilter {
-    boolean withNonAdded;
-    boolean withRemoved;
-    boolean withRemovedOnly;
+    private boolean withNonAdded;
+    private boolean withRemoved;
+    private boolean withRemovedOnly;
 }

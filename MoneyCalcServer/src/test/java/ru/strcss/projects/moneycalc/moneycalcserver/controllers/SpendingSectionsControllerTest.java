@@ -179,7 +179,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
      * Testing case when spending section is updated but name remains old
      */
     @Test
-    void shouldUpdateSpendingSection_oldName() throws Exception {
+    void shouldUpdateSpendingSectionWithOldName() throws Exception {
         String sectionName = "name";
 
         List<SpendingSection> spendingSections = generateSpendingSectionList(5, true, false, false);
@@ -202,7 +202,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
      * Testing case when spending section is updated but name is not set at all
      */
     @Test
-    void shouldUpdateSpendingSection_nameNotSet() throws Exception {
+    void shouldUpdateSpendingSectionWhenNameNotSet() throws Exception {
         SpendingSection spendingSection = generateSpendingSection();
         spendingSection.setName(null);
 
@@ -228,7 +228,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     }
 
     @Test(dataProvider = "incorrectSectionAddDataProvider")
-    void shouldNotAddSpendingSection_incorrectData(SpendingSection section, String expectedHint) throws Exception {
+    void shouldNotAddSpendingSectionWhenIncorrectData(SpendingSection section, String expectedHint) throws Exception {
         String content = serializeToJson(section);
 
         mockMvc.perform(post("/api/spendingSections")
@@ -243,7 +243,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotAddSpendingSection_existingName() throws Exception {
+    void shouldNotAddSpendingSectionWhenExistingName() throws Exception {
         when(sectionsMapper.isSpendingSectionNameNew(anyString(), anyString()))
                 .thenReturn(false);
         String sectionName = "name";
@@ -258,7 +258,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotAddSpendingSection_addingFailed() throws Exception {
+    void shouldNotAddSpendingSectionWhenAddingFailed() throws Exception {
         when(sectionsMapper.addSpendingSection(anyLong(), any(SpendingSection.class)))
                 .thenReturn(0);
 
@@ -272,7 +272,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotUpdateSpendingSection_nonexistentSectionId() throws Exception {
+    void shouldNotUpdateSpendingSectionWithNonexistentSectionId() throws Exception {
         when(sectionsMapper.isSpendingSectionIdExists(anyString(), anyInt()))
                 .thenReturn(false);
         int sectionId = 1;
@@ -287,7 +287,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotUpdateSpendingSection_sectionIsEmpty() throws Exception {
+    void shouldNotUpdateSpendingSectionWithEmptySection() throws Exception {
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
@@ -298,7 +298,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotUpdateSpendingSection_disallowedName() throws Exception {
+    void shouldNotUpdateSpendingSectionWithDisallowedName() throws Exception {
         String sectionName = "name";
 
         List<SpendingSection> spendingSections = generateSpendingSectionList(5, true, false, false);
@@ -317,7 +317,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotUpdateSpendingSection_updatingFailed() throws Exception {
+    void shouldNotUpdateSpendingSectionWhenUpdatingFailed() throws Exception {
         when(sectionsMapper.updateSpendingSection(anyString(), anyInt(), any(SpendingSection.class)))
                 .thenReturn(0);
 
@@ -331,7 +331,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotDeleteSpendingSection_deletingFailed() throws Exception {
+    void shouldNotDeleteSpendingSectionWhenDeletingFailed() throws Exception {
         when(sectionsMapper.deleteSpendingSection(anyString(), anyInt()))
                 .thenReturn(0);
 

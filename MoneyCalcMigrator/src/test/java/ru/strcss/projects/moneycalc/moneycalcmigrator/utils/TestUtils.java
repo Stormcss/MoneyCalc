@@ -23,7 +23,7 @@ public class TestUtils {
 
             @Override
             public void enqueue(Callback<T> callback) {
-
+                throw new UnsupportedOperationException("Not implemented");
             }
 
             @Override
@@ -33,7 +33,7 @@ public class TestUtils {
 
             @Override
             public void cancel() {
-
+                throw new UnsupportedOperationException("Not implemented");
             }
 
             @Override
@@ -43,12 +43,12 @@ public class TestUtils {
 
             @Override
             public Call<T> clone() {
-                return null;
+                throw new UnsupportedOperationException("Not implemented");
             }
 
             @Override
             public Request request() {
-                return null;
+                throw new UnsupportedOperationException("Not implemented");
             }
         };
     }

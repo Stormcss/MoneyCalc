@@ -31,7 +31,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.TransactionLegacy;
  */
 public class PojoTest {
     @Test
-    void shouldHavePojoStructureAndBehavior() {
+    public void shouldHavePojoStructureAndBehavior() {
         PojoTestUtils.validateAccessors(Access.class);
         PojoTestUtils.validateAccessors(AccessLegacy.class);
         PojoTestUtils.validateAccessors(FinanceSummaryBySection.class);

@@ -11,7 +11,6 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -120,13 +119,11 @@ public class Generator {
     public static List<SpendingSection> generateSpendingSectionList(int count, boolean isNonAdded,
                                                                     boolean isRemoved,
                                                                     boolean isRemovedOnly) {
-        List<SpendingSection> spendingSections = new ArrayList<>(count);
 
-        for (int id = 0; id < count; id++) {
-            SpendingSection section = generateSpendingSection(null, id + 1, (long) id, null,
-                    null, true, isRemovedOnly);
-            spendingSections.add(section);
-        }
+        List<SpendingSection> spendingSections = IntStream.range(0, count)
+                .mapToObj(id -> generateSpendingSection(null, id + 1, (long) id, null,
+                        null, true, isRemovedOnly))
+                .collect(Collectors.toList());
 
         if (isNonAdded)
             spendingSections.get(spendingSections.size() - 1).setIsAdded(false);
