@@ -82,12 +82,12 @@ public class FileReaderImpl implements FileReader {
 
     private PairFilesContainer generateContainer(String type, PairFilesContainer container, String path) {
         if (container == null) {
-            if (type.equals("Data"))
+            if ("Data".equals(type))
                 container = new PairFilesContainer(path, null);
             else
                 container = new PairFilesContainer(null, path);
         } else {
-            if (type.equals("Data"))
+            if ("Data".equals(type))
                 container = new PairFilesContainer(path, container.getPathInfoFile());
             else
                 container = new PairFilesContainer(container.getPathDataFile(), path);

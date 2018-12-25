@@ -85,10 +85,6 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     @Autowired
     private UserMapper userMapper;
 
-    @MockBean
-    @Autowired
-    private RegistryMapper registryMapper;
-
     @BeforeMethod
     public void prepareTransactionsSuccessfulScenario() {
         List<Transaction> transactionList = generateTransactionList(TRANSACTIONS_COUNT, sectionIds);
