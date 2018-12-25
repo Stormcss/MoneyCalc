@@ -84,6 +84,10 @@ public class StatisticsControllerTest extends AbstractControllerTest {
 
     @MockBean
     @Autowired
+    private RegistryMapper registryMapper;
+
+    @MockBean
+    @Autowired
     private SummaryStatisticsHandler statisticsHandler;
 
     @BeforeMethod
