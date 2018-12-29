@@ -43,7 +43,7 @@ public class TransactionsControllerIT extends AbstractIT {
      * Checks for correct Transactions returning for specific range
      */
     @Test
-    public void getTransaction_RangeChecks() {
+    public void getTransactionRangeChecks() {
         String token = savePersonGetToken(service);
 
         //Adding new Transactions
@@ -70,7 +70,7 @@ public class TransactionsControllerIT extends AbstractIT {
      * Checks for correct Transactions returning for requested sections
      */
     @Test
-    public void getTransaction_sectionFilter() {
+    public void getTransactionSectionFilter() {
         int numOfAddedTransactionsPerSection = 5;
         int numOfSections = 2; //currently Person by default has only 2 sections
 
@@ -127,7 +127,7 @@ public class TransactionsControllerIT extends AbstractIT {
      * Saving new Transaction with nonexistent sectionID
      */
     @Test
-    public void saveNewTransaction_nonExistentSectionID() {
+    public void saveNewTransactionNonExistentSectionID() {
         String token = savePersonGetToken(service);
 
         Response<MoneyCalcRs<Transaction>> addTransactionRs = sendRequest(service.addTransaction(token,
@@ -241,7 +241,7 @@ public class TransactionsControllerIT extends AbstractIT {
     }
 
     @Test
-    public void getTransaction_filterByTitle() {
+    public void getTransactionFilterByTitle() {
         int numOfAddedTransactions = 5;
         String token = savePersonGetToken(service);
 
@@ -264,7 +264,7 @@ public class TransactionsControllerIT extends AbstractIT {
     }
 
     @Test
-    public void getTransaction_filterByDescription() {
+    public void getTransactionFilterByDescription() {
         int numOfAddedTransactions = 5;
         String token = savePersonGetToken(service);
 
@@ -287,7 +287,7 @@ public class TransactionsControllerIT extends AbstractIT {
     }
 
     @Test
-    public void getTransaction_filterByPrice() {
+    public void getTransactionFilterByPrice() {
         int numOfAddedTransactions = 5;
         String token = savePersonGetToken(service);
 

@@ -46,7 +46,7 @@ public class StatisticsControllerIT extends AbstractIT {
     private String token;
 
     @BeforeGroups(groups = "inPeriodTest")
-    public void preparePerson_InPeriodTest() {
+    public void preparePersonInPeriodTest() {
         token = savePersonGetToken(service);
 
         checkPersonsSections(numOfSections, budgetPerSection, service, token);
@@ -55,7 +55,7 @@ public class StatisticsControllerIT extends AbstractIT {
     }
 
     @BeforeGroups(groups = "outPeriodTest")
-    public void preparePerson_OutPeriodTest() {
+    public void preparePersonOutPeriodTest() {
         token = savePersonGetToken(service);
 
         checkPersonsSections(numOfSections, budgetPerSection, service, token);
@@ -67,7 +67,7 @@ public class StatisticsControllerIT extends AbstractIT {
      * Test case when today is before the requested period
      */
     @Test(groups = {"outPeriodTest"})
-    public void singleSection_outPeriod_beforePeriod() {
+    public void singleSectionOutPeriodBeforePeriod() {
 
         LocalDate rangeFrom = generateDateMinus(ChronoUnit.DAYS, 7);
         LocalDate rangeTo = generateDateMinus(ChronoUnit.DAYS, 5);
@@ -85,7 +85,7 @@ public class StatisticsControllerIT extends AbstractIT {
      * Test case when today is after the requested period
      */
     @Test(groups = {"outPeriodTest"})
-    public void singleSection_outPeriod_afterPeriod() {
+    public void singleSectionOutPeriodAfterPeriod() {
 
         LocalDate rangeFrom = generateDateMinus(ChronoUnit.DAYS, 4);
         LocalDate rangeTo = generateDateMinus(ChronoUnit.DAYS, 2);
@@ -104,7 +104,7 @@ public class StatisticsControllerIT extends AbstractIT {
      * Test case when today is the start of period of 3 days
      */
     @Test(groups = {"inPeriodTest"})
-    public void singleSection_inPeriod_startOfPeriod() {
+    public void singleSectionInPeriodStartOfPeriod() {
         int rangeDays = 3;
         int daysPassed = 1;
 
@@ -126,7 +126,7 @@ public class StatisticsControllerIT extends AbstractIT {
      * Test case when today is the start of period of 1 month
      */
     @Test(groups = {"inPeriodTest"})
-    public void singleSection_inPeriod_startOfPeriod_1month() {
+    public void singleSectionInPeriodStartOfPeriod1month() {
         LocalDate dateFrom = LocalDate.now();
         long rangeDays = ChronoUnit.DAYS.between(dateFrom, dateFrom.plus(1, ChronoUnit.MONTHS)) + 1;
         int daysPassed = 1;
@@ -148,7 +148,7 @@ public class StatisticsControllerIT extends AbstractIT {
      * Test case when today is the middle of period
      */
     @Test(groups = {"inPeriodTest"})
-    public void singleSection_inPeriod_middleOfPeriod() {
+    public void singleSectionInPeriodMiddleOfPeriod() {
         int rangeDays = 3;
         int daysPassed = 2;
 
@@ -171,7 +171,7 @@ public class StatisticsControllerIT extends AbstractIT {
      * Test case when today is the last day of period
      */
     @Test(groups = {"inPeriodTest"})
-    public void singleSection_inPeriod_endOfPeriod() {
+    public void singleSectionInPeriodEndOfPeriod() {
         int rangeDays = 3;
         int daysPassed = 3;
 

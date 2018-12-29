@@ -28,7 +28,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @RestController
 @RequestMapping("/api/settings")
 @AllArgsConstructor
-public class SettingsController extends AbstractController {
+public class SettingsController implements AbstractController {
 
     private SettingsService settingsService;
 

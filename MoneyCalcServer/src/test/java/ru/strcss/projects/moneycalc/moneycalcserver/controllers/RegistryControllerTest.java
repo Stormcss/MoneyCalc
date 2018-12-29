@@ -87,7 +87,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
     }
 
     @Test(dataProvider = "incorrectAccessRegistrationDataProvider")
-    void shouldNotPerformRegistration_invalidAccess(Access access, String expectedHint) throws Exception {
+    void shouldNotPerformRegistrationInvalidAccess(Access access, String expectedHint) throws Exception {
         final MvcResult mvcResult = mockMvc.perform(post("/api/registration/register")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
@@ -103,7 +103,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotPerformRegistration_invalidIdentifications() throws Exception {
+    void shouldNotPerformRegistrationInvalidIdentifications() throws Exception {
         final MvcResult mvcResult = mockMvc.perform(post("/api/registration/register")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
@@ -119,7 +119,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotPerformRegistration_loginAlreadyExists() throws Exception {
+    void shouldNotPerformRegistrationLoginAlreadyExists() throws Exception {
         when(registryMapper.isUserExistsByLogin(anyString()))
                 .thenReturn(true);
         Credentials credentials = generateCredentials();
@@ -138,7 +138,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotPerformRegistration_emailAlreadyExists() throws Exception {
+    void shouldNotPerformRegistrationEmailAlreadyExists() throws Exception {
         when(registryMapper.isUserExistsByEmail(anyString()))
                 .thenReturn(true);
         final String email = "mail@mail.ru";
@@ -158,7 +158,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
     }
 
     @Test(dataProvider = "incorrectEmailRegistrationDataProvider")
-    void shouldNotPerformRegistration_emailInvalid(String email) throws Exception {
+    void shouldNotPerformRegistrationEmailInvalid(String email) throws Exception {
         Credentials credentials = generateCredentials();
         credentials.getAccess().setEmail(email);
 

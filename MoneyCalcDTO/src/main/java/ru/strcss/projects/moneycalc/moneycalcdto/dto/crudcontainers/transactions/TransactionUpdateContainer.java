@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class TransactionUpdateContainer extends AbstractContainer {
+public class TransactionUpdateContainer implements AbstractContainer {
 
     /**
      * transaction Id which will be updated

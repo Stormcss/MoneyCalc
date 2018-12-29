@@ -4,8 +4,9 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcmigrator.api.FileReader;
-import ru.strcss.projects.moneycalc.moneycalcmigrator.dto.PairFilesContainer;
-import ru.strcss.projects.moneycalc.moneycalcmigrator.dto.TransactionParseContainer;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.dto.PairFilesContainer;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.dto.TransactionParseContainer;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.exceptions.MigratorException;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -41,7 +42,7 @@ public class FileReaderImpl implements FileReader {
                         }
                     });
         } catch (IOException e) {
-            throw new RuntimeException("Can not group Data and Info files!", e);
+            throw new MigratorException("Can not group Data and Info files!", e);
         }
         return filesEntries;
     }
@@ -59,7 +60,7 @@ public class FileReaderImpl implements FileReader {
                     .limit(2)
                     .collect(Collectors.toSet());
         } catch (IOException e) {
-            throw new RuntimeException("Can not parse Data File!", e);
+            throw new MigratorException("Can not parse Data File!", e);
         }
     }
 
@@ -71,23 +72,22 @@ public class FileReaderImpl implements FileReader {
      */
     public List<Transaction> parseInfoFile(String folderPath, String fileName) {
         try (Stream<String> stream = Files.lines(Paths.get(folderPath + "/" + fileName))) {
-            // TODO: 19.02.2018 add other sections as well
             return stream.map(this::buildTransaction)
                     .peek(t -> log.trace("transaction: {}", t))
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException("Can not parse Info File!", e);
+            throw new MigratorException("Can not parse Info File!", e);
         }
     }
 
     private PairFilesContainer generateContainer(String type, PairFilesContainer container, String path) {
         if (container == null) {
-            if (type.equals("Data"))
+            if ("Data".equals(type))
                 container = new PairFilesContainer(path, null);
             else
                 container = new PairFilesContainer(null, path);
         } else {
-            if (type.equals("Data"))
+            if ("Data".equals(type))
                 container = new PairFilesContainer(path, container.getPathInfoFile());
             else
                 container = new PairFilesContainer(container.getPathDataFile(), path);
@@ -98,7 +98,7 @@ public class FileReaderImpl implements FileReader {
     private Transaction buildTransaction(String line) {
         TransactionParseContainer parseContainer = parseTransactionLine(line);
         return Transaction.builder()
-                .sectionId(parseContainer.getId()) // FIXME: 19.02.2018 Only 0 and 1 are created
+                .sectionId(parseContainer.getId())
                 .date(parseContainer.getDate())
                 .sum(parseContainer.getSum())
                 .description(parseContainer.getDescription())

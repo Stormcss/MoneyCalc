@@ -7,7 +7,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcmigrator.api.FileReader;
-import ru.strcss.projects.moneycalc.moneycalcmigrator.dto.PairFilesContainer;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.dto.PairFilesContainer;
 import ru.strcss.projects.moneycalc.moneycalcmigrator.properties.MigrationProperties;
 
 import java.util.ArrayList;

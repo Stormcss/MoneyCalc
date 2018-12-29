@@ -5,6 +5,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
+import ru.strcss.projects.moneycalc.moneycalcserver.configuration.security.SecurityConstants;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
@@ -13,23 +14,23 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.configuration.security.SecurityConstants.HEADER_STRING;
-import static ru.strcss.projects.moneycalc.moneycalcserver.configuration.security.SecurityConstants.SECRET;
-import static ru.strcss.projects.moneycalc.moneycalcserver.configuration.security.SecurityConstants.TOKEN_PREFIX;
 
 public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
 
-    public JWTAuthorizationFilter(AuthenticationManager authManager) {
+    public JWTAuthorizationFilter(AuthenticationManager authManager, SecurityConstants securityPropertiesHolder) {
         super(authManager);
+        this.securityPropertiesHolder = securityPropertiesHolder;
     }
+
+    private SecurityConstants securityPropertiesHolder;
 
     @Override
     protected void doFilterInternal(HttpServletRequest req,
                                     HttpServletResponse res,
                                     FilterChain chain) throws IOException, ServletException {
-        String header = req.getHeader(HEADER_STRING);
+        String header = req.getHeader(securityPropertiesHolder.getHeaderString());
 
-        if (header == null || !header.startsWith(TOKEN_PREFIX)) {
+        if (header == null || !header.startsWith(securityPropertiesHolder.getTokenPrefix())) {
             chain.doFilter(req, res);
             return;
         }
@@ -41,12 +42,12 @@ public class JWTAuthorizationFilter extends BasicAuthenticationFilter {
     }
 
     private UsernamePasswordAuthenticationToken getAuthentication(HttpServletRequest request) {
-        String token = request.getHeader(HEADER_STRING);
+        String token = request.getHeader(securityPropertiesHolder.getHeaderString());
         if (token != null) {
             // parse the token.
             String user = Jwts.parser()
-                    .setSigningKey(SECRET.getBytes())
-                    .parseClaimsJws(token.replace(TOKEN_PREFIX, ""))
+                    .setSigningKey(securityPropertiesHolder.getSecret().getBytes())
+                    .parseClaimsJws(token.replace(securityPropertiesHolder.getTokenPrefix(), ""))
                     .getBody()
                     .getSubject();
 

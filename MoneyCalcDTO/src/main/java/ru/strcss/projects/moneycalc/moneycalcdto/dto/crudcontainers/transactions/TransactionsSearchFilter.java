@@ -28,7 +28,7 @@ import java.util.List;
 @EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionsSearchFilter extends AbstractContainer {
+public class TransactionsSearchFilter implements AbstractContainer {
     private LocalDate dateFrom;
     private LocalDate dateTo;
     private List<Integer> requiredSections;

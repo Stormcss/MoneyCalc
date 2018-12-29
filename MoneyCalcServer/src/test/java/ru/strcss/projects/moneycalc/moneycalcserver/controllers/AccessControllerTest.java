@@ -47,7 +47,7 @@ public class AccessControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotGetAccess_gettingFailed() throws Exception {
+    void shouldNotGetAccessGettingFailed() throws Exception {
         when(accessMapper.getAccess(anyString()))
                 .thenReturn(null);
 

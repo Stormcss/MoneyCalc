@@ -63,7 +63,7 @@ public class SpendingSectionsIT extends AbstractIT {
     }
 
     @Test
-    public void addSpendingSection_correctIdIncrement() {
+    public void addSpendingSectionCorrectIdIncrement() {
         int addedSectionsNum = 10;
         String token = savePersonGetToken(service);
 
@@ -85,7 +85,7 @@ public class SpendingSectionsIT extends AbstractIT {
      * Test case when we are adding spending section with name which has deleted section
      */
     @Test
-    public void addSpendingSection_sectionWithDeletedName() {
+    public void addSpendingSectionSectionWithDeletedName() {
         String token = savePersonGetToken(service);
 
         List<SpendingSection> sectionsRs =
@@ -123,7 +123,7 @@ public class SpendingSectionsIT extends AbstractIT {
      * Test case checking that spending section was deactivated after deletion, but not removed
      */
     @Test
-    public void deleteSpendingSectionById_deactivationCheck() {
+    public void deleteSpendingSectionByIdDeactivationCheck() {
         String token = savePersonGetToken(service);
         SpendingSection spendingSection1 = generateSpendingSection();
 
@@ -170,7 +170,7 @@ public class SpendingSectionsIT extends AbstractIT {
     }
 
     @Test
-    public void updateSpendingSectionById_onlyBudget() {
+    public void updateSpendingSectionByIdOnlyBudget() {
         String token = savePersonGetToken(service);
         int updatedSectionId = 1;
 
@@ -193,7 +193,7 @@ public class SpendingSectionsIT extends AbstractIT {
     }
 
     @Test
-    public void updateSpendingSection_duplicateNames() {
+    public void updateSpendingSectionDuplicateNames() {
         String token = savePersonGetToken(service);
         SpendingSection spendingSection1 = generateSpendingSection();
         SpendingSection spendingSection2 = generateSpendingSection();
@@ -238,7 +238,7 @@ public class SpendingSectionsIT extends AbstractIT {
     }
 
     @Test
-    public void getSpendingSections_withNonAdded() {
+    public void getSpendingSectionsWithNonAdded() {
         String token = savePersonGetToken(service);
         int nonAddedId = 1;
         SpendingSection spendingSection = new SpendingSection(null, null, nonAddedId, null, "Renamed",
@@ -253,7 +253,7 @@ public class SpendingSectionsIT extends AbstractIT {
     }
 
     @Test
-    public void getSpendingSections_withRemoved() {
+    public void getSpendingSectionsWithRemoved() {
         String token = savePersonGetToken(service);
         int removedId = 1;
 
@@ -271,7 +271,7 @@ public class SpendingSectionsIT extends AbstractIT {
     }
 
     @Test
-    public void getSpendingSections_logoId() {
+    public void getSpendingSectionsLogoId() {
         String token = savePersonGetToken(service);
 
         SpendingSection spendingSection = generateSpendingSection();

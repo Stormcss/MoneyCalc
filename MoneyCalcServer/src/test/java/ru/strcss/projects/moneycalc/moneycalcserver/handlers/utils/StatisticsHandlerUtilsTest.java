@@ -20,7 +20,7 @@ public class StatisticsHandlerUtilsTest {
     }
 
     @Test
-    void testGetTodayPositionRange_before() {
+    void testGetTodayPositionRangeBefore() {
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
                 .today(LocalDate.now())
                 .rangeFrom(LocalDate.now().plus(1, ChronoUnit.DAYS))
@@ -31,7 +31,7 @@ public class StatisticsHandlerUtilsTest {
     }
 
     @Test
-    void testGetTodayPositionRange_in() {
+    void testGetTodayPositionRangeIn() {
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
                 .today(LocalDate.now())
                 .rangeFrom(LocalDate.now().minus(1, ChronoUnit.DAYS))
@@ -42,7 +42,7 @@ public class StatisticsHandlerUtilsTest {
     }
 
     @Test
-    void testGetTodayPositionRange_after() {
+    void testGetTodayPositionRangeAfter() {
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
                 .today(LocalDate.now().plus(3, ChronoUnit.DAYS))
                 .rangeFrom(LocalDate.now().minus(1, ChronoUnit.DAYS))
@@ -53,12 +53,12 @@ public class StatisticsHandlerUtilsTest {
     }
 
     @Test
-    void testGetDaysPassed_before() {
+    void testGetDaysPassedBefore() {
         assertEquals(getDaysPassed(null, TodayPositionRange.BEFORE, 30), 0);
     }
 
     @Test
-    void testGetDaysPassed_in() {
+    void testGetDaysPassedIn() {
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
                 .rangeFrom(LocalDate.now())
                 .today(LocalDate.now().plus(1, ChronoUnit.DAYS))
@@ -68,7 +68,7 @@ public class StatisticsHandlerUtilsTest {
     }
 
     @Test
-    void testGetDaysPassed_after() {
+    void testGetDaysPassedAfter() {
         assertEquals(getDaysPassed(null, TodayPositionRange.AFTER, 30), 30);
     }
 

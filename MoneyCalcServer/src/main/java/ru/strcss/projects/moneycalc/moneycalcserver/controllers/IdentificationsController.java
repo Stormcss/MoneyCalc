@@ -28,7 +28,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @RestController
 @RequestMapping("/api/identifications")
 @AllArgsConstructor
-public class IdentificationsController extends AbstractController {
+public class IdentificationsController implements AbstractController {
 
     private IdentificationsService identificationsService;
 

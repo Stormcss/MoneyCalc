@@ -42,7 +42,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
     @Autowired
     private SettingsMapper settingsMapper;
 
-    @Test(groups = "SettingsSuccessfulScenario")
+    @Test
     void shouldGetSettings() throws Exception {
         when(settingsMapper.getSettings(anyString()))
                 .thenReturn(generateSettings());
@@ -113,7 +113,7 @@ public class SettingsControllerTest extends AbstractControllerTest {
     }
 
     @Configuration
-    static class Config {
+    protected static class Config {
         @Bean
         SettingsService settingsService(SettingsMapper settingsMapper, MetricsService metricsService) {
             return new SettingsServiceImpl(settingsMapper, metricsService);

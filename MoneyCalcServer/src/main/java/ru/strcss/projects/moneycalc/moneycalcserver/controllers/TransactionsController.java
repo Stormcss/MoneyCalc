@@ -48,7 +48,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @RestController
 @RequestMapping("/api/transactions")
 @AllArgsConstructor
-public class TransactionsController extends AbstractController {
+public class TransactionsController implements AbstractController {
 
     private TransactionsService transactionsService;
     private PersonService personService;
