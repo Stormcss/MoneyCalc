@@ -1,7 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcmigrator.api;
 
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
-import ru.strcss.projects.moneycalc.moneycalcmigrator.dto.PairFilesContainer;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.dto.PairFilesContainer;
 
 import java.util.List;
 import java.util.Map;

@@ -10,8 +10,7 @@ import java.time.LocalDate;
 public class ValidationUtils {
 
     public static Boolean isEmailValid(String email) {
-        final boolean valid = EmailValidator.getInstance().isValid(email);
-        return valid;
+        return EmailValidator.getInstance().isValid(email);
     }
 
     public static boolean isDateSequenceValid(LocalDate dateFrom, LocalDate dateTo) {

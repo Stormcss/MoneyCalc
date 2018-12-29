@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.dto;
+package ru.strcss.projects.moneycalc.moneycalcserver.model.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

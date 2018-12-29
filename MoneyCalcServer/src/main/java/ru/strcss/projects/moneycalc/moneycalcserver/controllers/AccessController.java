@@ -22,7 +22,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @RestController
 @AllArgsConstructor
 @RequestMapping("/api/access")
-public class AccessController extends AbstractController {
+public class AccessController implements AbstractController {
     // TODO: 06.03.2018 finish me
     private AccessMapper accessMapper;
 

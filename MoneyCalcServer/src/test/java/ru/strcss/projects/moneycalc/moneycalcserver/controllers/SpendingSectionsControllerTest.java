@@ -14,9 +14,9 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.Spe
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
-import ru.strcss.projects.moneycalc.moneycalcserver.dto.SpendingSectionFilter;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.dto.SpendingSectionFilter;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.SpendingSectionServiceImpl;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 

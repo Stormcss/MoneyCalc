@@ -13,7 +13,7 @@ import java.util.List;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class SpendingSectionUpdateContainer extends AbstractContainer {
+public class SpendingSectionUpdateContainer implements AbstractContainer {
 
     private Integer sectionId;
     private SpendingSection spendingSection;
