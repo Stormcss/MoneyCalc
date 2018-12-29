@@ -8,9 +8,10 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.Spe
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.TimerType;
-import ru.strcss.projects.moneycalc.moneycalcserver.dto.SpendingSectionFilter;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.dto.SpendingSectionFilter;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.dto.exceptions.MoneyCalcServerException;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 
 import java.util.List;
@@ -38,7 +39,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     public Boolean addSpendingSection(String login, SpendingSection section) throws Exception {
         Long userId = registryMapper.getUserIdByLogin(login);
         if (userId == null)
-            throw new RuntimeException("User not found");
+            throw new MoneyCalcServerException("User not found");
 
         return metricsService.getTimersStorage().get(TimerType.SPENDING_SECTION_ADD_TIMER)
                 .recordCallable(() -> sectionsMapper.addSpendingSection(userId, section) > 0);
@@ -104,7 +105,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
             return !existingSectionIdWithSameName.isPresent();
         } catch (Exception e) {
             log.error("Error has occurred while performing 'isNewNameAllowed' validation", e);
-            throw new RuntimeException("Error has occurred while performing 'isNewNameAllowed' validation", e);
+            throw new MoneyCalcServerException("Error has occurred while performing 'isNewNameAllowed' validation", e);
         }
     }
 }

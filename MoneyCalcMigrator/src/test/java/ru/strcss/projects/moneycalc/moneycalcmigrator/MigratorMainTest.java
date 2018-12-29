@@ -42,22 +42,19 @@ import static ru.strcss.projects.moneycalc.moneycalcmigrator.utils.TestUtils.moc
 @TestPropertySource(locations = "classpath:migration.properties")
 public class MigratorMainTest extends AbstractTestNGSpringContextTests {
 
-    @Autowired
-    MigrationProperties migrationProperties;
-
     @MockBean
     @Autowired
-    MigrationAPI migrationAPI;
+    private MigrationAPI migrationAPI;
 
     @Autowired
-    FileParser fileParser;
+    private FileParser fileParser;
 
     private List<SpendingSection> spendingSections = new ArrayList<>();
 
     private Long lastTransactionId = 0L;
 
     @BeforeSuite
-    void init() throws Exception {
+    private void init() throws Exception {
         super.springTestContextPrepareTestInstance();
 
         prepareSpendingSections();
@@ -65,7 +62,7 @@ public class MigratorMainTest extends AbstractTestNGSpringContextTests {
     }
 
     @Test
-    void shouldSaveNewTransactions() {
+    public void shouldSaveNewTransactions() {
         fileParser.parseOldFiles(true);
 
         assertEquals(spendingSections.size(), 4);
@@ -110,7 +107,7 @@ public class MigratorMainTest extends AbstractTestNGSpringContextTests {
     }
 
     @TestConfiguration
-    static class Config {
+    protected static class Config {
 
         @Bean
         MigrationProperties migrationProperties() {

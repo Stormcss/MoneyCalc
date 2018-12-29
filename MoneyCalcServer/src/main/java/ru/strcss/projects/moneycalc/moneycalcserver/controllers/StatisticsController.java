@@ -41,7 +41,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @RestController
 @RequestMapping("/api/stats/summaryBySection")
 @AllArgsConstructor
-public class StatisticsController extends AbstractController {
+public class StatisticsController implements AbstractController {
 
     private TransactionsService transactionsService;
     private SpendingSectionService sectionService;

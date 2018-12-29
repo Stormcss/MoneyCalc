@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 @Getter
 @Service
 public class MetricsService {
-    //    private static final String TYPE = "count";
     private final MeterRegistry registry;
 
     private final Map<TimerType, Timer> timersStorage;

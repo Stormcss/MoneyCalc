@@ -72,7 +72,7 @@ public class IdentificationsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotUpdateIdentifications_incorrectData() throws Exception {
+    void shouldNotUpdateIdentificationsIncorrectData() throws Exception {
         mockMvc.perform(put("/api/identifications")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))

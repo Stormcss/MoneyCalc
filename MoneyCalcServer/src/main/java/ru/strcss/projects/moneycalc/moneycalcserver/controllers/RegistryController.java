@@ -27,7 +27,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @RestController
 @RequestMapping("/api/registration/")
 @AllArgsConstructor
-public class RegistryController extends AbstractController {
+public class RegistryController implements AbstractController {
 
     private RegisterService registerService;
 

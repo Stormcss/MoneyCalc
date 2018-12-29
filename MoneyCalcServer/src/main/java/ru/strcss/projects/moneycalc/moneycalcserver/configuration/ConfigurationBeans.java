@@ -1,22 +1,18 @@
 package ru.strcss.projects.moneycalc.moneycalcserver.configuration;
 
+import lombok.AllArgsConstructor;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.thread.QueuedThreadPool;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.embedded.jetty.JettyServletWebServerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 @Configuration
+@AllArgsConstructor
 public class ConfigurationBeans {
 
     private final JettyProperties jettyProperties;
-
-    @Autowired
-    public ConfigurationBeans(JettyProperties jettyProperties) {
-        this.jettyProperties = jettyProperties;
-    }
 
     @Bean
     public JettyServletWebServerFactory jettyEmbeddedServletContainerFactory() {
