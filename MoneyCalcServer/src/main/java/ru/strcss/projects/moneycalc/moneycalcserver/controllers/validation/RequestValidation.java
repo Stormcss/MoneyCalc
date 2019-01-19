@@ -2,6 +2,8 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import ru.strcss.projects.moneycalc.moneycalcdto.Validationable;
@@ -14,27 +16,21 @@ import java.util.function.Supplier;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
 
-@Getter
 @Slf4j
+@Getter
+@AllArgsConstructor
 public class RequestValidation<E> {
     private boolean isValid;
     private ResponseEntity<MoneyCalcRs<E>> validationError;
 
-    private RequestValidation(boolean isValid, ResponseEntity<MoneyCalcRs<E>> validationError) {
-        this.isValid = isValid;
-        this.validationError = validationError;
-    }
-
+    @RequiredArgsConstructor
     public static class Validator {
 
         private List<Pair> additionalChecks = new ArrayList<>();
+        @NonNull
         private Validationable container;
+        @NonNull
         private String actionName;
-
-        public Validator(Validationable container, String actionName) {
-            this.container = container;
-            this.actionName = actionName;
-        }
 
         public Validator addValidation(Supplier<Boolean> supplier, Supplier<String> actionName) {
             additionalChecks.add(new Pair(supplier, actionName, null));

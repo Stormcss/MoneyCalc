@@ -66,7 +66,7 @@ public class TransactionsController implements AbstractController {
 
         List<Transaction> transactions = transactionsService.getTransactions(login, null);
 
-        log.info("Returning Transactions for login \'{}\'", login);
+        log.info("Returning Transactions for login '{}' - {}", login, transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }

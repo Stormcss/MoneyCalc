@@ -8,16 +8,26 @@ bootJar {
 }
 
 task zip(type: Zip, dependsOn: bootJar){
-    from('build/libs'){
-        include '*.jar'
+    into('bin'){
+        from('/src/main/resources'){
+            include 'run.sh'
+        }
     }
-    from('/src/main/resources'){
-        include 'application.properties'
-        include 'MoneyCalcServerStarter.bat'
-        include 'logback.xml'
+    into('conf'){
+        from('/src/main/resources'){
+            include 'application.properties'
+            include 'logback.xml'
+            include 'banner.txt'
+        }
+    }
+    into('lib'){
+        from('build/libs'){
+            include '*.jar'
+        }
     }
 }
 build.dependsOn(zip)
+
 dependencies {
     compile project(':MoneyCalcDTO')
 

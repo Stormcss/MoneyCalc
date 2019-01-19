@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
 
-    <property name="LOGS" value="./logs"/>
+    <property name="LOGS" value="../log"/>
 
     <appender name="Console"
               class="ch.qos.logback.core.ConsoleAppender">
@@ -14,20 +14,20 @@
 
     <appender name="RollingFile"
               class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${LOGS}/spring-boot-logger.log</file>
+        <file>${LOGS}/MoneyCalcServer.log</file>
         <encoder
                 class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
-            <Pattern>%d %p %C{1.} [%t] %m%n</Pattern>
+            <Pattern>%d{ISO8601} %-5level [%t] %c{3}: %msg%n%throwable</Pattern>
         </encoder>
 
         <rollingPolicy
                 class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <!-- rollover daily and when the file reaches 10 MegaBytes -->
-            <fileNamePattern>${LOGS}/archived/spring-boot-logger-%d{yyyy-MM-dd}.%i.log
+            <!-- rollover daily and when the file reaches 50 MegaBytes -->
+            <fileNamePattern>${LOGS}/archived/MoneyCalcServer-%d{yyyy-MM-dd}.%i.log
             </fileNamePattern>
             <timeBasedFileNamingAndTriggeringPolicy
                     class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
-                <maxFileSize>10MB</maxFileSize>
+                <maxFileSize>50MB</maxFileSize>
             </timeBasedFileNamingAndTriggeringPolicy>
         </rollingPolicy>
     </appender>
@@ -37,9 +37,10 @@
         <appender-ref ref="Console"/>
     </root>
 
-    <logger name="ru.strcss.projects.moneycalc.moneycalcserver" level="trace" additivity="false">
+    <logger name="ru.strcss.projects.moneycalc.moneycalcserver" level="TRACE" additivity="false">
         <appender-ref ref="RollingFile"/>
         <appender-ref ref="Console"/>
     </logger>
 
+    <logger name="ru.strcss.projects.moneycalc.moneycalcserver.mapper" level="INFO" />
 </configuration>

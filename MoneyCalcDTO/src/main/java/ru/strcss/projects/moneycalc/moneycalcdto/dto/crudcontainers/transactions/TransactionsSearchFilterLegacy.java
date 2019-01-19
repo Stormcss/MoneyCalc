@@ -22,9 +22,9 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class TransactionsSearchContainerLegacy{
-    private String rangeFrom;
-    private String rangeTo;
+public class TransactionsSearchFilterLegacy {
+    private String dateFrom;
+    private String dateTo;
     private List<Integer> requiredSections;
     private String title;
     private String description;
