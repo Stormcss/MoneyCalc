@@ -32,8 +32,8 @@ public class RegisterServiceImpl implements RegisterService {
 
         log.info("Registering new User with Login: '{}' and name: '{}'", login, credentials.getIdentifications().getName());
 
-        SpendingSection section1 = generateRegisteringSpendingSection("Еда", 5000L, 0);
-        SpendingSection section2 = generateRegisteringSpendingSection("Свое", 5000L, 1);
+        SpendingSection section1 = generateRegisteringSpendingSection("Еда", 5000L, 1);
+        SpendingSection section2 = generateRegisteringSpendingSection("Свое", 5000L, 2);
 
         Person person = registryMapper.registerIds();
 
