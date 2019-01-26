@@ -21,16 +21,15 @@
 
     <update id="updateSettings" statementType="CALLABLE">
     <![CDATA[
-
         UPDATE "Settings"
         SET
           "periodFrom" = #{settings.periodFrom},
           "periodTo" = #{settings.periodTo}
-        from "Settings" st
-        join "User" u on st.id = u."settingsId"
-        join "Access" a on a.id = u."accessId"
-        where a.login = #{login};
-
+        where id = (select u.id
+                    from "User" u
+                      join "Access" a on a.id = u."accessId"
+                    where
+                      a.login = #{login})
         ]]>
     </update>
 
