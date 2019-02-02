@@ -22,5 +22,5 @@ public interface FileReader {
     /**
      * Get list of Transactions per Info file
      */
-    List<Transaction> parseInfoFile(String folderPath, String fileName);
+    List<Transaction> parseInfoFile(String folderPath, String fileName, List<Integer> additionalSectionsIds);
 }

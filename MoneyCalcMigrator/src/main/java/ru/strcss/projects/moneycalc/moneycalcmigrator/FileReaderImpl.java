@@ -13,10 +13,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -26,11 +28,20 @@ import java.util.stream.Stream;
 @Component
 public class FileReaderImpl implements FileReader {
 
+    private Comparator<String> namedDatesComparator() {
+        return (stringDate1, stringDate2) -> {
+            LocalDate date1 = LocalDate.parse(stringDate1, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            LocalDate date2 = LocalDate.parse(stringDate2, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            int isAfter = date1.isAfter(date2) ? 1 : 0;
+            return date1.isBefore(date2) ? -1 : isAfter;
+        };
+    }
+
     public Map<String, PairFilesContainer> groupFiles(String filesPath) {
         Pattern periodPattern = Pattern.compile("MoneyCalc(Data|Info)_(.*?).txt");
-        Map<String, PairFilesContainer> filesEntries = new HashMap<>(32);
+        Map<String, PairFilesContainer> filesEntries = new TreeMap<>(namedDatesComparator());
 
-        try (Stream<Path> paths = Files.walk(Paths.get(filesPath))) {
+        try (Stream<Path> paths = Files.walk(Paths.get(filesPath), 1)) {
             paths.filter(Files::isRegularFile)
                     .map(Path::getFileName)
                     .forEach(path -> {
@@ -70,9 +81,9 @@ public class FileReaderImpl implements FileReader {
      * @param fileName - file name
      * @return List of Transactions
      */
-    public List<Transaction> parseInfoFile(String folderPath, String fileName) {
+    public List<Transaction> parseInfoFile(String folderPath, String fileName, List<Integer> additionalSectionsIds) {
         try (Stream<String> stream = Files.lines(Paths.get(folderPath + "/" + fileName))) {
-            return stream.map(this::buildTransaction)
+            return stream.map(line -> buildTransaction(line, additionalSectionsIds))
                     .peek(t -> log.trace("transaction: {}", t))
                     .collect(Collectors.toList());
         } catch (IOException e) {
@@ -95,8 +106,8 @@ public class FileReaderImpl implements FileReader {
         return container;
     }
 
-    private Transaction buildTransaction(String line) {
-        TransactionParseContainer parseContainer = parseTransactionLine(line);
+    private Transaction buildTransaction(String line, List<Integer> additionalSectionsIds) {
+        TransactionParseContainer parseContainer = parseTransactionLine(line, additionalSectionsIds);
         return Transaction.builder()
                 .sectionId(parseContainer.getId())
                 .date(parseContainer.getDate())
@@ -106,10 +117,17 @@ public class FileReaderImpl implements FileReader {
                 .build();
     }
 
-    private TransactionParseContainer parseTransactionLine(String line) {
+    private TransactionParseContainer parseTransactionLine(String line, List<Integer> additionalSectionsIds) {
+        int sectionId;
         String[] part = line.split(" ", 4);
+        int idInFile = Integer.parseInt(part[0]);
+
+        if (idInFile > 2)
+            sectionId = additionalSectionsIds.get(idInFile - 3); // Id in file -> list position: 3 -> 0, 4 -> 1
+        else
+            sectionId = idInFile + 1;
         return TransactionParseContainer.builder()
-                .id(Integer.parseInt(part[0]))
+                .id(sectionId)
                 .date(formatDate(part[1]))
                 .sum(Integer.parseInt(part[2]))
                 .description(part[3].replaceFirst(".$", ""))

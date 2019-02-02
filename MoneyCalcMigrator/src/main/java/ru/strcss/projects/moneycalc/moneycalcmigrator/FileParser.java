@@ -14,6 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static ru.strcss.projects.moneycalc.moneycalcmigrator.utils.GenerationUtils.generateAccess;
 import static ru.strcss.projects.moneycalc.moneycalcmigrator.utils.GenerationUtils.generateSpendingSection;
@@ -63,16 +64,22 @@ class FileParser {
                 }
             }
 
-            List<Transaction> transactionsInFile = fileReader.parseInfoFile(properties.getDataPath(), pair.getValue().getPathInfoFile());
+            List<Integer> additionalSectionIds = personSectionsList.stream()
+                    .filter(spendingSection -> sectionsInFile.stream()
+                            .anyMatch(sectionName -> spendingSection.getName().equals(sectionName)))
+                    .map(SpendingSection::getSectionId)
+                    .collect(Collectors.toList());
+
+            List<Transaction> transactionsInFile = fileReader.parseInfoFile(properties.getDataPath(),
+                    pair.getValue().getPathInfoFile(), additionalSectionIds);
 
             Status savingStatus = serverConnector.saveTransactions(token, transactionsInFile, properties.getLogin());
 
-            if (Status.SUCCESS.equals(savingStatus))
+            if (Status.SUCCESS.equals(savingStatus)){
                 transactionsAdded += transactionsInFile.size();
-
-            if (Status.SUCCESS.equals(savingStatus))
                 log.debug("Saving Transactions status is {}. Saved {} transactions from file {}",
                         savingStatus, transactionsInFile.size(), pair.getValue().getPathInfoFile());
+            }
             else
                 log.debug("Saving Transactions status is {}", savingStatus);
         }
