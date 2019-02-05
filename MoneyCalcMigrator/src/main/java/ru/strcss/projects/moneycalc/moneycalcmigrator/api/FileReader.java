@@ -5,7 +5,6 @@ import ru.strcss.projects.moneycalc.moneycalcmigrator.model.dto.PairFilesContain
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface FileReader {
 
@@ -17,10 +16,10 @@ public interface FileReader {
     /**
      * Get list of sections per Data file
      */
-    Set<String> parseDataFile(String folderPath, String fileName);
+    List<String> parseDataFile(String folderPath, String fileName);
 
     /**
      * Get list of Transactions per Info file
      */
-    List<Transaction> parseInfoFile(String folderPath, String fileName, List<Integer> additionalSectionsIds);
+    List<Transaction> parseInfoFile(String folderPath, String fileName, Map<Integer, Integer> idMapper);
 }

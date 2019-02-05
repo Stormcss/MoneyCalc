@@ -17,7 +17,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
 import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -64,12 +64,12 @@ public class FileReaderImpl implements FileReader {
      * @param fileName - file name
      * @return Set of SpendingSection names
      */
-    public Set<String> parseDataFile(String folderPath, String fileName) {
+    public List<String> parseDataFile(String folderPath, String fileName) {
         try (Stream<String> stream = Files.lines(Paths.get(folderPath + "/" + fileName))) {
             return stream
                     .skip(14)
                     .limit(2)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
         } catch (IOException e) {
             throw new MigratorException("Can not parse Data File!", e);
         }
@@ -81,9 +81,11 @@ public class FileReaderImpl implements FileReader {
      * @param fileName - file name
      * @return List of Transactions
      */
-    public List<Transaction> parseInfoFile(String folderPath, String fileName, List<Integer> additionalSectionsIds) {
+    @Override
+    public List<Transaction> parseInfoFile(String folderPath, String fileName, Map<Integer, Integer> idMapper) {
         try (Stream<String> stream = Files.lines(Paths.get(folderPath + "/" + fileName))) {
-            return stream.map(line -> buildTransaction(line, additionalSectionsIds))
+            return stream.map(line -> buildTransaction(line, idMapper))
+                    .filter(Objects::nonNull)
                     .peek(t -> log.trace("transaction: {}", t))
                     .collect(Collectors.toList());
         } catch (IOException e) {
@@ -106,8 +108,10 @@ public class FileReaderImpl implements FileReader {
         return container;
     }
 
-    private Transaction buildTransaction(String line, List<Integer> additionalSectionsIds) {
-        TransactionParseContainer parseContainer = parseTransactionLine(line, additionalSectionsIds);
+    private Transaction buildTransaction(String line, Map<Integer, Integer> idMapper) {
+        TransactionParseContainer parseContainer = parseTransactionLine(line, idMapper);
+        if (parseContainer == null)
+            return null;
         return Transaction.builder()
                 .sectionId(parseContainer.getId())
                 .date(parseContainer.getDate())
@@ -117,20 +121,22 @@ public class FileReaderImpl implements FileReader {
                 .build();
     }
 
-    private TransactionParseContainer parseTransactionLine(String line, List<Integer> additionalSectionsIds) {
+    private TransactionParseContainer parseTransactionLine(String line, Map<Integer, Integer> idMapper) {
         int sectionId;
         String[] part = line.split(" ", 4);
         int idInFile = Integer.parseInt(part[0]);
 
         if (idInFile > 2)
-            sectionId = additionalSectionsIds.get(idInFile - 3); // Id in file -> list position: 3 -> 0, 4 -> 1
+            sectionId = idMapper.get(idInFile);
+        else if (idInFile == 1 || idInFile == 2)
+            sectionId = idInFile;
         else
-            sectionId = idInFile + 1;
+            return null;
         return TransactionParseContainer.builder()
                 .id(sectionId)
                 .date(formatDate(part[1]))
                 .sum(Integer.parseInt(part[2]))
-                .description(part[3].replaceFirst(".$", ""))
+                .description(part.length == 4 ? part[3].replaceFirst(".$", "") : null)
                 .build();
     }
 
