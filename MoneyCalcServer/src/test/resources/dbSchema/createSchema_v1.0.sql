@@ -65,3 +65,16 @@ CREATE SEQUENCE user_id_seq START 1 owned by "User".id;
 CREATE SEQUENCE settings_id_seq START 1 owned by "Settings".id;
 CREATE SEQUENCE spending_sections_id_seq START 1 owned by "SpendingSection".id;
 CREATE SEQUENCE transactions_id_seq START 1 owned by "Transactions".id;
+
+---------------------------------------------------------
+----------------------  INDEXES  ------------------------
+---------------------------------------------------------
+create unique index access_login_idx on "Access" (login);
+
+create index user_accessId_idx on "User" ("accessId");
+create index user_settings_idx on "User" ("settingsId");
+
+create index transaction_date_idx on "Transactions" (date);
+create index transactions_userId_idx on "Transactions" ("userId");
+
+create index spendingSections_userId_idx on "SpendingSection" ("userId");
