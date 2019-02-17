@@ -4,8 +4,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
 import java.math.BigDecimal;
@@ -113,7 +115,7 @@ public class TransactionsControllerIT extends AbstractIT {
      * Saving new Transaction to empty list
      */
     @Test
-    public void saveNewTransaction() {
+    public void shouldSaveNewTransaction() {
         String token = savePersonGetToken(service);
 
         addTransaction(service, token, generateTransaction());
@@ -127,7 +129,7 @@ public class TransactionsControllerIT extends AbstractIT {
      * Saving new Transaction with nonexistent sectionID
      */
     @Test
-    public void saveNewTransactionNonExistentSectionID() {
+    public void shouldNotSaveNewTransactionWithNonExistentSectionId() {
         String token = savePersonGetToken(service);
 
         Response<MoneyCalcRs<Transaction>> addTransactionRs = sendRequest(service.addTransaction(token,
@@ -140,7 +142,7 @@ public class TransactionsControllerIT extends AbstractIT {
      * Deleting Transaction
      */
     @Test
-    public void deleteTransaction() {
+    public void shouldDeleteTransaction() {
         int numOfAddedTransactions = 5;
         String token = savePersonGetToken(service);
 
@@ -171,7 +173,7 @@ public class TransactionsControllerIT extends AbstractIT {
      * Updating Transaction
      */
     @Test
-    public void updateTransaction() {
+    public void shouldUpdateTransaction() {
         int numOfAddedTransactions = 5;
         String token = savePersonGetToken(service);
 
@@ -205,11 +207,12 @@ public class TransactionsControllerIT extends AbstractIT {
         Transaction beforeUpdatedTransaction = addedTransactions.stream()
                 .filter(transaction -> transaction.getId().equals(idToUpdate))
                 .findFirst()
-                .get();
+                .orElseThrow(() -> new RuntimeException("Transaction is not found"));
+
         Transaction updatedTransaction = transactionsList.stream()
                 .filter(transaction -> transaction.getId().equals(idToUpdate))
                 .findFirst()
-                .get();
+                .orElseThrow(() -> new RuntimeException("Transaction is not found"));
 
         assertNotEquals(updatedTransaction.getSum(), beforeUpdatedTransaction.getSum(), "Sum in Transaction after update has not changed!");
         assertEquals(updatedTransaction.getId(), beforeUpdatedTransaction.getId(), "id of updated Transaction has changed!");
@@ -302,5 +305,29 @@ public class TransactionsControllerIT extends AbstractIT {
         searchContainer.setPriceTo(BigDecimal.valueOf(301));
         List<Transaction> filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
         assertEquals(filteredTransactions.size(), 3, INCORRECT_TRANSACTIONS_COUNT);
+    }
+
+    @Test
+    public void shouldReturnTransactionsForSettingsRange() {
+        int transactionsCount = 5;
+        String token = savePersonGetToken(service);
+
+        //adding transactions
+        IntStream.range(0, transactionsCount)
+                .forEach(value -> addTransaction(service, token, generateTransaction(LocalDate.now().minus(value, ChronoUnit.DAYS))));
+
+        List<Transaction> transactionsCountBeforeUpdate = getTransactions(service, token).getPayload();
+        assertEquals(transactionsCountBeforeUpdate.size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+
+        //changing Settings range - last transaction date is before periodTo
+        LocalDate periodFrom = LocalDate.now().minus(transactionsCount, ChronoUnit.DAYS);
+        LocalDate periodTo = LocalDate.now().plus(1, ChronoUnit.DAYS);
+        sendRequest(service.updateSettings(token, new Settings(periodFrom, periodTo)), Status.SUCCESS);
+        assertEquals(getTransactions(service, token).getPayload().size(), transactionsCount, INCORRECT_TRANSACTIONS_COUNT);
+
+        //changing Settings range - last transaction is equal to periodTo
+        periodFrom = LocalDate.now().minus(transactionsCount, ChronoUnit.DAYS);
+        sendRequest(service.updateSettings(token, new Settings(periodFrom, LocalDate.now())), Status.SUCCESS);
+        assertEquals(getTransactions(service, token).getPayload().size(), transactionsCount - 1, INCORRECT_TRANSACTIONS_COUNT);
     }
 }

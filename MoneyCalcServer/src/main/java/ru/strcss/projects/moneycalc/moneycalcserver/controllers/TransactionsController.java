@@ -56,7 +56,7 @@ public class TransactionsController implements AbstractController {
 
     /**
      * Get filtered list of Transactions by user's login
-     * Returned transactions are filtered by dates range at Settings and active
+     * Returned transactions are filtered by dates range being set at Settings
      *
      * @return response object with list of Transactions
      */
@@ -127,9 +127,8 @@ public class TransactionsController implements AbstractController {
 
     /**
      * Update Person's Transaction
-     *
+     * <p>
      * id field in Income Transaction object will be ignored and overwritten with given transactionID
-     *
      */
     @PutMapping
     public ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) throws Exception {
@@ -138,6 +137,7 @@ public class TransactionsController implements AbstractController {
         RequestValidation<Transaction> requestValidation = new Validator(updateContainer, "Updating Transaction")
                 .addValidation(() -> updateContainer.getTransaction().isValid().isValidated(),
                         () -> fillLog(TRANSACTION_INCORRECT, updateContainer.getTransaction().isValid().getReasons().toString()))
+                // TODO: 17.02.2019 add validation for sectionId existence
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 
