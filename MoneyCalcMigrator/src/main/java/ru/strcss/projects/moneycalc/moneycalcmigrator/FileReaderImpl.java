@@ -116,7 +116,7 @@ public class FileReaderImpl implements FileReader {
                 .sectionId(parseContainer.getId())
                 .date(parseContainer.getDate())
                 .sum(parseContainer.getSum())
-                .description(parseContainer.getDescription())
+                .title(parseContainer.getDescription())
                 .currency("RUR")
                 .build();
     }
