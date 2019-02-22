@@ -2,6 +2,7 @@
 appl_name="MoneyCalcServer"
 pid_file="${appl_name}.pid"
 jmx_port=8085
+ip_address=127.0.0.1
 
 moneycalc_home=$( cd "$(dirname "${BASH_SOURCE}")" ; cd .. ; pwd -P )
 
@@ -10,7 +11,7 @@ jar_name=$( ls $moneycalc_home/lib/ | grep ${appl_name}.*.jar )
 pid_file=$moneycalc_home/$pid_file
 logback_file=$moneycalc_home/conf/logback.xml
 
-JAVA_OPTS="-Xms256m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=$jmx_port -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.security.egd=file:/dev/../dev/urandom -Dsecurerandom.source=file:/dev/../dev/urandom"
+JAVA_OPTS="-Xms256m -Xmx512m -XX:+HeapDumpOnOutOfMemoryError -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=$jmx_port -Dcom.sun.management.jmxremote.rmi.port=$jmx_port -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.rmi.server.hostname=$ip_address"
 APP_OPTS="-jar $moneycalc_home/lib/$jar_name --logging.config=$logback_file --spring.config.location=file:$moneycalc_home/conf/"
 
 if [ "$2" == "any" ]
