@@ -12,4 +12,6 @@ dependencies {
 
 //    testCompile group: 'org.mockito', name: 'mockito-all', version: '1.9.5'
     testCompile("org.springframework.boot:spring-boot-starter-test:${springBootVersion}")
+    testCompile group: 'org.mockito', name: 'mockito-core', version: '2.23.4'
+
 }

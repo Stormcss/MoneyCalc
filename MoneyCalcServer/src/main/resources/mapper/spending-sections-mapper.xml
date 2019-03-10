@@ -93,13 +93,11 @@
     </resultMap>
     <select id="isSpendingSectionNameNew" resultMap="isSpendingSectionNameNewMap">
     <![CDATA[
-
         select case when count(*) > 0 then 0 else 1 end
         FROM "SpendingSection" ss
         join "User" p on ss."userId" = p.id
         join "Access" a on a.id = p."accessId"
         where a.login = #{login} AND ss.name = #{sectionName}
-
         ]]>
     </select>
 
@@ -108,13 +106,11 @@
     </resultMap>
     <select id="isSpendingSectionIdExists" resultMap="isSpendingSectionIdExistsMap">
     <![CDATA[
-
         select case when count(*) > 0 then 1 else 0 end
         FROM "SpendingSection" ss
         join "User" p on ss."userId" = p.id
         join "Access" a on a.id = p."accessId"
         where a.login = #{login} AND ss."sectionId" = #{sectionId}
-
         ]]>
     </select>
 
@@ -123,13 +119,11 @@
     </resultMap>
     <select id="getSectionBySectionId" resultMap="getSectionBySectionIdMap">
     <![CDATA[
-
         select *
         FROM "SpendingSection" ss
         join "User" u on ss."userId" = u.id
         join "Access" a on a.id = u."accessId"
         where a.login = #{login} AND ss."sectionId" = #{sectionId}
-
         ]]>
     </select>
 
@@ -138,13 +132,11 @@
     </resultMap>
     <select id="getSectionBySectionName" resultMap="getSectionBySectionNameMap">
     <![CDATA[
-
         select *
         FROM "SpendingSection" ss
         join "User" u on ss."userId" = u.id
         join "Access" a on a.id = u."accessId"
         where a.login = #{login} AND ss.name = #{name}
-
         ]]>
     </select>
 </mapper>
