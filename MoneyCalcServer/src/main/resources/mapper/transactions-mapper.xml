@@ -22,11 +22,17 @@
     </resultMap>
     <select id="getTransactions" resultMap="getTransactionsMap">
         <![CDATA[
-            select t.* from "Transactions" t
+                        select t.* from "Transactions" t
                             join "User" u on t."userId" = u.id
-                            join "Access" a on a.id = u."accessId"
-            where a.login = #{login}
-        ]]>
+                            join "Access" a on a.id = u."accessId"]]>
+        <if test="filter == null">
+            join "Settings" s on u."settingsId" = s.id
+        </if>
+        where a.login = #{login}
+        <if test="filter == null"><![CDATA[
+            and t.date >= s."periodFrom"
+            and t.date < s."periodTo"]]>
+        </if>
         <if test="filter != null">
             <if test="filter.dateFrom != null">
                 AND t.date >= #{filter.dateFrom}
@@ -53,7 +59,7 @@
                 AND t.sum &lt;= #{filter.priceTo}
             </if>
         </if>
-        ORDER BY t."date" ASC;
+        ORDER BY t."date" ASC, t.id ASC;
     </select>
 
     <insert id="addTransaction" useGeneratedKeys="true" keyProperty="userId" keyColumn="userId"

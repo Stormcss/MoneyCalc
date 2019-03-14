@@ -1,6 +1,7 @@
 package ru.strcss.projects.moneycalc.moneycalcmigrator;
 
 import okhttp3.Headers;
+import org.mockito.ArgumentCaptor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -24,7 +25,10 @@ import ru.strcss.projects.moneycalc.moneycalcmigrator.properties.MigrationProper
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import static org.hamcrest.Matchers.containsInAnyOrder;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.doAnswer;
@@ -65,12 +69,20 @@ public class MigratorMainTest extends AbstractTestNGSpringContextTests {
     public void shouldSaveNewTransactions() {
         fileParser.parseOldFiles(true);
 
-        assertEquals(spendingSections.size(), 4);
-        verify(migrationAPI, times(2)).addSpendingSection(anyString(), any(SpendingSection.class));
-        verify(migrationAPI, times(46)).addTransaction(anyString(), any(Transaction.class));
+        ArgumentCaptor<Transaction> transactionCaptor = ArgumentCaptor.forClass(Transaction.class);
+
+        assertEquals(spendingSections.size(), 5);
+        verify(migrationAPI, times(3)).addSpendingSection(anyString(), any(SpendingSection.class));
+        verify(migrationAPI, times(102)).addTransaction(anyString(), transactionCaptor.capture());
+
+        List<Integer> sectionIds = transactionCaptor.getAllValues().stream()
+                .map(Transaction::getSectionId)
+                .distinct()
+                .collect(Collectors.toList());
+        assertThat(sectionIds, containsInAnyOrder(1, 2, 3, 4));
     }
 
-    private void prepareMocks(){
+    private void prepareMocks() {
         when(migrationAPI.registerPerson(any(Credentials.class)))
                 .thenReturn(mockedCall(Response.success(new MoneyCalcRs<>(Status.SUCCESS, new Person(), null))));
 

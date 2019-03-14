@@ -116,6 +116,7 @@ class ServerConnector implements ServerConnectorI {
                     }
             );
         }
+        log.info("Added {} transactions...", addedTransactions.size());
         return rollback ? Status.ERROR : Status.SUCCESS;
     }
 }
