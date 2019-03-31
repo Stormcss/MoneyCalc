@@ -172,7 +172,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotGetTransactionsWithFilter_rangeIsEmpty() throws Exception {
+    void shouldNotGetTransactionsWithFilterWhenRangeIsEmpty() throws Exception {
         mockMvc.perform(post("/api/transactions/getFiltered")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
@@ -185,7 +185,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotGetTransactionsWithFilter_dateSequenceInvalid() throws Exception {
+    void shouldNotGetTransactionsWithFilterWithDateSequenceInvalid() throws Exception {
         TransactionsSearchFilter searchFilter = new TransactionsSearchFilter();
         searchFilter.setDateFrom(LocalDate.now());
         searchFilter.setDateTo(LocalDate.now().minus(1, ChronoUnit.DAYS));
@@ -200,7 +200,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     }
 
     @Test(dataProvider = "incorrectTransactionAddDataProvider")
-    void shouldNotAddTransaction_incorrectData(Transaction transaction, String expectedHint) throws Exception {
+    void shouldNotAddTransactionWithIncorrectData(Transaction transaction, String expectedHint) throws Exception {
         mockMvc.perform(post("/api/transactions")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
@@ -213,7 +213,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotAddTransaction_nonexistentSectionId() throws Exception {
+    void shouldNotAddTransactionWithNonexistentSectionId() throws Exception {
         when(sectionsMapper.isSpendingSectionIdExists(anyString(), anyInt()))
                 .thenReturn(false);
         int sectionId = 1;
@@ -228,7 +228,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotAddTransaction_addingFailed() throws Exception {
+    void shouldNotAddTransactionWhenAddingFailed() throws Exception {
         when(transactionsMapper.addTransaction(any(Transaction.class)))
                 .thenReturn(null);
 
@@ -242,7 +242,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotUpdateTransaction_incorrectData() throws Exception {
+    void shouldNotUpdateTransactionWithIncorrectData() throws Exception {
         Transaction transaction = generateTransaction();
         transaction.setSum(null);
 
@@ -258,7 +258,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotUpdateTransaction_updatingFailed() throws Exception {
+    void shouldNotUpdateTransactionWhenUpdatingFailed() throws Exception {
         when(transactionsMapper.updateTransaction(anyString(), anyLong(), any(Transaction.class)))
                 .thenReturn(0);
 
@@ -272,7 +272,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     }
 
     @Test
-    void shouldNotDeleteTransaction_idNotFound() throws Exception {
+    void shouldNotDeleteTransactionWithIdNotFound() throws Exception {
         when(transactionsMapper.getTransactionById(anyString(), anyLong()))
                 .thenReturn(null);
 

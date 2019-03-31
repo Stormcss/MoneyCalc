@@ -10,7 +10,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.F
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilterLegacy;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainerLegacy;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchContainerLegacy;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilterLegacy;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.AccessLegacy;
@@ -31,7 +31,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.TransactionLegacy;
  */
 public class PojoTest {
     @Test
-    void shouldHavePojoStructureAndBehavior() {
+    public void shouldHavePojoStructureAndBehavior() {
         PojoTestUtils.validateAccessors(Access.class);
         PojoTestUtils.validateAccessors(AccessLegacy.class);
         PojoTestUtils.validateAccessors(FinanceSummaryBySection.class);
@@ -48,7 +48,7 @@ public class PojoTest {
         PojoTestUtils.validateAccessors(SpendingSectionUpdateContainer.class);
         PojoTestUtils.validateAccessors(FinanceSummaryFilter.class);
         PojoTestUtils.validateAccessors(FinanceSummaryFilterLegacy.class);
-        PojoTestUtils.validateAccessors(TransactionsSearchContainerLegacy.class);
+        PojoTestUtils.validateAccessors(TransactionsSearchFilterLegacy.class);
         PojoTestUtils.validateAccessors(TransactionsSearchFilter.class);
         PojoTestUtils.validateAccessors(TransactionUpdateContainer.class);
         PojoTestUtils.validateAccessors(TransactionUpdateContainerLegacy.class);

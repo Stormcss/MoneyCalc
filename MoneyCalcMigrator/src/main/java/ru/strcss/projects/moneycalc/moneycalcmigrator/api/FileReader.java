@@ -1,11 +1,10 @@
 package ru.strcss.projects.moneycalc.moneycalcmigrator.api;
 
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
-import ru.strcss.projects.moneycalc.moneycalcmigrator.dto.PairFilesContainer;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.dto.PairFilesContainer;
 
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 public interface FileReader {
 
@@ -17,10 +16,10 @@ public interface FileReader {
     /**
      * Get list of sections per Data file
      */
-    Set<String> parseDataFile(String folderPath, String fileName);
+    List<String> parseDataFile(String folderPath, String fileName);
 
     /**
      * Get list of Transactions per Info file
      */
-    List<Transaction> parseInfoFile(String folderPath, String fileName);
+    List<Transaction> parseInfoFile(String folderPath, String fileName, Map<Integer, Integer> idMapper);
 }

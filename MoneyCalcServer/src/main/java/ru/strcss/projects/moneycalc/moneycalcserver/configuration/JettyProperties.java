@@ -2,17 +2,16 @@ package ru.strcss.projects.moneycalc.moneycalcserver.configuration;
 
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.validator.constraints.NotEmpty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
+import org.springframework.context.annotation.Configuration;
 
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 
-@Component
-@ConfigurationProperties("jetty")
-@Getter
 @Setter
+@Getter
+@Configuration
+@ConfigurationProperties("jetty")
 public class JettyProperties {
 
     private String threadNamePrefix;
@@ -20,8 +19,8 @@ public class JettyProperties {
     @Min(3)
     private int minThreads;
 
-    @Max(1000)
     @Min(4)
+    @Max(1000)
     private int maxThreads;
 
     private int idleTimeout;

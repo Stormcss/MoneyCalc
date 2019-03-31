@@ -15,6 +15,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcmigrator.api.MigrationAPI;
 import ru.strcss.projects.moneycalc.moneycalcmigrator.api.ServerConnectorI;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.exceptions.MigratorException;
 import ru.strcss.projects.moneycalc.moneycalcmigrator.properties.MigrationProperties;
 
 import java.io.IOException;
@@ -40,7 +41,7 @@ class ServerConnector implements ServerConnectorI {
                 token = registerPerson(access);
             }
         } catch (IOException e) {
-            throw new RuntimeException("Getting Token has failed!", e);
+            throw new MigratorException("Getting Token has failed!", e);
         }
         return token;
     }
@@ -50,7 +51,7 @@ class ServerConnector implements ServerConnectorI {
         try {
             return service.addSpendingSection(token, spendingSection).execute().body().getPayload();
         } catch (IOException e) {
-            throw new RuntimeException("Saving SpendingSection has failed", e);
+            throw new MigratorException("Saving SpendingSection has failed", e);
         }
     }
 
@@ -64,10 +65,10 @@ class ServerConnector implements ServerConnectorI {
         try {
             MoneyCalcRs<Person> registerResponse = service.registerPerson(new Credentials(access, identifications)).execute().body();
             if (registerResponse.getServerStatus() != Status.SUCCESS)
-                throw new RuntimeException("Registration has failed", new RuntimeException(registerResponse.getMessage()));
+                throw new MigratorException("Registration has failed", new RuntimeException(registerResponse.getMessage()));
             return service.login(access).execute().headers().get("Authorization");
         } catch (IOException e) {
-            throw new RuntimeException("Registration has failed!", e);
+            throw new MigratorException("Registration has failed!", e);
         }
     }
 
@@ -76,7 +77,7 @@ class ServerConnector implements ServerConnectorI {
         try {
             return service.getSpendingSections(token).execute().body().getPayload();
         } catch (IOException e) {
-            throw new RuntimeException("Getting SpendingSection list has failed!", e);
+            throw new MigratorException("Getting SpendingSection list has failed!", e);
         }
     }
 
@@ -98,7 +99,7 @@ class ServerConnector implements ServerConnectorI {
                 }
             } catch (Exception e) {
                 rollback = true;
-                e.printStackTrace();
+                log.error("Failed adding transactions", e);
                 break;
             }
         }
@@ -110,12 +111,12 @@ class ServerConnector implements ServerConnectorI {
                         try {
                             service.deleteTransaction(token, transaction.getId()).execute().body();
                         } catch (IOException e) {
-                            log.error("Rollback for transaction id \"{}\" has failed", transaction.getId());
-                            e.printStackTrace();
+                            log.error("Rollback for transaction id '{}' has failed. ", transaction.getId(), e);
                         }
                     }
             );
         }
+        log.info("Added {} transactions...", addedTransactions.size());
         return rollback ? Status.ERROR : Status.SUCCESS;
     }
 }

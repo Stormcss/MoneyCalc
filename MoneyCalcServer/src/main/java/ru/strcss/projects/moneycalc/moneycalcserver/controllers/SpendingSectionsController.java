@@ -41,7 +41,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @RestController
 @RequestMapping("/api/spendingSections")
 @AllArgsConstructor
-public class SpendingSectionsController extends AbstractController {
+public class SpendingSectionsController implements AbstractController {
     private SpendingSectionService sectionService;
 
     /**

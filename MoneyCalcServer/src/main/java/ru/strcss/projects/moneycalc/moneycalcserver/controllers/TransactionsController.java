@@ -48,7 +48,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validatio
 @RestController
 @RequestMapping("/api/transactions")
 @AllArgsConstructor
-public class TransactionsController extends AbstractController {
+public class TransactionsController implements AbstractController {
 
     private TransactionsService transactionsService;
     private PersonService personService;
@@ -56,7 +56,7 @@ public class TransactionsController extends AbstractController {
 
     /**
      * Get filtered list of Transactions by user's login
-     * Returned transactions are filtered by dates range at Settings and active
+     * Returned transactions are filtered by dates range being set at Settings
      *
      * @return response object with list of Transactions
      */
@@ -66,7 +66,7 @@ public class TransactionsController extends AbstractController {
 
         List<Transaction> transactions = transactionsService.getTransactions(login, null);
 
-        log.info("Returning Transactions for login \'{}\'", login);
+        log.info("Returning Transactions for login '{}' - {}", login, transactions);
 
         return responseSuccess(TRANSACTIONS_RETURNED, transactions);
     }
@@ -127,9 +127,8 @@ public class TransactionsController extends AbstractController {
 
     /**
      * Update Person's Transaction
-     *
+     * <p>
      * id field in Income Transaction object will be ignored and overwritten with given transactionID
-     *
      */
     @PutMapping
     public ResponseEntity<MoneyCalcRs<Transaction>> updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) throws Exception {
@@ -138,6 +137,7 @@ public class TransactionsController extends AbstractController {
         RequestValidation<Transaction> requestValidation = new Validator(updateContainer, "Updating Transaction")
                 .addValidation(() -> updateContainer.getTransaction().isValid().isValidated(),
                         () -> fillLog(TRANSACTION_INCORRECT, updateContainer.getTransaction().isValid().getReasons().toString()))
+                // TODO: 17.02.2019 add validation for sectionId existence
                 .validate();
         if (!requestValidation.isValid()) return requestValidation.getValidationError();
 

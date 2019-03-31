@@ -38,11 +38,9 @@
     </root>
 
     <logger name="ru.strcss.projects.moneycalc.moneycalcserver" level="TRACE" additivity="false">
-    <!--<logger name="ru.strcss.projects.moneycalc.moneycalcserver" level="WARN" additivity="false">-->
         <appender-ref ref="RollingFile"/>
         <appender-ref ref="Console"/>
     </logger>
 
     <logger name="ru.strcss.projects.moneycalc.moneycalcserver.mapper" level="INFO" />
-    <!--<logger name="ru.strcss.projects.moneycalc.moneycalcserver.mapper" level="DEBUG" />-->
 </configuration>

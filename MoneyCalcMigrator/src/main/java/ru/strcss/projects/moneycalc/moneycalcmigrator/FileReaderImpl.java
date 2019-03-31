@@ -4,18 +4,21 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcmigrator.api.FileReader;
-import ru.strcss.projects.moneycalc.moneycalcmigrator.dto.PairFilesContainer;
-import ru.strcss.projects.moneycalc.moneycalcmigrator.dto.TransactionParseContainer;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.dto.PairFilesContainer;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.dto.TransactionParseContainer;
+import ru.strcss.projects.moneycalc.moneycalcmigrator.model.exceptions.MigratorException;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
-import java.util.HashMap;
+import java.time.format.DateTimeFormatter;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
+import java.util.TreeMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -25,11 +28,20 @@ import java.util.stream.Stream;
 @Component
 public class FileReaderImpl implements FileReader {
 
+    private Comparator<String> namedDatesComparator() {
+        return (stringDate1, stringDate2) -> {
+            LocalDate date1 = LocalDate.parse(stringDate1, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            LocalDate date2 = LocalDate.parse(stringDate2, DateTimeFormatter.ofPattern("dd.MM.yyyy"));
+            int isAfter = date1.isAfter(date2) ? 1 : 0;
+            return date1.isBefore(date2) ? -1 : isAfter;
+        };
+    }
+
     public Map<String, PairFilesContainer> groupFiles(String filesPath) {
         Pattern periodPattern = Pattern.compile("MoneyCalc(Data|Info)_(.*?).txt");
-        Map<String, PairFilesContainer> filesEntries = new HashMap<>(32);
+        Map<String, PairFilesContainer> filesEntries = new TreeMap<>(namedDatesComparator());
 
-        try (Stream<Path> paths = Files.walk(Paths.get(filesPath))) {
+        try (Stream<Path> paths = Files.walk(Paths.get(filesPath), 1)) {
             paths.filter(Files::isRegularFile)
                     .map(Path::getFileName)
                     .forEach(path -> {
@@ -41,7 +53,7 @@ public class FileReaderImpl implements FileReader {
                         }
                     });
         } catch (IOException e) {
-            throw new RuntimeException("Can not group Data and Info files!", e);
+            throw new MigratorException("Can not group Data and Info files!", e);
         }
         return filesEntries;
     }
@@ -52,14 +64,14 @@ public class FileReaderImpl implements FileReader {
      * @param fileName - file name
      * @return Set of SpendingSection names
      */
-    public Set<String> parseDataFile(String folderPath, String fileName) {
+    public List<String> parseDataFile(String folderPath, String fileName) {
         try (Stream<String> stream = Files.lines(Paths.get(folderPath + "/" + fileName))) {
             return stream
                     .skip(14)
                     .limit(2)
-                    .collect(Collectors.toSet());
+                    .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException("Can not parse Data File!", e);
+            throw new MigratorException("Can not parse Data File!", e);
         }
     }
 
@@ -69,25 +81,26 @@ public class FileReaderImpl implements FileReader {
      * @param fileName - file name
      * @return List of Transactions
      */
-    public List<Transaction> parseInfoFile(String folderPath, String fileName) {
+    @Override
+    public List<Transaction> parseInfoFile(String folderPath, String fileName, Map<Integer, Integer> idMapper) {
         try (Stream<String> stream = Files.lines(Paths.get(folderPath + "/" + fileName))) {
-            // TODO: 19.02.2018 add other sections as well
-            return stream.map(this::buildTransaction)
+            return stream.map(line -> buildTransaction(line, idMapper))
+                    .filter(Objects::nonNull)
                     .peek(t -> log.trace("transaction: {}", t))
                     .collect(Collectors.toList());
         } catch (IOException e) {
-            throw new RuntimeException("Can not parse Info File!", e);
+            throw new MigratorException("Can not parse Info File!", e);
         }
     }
 
     private PairFilesContainer generateContainer(String type, PairFilesContainer container, String path) {
         if (container == null) {
-            if (type.equals("Data"))
+            if ("Data".equals(type))
                 container = new PairFilesContainer(path, null);
             else
                 container = new PairFilesContainer(null, path);
         } else {
-            if (type.equals("Data"))
+            if ("Data".equals(type))
                 container = new PairFilesContainer(path, container.getPathInfoFile());
             else
                 container = new PairFilesContainer(container.getPathDataFile(), path);
@@ -95,24 +108,35 @@ public class FileReaderImpl implements FileReader {
         return container;
     }
 
-    private Transaction buildTransaction(String line) {
-        TransactionParseContainer parseContainer = parseTransactionLine(line);
+    private Transaction buildTransaction(String line, Map<Integer, Integer> idMapper) {
+        TransactionParseContainer parseContainer = parseTransactionLine(line, idMapper);
+        if (parseContainer == null)
+            return null;
         return Transaction.builder()
-                .sectionId(parseContainer.getId()) // FIXME: 19.02.2018 Only 0 and 1 are created
+                .sectionId(parseContainer.getId())
                 .date(parseContainer.getDate())
                 .sum(parseContainer.getSum())
-                .description(parseContainer.getDescription())
+                .title(parseContainer.getDescription())
                 .currency("RUR")
                 .build();
     }
 
-    private TransactionParseContainer parseTransactionLine(String line) {
+    private TransactionParseContainer parseTransactionLine(String line, Map<Integer, Integer> idMapper) {
+        int sectionId;
         String[] part = line.split(" ", 4);
+        int idInFile = Integer.parseInt(part[0]);
+
+        if (idInFile > 2)
+            sectionId = idMapper.get(idInFile);
+        else if (idInFile == 1 || idInFile == 2)
+            sectionId = idInFile;
+        else
+            return null;
         return TransactionParseContainer.builder()
-                .id(Integer.parseInt(part[0]))
+                .id(sectionId)
                 .date(formatDate(part[1]))
                 .sum(Integer.parseInt(part[2]))
-                .description(part[3].replaceFirst(".$", ""))
+                .description(part.length == 4 ? part[3].replaceFirst(".$", "") : null)
                 .build();
     }
 

@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class FinanceSummaryFilter extends AbstractContainer {
+public class FinanceSummaryFilter implements AbstractContainer {
 
     private LocalDate rangeFrom;
     private LocalDate rangeTo;

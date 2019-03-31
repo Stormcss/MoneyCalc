@@ -35,7 +35,7 @@ public class SummaryStatisticsHandlerTest {
     }
 
     @Test(invocationCount = 3)
-    public void testCalculateSummaryStatistics_decimalPlaces() {
+    public void shouldReturnCorrectCountOfDecimalPlaces() {
         FinanceSummaryCalculationContainer finSummContainer = generateFinSummCalculContainer(50, 500);
 
         List<FinanceSummaryBySection> financeSummaryList = statisticsHandler.calculateSummaryStatisticsBySection(finSummContainer);

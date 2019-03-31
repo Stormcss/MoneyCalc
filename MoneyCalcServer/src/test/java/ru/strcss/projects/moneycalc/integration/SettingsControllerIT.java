@@ -42,7 +42,7 @@ public class SettingsControllerIT extends AbstractIT {
         MoneyCalcRs<Settings> updatedRs = sendRequest(service.updateSettings(token, newSettings), Status.SUCCESS).body();
 
         assertNotNull(updatedRs.getPayload(), "Payload is null!");
-        assertEquals(newSettings.getPeriodTo(),
-                updatedRs.getPayload().getPeriodTo(), "Settings were not updated!");
+        assertEquals(updatedRs.getPayload().getPeriodTo(),
+                newSettings.getPeriodTo(), "Settings were not updated!");
     }
 }
