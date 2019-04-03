@@ -12,9 +12,11 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.handlers.HttpExceptionHandler;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.TransactionsMapper;
@@ -62,7 +64,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_UPDATED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
-import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionList;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionsSearchRs;
 import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
 
 @WebMvcTest(controllers = TransactionsController.class)
@@ -91,11 +93,11 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
     @BeforeMethod
     public void prepareTransactionsSuccessfulScenario() {
-        List<Transaction> transactionList = generateTransactionList(TRANSACTIONS_COUNT, sectionIds);
+        TransactionsSearchRs transactionList = generateTransactionsSearchRs(TRANSACTIONS_COUNT, sectionIds, true);
 
-        when(transactionsMapper.getTransactions(anyString(), eq(null)))
+        when(transactionsMapper.getTransactions(anyString(), eq(null), eq(true)))
                 .thenReturn(transactionList);
-        when(transactionsMapper.getTransactions(anyString(), any(TransactionsSearchFilter.class)))
+        when(transactionsMapper.getTransactions(anyString(), any(TransactionsSearchFilter.class), eq(true)))
                 .thenReturn(transactionList);
         when(userMapper.getUserIdByLogin(anyString()))
                 .thenReturn(1L);
@@ -116,8 +118,12 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         mockMvc.perform(get("/api/transactions")
                 .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(TRANSACTIONS_COUNT)));
+                .andExpect(jsonPath("$.stats.sum").isNumber())
+                .andExpect(jsonPath("$.stats.min").isNumber())
+                .andExpect(jsonPath("$.stats.max").isNumber())
+                .andExpect(jsonPath("$.stats.avg").isNumber())
+                .andExpect(jsonPath("$.items[*]", hasSize(TRANSACTIONS_COUNT)))
+                .andExpect(jsonPath("$.count", is(TRANSACTIONS_COUNT)));
     }
 
     @Test
@@ -131,8 +137,12 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(searchFilter)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(TRANSACTIONS_COUNT)));
+                .andExpect(jsonPath("$.stats.sum").isNumber())
+                .andExpect(jsonPath("$.stats.min").isNumber())
+                .andExpect(jsonPath("$.stats.max").isNumber())
+                .andExpect(jsonPath("$.stats.avg").isNumber())
+                .andExpect(jsonPath("$.items[*]", hasSize(TRANSACTIONS_COUNT)))
+                .andExpect(jsonPath("$.count", is(TRANSACTIONS_COUNT)));
     }
 
     @Test
@@ -178,8 +188,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new TransactionsSearchFilter())))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                .andExpect(jsonPath("$.userMessage", stringContainsInOrder(
                         Arrays.asList("Required fields are incorrect:", "dateFrom is empty", "dateTo is empty")
                 )));
     }
@@ -195,8 +204,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(searchFilter)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(DATE_SEQUENCE_INCORRECT)));
+                .andExpect(jsonPath("$.userMessage", is(DATE_SEQUENCE_INCORRECT)));
     }
 
     @Test(dataProvider = "incorrectTransactionAddDataProvider")
@@ -327,6 +335,11 @@ public class TransactionsControllerTest extends AbstractControllerTest {
         @Bean
         PersonService personService(UserMapper userMapper) {
             return new PersonServiceImpl(userMapper);
+        }
+
+        @Bean
+        HttpExceptionHandler httpExceptionHandler() {
+            return new HttpExceptionHandler();
         }
     }
 }

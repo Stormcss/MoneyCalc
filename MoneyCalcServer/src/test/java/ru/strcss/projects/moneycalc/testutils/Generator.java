@@ -2,6 +2,8 @@ package ru.strcss.projects.moneycalc.testutils;
 
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsStats;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
@@ -9,6 +11,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
@@ -102,6 +105,18 @@ public class Generator {
         return IntStream.range(0, count)
                 .mapToObj(value -> generateTransaction(sectionIds.get(ThreadLocalRandom.current().nextInt(sectionIds.size()))))
                 .collect(Collectors.toList());
+    }
+
+    /**
+     * Generates {@link TransactionsSearchRs} object with required parameters
+     *
+     * @param count      - required objects count
+     * @param sectionIds - desired sectionIds for these Transactions
+     */
+    public static TransactionsSearchRs generateTransactionsSearchRs(int count, List<Integer> sectionIds, boolean isStatsRequired) {
+        List<Transaction> transactions = generateTransactionList(count, sectionIds);
+        TransactionsStats stats = new TransactionsStats(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.TEN);
+        return new TransactionsSearchRs(transactions.size(), isStatsRequired ? stats : null, transactions);
     }
 
     public static String UUID() {

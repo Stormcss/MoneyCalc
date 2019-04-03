@@ -11,7 +11,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.TimerT
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.model.dto.SpendingSectionFilter;
-import ru.strcss.projects.moneycalc.moneycalcserver.model.dto.exceptions.MoneyCalcServerException;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.MoneyCalcServerException;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 
 import java.util.List;

@@ -39,6 +39,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -53,7 +54,7 @@ import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.STATISTICS_RETURNED;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateFinanceSummaryBySectionList;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSectionList;
-import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionList;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionsSearchRs;
 import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
 
 @WebMvcTest(controllers = StatisticsController.class)
@@ -101,8 +102,8 @@ public class StatisticsControllerTest extends AbstractControllerTest {
 
         doAnswer(invocation -> {
             List<Integer> sections = ((TransactionsSearchFilter) invocation.getArgument(1)).getRequiredSections();
-            return generateTransactionList(TRANSACTIONS_COUNT, sections);
-        }).when(transactionsMapper).getTransactions(anyString(), any(TransactionsSearchFilter.class));
+            return generateTransactionsSearchRs(TRANSACTIONS_COUNT, sections, false);
+        }).when(transactionsMapper).getTransactions(anyString(), any(TransactionsSearchFilter.class), eq(false));
 
         doAnswer(invocation -> {
             int size = ((FinanceSummaryCalculationContainer) invocation.getArgument(0)).getSections().size();
@@ -122,7 +123,7 @@ public class StatisticsControllerTest extends AbstractControllerTest {
 
         //asserting that correct transactions are requested
         ArgumentCaptor<TransactionsSearchFilter> transactionSearchArgument = ArgumentCaptor.forClass(TransactionsSearchFilter.class);
-        verify(transactionsMapper).getTransactions(anyString(), transactionSearchArgument.capture());
+        verify(transactionsMapper).getTransactions(anyString(), transactionSearchArgument.capture(), eq(false));
         assertEquals(transactionSearchArgument.getValue().getDateFrom(), settingsDateFrom);
         assertEquals(transactionSearchArgument.getValue().getDateTo(), settingsDateTo);
         assertEquals(transactionSearchArgument.getValue().getRequiredSections().size(), SECTIONS_COUNT);
@@ -156,7 +157,7 @@ public class StatisticsControllerTest extends AbstractControllerTest {
 
         //asserting that correct transactions are requested
         ArgumentCaptor<TransactionsSearchFilter> transactionSearchArgument = ArgumentCaptor.forClass(TransactionsSearchFilter.class);
-        verify(transactionsMapper).getTransactions(anyString(), transactionSearchArgument.capture());
+        verify(transactionsMapper).getTransactions(anyString(), transactionSearchArgument.capture(), eq(false));
         assertEquals(transactionSearchArgument.getValue().getDateFrom(), customDateFrom);
         assertEquals(transactionSearchArgument.getValue().getDateTo(), customDateTo);
         assertEquals(transactionSearchArgument.getValue().getRequiredSections().size(), sectionIds.size());

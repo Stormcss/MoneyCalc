@@ -7,6 +7,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
@@ -53,19 +54,22 @@ public class TransactionsControllerIT extends AbstractIT {
         addTransaction(service, token, generateTransaction(generateDatePlus(ChronoUnit.DAYS, 1)));
 
         //Requesting Transactions from today to tomorrow
-        MoneyCalcRs<List<Transaction>> today2TomorrowRs = getTransactions(service, token, LocalDate.now(),
+        TransactionsSearchRs today2TomorrowRs = getTransactions(service, token, LocalDate.now(),
                 generateDatePlus(ChronoUnit.DAYS, 1), Collections.emptyList());
-        assertEquals(today2TomorrowRs.getPayload().size(), 2, INCORRECT_TRANSACTIONS_COUNT);
+        assertEquals(today2TomorrowRs.getItems().size(), 2, INCORRECT_TRANSACTIONS_COUNT);
+        assertEquals((int) today2TomorrowRs.getCount(), 2, INCORRECT_TRANSACTIONS_COUNT);
 
         //Requesting Transactions from yesterday to today
-        MoneyCalcRs<List<Transaction>> yesterday2TodayRs = getTransactions(service, token,
+        TransactionsSearchRs yesterday2TodayRs = getTransactions(service, token,
                 generateDateMinus(ChronoUnit.DAYS, 1), LocalDate.now(), Collections.emptyList());
-        assertEquals(yesterday2TodayRs.getPayload().size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+        assertEquals(yesterday2TodayRs.getItems().size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+        assertEquals((int) yesterday2TodayRs.getCount(), 1, INCORRECT_TRANSACTIONS_COUNT);
 
         //Requesting Transactions from yesterday to tomorrow
-        MoneyCalcRs<List<Transaction>> tomorrowAndLaterRs = getTransactions(service, token,
+        TransactionsSearchRs tomorrowAndLaterRs = getTransactions(service, token,
                 generateDatePlus(ChronoUnit.DAYS, 1), generateDatePlus(ChronoUnit.DAYS, 2), Collections.emptyList());
-        assertEquals(tomorrowAndLaterRs.getPayload().size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+        assertEquals(tomorrowAndLaterRs.getItems().size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+        assertEquals((int) tomorrowAndLaterRs.getCount(), 1, INCORRECT_TRANSACTIONS_COUNT);
     }
 
     /**
@@ -95,18 +99,18 @@ public class TransactionsControllerIT extends AbstractIT {
         for (int sectionId = 1; sectionId <= numOfSections; sectionId++) {
             int finalSectionId = sectionId;
 
-            MoneyCalcRs<List<Transaction>> singleSectionRs = getTransactions(service, token, LocalDate.now(),
+            TransactionsSearchRs singleSectionRs = getTransactions(service, token, LocalDate.now(),
                     generateDatePlus(ChronoUnit.DAYS, 1), Collections.singletonList(sectionId));
 
-            assertEquals(singleSectionRs.getPayload().size(), numOfAddedTransactionsPerSection, INCORRECT_TRANSACTIONS_COUNT);
-            assertTrue(singleSectionRs.getPayload().stream().allMatch(t -> t.getSectionId() == finalSectionId),
+            assertEquals(singleSectionRs.getItems().size(), numOfAddedTransactionsPerSection, INCORRECT_TRANSACTIONS_COUNT);
+            assertTrue(singleSectionRs.getItems().stream().allMatch(t -> t.getSectionId() == finalSectionId),
                     "Some of returned Transactions has wrong SectionId");
         }
         //Requesting Transactions with Multiple Sections
         if (numOfSections > 1) {
-            MoneyCalcRs<List<Transaction>> multipleSectionsRs = getTransactions(service, token, LocalDate.now(),
+            TransactionsSearchRs multipleSectionsRs = getTransactions(service, token, LocalDate.now(),
                     generateDatePlus(ChronoUnit.DAYS, 1), Arrays.asList(1, 2));
-            assertEquals(multipleSectionsRs.getPayload().size(), numOfAddedTransactionsPerSection * 2,
+            assertEquals(multipleSectionsRs.getItems().size(), numOfAddedTransactionsPerSection * 2,
                     INCORRECT_TRANSACTIONS_COUNT);
         }
     }
@@ -120,9 +124,9 @@ public class TransactionsControllerIT extends AbstractIT {
 
         addTransaction(service, token, generateTransaction());
 
-        MoneyCalcRs<List<Transaction>> getTransactionsRs = getTransactions(service, token,
+        TransactionsSearchRs getTransactionsRs = getTransactions(service, token,
                 generateDateMinus(ChronoUnit.DAYS, 1), generateDatePlus(ChronoUnit.DAYS, 1), Collections.emptyList());
-        assertEquals(getTransactionsRs.getPayload().size(), 1, "Size of returned Transactions list is not 1!");
+        assertEquals(getTransactionsRs.getItems().size(), 1, "Size of returned Transactions list is not 1!");
     }
 
     /**
@@ -161,11 +165,11 @@ public class TransactionsControllerIT extends AbstractIT {
         sendRequest(service.deleteTransaction(token, idToDelete), SUCCESS).body();
 
         //Getting Transactions list
-        MoneyCalcRs<List<Transaction>> getTransactionsRs = getTransactions(service, token, LocalDate.now(), LocalDate.now(),
+        TransactionsSearchRs getTransactionsRs = getTransactions(service, token, LocalDate.now(), LocalDate.now(),
                 Collections.emptyList());
-        assertEquals(getTransactionsRs.getPayload().size(), numOfAddedTransactions - 1,
+        assertEquals(getTransactionsRs.getItems().size(), numOfAddedTransactions - 1,
                 "List size after delete has not decreased!");
-        assertFalse(getTransactionsRs.getPayload().stream().anyMatch(transaction -> transaction.getId().equals(idToDelete)),
+        assertFalse(getTransactionsRs.getItems().stream().anyMatch(transaction -> transaction.getId().equals(idToDelete)),
                 "Transaction was not deleted!");
     }
 
@@ -196,20 +200,20 @@ public class TransactionsControllerIT extends AbstractIT {
                 new TransactionUpdateContainer(idToUpdate, generateTransaction(newDate))), SUCCESS);
 
         //Getting Transactions list
-        List<Transaction> transactionsList = getTransactions(service, token, newDate, LocalDate.now(),
-                Collections.emptyList()).getPayload();
+        TransactionsSearchRs transactionsRs = getTransactions(service, token, newDate, LocalDate.now(),
+                Collections.emptyList());
 
-        assertTrue(transactionsList.stream()
+        assertTrue(transactionsRs.getItems().stream()
                 .map(Transaction::getId)
                 .anyMatch(id -> id.equals(idToUpdate)), "Id of updated Transaction has changed!");
-        assertEquals(transactionsList.size(), numOfAddedTransactions, "Size of Transactions list has changed!");
+        assertEquals(transactionsRs.getItems().size(), numOfAddedTransactions, "Size of Transactions list has changed!");
 
         Transaction beforeUpdatedTransaction = addedTransactions.stream()
                 .filter(transaction -> transaction.getId().equals(idToUpdate))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Transaction is not found"));
 
-        Transaction updatedTransaction = transactionsList.stream()
+        Transaction updatedTransaction = transactionsRs.getItems().stream()
                 .filter(transaction -> transaction.getId().equals(idToUpdate))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Transaction is not found"));
@@ -217,7 +221,7 @@ public class TransactionsControllerIT extends AbstractIT {
         assertNotEquals(updatedTransaction.getSum(), beforeUpdatedTransaction.getSum(), "Sum in Transaction after update has not changed!");
         assertEquals(updatedTransaction.getId(), beforeUpdatedTransaction.getId(), "id of updated Transaction has changed!");
         assertEquals(updatedTransaction.getSectionId(), beforeUpdatedTransaction.getSectionId(), "inner id of updated Transaction has changed!");
-        assertTrue(assertTransactionsOrderedByDate(transactionsList), "Transaction list is not ordered by date!");
+        assertTrue(assertTransactionsOrderedByDate(transactionsRs.getItems()), "Transaction list is not ordered by date!");
     }
 
     /**
@@ -237,10 +241,10 @@ public class TransactionsControllerIT extends AbstractIT {
         Transaction newTransaction = generateTransaction(newTitle, "newDesc");
         sendRequest(service.updateTransaction(token, new TransactionUpdateContainer(updatedTransactionId, newTransaction)), SUCCESS).body();
 
-        List<Transaction> transactionList = getTransactions(service, token).getPayload();
+        TransactionsSearchRs transactionList = getTransactions(service, token);
 
-        assertEquals(transactionList.get(0).getTitle(), title1, "Old transaction title has changed!");
-        assertEquals(transactionList.get(1).getTitle(), newTitle, "Transaction title has not changed!");
+        assertEquals(transactionList.getItems().get(0).getTitle(), title1, "Old transaction title has changed!");
+        assertEquals(transactionList.getItems().get(1).getTitle(), newTitle, "Transaction title has not changed!");
     }
 
     @Test
@@ -257,13 +261,13 @@ public class TransactionsControllerIT extends AbstractIT {
 
         // filtering by title by mask
         searchContainer.setTitle("%itle%");
-        List<Transaction> filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
-        assertEquals(filteredTransactions.size(), numOfAddedTransactions, INCORRECT_TRANSACTIONS_COUNT);
+        TransactionsSearchRs filteredTransactions = getTransactions(service, token, searchContainer);
+        assertEquals(filteredTransactions.getItems().size(), numOfAddedTransactions, INCORRECT_TRANSACTIONS_COUNT);
 
         // filtering by exact match
         searchContainer.setTitle("title4");
-        filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
-        assertEquals(filteredTransactions.size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+        filteredTransactions = getTransactions(service, token, searchContainer);
+        assertEquals(filteredTransactions.getItems().size(), 1, INCORRECT_TRANSACTIONS_COUNT);
     }
 
     @Test
@@ -280,13 +284,13 @@ public class TransactionsControllerIT extends AbstractIT {
 
         // filtering by title by mask
         searchContainer.setDescription("%esc%");
-        List<Transaction> filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
-        assertEquals(filteredTransactions.size(), numOfAddedTransactions, INCORRECT_TRANSACTIONS_COUNT);
+        TransactionsSearchRs filteredTransactions = getTransactions(service, token, searchContainer);
+        assertEquals(filteredTransactions.getItems().size(), numOfAddedTransactions, INCORRECT_TRANSACTIONS_COUNT);
 
         // filtering by exact match
         searchContainer.setDescription("desc4");
-        filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
-        assertEquals(filteredTransactions.size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+        filteredTransactions = getTransactions(service, token, searchContainer);
+        assertEquals(filteredTransactions.getItems().size(), 1, INCORRECT_TRANSACTIONS_COUNT);
     }
 
     @Test
@@ -303,8 +307,8 @@ public class TransactionsControllerIT extends AbstractIT {
 
         searchContainer.setPriceFrom(BigDecimal.valueOf(100));
         searchContainer.setPriceTo(BigDecimal.valueOf(301));
-        List<Transaction> filteredTransactions = getTransactions(service, token, searchContainer).getPayload();
-        assertEquals(filteredTransactions.size(), 3, INCORRECT_TRANSACTIONS_COUNT);
+        TransactionsSearchRs filteredTransactions = getTransactions(service, token, searchContainer);
+        assertEquals(filteredTransactions.getItems().size(), 3, INCORRECT_TRANSACTIONS_COUNT);
     }
 
     @Test
@@ -316,18 +320,18 @@ public class TransactionsControllerIT extends AbstractIT {
         IntStream.range(0, transactionsCount)
                 .forEach(value -> addTransaction(service, token, generateTransaction(LocalDate.now().minus(value, ChronoUnit.DAYS))));
 
-        List<Transaction> transactionsCountBeforeUpdate = getTransactions(service, token).getPayload();
-        assertEquals(transactionsCountBeforeUpdate.size(), 1, INCORRECT_TRANSACTIONS_COUNT);
+        TransactionsSearchRs transactionsRsBeforeUpdate = getTransactions(service, token);
+        assertEquals(transactionsRsBeforeUpdate.getItems().size(), 1, INCORRECT_TRANSACTIONS_COUNT);
 
         //changing Settings range - last transaction date is before periodTo
         LocalDate periodFrom = LocalDate.now().minus(transactionsCount, ChronoUnit.DAYS);
         LocalDate periodTo = LocalDate.now().plus(1, ChronoUnit.DAYS);
         sendRequest(service.updateSettings(token, new Settings(periodFrom, periodTo)), Status.SUCCESS);
-        assertEquals(getTransactions(service, token).getPayload().size(), transactionsCount, INCORRECT_TRANSACTIONS_COUNT);
+        assertEquals(getTransactions(service, token).getItems().size(), transactionsCount, INCORRECT_TRANSACTIONS_COUNT);
 
         //changing Settings range - last transaction is equal to periodTo
         periodFrom = LocalDate.now().minus(transactionsCount, ChronoUnit.DAYS);
         sendRequest(service.updateSettings(token, new Settings(periodFrom, LocalDate.now())), Status.SUCCESS);
-        assertEquals(getTransactions(service, token).getPayload().size(), transactionsCount - 1, INCORRECT_TRANSACTIONS_COUNT);
+        assertEquals(getTransactions(service, token).getItems().size(), transactionsCount - 1, INCORRECT_TRANSACTIONS_COUNT);
     }
 }

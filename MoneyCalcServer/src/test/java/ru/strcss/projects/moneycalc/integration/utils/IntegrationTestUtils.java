@@ -9,6 +9,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
@@ -34,8 +35,8 @@ public class IntegrationTestUtils {
         return sendRequest(call, null);
     }
 
-    public static <T> Response<MoneyCalcRs<T>> sendRequest(Call<MoneyCalcRs<T>> call, Status expectedStatus) {
-        Response<MoneyCalcRs<T>> response;
+    public static <T> Response<T> sendRequest(Call<T> call, Status expectedStatus) {
+        Response<T> response;
         try {
             response = call.execute();
         } catch (IOException e) {
@@ -48,17 +49,41 @@ public class IntegrationTestUtils {
             String errorBodyMessage = getErrorBodyMessage(response);
             log.debug("{} - {}", errorBodyMessage, response.code());
             if (expectedStatus != null && expectedStatus.equals(Status.SUCCESS))
-                // TODO: 30.05.2018 add storing http code in Status object
                 assertEquals(response.code(), 200, errorBodyMessage);
-//                assertEquals(response.code(), 200, "Response code is not 200!");
         } else {
             assertNotNull(response.body(), "Response body is null!");
-            if (expectedStatus != null)
-                assertEquals(response.body().getServerStatus(), expectedStatus, response.body().getMessage());
-            log.debug("{} - {}", response.body().getMessage(), response.body().getServerStatus().name());
+//            if (expectedStatus != null && type.isInstance(MoneyCalcRs.class) )
+//                assertEquals(response.body().getServerStatus(), expectedStatus, response.body().getMessage());
+            log.debug("Received - {} with HTTP status {}", response.body(), response.code());
         }
         return response;
     }
+
+//    public static <T> Response<MoneyCalcRs<T>> sendRequest(Call<MoneyCalcRs<T>> call, Status expectedStatus) {
+//        Response<MoneyCalcRs<T>> response;
+//        try {
+//            response = call.execute();
+//        } catch (IOException e) {
+//            throw new RuntimeException("Can not send Request!", e);
+//        }
+//
+//        assertNotNull(response, "Response is null!");
+//
+//        if (response.body() == null /*&& expectedStatus != null && expectedStatus.equals(Status.ERROR)*/) {
+//            String errorBodyMessage = getErrorBodyMessage(response);
+//            log.debug("{} - {}", errorBodyMessage, response.code());
+//            if (expectedStatus != null && expectedStatus.equals(Status.SUCCESS))
+//                // TODO: 30.05.2018 add storing http code in Status object
+//                assertEquals(response.code(), 200, errorBodyMessage);
+////                assertEquals(response.code(), 200, "Response code is not 200!");
+//        } else {
+//            assertNotNull(response.body(), "Response body is null!");
+//            if (expectedStatus != null)
+//                assertEquals(response.body().getServerStatus(), expectedStatus, response.body().getMessage());
+//            log.debug("{} - {}", response.body().getMessage(), response.body().getServerStatus().name());
+//        }
+//        return response;
+//    }
 
     public static String getErrorBodyMessage(Response response) {
         try {
@@ -190,7 +215,7 @@ public class IntegrationTestUtils {
     /**
      * Get Transactions with applied filter
      */
-    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, TransactionsSearchFilter
+    public static TransactionsSearchRs getTransactions(MoneyCalcClient service, String token, TransactionsSearchFilter
             searchContainer) {
         return sendRequest(service.getTransactions(token, searchContainer), Status.SUCCESS).body();
     }
@@ -198,12 +223,12 @@ public class IntegrationTestUtils {
     /**
      * Get Transactions without filter
      */
-    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token) {
+    public static TransactionsSearchRs getTransactions(MoneyCalcClient service, String token) {
         return sendRequest(service.getTransactions(token), Status.SUCCESS).body();
     }
 
-    public static MoneyCalcRs<List<Transaction>> getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
-                                                                 LocalDate dateTo, List<Integer> sectionIds) {
+    public static TransactionsSearchRs getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
+                                                       LocalDate dateTo, List<Integer> sectionIds) {
         TransactionsSearchFilter container = new TransactionsSearchFilter();
         container.setDateFrom(dateFrom);
         container.setDateTo(dateTo);

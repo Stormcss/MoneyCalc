@@ -14,6 +14,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.Spe
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
@@ -83,11 +84,11 @@ public interface MoneyCalcClient {
      * Transactions
      */
     @GET("/api/transactions")
-    Call<MoneyCalcRs<List<Transaction>>> getTransactions(@Header("Authorization") String token);
+    Call<TransactionsSearchRs> getTransactions(@Header("Authorization") String token);
 
     @POST("/api/transactions/getFiltered")
-    Call<MoneyCalcRs<List<Transaction>>> getTransactions(@Header("Authorization") String token,
-                                                         @Body TransactionsSearchFilter container);
+    Call<TransactionsSearchRs> getTransactions(@Header("Authorization") String token,
+                                               @Body TransactionsSearchFilter container);
 
     @POST("/api/transactions")
     Call<MoneyCalcRs<Transaction>> addTransaction(@Header("Authorization") String token,

@@ -21,7 +21,9 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 @AllArgsConstructor
 public class RequestValidation<E> {
     private boolean isValid;
+    @Deprecated
     private ResponseEntity<MoneyCalcRs<E>> validationError;
+    private String reason;
 
     @RequiredArgsConstructor
     public static class Validator {
@@ -45,12 +47,13 @@ public class RequestValidation<E> {
         public <E> RequestValidation<E> validate() {
             if (container == null) {
                 log.error("Container is null");
-                return new RequestValidation<>(false, responseError("Container is null"));
+                return new RequestValidation<>(false, responseError("Container is null"), "Container is null");
             } else {
                 ValidationResult validationResult = container.isValid();
                 if (!validationResult.isValidated()) {
                     log.error("{} has failed - required fields are incorrect: {}", actionName, validationResult.getReasons());
-                    return new RequestValidation<>(false, responseError("Required fields are incorrect: " + validationResult.getReasons()));
+                    String message = "Required fields are incorrect: " + validationResult.getReasons();
+                    return new RequestValidation<>(false, responseError(message), message);
                 }
             }
 
@@ -64,10 +67,10 @@ public class RequestValidation<E> {
                     } else {
                         errorMsg = pair.getActionName().get();
                     }
-                    return new RequestValidation<>(false, responseError(errorMsg));
+                    return new RequestValidation<>(false, responseError(errorMsg), errorMsg);
                 }
             }
-            return new RequestValidation<>(true, null);
+            return new RequestValidation<>(true, null, null);
         }
     }
 

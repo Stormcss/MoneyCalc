@@ -14,10 +14,10 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationCo
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
-import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.TimerType;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
@@ -68,13 +68,13 @@ public class StatisticsController implements AbstractController {
         TransactionsSearchFilter transactionsFilter = new TransactionsSearchFilter(dateFrom, dateTo, sectionIds,
                 null, null, null, null);
 
-        List<Transaction> transactionsList = transactionsService.getTransactions(login, transactionsFilter);
+        TransactionsSearchRs transactionsSearchRs = transactionsService.getTransactions(login, transactionsFilter, false);
 
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
                 .rangeFrom(dateFrom)
                 .rangeTo(dateTo)
                 .sections(sectionIds)
-                .transactions(transactionsList)
+                .transactions(transactionsSearchRs.getItems())
                 .spendingSections(spendingSections)
                 .today(LocalDate.now())
                 .build();
@@ -102,7 +102,7 @@ public class StatisticsController implements AbstractController {
         TransactionsSearchFilter transactionsFilter = new TransactionsSearchFilter(summaryFilter.getRangeFrom(),
                 summaryFilter.getRangeTo(), summaryFilter.getSectionIds(), null, null, null, null);
 
-        List<Transaction> transactions = transactionsService.getTransactions(login, transactionsFilter);
+        TransactionsSearchRs transactionsSearchRs = transactionsService.getTransactions(login, transactionsFilter, false);
 
         //оставляю только те секции клиента для которых мне нужна статистика
         List<SpendingSection> spendingSections = sectionService.getSpendingSections(login, false,
@@ -119,7 +119,7 @@ public class StatisticsController implements AbstractController {
                 .rangeFrom(summaryFilter.getRangeFrom())
                 .rangeTo((summaryFilter.getRangeTo()))
                 .sections(summaryFilter.getSectionIds())
-                .transactions(transactions)
+                .transactions(transactionsSearchRs.getItems())
                 .spendingSections(spendingSections)
                 .today(LocalDate.now())
                 .build();

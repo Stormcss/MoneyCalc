@@ -7,31 +7,42 @@
     </resultMap>
     <select id="getTransactionById" resultMap="getTransactionByIdMap">
         <![CDATA[
-
             select t.* from "Transactions" t
             join "User" p on t."userId" = p.id
             join "Access" a on p."accessId" = a.id
             where t.id = #{transactionId}
             and a.login = #{login}
-
         ]]>
     </select>
 
-    <resultMap id="getTransactionsMap" type="ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction"
-               autoMapping="true">
+    <resultMap id="getTransactionsMap"
+               type="ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs"
+               autoMapping="false">
+        <result property="count" column="count"/>
+        <association property="stats"
+                     javaType="ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsStats"
+                     autoMapping="true"/>
+        <collection property="items" ofType="ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction"
+                    autoMapping="true"/>
     </resultMap>
     <select id="getTransactions" resultMap="getTransactionsMap">
-        <![CDATA[
-                        select t.* from "Transactions" t
-                            join "User" u on t."userId" = u.id
-                            join "Access" a on a.id = u."accessId"]]>
+        select count(*) over () as count, t.*
+        <if test="isStatsRequired == true">
+            ,sum(t.sum) over() as sum,
+            min(t.sum) over() as min,
+            max(t.sum) over() as max,
+            avg(t.sum) over() as avg
+        </if>
+        from "Transactions" t
+        join "User" u on t."userId" = u.id
+        join "Access" a on a.id = u."accessId"
         <if test="filter == null">
             join "Settings" s on u."settingsId" = s.id
         </if>
         where a.login = #{login}
         <if test="filter == null"><![CDATA[
-            and t.date >= s."periodFrom"
-            and t.date < s."periodTo"]]>
+                and t.date >= s."periodFrom"
+                and t.date < s."periodTo"]]>
         </if>
         <if test="filter != null">
             <if test="filter.dateFrom != null">

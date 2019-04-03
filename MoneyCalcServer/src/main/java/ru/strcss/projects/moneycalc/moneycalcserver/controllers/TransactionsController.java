@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.IncorrectRequestException;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
@@ -28,7 +30,6 @@ import java.util.List;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.DATE_SEQUENCE_INCORRECT;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.NO_PERSON_LOGIN_EXISTS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_ID_NOT_EXISTS;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTIONS_RETURNED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_DELETED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_INCORRECT;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_DELETED;
@@ -61,14 +62,14 @@ public class TransactionsController implements AbstractController {
      * @return response object with list of Transactions
      */
     @GetMapping
-    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions() throws Exception {
+    public TransactionsSearchRs getTransactions() throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        List<Transaction> transactions = transactionsService.getTransactions(login, null);
+        TransactionsSearchRs transactions = transactionsService.getTransactions(login, null, true);
 
         log.info("Returning Transactions for login '{}' - {}", login, transactions);
 
-        return responseSuccess(TRANSACTIONS_RETURNED, transactions);
+        return transactions;
     }
 
     /**
@@ -78,20 +79,21 @@ public class TransactionsController implements AbstractController {
      * @return response object with list of Transactions
      */
     @PostMapping(value = "/getFiltered")
-    public ResponseEntity<MoneyCalcRs<List<Transaction>>> getTransactions(@RequestBody TransactionsSearchFilter getFilter) throws Exception {
+    public TransactionsSearchRs getTransactions(@RequestBody TransactionsSearchFilter getFilter) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         RequestValidation<List<Transaction>> requestValidation = new Validator(getFilter, "Getting Transactions")
                 .addValidation(() -> isDateSequenceValid(getFilter.getDateFrom(), getFilter.getDateTo()),
                         () -> DATE_SEQUENCE_INCORRECT)
                 .validate();
-        if (!requestValidation.isValid()) return requestValidation.getValidationError();
+        if (!requestValidation.isValid())
+            throw new IncorrectRequestException(requestValidation.getReason());
 
-        List<Transaction> transactions = transactionsService.getTransactions(login, getFilter);
+        TransactionsSearchRs transactions = transactionsService.getTransactions(login, getFilter, true);
 
         log.info("Returning Transactions for login '{}', applying Filter: {} - {}", login, getFilter, transactions);
 
-        return responseSuccess(TRANSACTIONS_RETURNED, transactions);
+        return transactions;
     }
 
     @PostMapping

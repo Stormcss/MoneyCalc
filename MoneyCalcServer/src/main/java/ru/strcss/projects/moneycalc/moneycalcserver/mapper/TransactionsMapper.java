@@ -3,9 +3,8 @@ package ru.strcss.projects.moneycalc.moneycalcserver.mapper;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
-
-import java.util.List;
 
 /**
  * Created by Stormcss
@@ -15,7 +14,8 @@ import java.util.List;
 public interface TransactionsMapper {
     Transaction getTransactionById(@Param("login") String login, @Param("transactionId") Long transactionId);
 
-    List<Transaction> getTransactions(@Param("login") String login, @Param("filter") TransactionsSearchFilter filter);
+    TransactionsSearchRs getTransactions(@Param("login") String login, @Param("filter") TransactionsSearchFilter filter,
+                                         @Param("isStatsRequired") boolean isStatsRequired);
 
     Long addTransaction(Transaction transaction);
 
