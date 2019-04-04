@@ -2,7 +2,6 @@ package ru.strcss.projects.moneycalc.integration;
 
 import org.testng.annotations.BeforeGroups;
 import org.testng.annotations.Test;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
@@ -215,8 +214,6 @@ public class StatisticsControllerIT extends AbstractIT {
         return transactions.stream()
                 .map(transaction -> sendRequest(service.addTransaction(token, transaction)).body())
                 .filter(Objects::nonNull)
-                .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());
     }
-
 }

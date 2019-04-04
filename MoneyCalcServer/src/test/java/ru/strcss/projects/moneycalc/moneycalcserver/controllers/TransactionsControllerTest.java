@@ -51,17 +51,12 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.ERROR;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.DATE_SEQUENCE_INCORRECT;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_ID_NOT_EXISTS;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_DELETED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_DELETED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_FOUND;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_NOT_UPDATED;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_SAVED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_SAVING_ERROR;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.TRANSACTION_UPDATED;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionsSearchRs;
@@ -152,10 +147,8 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateTransaction("title", "desc"))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.message", is(TRANSACTION_SAVED)))
-                .andExpect(jsonPath("$.payload.title", is("title")))
-                .andExpect(jsonPath("$.payload.description", is("desc")));
+                .andExpect(jsonPath("$.title", is("title")))
+                .andExpect(jsonPath("$.description", is("desc")));
     }
 
     @Test
@@ -165,9 +158,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.message", is(TRANSACTION_UPDATED)))
-                .andExpect(jsonPath("$.payload[*]", hasSize(greaterThan(0))));
+                .andExpect(jsonPath("$[*]", hasSize(greaterThan(0))));
     }
 
     @Test
@@ -176,9 +167,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.message", is(TRANSACTION_DELETED)));
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -214,8 +203,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(transaction)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                .andExpect(jsonPath("$.userMessage", stringContainsInOrder(
                         Arrays.asList("Required fields are incorrect:", expectedHint)
                 )));
     }
@@ -231,8 +219,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateTransaction(sectionId))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(fillLog(SPENDING_SECTION_ID_NOT_EXISTS, String.valueOf(sectionId)))));
+                .andExpect(jsonPath("$.userMessage", is(fillLog(SPENDING_SECTION_ID_NOT_EXISTS, String.valueOf(sectionId)))));
     }
 
     @Test
@@ -245,8 +232,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateTransaction())))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(TRANSACTION_SAVING_ERROR)));
+                .andExpect(jsonPath("$.userMessage", is(TRANSACTION_SAVING_ERROR)));
     }
 
     @Test
@@ -259,8 +245,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new TransactionUpdateContainer(1L, transaction))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                .andExpect(jsonPath("$.userMessage", stringContainsInOrder(
                         Collections.singletonList("TRANSACTION has incorrect fields")
                 )));
     }
@@ -275,8 +260,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(TRANSACTION_NOT_UPDATED)));
+                .andExpect(jsonPath("$.userMessage", is(TRANSACTION_NOT_UPDATED)));
     }
 
     @Test
@@ -289,8 +273,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(TRANSACTION_NOT_FOUND)));
+                .andExpect(jsonPath("$.userMessage", is(TRANSACTION_NOT_FOUND)));
     }
 
     @Test
@@ -303,8 +286,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(TRANSACTION_NOT_DELETED)));
+                .andExpect(jsonPath("$.userMessage", is(TRANSACTION_NOT_DELETED)));
     }
 
     @DataProvider(name = "incorrectTransactionAddDataProvider")

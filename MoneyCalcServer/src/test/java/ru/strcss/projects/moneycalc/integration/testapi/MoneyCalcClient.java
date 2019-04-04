@@ -91,16 +91,16 @@ public interface MoneyCalcClient {
                                                @Body TransactionsSearchFilter container);
 
     @POST("/api/transactions")
-    Call<MoneyCalcRs<Transaction>> addTransaction(@Header("Authorization") String token,
-                                                  @Body Transaction transaction);
+    Call<Transaction> addTransaction(@Header("Authorization") String token,
+                                     @Body Transaction transaction);
 
     @DELETE("/api/transactions/{transactionId}")
-    Call<MoneyCalcRs<Void>> deleteTransaction(@Header("Authorization") String token,
-                                              @Path("transactionId") Long transactionId);
+    Call<Void> deleteTransaction(@Header("Authorization") String token,
+                                 @Path("transactionId") Long transactionId);
 
     @PUT("/api/transactions")
-    Call<MoneyCalcRs<Transaction>> updateTransaction(@Header("Authorization") String token,
-                                                     @Body TransactionUpdateContainer transactionUpdateContainer);
+    Call<Transaction> updateTransaction(@Header("Authorization") String token,
+                                        @Body TransactionUpdateContainer transactionUpdateContainer);
 
     /**
      * Statistics

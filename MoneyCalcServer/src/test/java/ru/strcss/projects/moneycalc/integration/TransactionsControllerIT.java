@@ -3,7 +3,6 @@ package ru.strcss.projects.moneycalc.integration;
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
 import retrofit2.Response;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
@@ -89,7 +88,6 @@ public class TransactionsControllerIT extends AbstractIT {
             addedTransactions.addAll(IntStream.range(0, numOfAddedTransactionsPerSection)
                     .mapToObj(s -> sendRequest(service.addTransaction(token, generateTransaction(sectionId))).body())
                     .filter(Objects::nonNull)
-                    .map(MoneyCalcRs::getPayload)
                     .collect(Collectors.toList()));
         }
         assertEquals(addedTransactions.size(), numOfAddedTransactionsPerSection * numOfSections,
@@ -136,7 +134,7 @@ public class TransactionsControllerIT extends AbstractIT {
     public void shouldNotSaveNewTransactionWithNonExistentSectionId() {
         String token = savePersonGetToken(service);
 
-        Response<MoneyCalcRs<Transaction>> addTransactionRs = sendRequest(service.addTransaction(token,
+        Response<Transaction> addTransactionRs = sendRequest(service.addTransaction(token,
                 generateTransaction(10)));
 
         assertFalse(addTransactionRs.isSuccessful(), "Response is not failed!");
@@ -154,7 +152,6 @@ public class TransactionsControllerIT extends AbstractIT {
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
                 .mapToObj(s -> sendRequest(service.addTransaction(token, generateTransaction())).body())
                 .filter(Objects::nonNull)
-                .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());
 
         assertEquals(addedTransactions.size(), numOfAddedTransactions, "Some Transactions were not created!");
@@ -162,7 +159,7 @@ public class TransactionsControllerIT extends AbstractIT {
         //Getting random Transactions to delete
         Long idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).getId();
 
-        sendRequest(service.deleteTransaction(token, idToDelete), SUCCESS).body();
+        sendRequest(service.deleteTransaction(token, idToDelete), SUCCESS);
 
         //Getting Transactions list
         TransactionsSearchRs getTransactionsRs = getTransactions(service, token, LocalDate.now(), LocalDate.now(),
@@ -185,7 +182,6 @@ public class TransactionsControllerIT extends AbstractIT {
         List<Transaction> addedTransactions = IntStream.range(0, numOfAddedTransactions)
                 .mapToObj(s -> sendRequest(service.addTransaction(token, generateTransaction())).body())
                 .filter(Objects::nonNull)
-                .map(MoneyCalcRs::getPayload)
                 .collect(Collectors.toList());
 
         assertEquals(addedTransactions.size(), numOfAddedTransactions, "Some Transactions were not created!");
@@ -236,7 +232,7 @@ public class TransactionsControllerIT extends AbstractIT {
 
         addTransaction(service, token, generateTransaction(title1, "123"));
         Long updatedTransactionId = addTransaction(service, token, generateTransaction("title2", "desc2"))
-                .getPayload().getId();
+                .getId();
 
         Transaction newTransaction = generateTransaction(newTitle, "newDesc");
         sendRequest(service.updateTransaction(token, new TransactionUpdateContainer(updatedTransactionId, newTransaction)), SUCCESS).body();

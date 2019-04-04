@@ -2,6 +2,7 @@ package ru.strcss.projects.moneycalc.integration.utils;
 
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
+import okhttp3.ResponseBody;
 import retrofit2.Call;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
@@ -31,7 +32,7 @@ public class IntegrationTestUtils {
     private final static String messageRegex = "\"message\":\"(.*?)\"";
     private final static Pattern messageGetterPattern = Pattern.compile(messageRegex);
 
-    public static <T> Response<MoneyCalcRs<T>> sendRequest(Call<MoneyCalcRs<T>> call) {
+    public static <T> Response<T> sendRequest(Call<T> call) {
         return sendRequest(call, null);
     }
 
@@ -48,8 +49,8 @@ public class IntegrationTestUtils {
         if (response.body() == null /*&& expectedStatus != null && expectedStatus.equals(Status.ERROR)*/) {
             String errorBodyMessage = getErrorBodyMessage(response);
             log.debug("{} - {}", errorBodyMessage, response.code());
-            if (expectedStatus != null && expectedStatus.equals(Status.SUCCESS))
-                assertEquals(response.code(), 200, errorBodyMessage);
+            if (expectedStatus != null && expectedStatus.equals(Status.SUCCESS)) // TODO: 04.04.2019 remove comparing with Status
+                assertEquals(response.code(), 200, "Response http code is incorrect!");
         } else {
             assertNotNull(response.body(), "Response body is null!");
 //            if (expectedStatus != null && type.isInstance(MoneyCalcRs.class) )
@@ -87,7 +88,10 @@ public class IntegrationTestUtils {
 
     public static String getErrorBodyMessage(Response response) {
         try {
-            String errorJSON = response.errorBody().string();
+            ResponseBody responseBody = response.errorBody();
+            if (responseBody == null)
+                return null;
+            String errorJSON = responseBody.string();
             final Matcher messageMatcher = messageGetterPattern.matcher(errorJSON);
 
             if (messageMatcher.find()) {
@@ -208,7 +212,7 @@ public class IntegrationTestUtils {
      * @param transaction - added Transaction object
      * @return income Rs object
      */
-    public static MoneyCalcRs<Transaction> addTransaction(MoneyCalcClient service, String token, Transaction transaction) {
+    public static Transaction addTransaction(MoneyCalcClient service, String token, Transaction transaction) {
         return sendRequest(service.addTransaction(token, transaction), Status.SUCCESS).body();
     }
 
