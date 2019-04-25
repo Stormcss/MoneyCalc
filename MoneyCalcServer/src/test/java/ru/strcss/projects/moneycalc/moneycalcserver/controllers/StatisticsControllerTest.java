@@ -11,12 +11,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
-import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.handlers.HttpExceptionHandler;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SettingsMapper;
@@ -53,7 +54,7 @@ import static org.testng.AssertJUnit.assertEquals;
 import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.STATISTICS_RETURNED;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateFinanceSummaryBySectionList;
-import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSectionList;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSectionsSearchRs;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionsSearchRs;
 import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
 
@@ -69,7 +70,7 @@ public class StatisticsControllerTest extends AbstractControllerTest {
     private final LocalDate customDateFrom = LocalDate.now().minus(1, ChronoUnit.MONTHS);
     private final LocalDate customDateTo = LocalDate.now().minus(1, ChronoUnit.DAYS);
 
-    private List<SpendingSection> sectionList = generateSpendingSectionList(SECTIONS_COUNT, false, false, false);
+    private SpendingSectionsSearchRs sectionsSearchRs = generateSpendingSectionsSearchRs(SECTIONS_COUNT, false, false, false);
 
     @MockBean
     @Autowired
@@ -98,7 +99,7 @@ public class StatisticsControllerTest extends AbstractControllerTest {
         when(settingsMapper.getSettings(anyString()))
                 .thenReturn(new Settings(settingsDateFrom, settingsDateTo));
         when(sectionsMapper.getSpendingSections(anyString(), any(SpendingSectionFilter.class)))
-                .thenReturn(sectionList);
+                .thenReturn(sectionsSearchRs);
 
         doAnswer(invocation -> {
             List<Integer> sections = ((TransactionsSearchFilter) invocation.getArgument(1)).getRequiredSections();
@@ -193,6 +194,11 @@ public class StatisticsControllerTest extends AbstractControllerTest {
         @Bean
         SettingsService personService(SettingsMapper settingsMapper, MetricsService metricsService) {
             return new SettingsServiceImpl(settingsMapper, metricsService);
+        }
+
+        @Bean
+        HttpExceptionHandler httpExceptionHandler() {
+            return new HttpExceptionHandler();
         }
     }
 }

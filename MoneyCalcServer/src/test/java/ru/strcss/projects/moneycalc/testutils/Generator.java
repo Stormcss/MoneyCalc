@@ -2,6 +2,7 @@ package ru.strcss.projects.moneycalc.testutils;
 
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsStats;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
@@ -124,16 +125,16 @@ public class Generator {
     }
 
     /**
-     * Generates {@link List} of {@link SpendingSection} objects with required parameters
+     * Generates {@link SpendingSectionsSearchRs} object with required parameters
      *
      * @param count         - required objects count
      * @param isNonAdded    - last list item will have {@code isAdded} field as false
      * @param isRemoved     - last list item will have {@code isRemoved} field as true
      * @param isRemovedOnly - each object will have {@code isRemoved} field as true
      */
-    public static List<SpendingSection> generateSpendingSectionList(int count, boolean isNonAdded,
-                                                                    boolean isRemoved,
-                                                                    boolean isRemovedOnly) {
+    public static SpendingSectionsSearchRs generateSpendingSectionsSearchRs(int count, boolean isNonAdded,
+                                                                            boolean isRemoved,
+                                                                            boolean isRemovedOnly) {
 
         List<SpendingSection> spendingSections = IntStream.range(0, count)
                 .mapToObj(id -> generateSpendingSection(null, id + 1, (long) id, null,
@@ -145,7 +146,7 @@ public class Generator {
         if (isRemoved)
             spendingSections.get(spendingSections.size() - 1).setIsRemoved(true);
 
-        return spendingSections;
+        return new SpendingSectionsSearchRs(spendingSections.size(), spendingSections);
     }
 
     public static SpendingSection generateSpendingSection() {
@@ -183,7 +184,7 @@ public class Generator {
         return spendingSection;
     }
 
-    public static List<FinanceSummaryBySection> generateFinanceSummaryBySectionList(int count){
+    public static List<FinanceSummaryBySection> generateFinanceSummaryBySectionList(int count) {
         return IntStream.range(0, count)
                 .mapToObj(Generator::generateFinanceSummaryBySection)
                 .collect(Collectors.toList());

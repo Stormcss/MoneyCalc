@@ -31,11 +31,11 @@ public class StatisticsControllerTestUtils {
      * @param numOfSections - required number of Person's sections
      */
     public static void checkPersonsSections(int numOfSections, long budget, MoneyCalcClient service, String token) {
-        List<SpendingSection> spendingSections = sendRequest(service.getSpendingSections(token)).body().getPayload();
+        List<SpendingSection> spendingSections = sendRequest(service.getSpendingSections(token)).body().getItems();
 
         if (numOfSections > spendingSections.size()) {
             for (int i = 0; i < numOfSections - spendingSections.size(); i++) {
-                sendRequest(service.addSpendingSection(token, generateSpendingSection(budget)), Status.SUCCESS).body();
+                sendRequest(service.addSpendingSection(token, generateSpendingSection(budget)), Status.SUCCESS);
             }
         }
     }

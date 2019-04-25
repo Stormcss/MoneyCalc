@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
@@ -58,9 +59,9 @@ public class StatisticsController implements AbstractController {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Settings settings = settingsService.getSettings(login);
-        List<SpendingSection> spendingSections = sectionService.getSpendingSections(login, false,
+        SpendingSectionsSearchRs sectionsSearchRs = sectionService.getSpendingSections(login, false,
                 false, false);
-        List<Integer> sectionIds = spendingSections.stream().map(SpendingSection::getSectionId).collect(Collectors.toList());
+        List<Integer> sectionIds = sectionsSearchRs.getItems().stream().map(SpendingSection::getSectionId).collect(Collectors.toList());
 
         LocalDate dateFrom = settings.getPeriodFrom();
         LocalDate dateTo = settings.getPeriodTo();
@@ -75,7 +76,7 @@ public class StatisticsController implements AbstractController {
                 .rangeTo(dateTo)
                 .sections(sectionIds)
                 .transactions(transactionsSearchRs.getItems())
-                .spendingSections(spendingSections)
+                .spendingSections(sectionsSearchRs.getItems())
                 .today(LocalDate.now())
                 .build();
         // TODO: 13.02.2018 should be client's time
@@ -106,7 +107,7 @@ public class StatisticsController implements AbstractController {
 
         //оставляю только те секции клиента для которых мне нужна статистика
         List<SpendingSection> spendingSections = sectionService.getSpendingSections(login, false,
-                false, false).stream()
+                false, false).getItems().stream()
                 .filter(section -> summaryFilter.getSectionIds().stream().anyMatch(id -> id.equals(section.getSectionId())))
                 .collect(Collectors.toList());
 

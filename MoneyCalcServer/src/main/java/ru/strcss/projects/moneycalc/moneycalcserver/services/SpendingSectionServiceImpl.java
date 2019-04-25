@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.TimerType;
@@ -14,7 +15,6 @@ import ru.strcss.projects.moneycalc.moneycalcserver.model.dto.SpendingSectionFil
 import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.MoneyCalcServerException;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 
@@ -28,7 +28,8 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     private MetricsService metricsService;
 
     @Override
-    public List<SpendingSection> getSpendingSections(String login, boolean withNonAdded, boolean withRemoved, boolean withRemovedOnly) throws Exception {
+    public SpendingSectionsSearchRs getSpendingSections(String login, boolean withNonAdded, boolean withRemoved,
+                                                        boolean withRemovedOnly) throws Exception {
         SpendingSectionFilter filter = new SpendingSectionFilter(withNonAdded, withRemoved, withRemovedOnly);
         return metricsService.getTimersStorage().get(TimerType.SPENDING_SECTIONS_GET_TIMER)
                 .recordCallable(() -> sectionsMapper.getSpendingSections(login, filter));
@@ -36,7 +37,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
 
     @Override
     @Transactional
-    public Boolean addSpendingSection(String login, SpendingSection section) throws Exception {
+    public boolean addSpendingSection(String login, SpendingSection section) throws Exception {
         Long userId = registryMapper.getUserIdByLogin(login);
         if (userId == null)
             throw new MoneyCalcServerException("User not found");
@@ -47,7 +48,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
 
     @Override
     @Transactional
-    public Boolean updateSpendingSection(String login, SpendingSectionUpdateContainer updateContainer) throws Exception {
+    public boolean updateSpendingSection(String login, SpendingSectionUpdateContainer updateContainer) throws Exception {
         Callable<Integer> updateSectionCallable =
                 () -> sectionsMapper.updateSpendingSection(login, updateContainer.getSectionId(), updateContainer.getSpendingSection());
         return metricsService.getTimersStorage().get(TimerType.SPENDING_SECTION_UPDATE_TIMER)
@@ -55,18 +56,18 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
     }
 
     @Override
-    public Boolean deleteSpendingSection(String login, Integer sectionId) throws Exception {
+    public boolean deleteSpendingSection(String login, Integer sectionId) throws Exception {
         return metricsService.getTimersStorage().get(TimerType.SPENDING_SECTION_DELETE_TIMER)
                 .recordCallable(() -> sectionsMapper.deleteSpendingSection(login, sectionId)) > 0;
     }
 
     @Override
-    public Boolean isSpendingSectionIdExists(String login, Integer sectionId) {
+    public boolean isSpendingSectionIdExists(String login, Integer sectionId) {
         return sectionsMapper.isSpendingSectionIdExists(login, sectionId);
     }
 
     @Override
-    public Boolean isSpendingSectionNameNew(String login, String name) {
+    public boolean isSpendingSectionNameNew(String login, String name) {
         return sectionsMapper.isSpendingSectionNameNew(login, name);
     }
 
@@ -75,7 +76,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
      * Returns false if update will case doubles in SpendingSection names
      */
     @Override
-    public Boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
+    public boolean isNewNameAllowed(String login, SpendingSectionUpdateContainer updateContainer) {
         try {
             // if name is not set at all
             if (updateContainer.getSpendingSection().getName() == null)
@@ -83,10 +84,13 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
 
             SpendingSectionFilter filter = new SpendingSectionFilter(true, false, false);
 
-            List<SpendingSection> sectionList = metricsService.getTimersStorage().get(TimerType.SPENDING_SECTIONS_GET_TIMER)
+            SpendingSectionsSearchRs sectionsRs = metricsService.getTimersStorage().get(TimerType.SPENDING_SECTIONS_GET_TIMER)
                     .recordCallable(() -> sectionsMapper.getSpendingSections(login, filter));
 
-            String oldName = sectionList.stream()
+            if (sectionsRs.getItems() == null || sectionsRs.getItems().isEmpty())
+                return true;
+
+            String oldName = sectionsRs.getItems().stream()
                     .filter(section -> section.getSectionId().equals(updateContainer.getSectionId()))
                     .map(SpendingSection::getName)
                     .findAny()
@@ -97,7 +101,7 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
                 return true;
 
             // looking for other sections with the new name
-            Optional<Integer> existingSectionIdWithSameName = sectionList.stream()
+            Optional<Integer> existingSectionIdWithSameName = sectionsRs.getItems().stream()
                     .filter(section -> section.getName().equals(updateContainer.getSpendingSection().getName()))
                     .map(SpendingSection::getSectionId)
                     .findAny();

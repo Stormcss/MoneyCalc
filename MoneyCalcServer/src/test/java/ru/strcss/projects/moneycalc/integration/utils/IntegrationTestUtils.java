@@ -7,8 +7,8 @@ import retrofit2.Call;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
@@ -170,18 +170,19 @@ public class IntegrationTestUtils {
     }
 
     /**
-     * Add SpendingSection and return it's Id
+     * Add SpendingSection and return its Id
      *
      * @param spendingSection - added SpendingSection
      * @return added Spending Section Id
      */
     public static Integer addSpendingSectionGetSectionId(MoneyCalcClient service, String token, SpendingSection spendingSection) {
-        MoneyCalcRs<List<SpendingSection>> addSectionRs =
-                sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
+        SpendingSectionsSearchRs addSectionRs = sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
 
-        return addSectionRs.getPayload().stream().filter(section -> section.getName().equals(spendingSection.getName()))
+        // FIXME: 25.04.2019 wrap in Optional
+        return addSectionRs.getItems().stream().filter(section -> section.getName().equals(spendingSection.getName()))
                 .findAny()
-                .get().getSectionId();
+                .map(SpendingSection::getSectionId)
+                .orElseThrow(() -> new RuntimeException("Spending Section is not found"));
     }
 
     /**
@@ -190,7 +191,7 @@ public class IntegrationTestUtils {
      * @param spendingSection - added SpendingSection
      * @return income Rs object
      */
-    public static MoneyCalcRs<List<SpendingSection>> addSpendingSectionGetRs(MoneyCalcClient service, String token, SpendingSection spendingSection) {
+    public static SpendingSectionsSearchRs addSpendingSectionGetRs(MoneyCalcClient service, String token, SpendingSection spendingSection) {
         return sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
     }
 
@@ -201,7 +202,7 @@ public class IntegrationTestUtils {
      * @param id    - deleted Transaction id
      * @return income Rs object
      */
-    public static MoneyCalcRs<List<SpendingSection>> deleteSpendingSectionByIdGetRs(MoneyCalcClient service, String token, Integer id) {
+    public static SpendingSectionsSearchRs deleteSpendingSectionByIdGetRs(MoneyCalcClient service, String token, Integer id) {
         return sendRequest(service.deleteSpendingSection(token, id), Status.SUCCESS).body();
     }
 

@@ -11,6 +11,7 @@ import retrofit2.http.Path;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
@@ -47,28 +48,28 @@ public interface MoneyCalcClient {
      * Spending Section
      */
     @POST("/api/spendingSections")
-    Call<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@Header("Authorization") String token,
-                                                                @Body SpendingSection spendingSection);
+    Call<SpendingSectionsSearchRs> addSpendingSection(@Header("Authorization") String token,
+                                                      @Body SpendingSection spendingSection);
 
     @PUT("/api/spendingSections")
-    Call<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@Header("Authorization") String token,
-                                                                   @Body SpendingSectionUpdateContainer updateContainer);
+    Call<SpendingSectionsSearchRs> updateSpendingSection(@Header("Authorization") String token,
+                                                         @Body SpendingSectionUpdateContainer updateContainer);
 
     @DELETE("/api/spendingSections/{sectionId}")
-    Call<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@Header("Authorization") String token,
-                                                                   @Path("sectionId") Integer sectionId);
+    Call<SpendingSectionsSearchRs> deleteSpendingSection(@Header("Authorization") String token,
+                                                         @Path("sectionId") Integer sectionId);
 
     @GET("/api/spendingSections")
-    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSections(@Header("Authorization") String token);
+    Call<SpendingSectionsSearchRs> getSpendingSections(@Header("Authorization") String token);
 
     @GET("/api/spendingSections?withNonAdded=true")
-    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithNonAdded(@Header("Authorization") String token);
+    Call<SpendingSectionsSearchRs> getSpendingSectionsWithNonAdded(@Header("Authorization") String token);
 
     @GET("/api/spendingSections?withRemoved=true")
-    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemoved(@Header("Authorization") String token);
+    Call<SpendingSectionsSearchRs> getSpendingSectionsWithRemoved(@Header("Authorization") String token);
 
     @GET("/api/spendingSections?withRemovedOnly=true")
-    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemovedOnly(@Header("Authorization") String token);
+    Call<SpendingSectionsSearchRs> getSpendingSectionsWithRemovedOnly(@Header("Authorization") String token);
 
     /**
      * Identifications
