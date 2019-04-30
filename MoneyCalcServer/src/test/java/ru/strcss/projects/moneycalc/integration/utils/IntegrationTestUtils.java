@@ -1,13 +1,15 @@
 package ru.strcss.projects.moneycalc.integration.utils;
 
+import lombok.AccessLevel;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.Headers;
 import okhttp3.ResponseBody;
+import org.springframework.http.HttpStatus;
 import retrofit2.Call;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
@@ -28,15 +30,16 @@ import static org.testng.Assert.assertNotNull;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateCredentials;
 
 @Slf4j
+@NoArgsConstructor(access = AccessLevel.PRIVATE)
 public class IntegrationTestUtils {
-    private final static String messageRegex = "\"message\":\"(.*?)\"";
-    private final static Pattern messageGetterPattern = Pattern.compile(messageRegex);
+    private static final String messageRegex = "\"message\":\"(.*?)\"";
+    private static final Pattern messageGetterPattern = Pattern.compile(messageRegex);
 
     public static <T> Response<T> sendRequest(Call<T> call) {
         return sendRequest(call, null);
     }
 
-    public static <T> Response<T> sendRequest(Call<T> call, Status expectedStatus) {
+    public static <T> Response<T> sendRequest(Call<T> call, HttpStatus expectedStatus) {
         Response<T> response;
         try {
             response = call.execute();
@@ -46,45 +49,19 @@ public class IntegrationTestUtils {
 
         assertNotNull(response, "Response is null!");
 
-        if (response.body() == null /*&& expectedStatus != null && expectedStatus.equals(Status.ERROR)*/) {
+        if (response.body() == null) {
             String errorBodyMessage = getErrorBodyMessage(response);
             log.debug("{} - {}", errorBodyMessage, response.code());
-            if (expectedStatus != null && expectedStatus.equals(Status.SUCCESS)) // TODO: 04.04.2019 remove comparing with Status
-                assertEquals(response.code(), 200, "Response http code is incorrect!");
+            if (expectedStatus == null)
+                assertEquals(response.code(), HttpStatus.OK.value(), "Response http code is not OK!");
+            else
+                assertEquals(response.code(), expectedStatus.value(), "Response http code is incorrect!");
         } else {
             assertNotNull(response.body(), "Response body is null!");
-//            if (expectedStatus != null && type.isInstance(MoneyCalcRs.class) )
-//                assertEquals(response.body().getServerStatus(), expectedStatus, response.body().getMessage());
             log.debug("Received - {} with HTTP status {}", response.body(), response.code());
         }
         return response;
     }
-
-//    public static <T> Response<MoneyCalcRs<T>> sendRequest(Call<MoneyCalcRs<T>> call, Status expectedStatus) {
-//        Response<MoneyCalcRs<T>> response;
-//        try {
-//            response = call.execute();
-//        } catch (IOException e) {
-//            throw new RuntimeException("Can not send Request!", e);
-//        }
-//
-//        assertNotNull(response, "Response is null!");
-//
-//        if (response.body() == null /*&& expectedStatus != null && expectedStatus.equals(Status.ERROR)*/) {
-//            String errorBodyMessage = getErrorBodyMessage(response);
-//            log.debug("{} - {}", errorBodyMessage, response.code());
-//            if (expectedStatus != null && expectedStatus.equals(Status.SUCCESS))
-//                // TODO: 30.05.2018 add storing http code in Status object
-//                assertEquals(response.code(), 200, errorBodyMessage);
-////                assertEquals(response.code(), 200, "Response code is not 200!");
-//        } else {
-//            assertNotNull(response.body(), "Response body is null!");
-//            if (expectedStatus != null)
-//                assertEquals(response.body().getServerStatus(), expectedStatus, response.body().getMessage());
-//            log.debug("{} - {}", response.body().getMessage(), response.body().getServerStatus().name());
-//        }
-//        return response;
-//    }
 
     public static String getErrorBodyMessage(Response response) {
         try {
@@ -99,8 +76,8 @@ public class IntegrationTestUtils {
             } else {
                 return errorJSON;
             }
-        } catch (IOException e1) {
-            e1.printStackTrace();
+        } catch (IOException e) {
+            log.error("Error has occurred while extracting errorBody message", e);
             return response.message();
         }
     }
@@ -113,7 +90,7 @@ public class IntegrationTestUtils {
      */
     public static String savePersonGetToken(MoneyCalcClient service) {
         Credentials credentials = generateCredentials(Generator.UUID());
-        sendRequest(service.registerPerson(credentials), Status.SUCCESS);
+        sendRequest(service.registerPerson(credentials), HttpStatus.OK);
 
         return getToken(service, credentials.getAccess());
     }
@@ -127,7 +104,7 @@ public class IntegrationTestUtils {
     public static Pair<String, String> savePersonGetLoginAndToken(MoneyCalcClient service) {
         String login = Generator.UUID();
         Credentials credentials = generateCredentials(login);
-        sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
+        sendRequest(service.registerPerson(credentials), HttpStatus.OK);
 
         return new Pair<>(login, getToken(service, credentials.getAccess()));
     }
@@ -139,7 +116,7 @@ public class IntegrationTestUtils {
      */
     public static Pair<Person, String> savePersonGetIdsAndToken(MoneyCalcClient service) {
         Credentials credentials = generateCredentials(Generator.UUID());
-        Person registerRs = sendRequest(service.registerPerson(credentials), Status.SUCCESS).body().getPayload();
+        Person registerRs = sendRequest(service.registerPerson(credentials), HttpStatus.OK).body();
 
         Person person = new Person(registerRs.getId(), registerRs.getAccessId(), registerRs.getIdentificationsId(), registerRs.getSettingsId());
 
@@ -154,7 +131,7 @@ public class IntegrationTestUtils {
      */
     public static Pair<Credentials, String> savePersonGetCredentialsAndToken(MoneyCalcClient service) {
         Credentials credentials = generateCredentials(Generator.UUID());
-        sendRequest(service.registerPerson(credentials), Status.SUCCESS).body();
+        sendRequest(service.registerPerson(credentials), HttpStatus.OK);
 
         return new Pair<>(credentials, getToken(service, credentials.getAccess()));
     }
@@ -176,7 +153,7 @@ public class IntegrationTestUtils {
      * @return added Spending Section Id
      */
     public static Integer addSpendingSectionGetSectionId(MoneyCalcClient service, String token, SpendingSection spendingSection) {
-        SpendingSectionsSearchRs addSectionRs = sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
+        SpendingSectionsSearchRs addSectionRs = sendRequest(service.addSpendingSection(token, spendingSection), HttpStatus.OK).body();
 
         // FIXME: 25.04.2019 wrap in Optional
         return addSectionRs.getItems().stream().filter(section -> section.getName().equals(spendingSection.getName()))
@@ -192,7 +169,7 @@ public class IntegrationTestUtils {
      * @return income Rs object
      */
     public static SpendingSectionsSearchRs addSpendingSectionGetRs(MoneyCalcClient service, String token, SpendingSection spendingSection) {
-        return sendRequest(service.addSpendingSection(token, spendingSection), Status.SUCCESS).body();
+        return sendRequest(service.addSpendingSection(token, spendingSection), HttpStatus.OK).body();
     }
 
     /**
@@ -203,7 +180,7 @@ public class IntegrationTestUtils {
      * @return income Rs object
      */
     public static SpendingSectionsSearchRs deleteSpendingSectionByIdGetRs(MoneyCalcClient service, String token, Integer id) {
-        return sendRequest(service.deleteSpendingSection(token, id), Status.SUCCESS).body();
+        return sendRequest(service.deleteSpendingSection(token, id), HttpStatus.OK).body();
     }
 
     /**
@@ -214,7 +191,7 @@ public class IntegrationTestUtils {
      * @return income Rs object
      */
     public static Transaction addTransaction(MoneyCalcClient service, String token, Transaction transaction) {
-        return sendRequest(service.addTransaction(token, transaction), Status.SUCCESS).body();
+        return sendRequest(service.addTransaction(token, transaction), HttpStatus.OK).body();
     }
 
     /**
@@ -222,14 +199,14 @@ public class IntegrationTestUtils {
      */
     public static TransactionsSearchRs getTransactions(MoneyCalcClient service, String token, TransactionsSearchFilter
             searchContainer) {
-        return sendRequest(service.getTransactions(token, searchContainer), Status.SUCCESS).body();
+        return sendRequest(service.getTransactions(token, searchContainer), HttpStatus.OK).body();
     }
 
     /**
      * Get Transactions without filter
      */
     public static TransactionsSearchRs getTransactions(MoneyCalcClient service, String token) {
-        return sendRequest(service.getTransactions(token), Status.SUCCESS).body();
+        return sendRequest(service.getTransactions(token), HttpStatus.OK).body();
     }
 
     public static TransactionsSearchRs getTransactions(MoneyCalcClient service, String token, LocalDate dateFrom,
@@ -238,6 +215,6 @@ public class IntegrationTestUtils {
         container.setDateFrom(dateFrom);
         container.setDateTo(dateTo);
         container.setRequiredSections(sectionIds);
-        return sendRequest(service.getTransactions(token, container), Status.SUCCESS).body();
+        return sendRequest(service.getTransactions(token, container), HttpStatus.OK).body();
     }
 }

@@ -20,8 +20,6 @@ import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.Reque
 import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.IncorrectRequestException;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 
-import java.util.List;
-
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_EMPTY;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_ID_NOT_EXISTS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_INCORRECT;
@@ -61,8 +59,7 @@ public class SpendingSectionsController implements AbstractController {
     public SpendingSectionsSearchRs addSpendingSection(@RequestBody SpendingSection spendingSection) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<SpendingSection>> requestValidation = new Validator(spendingSection,
-                "Adding SpendingSection")
+        RequestValidation requestValidation = new Validator(spendingSection, "Adding SpendingSection")
                 .addValidation(() -> spendingSection.isValid().isValidated(),
                         () -> fillLog(SPENDING_SECTION_INCORRECT, spendingSection.isValid().getReasons().toString()))
                 .addValidation(() -> sectionService.isSpendingSectionNameNew(login, spendingSection.getName()),
@@ -72,7 +69,7 @@ public class SpendingSectionsController implements AbstractController {
         if (!requestValidation.isValid())
             throw new IncorrectRequestException(requestValidation.getReason());
 
-        Boolean isAdded = sectionService.addSpendingSection(login, spendingSection);
+        boolean isAdded = sectionService.addSpendingSection(login, spendingSection);
 
         if (!isAdded) {
             log.error("Saving SpendingSection {} for login '{}' has failed", spendingSection, login);
@@ -87,7 +84,7 @@ public class SpendingSectionsController implements AbstractController {
     public SpendingSectionsSearchRs updateSpendingSection(@RequestBody SpendingSectionUpdateContainer updateContainer) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<SpendingSection>> requestValidation = new Validator(updateContainer,
+        RequestValidation requestValidation = new Validator(updateContainer,
                 "Updating SpendingSection")
                 .addValidation(() -> sectionService.isSpendingSectionIdExists(login, updateContainer.getSectionId()),
                         () -> fillLog(SPENDING_SECTION_ID_NOT_EXISTS, "" + updateContainer.getSectionId()))

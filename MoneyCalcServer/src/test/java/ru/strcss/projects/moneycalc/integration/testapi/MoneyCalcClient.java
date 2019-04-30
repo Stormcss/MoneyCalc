@@ -9,27 +9,24 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummarySearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
-import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 
-import java.util.List;
-
 public interface MoneyCalcClient {
 
     @POST("/api/registration/register")
-    Call<MoneyCalcRs<Person>> registerPerson(@Body Credentials credentials);
+    Call<Person> registerPerson(@Body Credentials credentials);
 
     @POST("/login")
     Call<Void> login(@Body Access access);
@@ -38,11 +35,11 @@ public interface MoneyCalcClient {
      * Settings
      */
     @PUT("/api/settings")
-    Call<MoneyCalcRs<Settings>> updateSettings(@Header("Authorization") String token,
-                                               @Body Settings settings);
+    Call<Settings> updateSettings(@Header("Authorization") String token,
+                                  @Body Settings settings);
 
     @GET("/api/settings")
-    Call<MoneyCalcRs<Settings>> getSettings(@Header("Authorization") String token);
+    Call<Settings> getSettings(@Header("Authorization") String token);
 
     /**
      * Spending Section
@@ -75,11 +72,11 @@ public interface MoneyCalcClient {
      * Identifications
      */
     @PUT("/api/identifications")
-    Call<MoneyCalcRs<Identifications>> saveIdentifications(@Header("Authorization") String token,
-                                                           @Body Identifications identifications);
+    Call<Identifications> saveIdentifications(@Header("Authorization") String token,
+                                              @Body Identifications identifications);
 
     @GET("/api/identifications")
-    Call<MoneyCalcRs<Identifications>> getIdentifications(@Header("Authorization") String token);
+    Call<Identifications> getIdentifications(@Header("Authorization") String token);
 
     /**
      * Transactions
@@ -107,15 +104,15 @@ public interface MoneyCalcClient {
      * Statistics
      */
     @POST("/api/stats/summaryBySection")
-    Call<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@Header("Authorization") String token);
+    Call<FinanceSummarySearchRs> getFinanceSummaryBySection(@Header("Authorization") String token);
 
     @POST("/api/stats/summaryBySection/getFiltered")
-    Call<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@Header("Authorization") String token,
-                                                                                @Body FinanceSummaryFilter getContainer);
+    Call<FinanceSummarySearchRs> getFinanceSummaryBySection(@Header("Authorization") String token,
+                                                            @Body FinanceSummaryFilter getContainer);
 
     /**
      * Access
      */
     @GET("/api/access")
-    Call<MoneyCalcRs<Access>> getAccess(@Header("Authorization") String token);
+    Call<Access> getAccess(@Header("Authorization") String token);
 }

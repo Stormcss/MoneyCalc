@@ -1,16 +1,13 @@
 package ru.strcss.projects.moneycalc.integration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.testng.annotations.Test;
-import retrofit2.Response;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
 
 import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNotNull;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetCredentialsAndToken;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetToken;
@@ -27,13 +24,13 @@ public class IdentificationsControllerIT extends AbstractIT {
         String token = credentialsAndToken.getRight();
 
         //Updating default Identifications
-        MoneyCalcRs<Identifications> saveIdentificationsRs =
-                sendRequest(service.saveIdentifications(token, credentials.getIdentifications()), Status.SUCCESS).body();
-        assertNotNull(saveIdentificationsRs.getPayload().getName(), "Identifications object is empty!");
+        Identifications saveIdentificationsRs =
+                sendRequest(service.saveIdentifications(token, credentials.getIdentifications())).body();
+        assertNotNull(saveIdentificationsRs.getName(), "Identifications object is empty!");
 
         //Requesting updated Identifications
-        MoneyCalcRs<Identifications> getUpdatedRs = sendRequest(service.getIdentifications(token), Status.SUCCESS).body();
-        assertEquals(getUpdatedRs.getPayload().getName(), credentials.getIdentifications().getName(),
+        Identifications getUpdatedRs = sendRequest(service.getIdentifications(token)).body();
+        assertEquals(getUpdatedRs.getName(), credentials.getIdentifications().getName(),
                 "returned Identifications object has wrong name!");
     }
 
@@ -43,9 +40,7 @@ public class IdentificationsControllerIT extends AbstractIT {
         Identifications incorrectIdentifications = generateIdentifications();
         incorrectIdentifications.setName(null);
 
-        Response<MoneyCalcRs<Identifications>> saveIdentificationsRs = sendRequest(service.saveIdentifications(token, incorrectIdentifications));
-
-        assertFalse(saveIdentificationsRs.isSuccessful(), "Identifications object with incorrect Name is saved!");
+        sendRequest(service.saveIdentifications(token, incorrectIdentifications), HttpStatus.BAD_REQUEST);
     }
 
     @Test
@@ -54,9 +49,9 @@ public class IdentificationsControllerIT extends AbstractIT {
         Credentials credentials = credentialsAndToken.getLeft();
         String token = credentialsAndToken.getRight();
 
-        MoneyCalcRs<Identifications> getIdentificationsRs = sendRequest(service.getIdentifications(token), Status.SUCCESS).body();
+        Identifications getIdentificationsRs = sendRequest(service.getIdentifications(token)).body();
 
-        assertEquals(getIdentificationsRs.getPayload().getName(), credentials.getIdentifications().getName(),
+        assertEquals(getIdentificationsRs.getName(), credentials.getIdentifications().getName(),
                 "returned Identifications object has wrong name!");
     }
 

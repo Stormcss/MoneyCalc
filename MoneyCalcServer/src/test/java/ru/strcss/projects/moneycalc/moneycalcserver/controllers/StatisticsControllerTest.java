@@ -13,6 +13,7 @@ import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummarySearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
@@ -51,8 +52,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.testng.AssertJUnit.assertEquals;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.STATISTICS_RETURNED;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateFinanceSummaryBySectionList;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSectionsSearchRs;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransactionsSearchRs;
@@ -108,7 +107,7 @@ public class StatisticsControllerTest extends AbstractControllerTest {
 
         doAnswer(invocation -> {
             int size = ((FinanceSummaryCalculationContainer) invocation.getArgument(0)).getSections().size();
-            return generateFinanceSummaryBySectionList(size);
+            return new FinanceSummarySearchRs(generateFinanceSummaryBySectionList(size));
         }).when(statisticsHandler).calculateSummaryStatisticsBySection(any(FinanceSummaryCalculationContainer.class));
     }
 
@@ -117,10 +116,8 @@ public class StatisticsControllerTest extends AbstractControllerTest {
         mockMvc.perform(get("/api/stats/summaryBySection")
                 .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.message", is(STATISTICS_RETURNED)))
-                .andExpect(jsonPath("$.payload.length()", is(SECTIONS_COUNT)))
-                .andExpect(jsonPath("$.payload[0].*", hasSize(6)));
+                .andExpect(jsonPath("$.items.length()", is(SECTIONS_COUNT)))
+                .andExpect(jsonPath("$.items[0].*", hasSize(6)));
 
         //asserting that correct transactions are requested
         ArgumentCaptor<TransactionsSearchFilter> transactionSearchArgument = ArgumentCaptor.forClass(TransactionsSearchFilter.class);
@@ -151,10 +148,8 @@ public class StatisticsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(financeSummaryFilter)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.message", is(STATISTICS_RETURNED)))
-                .andExpect(jsonPath("$.payload.length()", is(2)))
-                .andExpect(jsonPath("$.payload[0].*", hasSize(6)));
+                .andExpect(jsonPath("$.items.length()", is(2)))
+                .andExpect(jsonPath("$.items[0].*", hasSize(6)));
 
         //asserting that correct transactions are requested
         ArgumentCaptor<TransactionsSearchFilter> transactionSearchArgument = ArgumentCaptor.forClass(TransactionsSearchFilter.class);

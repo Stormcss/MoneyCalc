@@ -5,24 +5,18 @@ import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import ru.strcss.projects.moneycalc.moneycalcdto.Validationable;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.ValidationResult;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
-
 @Slf4j
 @Getter
 @AllArgsConstructor
-public class RequestValidation<E> {
+public class RequestValidation {
     private boolean isValid;
-    @Deprecated
-    private ResponseEntity<MoneyCalcRs<E>> validationError;
     private String reason;
 
     @RequiredArgsConstructor
@@ -44,16 +38,16 @@ public class RequestValidation<E> {
             return this;
         }
 
-        public <E> RequestValidation<E> validate() {
+        public RequestValidation validate() {
             if (container == null) {
                 log.error("Container is null");
-                return new RequestValidation<>(false, responseError("Container is null"), "Container is null");
+                return new RequestValidation(false, "Container is null");
             } else {
                 ValidationResult validationResult = container.isValid();
                 if (!validationResult.isValidated()) {
                     log.error("{} has failed - required fields are incorrect: {}", actionName, validationResult.getReasons());
                     String message = "Required fields are incorrect: " + validationResult.getReasons();
-                    return new RequestValidation<>(false, responseError(message), message);
+                    return new RequestValidation(false, message);
                 }
             }
 
@@ -67,10 +61,10 @@ public class RequestValidation<E> {
                     } else {
                         errorMsg = pair.getActionName().get();
                     }
-                    return new RequestValidation<>(false, responseError(errorMsg), errorMsg);
+                    return new RequestValidation(false, errorMsg);
                 }
             }
-            return new RequestValidation<>(true, null, null);
+            return new RequestValidation(true, null);
         }
     }
 

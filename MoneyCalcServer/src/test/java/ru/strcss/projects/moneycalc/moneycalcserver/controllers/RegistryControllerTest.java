@@ -17,6 +17,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.handlers.HttpExceptionHandler;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.RegisterServiceImpl;
@@ -33,12 +34,9 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.ERROR;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.PERSON_EMAIL_ALREADY_EXISTS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.PERSON_EMAIL_INCORRECT;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.PERSON_LOGIN_ALREADY_EXISTS;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.REGISTER_SUCCESSFUL;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateAccess;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateCredentials;
@@ -73,17 +71,12 @@ public class RegistryControllerTest extends AbstractControllerTest {
         Credentials credentials = generateCredentials();
         credentials.getAccess().setEmail(email);
 
-        final MvcResult mvcResult = mockMvc.perform(post("/api/registration/register")
+        mockMvc.perform(post("/api/registration/register")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(credentials)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.message", is(REGISTER_SUCCESSFUL)))
-                .andExpect(jsonPath("$.payload[*]", hasSize(4)))
-                .andReturn();
-
-        System.out.println(mvcResult.getResponse().getContentAsString());
+                .andExpect(jsonPath("$.[*]", hasSize(4)));
     }
 
     @Test(dataProvider = "incorrectAccessRegistrationDataProvider")
@@ -93,8 +86,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateCredentials(access, generateIdentifications()))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                .andExpect(jsonPath("$.userMessage", stringContainsInOrder(
                         Arrays.asList("Can not perform registration:", expectedHint)
                 )))
                 .andReturn();
@@ -109,8 +101,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateCredentials(generateAccess(), new Identifications()))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                .andExpect(jsonPath("$.userMessage", stringContainsInOrder(
                         Arrays.asList("Can not perform registration:", "name is empty")
                 )))
                 .andReturn();
@@ -130,8 +121,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateCredentials(USER_LOGIN))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(fillLog(PERSON_LOGIN_ALREADY_EXISTS, USER_LOGIN))))
+                .andExpect(jsonPath("$.userMessage", is(fillLog(PERSON_LOGIN_ALREADY_EXISTS, USER_LOGIN))))
                 .andReturn();
 
         System.out.println(mvcResult.getResponse().getContentAsString());
@@ -150,8 +140,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(credentials)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(fillLog(PERSON_EMAIL_ALREADY_EXISTS, email))))
+                .andExpect(jsonPath("$.userMessage", is(fillLog(PERSON_EMAIL_ALREADY_EXISTS, email))))
                 .andReturn();
 
         System.out.println(mvcResult.getResponse().getContentAsString());
@@ -167,8 +156,7 @@ public class RegistryControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(credentials)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(fillLog(PERSON_EMAIL_INCORRECT, email))))
+                .andExpect(jsonPath("$.userMessage", is(fillLog(PERSON_EMAIL_INCORRECT, email))))
                 .andReturn();
 
         System.out.println(mvcResult.getResponse().getContentAsString());
@@ -215,6 +203,10 @@ public class RegistryControllerTest extends AbstractControllerTest {
                                        BCryptPasswordEncoder bCryptPasswordEncoder) {
             return new RegisterServiceImpl(registryMapper, sectionsMapper, bCryptPasswordEncoder);
         }
-    }
 
+        @Bean
+        HttpExceptionHandler httpExceptionHandler() {
+            return new HttpExceptionHandler();
+        }
+    }
 }

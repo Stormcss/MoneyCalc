@@ -3,7 +3,6 @@ package ru.strcss.projects.moneycalc.moneycalcmigrator;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcmigrator.api.FileReader;
@@ -51,7 +50,7 @@ class FileParser {
         log.info("token = " + token);
 
         log.debug("Getting section names ...");
-        List<SpendingSection> personSectionsList = serverConnector.getSectionsList(token);
+        List<SpendingSection> personSectionsList = serverConnector.getSectionsList(token).getItems();
 
         for (Map.Entry<String, PairFilesContainer> pair : filesEntries.entrySet()) {
             List<String> sectionsInFile = fileReader.parseDataFile(properties.getDataPath(), pair.getValue().getPathDataFile());
@@ -59,21 +58,21 @@ class FileParser {
             List<SpendingSection> spendingSectionsTemp = new ArrayList<>(personSectionsList);
             for (String sectionInFile : sectionsInFile) {
                 if (spendingSectionsTemp.stream().noneMatch(spendingSection -> spendingSection.getName().equals(sectionInFile))) {
-                    personSectionsList = serverConnector.saveSpendingSection(token, generateSpendingSection(sectionInFile));
+                    personSectionsList = serverConnector.saveSpendingSection(token, generateSpendingSection(sectionInFile)).getItems();
                 }
             }
 
             List<Transaction> transactionsInFile = fileReader.parseInfoFile(properties.getDataPath(),
                     pair.getValue().getPathInfoFile(), getSectionIdMapper(personSectionsList, new ArrayList<>(sectionsInFile)));
 
-            Status savingStatus = serverConnector.saveTransactions(token, transactionsInFile, properties.getLogin());
+            boolean isTransactionSaved = serverConnector.saveTransactions(token, transactionsInFile, properties.getLogin());
 
-            if (Status.SUCCESS.equals(savingStatus)) {
+            if (isTransactionSaved) {
                 transactionsAdded += transactionsInFile.size();
-                log.debug("Saving Transactions status is {}. Saved {} transactions from file {}",
-                        savingStatus, transactionsInFile.size(), pair.getValue().getPathInfoFile());
+                log.debug("Transaction is saved. Saved {} transactions from file {}", transactionsInFile.size(),
+                        pair.getValue().getPathInfoFile());
             } else
-                log.debug("Saving Transactions status is {}", savingStatus);
+                log.debug("Transaction is not saved");
         }
         spendingSectionsAdded += personSectionsList.size();
 

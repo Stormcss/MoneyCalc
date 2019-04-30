@@ -1,10 +1,10 @@
 package ru.strcss.projects.moneycalc.integration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.testng.annotations.Test;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
@@ -22,7 +22,6 @@ import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtil
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetLoginAndToken;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetToken;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSection;
 import static ru.strcss.projects.moneycalc.testutils.TestUtils.getMaxSpendingSectionId;
 
@@ -55,8 +54,9 @@ public class SpendingSectionsIT extends AbstractIT {
         String token = loginAndToken.getRight();
         SpendingSection spendingSection = generateSpendingSection();
 
-        sendRequest(service.addSpendingSection(token, spendingSection), SUCCESS);
-        Response<SpendingSectionsSearchRs> addSectionRs = sendRequest(service.addSpendingSection(token, spendingSection));
+        sendRequest(service.addSpendingSection(token, spendingSection));
+        Response<SpendingSectionsSearchRs> addSectionRs = sendRequest(service.addSpendingSection(token, spendingSection),
+                HttpStatus.BAD_REQUEST);
 
         assertFalse(addSectionRs.isSuccessful(), "Response is not failed!");
     }
@@ -87,19 +87,19 @@ public class SpendingSectionsIT extends AbstractIT {
     public void addSpendingSectionSectionWithDeletedName() {
         String token = savePersonGetToken(service);
 
-        List<SpendingSection> sectionsRs = sendRequest(service.getSpendingSections(token), SUCCESS).body().getItems();
+        List<SpendingSection> sectionsRs = sendRequest(service.getSpendingSections(token)).body().getItems();
         SpendingSection deletedSection = sectionsRs.get(0);
         String deletedSectionName = deletedSection.getName();
 
         SpendingSectionsSearchRs deleteRs =
-                sendRequest(service.deleteSpendingSection(token, deletedSection.getSectionId()), SUCCESS).body();
+                sendRequest(service.deleteSpendingSection(token, deletedSection.getSectionId())).body();
         assertTrue(deleteRs.getItems().stream().noneMatch(sections -> sections.getName().equals(deletedSectionName)), SECTION_NOT_REMOVED);
 
         SpendingSectionsSearchRs addRs = sendRequest(service.addSpendingSection(token,
-                generateSpendingSection(deletedSectionName)), SUCCESS).body();
+                generateSpendingSection(deletedSectionName))).body();
         assertEquals(addRs.getItems().get(addRs.getItems().size() - 1).getName(), deletedSectionName, SECTION_NOT_ADDED);
 
-        SpendingSectionsSearchRs removedSections = sendRequest(service.getSpendingSectionsWithRemovedOnly(token), SUCCESS).body();
+        SpendingSectionsSearchRs removedSections = sendRequest(service.getSpendingSectionsWithRemovedOnly(token)).body();
 
         assertEquals(removedSections.getItems().get(0).getName(), "#del_" + deletedSectionName, "Deleted section has wrong name!");
     }
@@ -150,7 +150,7 @@ public class SpendingSectionsIT extends AbstractIT {
         SpendingSection spendingSection = generateSpendingSection();
         int updatedSectionId = 1;
 
-        SpendingSectionsSearchRs getSectionsRs = sendRequest(service.getSpendingSections(token), SUCCESS).body();
+        SpendingSectionsSearchRs getSectionsRs = sendRequest(service.getSpendingSections(token)).body();
 
         String oldName = getSectionsRs.getItems()
                 .stream().filter(section -> section.getSectionId().equals(updatedSectionId)).findAny().get().getName();
@@ -159,7 +159,7 @@ public class SpendingSectionsIT extends AbstractIT {
         SpendingSectionUpdateContainer updateContainerById = new SpendingSectionUpdateContainer(updatedSectionId, spendingSection);
 
         SpendingSectionsSearchRs updateSectionRs =
-                sendRequest(service.updateSpendingSection(token, updateContainerById), SUCCESS).body();
+                sendRequest(service.updateSpendingSection(token, updateContainerById)).body();
 
         assertTrue(updateSectionRs.getItems().stream().noneMatch(section -> section.getName().equals(oldName)),
                 "Spending Section was not updated!");
@@ -173,7 +173,7 @@ public class SpendingSectionsIT extends AbstractIT {
         String token = savePersonGetToken(service);
         int updatedSectionId = 1;
 
-        List<SpendingSection> getSectionsRs = sendRequest(service.getSpendingSections(token), SUCCESS).body().getItems();
+        List<SpendingSection> getSectionsRs = sendRequest(service.getSpendingSections(token)).body().getItems();
 
         Long oldBudget = getSectionsRs
                 .stream().filter(section -> section.getSectionId().equals(updatedSectionId)).findAny().get().getBudget();
@@ -184,7 +184,7 @@ public class SpendingSectionsIT extends AbstractIT {
                 new SpendingSectionUpdateContainer(updatedSectionId, getSectionsRs.get(updatedSectionId - 1));
 
         List<SpendingSection> updateSectionRs =
-                sendRequest(service.updateSpendingSection(token, updateContainerById), SUCCESS).body().getItems();
+                sendRequest(service.updateSpendingSection(token, updateContainerById)).body().getItems();
 
         assertNotEquals(updateSectionRs.get(updatedSectionId - 1).getBudget(), oldBudget, SECTION_NOT_UPDATED);
         assertEquals(getSectionsRs.size(), updateSectionRs.size(), "Number of Spending Sections has changed!");
@@ -201,7 +201,7 @@ public class SpendingSectionsIT extends AbstractIT {
         addSpendingSectionGetRs(service, token, spendingSection2);
 
         sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(spendingSection1.getSectionId(),
-                spendingSection2)), Status.ERROR);
+                spendingSection2)), HttpStatus.BAD_REQUEST);
     }
 
     /**
@@ -219,9 +219,9 @@ public class SpendingSectionsIT extends AbstractIT {
                 .getItems().stream().reduce((first, second) -> second).orElse(null).getSectionId();
 
         SpendingSection newSpendingSection = generateSpendingSection(newName);
-        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(updatedSectionId, newSpendingSection)), SUCCESS);
+        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(updatedSectionId, newSpendingSection)));
 
-        List<SpendingSection> spendingSectionList = sendRequest(service.getSpendingSections(token), SUCCESS).body().getItems();
+        List<SpendingSection> spendingSectionList = sendRequest(service.getSpendingSections(token)).body().getItems();
 
         assertEquals(spendingSectionList.get(2).getName(), name1, "Old SpendingSection name has changed!");
         assertEquals(spendingSectionList.get(3).getName(), newName, "SpendingSection name has not changed!");
@@ -231,7 +231,7 @@ public class SpendingSectionsIT extends AbstractIT {
     public void getSpendingSections() {
         String token = savePersonGetToken(service);
 
-        SpendingSectionsSearchRs getSectionsRs = sendRequest(service.getSpendingSections(token), SUCCESS).body();
+        SpendingSectionsSearchRs getSectionsRs = sendRequest(service.getSpendingSections(token)).body();
 
         assertEquals(getSectionsRs.getItems().size(), 2, "Wrong number of spending sections is returned!");
     }
@@ -243,9 +243,9 @@ public class SpendingSectionsIT extends AbstractIT {
         SpendingSection spendingSection = new SpendingSection(null, null, nonAddedId, null, "Renamed",
                 false, false, 1000L);
 
-        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(nonAddedId, spendingSection)), SUCCESS);
+        sendRequest(service.updateSpendingSection(token, new SpendingSectionUpdateContainer(nonAddedId, spendingSection)));
 
-        SpendingSectionsSearchRs getSectionsRs = sendRequest(service.getSpendingSectionsWithNonAdded(token), SUCCESS).body();
+        SpendingSectionsSearchRs getSectionsRs = sendRequest(service.getSpendingSectionsWithNonAdded(token)).body();
 
         assertEquals(getSectionsRs.getItems().size(), 2, "Wrong number of spending sections is returned!");
         assertFalse(getSectionsRs.getItems().get(nonAddedId - 1).getIsAdded(), "Section is still added!");
@@ -256,15 +256,15 @@ public class SpendingSectionsIT extends AbstractIT {
         String token = savePersonGetToken(service);
         int removedId = 1;
 
-        sendRequest(service.deleteSpendingSection(token, removedId), SUCCESS);
+        sendRequest(service.deleteSpendingSection(token, removedId));
 
         SpendingSectionsSearchRs getWithRemovedSectionsRs =
-                sendRequest(service.getSpendingSectionsWithRemoved(token), SUCCESS).body();
+                sendRequest(service.getSpendingSectionsWithRemoved(token)).body();
         assertEquals(getWithRemovedSectionsRs.getItems().size(), 2, "Wrong number of spending sections is returned!");
         assertTrue(getWithRemovedSectionsRs.getItems().get(removedId - 1).getIsRemoved(), SECTION_NOT_REMOVED);
 
         SpendingSectionsSearchRs getRemovedSectionsOnlyRs =
-                sendRequest(service.getSpendingSectionsWithRemovedOnly(token), SUCCESS).body();
+                sendRequest(service.getSpendingSectionsWithRemovedOnly(token)).body();
         assertEquals(getRemovedSectionsOnlyRs.getItems().size(), 1, "Wrong number of spending sections is returned!");
         assertTrue(getRemovedSectionsOnlyRs.getItems().get(removedId - 1).getIsRemoved(), SECTION_NOT_REMOVED);
     }
@@ -278,7 +278,7 @@ public class SpendingSectionsIT extends AbstractIT {
 
         int sectionId = addSpendingSectionGetSectionId(service, token, spendingSection);
 
-        SpendingSectionsSearchRs getSectionsRs = sendRequest(service.getSpendingSections(token), SUCCESS).body();
+        SpendingSectionsSearchRs getSectionsRs = sendRequest(service.getSpendingSections(token)).body();
 
         Integer logoId = getSectionsRs.getItems().stream()
                 .filter(section -> section.getSectionId().equals(sectionId))

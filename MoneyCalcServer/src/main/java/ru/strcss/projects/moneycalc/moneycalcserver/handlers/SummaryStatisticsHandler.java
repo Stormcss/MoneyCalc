@@ -3,6 +3,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.handlers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummarySearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.TodayPositionRange;
@@ -10,7 +11,6 @@ import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.TodayPosition
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.StatisticsHandlerUtils.getDaysPassed;
@@ -26,7 +26,7 @@ public class SummaryStatisticsHandler {
      */
     private static final int DIGITS = 2;
 
-    public List<FinanceSummaryBySection> calculateSummaryStatisticsBySection(FinanceSummaryCalculationContainer container) {
+    public FinanceSummarySearchRs calculateSummaryStatisticsBySection(FinanceSummaryCalculationContainer container) {
 
         final Map<Integer, FinanceSummaryBySection> statistics = new HashMap<>();
 
@@ -65,7 +65,7 @@ public class SummaryStatisticsHandler {
             financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
             financeSummaryBySection.setSectionName(currentSection.getName());
         });
-        return new ArrayList<>(statistics.values());
+        return new FinanceSummarySearchRs(new ArrayList<>(statistics.values()));
     }
 
     private Double getTodayBalance(TodayPositionRange todayPositionRange, Map<Integer, Double> spendTodayBySection,

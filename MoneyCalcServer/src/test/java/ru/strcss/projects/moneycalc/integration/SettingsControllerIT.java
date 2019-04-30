@@ -3,8 +3,6 @@ package ru.strcss.projects.moneycalc.integration;
 import lombok.extern.slf4j.Slf4j;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.integration.utils.Pair;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 
 import java.time.temporal.ChronoUnit;
@@ -25,10 +23,10 @@ public class SettingsControllerIT extends AbstractIT {
     public void getSettings() {
         String token = savePersonGetToken(service);
 
-        MoneyCalcRs<Settings> getSettingsRs = sendRequest(service.getSettings(token), Status.SUCCESS).body();
+        Settings getSettingsRs = sendRequest(service.getSettings(token)).body();
 
-        assertNotNull(getSettingsRs.getPayload(), "Settings are null!");
-        assertTrue(getSettingsRs.getPayload().isValid().isValidated(), "Settings are not valid!");
+        assertNotNull(getSettingsRs, "Settings are null!");
+        assertTrue(getSettingsRs.isValid().isValidated(), "Settings are not valid!");
     }
 
     @Test
@@ -39,10 +37,9 @@ public class SettingsControllerIT extends AbstractIT {
         newSettings.setPeriodTo(generateDatePlus(ChronoUnit.YEARS, 1));
 
         //Updating Settings
-        MoneyCalcRs<Settings> updatedRs = sendRequest(service.updateSettings(token, newSettings), Status.SUCCESS).body();
+        Settings updatedRs = sendRequest(service.updateSettings(token, newSettings)).body();
 
-        assertNotNull(updatedRs.getPayload(), "Payload is null!");
-        assertEquals(updatedRs.getPayload().getPeriodTo(),
-                newSettings.getPeriodTo(), "Settings were not updated!");
+        assertNotNull(updatedRs, "Settings is null!");
+        assertEquals(updatedRs.getPeriodTo(), newSettings.getPeriodTo(), "Settings were not updated!");
     }
 }

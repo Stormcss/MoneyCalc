@@ -24,8 +24,6 @@ import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonSe
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
 
-import java.util.List;
-
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.DATE_SEQUENCE_INCORRECT;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.NO_PERSON_LOGIN_EXISTS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_ID_NOT_EXISTS;
@@ -76,7 +74,7 @@ public class TransactionsController implements AbstractController {
     public TransactionsSearchRs getTransactions(@RequestBody TransactionsSearchFilter getFilter) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<Transaction>> requestValidation = new Validator(getFilter, "Getting Transactions")
+        RequestValidation requestValidation = new Validator(getFilter, "Getting Transactions")
                 .addValidation(() -> isDateSequenceValid(getFilter.getDateFrom(), getFilter.getDateTo()),
                         () -> DATE_SEQUENCE_INCORRECT)
                 .validate();
@@ -101,7 +99,7 @@ public class TransactionsController implements AbstractController {
         if (userId == null)
             throw new IncorrectRequestException(fillLog(NO_PERSON_LOGIN_EXISTS, login));
 
-        RequestValidation<Transaction> requestValidation = new Validator(transaction, "Adding Transaction")
+        RequestValidation requestValidation = new Validator(transaction, "Adding Transaction")
                 .addValidation(() -> transaction.isValid().isValidated(),
                         () -> fillLog(TRANSACTION_INCORRECT, transaction.isValid().getReasons().toString()))
                 .addValidation(() -> spendingSectionService.isSpendingSectionIdExists(login, transaction.getSectionId()),
@@ -131,7 +129,7 @@ public class TransactionsController implements AbstractController {
     public Transaction updateTransaction(@RequestBody TransactionUpdateContainer updateContainer) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<Transaction> requestValidation = new Validator(updateContainer, "Updating Transaction")
+        RequestValidation requestValidation = new Validator(updateContainer, "Updating Transaction")
                 .addValidation(() -> updateContainer.getTransaction().isValid().isValidated(),
                         () -> fillLog(TRANSACTION_INCORRECT, updateContainer.getTransaction().isValid().getReasons().toString()))
                 // TODO: 17.02.2019 add validation for sectionId existence

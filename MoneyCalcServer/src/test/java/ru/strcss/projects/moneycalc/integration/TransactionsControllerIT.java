@@ -1,9 +1,9 @@
 package ru.strcss.projects.moneycalc.integration;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.testng.annotations.Test;
 import retrofit2.Response;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
@@ -30,7 +30,6 @@ import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtil
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.getTransactions;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.savePersonGetToken;
 import static ru.strcss.projects.moneycalc.integration.utils.IntegrationTestUtils.sendRequest;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDateMinus;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.GenerationUtils.generateDatePlus;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateTransaction;
@@ -135,7 +134,7 @@ public class TransactionsControllerIT extends AbstractIT {
         String token = savePersonGetToken(service);
 
         Response<Transaction> addTransactionRs = sendRequest(service.addTransaction(token,
-                generateTransaction(10)));
+                generateTransaction(10)), HttpStatus.BAD_REQUEST);
 
         assertFalse(addTransactionRs.isSuccessful(), "Response is not failed!");
     }
@@ -159,7 +158,7 @@ public class TransactionsControllerIT extends AbstractIT {
         //Getting random Transactions to delete
         Long idToDelete = addedTransactions.get(ThreadLocalRandom.current().nextInt(addedTransactions.size())).getId();
 
-        sendRequest(service.deleteTransaction(token, idToDelete), SUCCESS);
+        sendRequest(service.deleteTransaction(token, idToDelete));
 
         //Getting Transactions list
         TransactionsSearchRs getTransactionsRs = getTransactions(service, token, LocalDate.now(), LocalDate.now(),
@@ -193,7 +192,7 @@ public class TransactionsControllerIT extends AbstractIT {
         //Update Transaction
         LocalDate newDate = LocalDate.now().minus(1, ChronoUnit.DAYS);
         sendRequest(service.updateTransaction(token,
-                new TransactionUpdateContainer(idToUpdate, generateTransaction(newDate))), SUCCESS);
+                new TransactionUpdateContainer(idToUpdate, generateTransaction(newDate))));
 
         //Getting Transactions list
         TransactionsSearchRs transactionsRs = getTransactions(service, token, newDate, LocalDate.now(),
@@ -235,7 +234,7 @@ public class TransactionsControllerIT extends AbstractIT {
                 .getId();
 
         Transaction newTransaction = generateTransaction(newTitle, "newDesc");
-        sendRequest(service.updateTransaction(token, new TransactionUpdateContainer(updatedTransactionId, newTransaction)), SUCCESS).body();
+        sendRequest(service.updateTransaction(token, new TransactionUpdateContainer(updatedTransactionId, newTransaction)));
 
         TransactionsSearchRs transactionList = getTransactions(service, token);
 
@@ -322,12 +321,12 @@ public class TransactionsControllerIT extends AbstractIT {
         //changing Settings range - last transaction date is before periodTo
         LocalDate periodFrom = LocalDate.now().minus(transactionsCount, ChronoUnit.DAYS);
         LocalDate periodTo = LocalDate.now().plus(1, ChronoUnit.DAYS);
-        sendRequest(service.updateSettings(token, new Settings(periodFrom, periodTo)), Status.SUCCESS);
+        sendRequest(service.updateSettings(token, new Settings(periodFrom, periodTo)));
         assertEquals(getTransactions(service, token).getItems().size(), transactionsCount, INCORRECT_TRANSACTIONS_COUNT);
 
         //changing Settings range - last transaction is equal to periodTo
         periodFrom = LocalDate.now().minus(transactionsCount, ChronoUnit.DAYS);
-        sendRequest(service.updateSettings(token, new Settings(periodFrom, LocalDate.now())), Status.SUCCESS);
+        sendRequest(service.updateSettings(token, new Settings(periodFrom, LocalDate.now())));
         assertEquals(getTransactions(service, token).getItems().size(), transactionsCount - 1, INCORRECT_TRANSACTIONS_COUNT);
     }
 }

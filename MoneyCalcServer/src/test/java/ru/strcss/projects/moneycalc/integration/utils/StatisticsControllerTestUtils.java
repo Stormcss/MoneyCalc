@@ -1,9 +1,8 @@
 package ru.strcss.projects.moneycalc.integration.utils;
 
 import ru.strcss.projects.moneycalc.integration.testapi.MoneyCalcClient;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummarySearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 
@@ -21,8 +20,8 @@ public class StatisticsControllerTestUtils {
      * @return
      */
     public static FinanceSummaryBySection getFinanceSummaryBySection(FinanceSummaryFilter getContainer, MoneyCalcClient service, String token) {
-        MoneyCalcRs<List<FinanceSummaryBySection>> responseGetStats = sendRequest(service.getFinanceSummaryBySection(token, getContainer), Status.SUCCESS).body();
-        return responseGetStats.getPayload().get(0);
+        FinanceSummarySearchRs responseGetStats = sendRequest(service.getFinanceSummaryBySection(token, getContainer)).body();
+        return responseGetStats.getItems().get(0);
     }
 
     /**
@@ -35,7 +34,7 @@ public class StatisticsControllerTestUtils {
 
         if (numOfSections > spendingSections.size()) {
             for (int i = 0; i < numOfSections - spendingSections.size(); i++) {
-                sendRequest(service.addSpendingSection(token, generateSpendingSection(budget)), Status.SUCCESS);
+                sendRequest(service.addSpendingSection(token, generateSpendingSection(budget)));
             }
         }
     }

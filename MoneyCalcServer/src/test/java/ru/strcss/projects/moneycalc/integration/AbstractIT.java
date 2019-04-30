@@ -19,9 +19,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.MoneyCalcApplication;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {
-        MoneyCalcApplication.class
-})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = MoneyCalcApplication.class)
 public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
 
     @LocalServerPort

@@ -3,9 +3,8 @@ package ru.strcss.projects.moneycalc.moneycalcserver.handlers;
 import org.testng.annotations.BeforeClass;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummarySearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
-
-import java.util.List;
 
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertNotNull;
@@ -27,20 +26,20 @@ public class SummaryStatisticsHandlerTest {
         int sections = 5;
         int transactionsNum = 100;
 
-        List<FinanceSummaryBySection> financeSummary =
+        FinanceSummarySearchRs financeSummary =
                 statisticsHandler.calculateSummaryStatisticsBySection(generateFinSummCalculContainer(sections, transactionsNum));
 
         assertNotNull(financeSummary, "FinanceSummary is null!");
-        assertEquals(financeSummary.size(), sections, "FinanceSummary has wrong size!");
+        assertEquals(financeSummary.getItems().size(), sections, "FinanceSummary has wrong size!");
     }
 
     @Test(invocationCount = 3)
     public void shouldReturnCorrectCountOfDecimalPlaces() {
         FinanceSummaryCalculationContainer finSummContainer = generateFinSummCalculContainer(50, 500);
 
-        List<FinanceSummaryBySection> financeSummaryList = statisticsHandler.calculateSummaryStatisticsBySection(finSummContainer);
+        FinanceSummarySearchRs financeSummaryList = statisticsHandler.calculateSummaryStatisticsBySection(finSummContainer);
 
-        for (FinanceSummaryBySection financeSummary : financeSummaryList) {
+        for (FinanceSummaryBySection financeSummary : financeSummaryList.getItems()) {
             int maxDecimalPlaces = maxDecimalPlaces(financeSummary.getTodayBalance(), financeSummary.getSummaryBalance());
             assertTrue(maxDecimalPlaces <= DIGITS, "Incorrect number of decimal digits! Expected " + DIGITS +
                     " but found " + maxDecimalPlaces);

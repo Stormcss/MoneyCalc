@@ -3,7 +3,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 import io.micrometer.core.annotation.Timed;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,12 +11,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummarySearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
@@ -24,6 +23,8 @@ import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.TimerT
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.SummaryStatisticsHandler;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.IncorrectRequestException;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.RequestFailedException;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SettingsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
@@ -33,9 +34,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.DATE_SEQUENCE_INCORRECT;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.STATISTICS_RETURNED;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseError;
-import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.responseSuccess;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
 
 @Slf4j
@@ -55,7 +53,7 @@ public class StatisticsController implements AbstractController {
      */
     @GetMapping
     @Timed(value = "stats.summaryBySection.get", extraTags = {"time", "formGetToDbSave"})
-    public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection() throws Exception {
+    public FinanceSummarySearchRs getFinanceSummaryBySection() throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
         Settings settings = settingsService.getSettings(login);
@@ -81,24 +79,25 @@ public class StatisticsController implements AbstractController {
                 .build();
         // TODO: 13.02.2018 should be client's time
 
-        List<FinanceSummaryBySection> financeSummaryResult = metricsService.getTimersStorage().get(TimerType.STATS_PROCESS_TIMER)
+        FinanceSummarySearchRs financeSummaryResult = metricsService.getTimersStorage().get(TimerType.STATS_PROCESS_TIMER)
                 .recordCallable(() -> statisticsHandler.calculateSummaryStatisticsBySection(calculationContainer));
 
-        log.debug("Returned List of FinanceSummaryBySections for login \'{}\' : {}", login, financeSummaryResult);
-        return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
+        log.debug("Returned FinanceSummarySearchRs for login \'{}\' : {}", login, financeSummaryResult);
+        return financeSummaryResult;
     }
 
     @PostMapping(value = "/getFiltered")
-    public ResponseEntity<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(
+    public FinanceSummarySearchRs getFinanceSummaryBySection(
             @RequestBody FinanceSummaryFilter summaryFilter) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        RequestValidation<List<FinanceSummaryBySection>> requestValidation = new Validator(summaryFilter,
+        RequestValidation requestValidation = new Validator(summaryFilter,
                 "Getting Finance Summary")
                 .addValidation(() -> isDateSequenceValid(summaryFilter.getRangeFrom(), summaryFilter.getRangeTo()),
                         () -> DATE_SEQUENCE_INCORRECT)
                 .validate();
-        if (!requestValidation.isValid()) return requestValidation.getValidationError();
+        if (!requestValidation.isValid())
+            throw new IncorrectRequestException(requestValidation.getReason());
 
         TransactionsSearchFilter transactionsFilter = new TransactionsSearchFilter(summaryFilter.getRangeFrom(),
                 summaryFilter.getRangeTo(), summaryFilter.getSectionIds(), null, null, null, null);
@@ -113,7 +112,7 @@ public class StatisticsController implements AbstractController {
 
         if (spendingSections.size() != summaryFilter.getSectionIds().size()) {
             log.error("List of required IDs is not equal with filtered Person's list for login: \'{}\'", login);
-            return responseError("List of required IDs is not equal with filtered Person's list");
+            throw new RequestFailedException(HttpStatus.UNPROCESSABLE_ENTITY, "List of required IDs is not equal with filtered Person's list");
         }
 
         FinanceSummaryCalculationContainer calculationContainer = FinanceSummaryCalculationContainer.builder()
@@ -126,10 +125,10 @@ public class StatisticsController implements AbstractController {
                 .build();
         // TODO: 13.02.2018 should be client's time
 
-        List<FinanceSummaryBySection> financeSummaryResult = metricsService.getTimersStorage().get(TimerType.STATS_PROCESS_TIMER)
+        FinanceSummarySearchRs financeSummaryResult = metricsService.getTimersStorage().get(TimerType.STATS_PROCESS_TIMER)
                 .recordCallable(() -> statisticsHandler.calculateSummaryStatisticsBySection(calculationContainer));
 
-        log.debug("Returned List of FinanceSummaryBySection for login \'{}\' : {}", login, financeSummaryResult);
-        return responseSuccess(STATISTICS_RETURNED, financeSummaryResult);
+        log.debug("Returned List of FinanceSummarySearchRs for login \'{}\' : {}", login, financeSummaryResult);
+        return financeSummaryResult;
     }
 }
