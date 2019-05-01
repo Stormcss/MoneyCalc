@@ -85,10 +85,6 @@ public class StatisticsControllerTest extends AbstractControllerTest {
 
     @MockBean
     @Autowired
-    private RegistryMapper registryMapper;
-
-    @MockBean
-    @Autowired
     private SummaryStatisticsHandler statisticsHandler;
 
     @BeforeMethod
@@ -175,6 +171,10 @@ public class StatisticsControllerTest extends AbstractControllerTest {
 
     @TestConfiguration
     static class Config {
+
+        @MockBean
+        RegistryMapper registryMapper;
+
         @Bean
         TransactionsService transactionsService(TransactionsMapper transactionsMapper, MetricsService metricsService) {
             return new TransactionsServiceImpl(transactionsMapper, metricsService);

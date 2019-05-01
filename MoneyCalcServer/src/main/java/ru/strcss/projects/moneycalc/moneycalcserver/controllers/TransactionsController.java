@@ -3,6 +3,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 import io.micrometer.core.annotation.Timed;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -20,6 +21,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.IncorrectRequestException;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.RequestFailedException;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.PersonService;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
@@ -114,7 +116,7 @@ public class TransactionsController implements AbstractController {
 
         if (addedTransactionId == null) {
             log.error("Saving Transaction {} for login '{}' has failed", transaction, login);
-            throw new IncorrectRequestException(TRANSACTION_SAVING_ERROR);
+            throw new RequestFailedException(HttpStatus.INTERNAL_SERVER_ERROR, TRANSACTION_SAVING_ERROR);
         }
         log.info("Saved new Transaction for login '{}' : {}", login, transaction);
         return transaction;
@@ -142,7 +144,7 @@ public class TransactionsController implements AbstractController {
 
         if (!isUpdateSuccessful) {
             log.error("Updating Transaction for login \'{}\' has failed", login);
-            throw new IncorrectRequestException(TRANSACTION_NOT_UPDATED);
+            throw new RequestFailedException(HttpStatus.INTERNAL_SERVER_ERROR, TRANSACTION_NOT_UPDATED);
         }
 
         Transaction resultTransaction = transactionsService.getTransactionById(login, updateContainer.getId());
@@ -166,7 +168,7 @@ public class TransactionsController implements AbstractController {
 
         if (!isDeleteSuccessful) {
             log.error("Deleting Transaction for login \'{}\' has failed", login);
-            throw new IncorrectRequestException(TRANSACTION_NOT_DELETED);
+            throw new RequestFailedException(HttpStatus.INTERNAL_SERVER_ERROR, TRANSACTION_NOT_DELETED);
         }
         log.info("Deleted Transaction id \'{}\': for login: \'{}\'", transactionId, login);
 

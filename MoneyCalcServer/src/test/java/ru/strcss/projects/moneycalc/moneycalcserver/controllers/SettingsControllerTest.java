@@ -7,7 +7,6 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MvcResult;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
@@ -47,12 +46,9 @@ public class SettingsControllerTest extends AbstractControllerTest {
         when(settingsMapper.getSettings(anyString()))
                 .thenReturn(generateSettings());
 
-        MvcResult mvcResult = mockMvc.perform(get("/api/settings")
+        mockMvc.perform(get("/api/settings")
                 .with(user("User")))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        System.out.println("mvcResult.getResponse().getContentAsString() = " + mvcResult.getResponse().getContentAsString());
+                .andExpect(status().isOk());
     }
 
     @Test
@@ -60,14 +56,11 @@ public class SettingsControllerTest extends AbstractControllerTest {
         when(settingsMapper.getSettings(anyString()))
                 .thenReturn(generateSettings());
 
-        MvcResult mvcResult = mockMvc.perform(put("/api/settings")
+        mockMvc.perform(put("/api/settings")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user("User"))
                 .content(serializeToJson(generateSettings())))
-                .andExpect(status().isOk())
-                .andReturn();
-
-        System.out.println("mvcResult.getResponse().getContentAsString() = " + mvcResult.getResponse().getContentAsString());
+                .andExpect(status().isOk());
     }
 
     @Test

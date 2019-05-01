@@ -255,7 +255,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateSpendingSection())))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.userMessage", is(SPENDING_SECTION_SAVING_ERROR)));
     }
 
@@ -310,7 +310,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection()))))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.userMessage", is(SPENDING_SECTION_NOT_FOUND)));
     }
 
@@ -323,7 +323,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection()))))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.userMessage", is(SPENDING_SECTION_NOT_DELETED)));
     }
 

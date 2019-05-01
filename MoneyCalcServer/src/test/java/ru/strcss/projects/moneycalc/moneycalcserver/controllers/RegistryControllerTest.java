@@ -8,7 +8,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.web.servlet.MvcResult;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
@@ -52,10 +51,6 @@ public class RegistryControllerTest extends AbstractControllerTest {
     @Autowired
     private RegistryMapper registryMapper;
 
-    @MockBean
-    @Autowired
-    private SpendingSectionsMapper sectionsMapper;
-
     @BeforeMethod
     public void prepareRegistrySuccessfulScenario() {
         when(registryMapper.isUserExistsByLogin(anyString()))
@@ -81,32 +76,26 @@ public class RegistryControllerTest extends AbstractControllerTest {
 
     @Test(dataProvider = "incorrectAccessRegistrationDataProvider")
     void shouldNotPerformRegistrationInvalidAccess(Access access, String expectedHint) throws Exception {
-        final MvcResult mvcResult = mockMvc.perform(post("/api/registration/register")
+        mockMvc.perform(post("/api/registration/register")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateCredentials(access, generateIdentifications()))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.userMessage", stringContainsInOrder(
                         Arrays.asList("Can not perform registration:", expectedHint)
-                )))
-                .andReturn();
-
-        System.out.println(mvcResult.getResponse().getContentAsString());
+                )));
     }
 
     @Test
     void shouldNotPerformRegistrationInvalidIdentifications() throws Exception {
-        final MvcResult mvcResult = mockMvc.perform(post("/api/registration/register")
+        mockMvc.perform(post("/api/registration/register")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateCredentials(generateAccess(), new Identifications()))))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$.userMessage", stringContainsInOrder(
                         Arrays.asList("Can not perform registration:", "name is empty")
-                )))
-                .andReturn();
-
-        System.out.println(mvcResult.getResponse().getContentAsString());
+                )));
     }
 
     @Test
@@ -116,15 +105,12 @@ public class RegistryControllerTest extends AbstractControllerTest {
         Credentials credentials = generateCredentials();
         credentials.getAccess().setLogin(USER_LOGIN);
 
-        final MvcResult mvcResult = mockMvc.perform(post("/api/registration/register")
+        mockMvc.perform(post("/api/registration/register")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateCredentials(USER_LOGIN))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.userMessage", is(fillLog(PERSON_LOGIN_ALREADY_EXISTS, USER_LOGIN))))
-                .andReturn();
-
-        System.out.println(mvcResult.getResponse().getContentAsString());
+                .andExpect(jsonPath("$.userMessage", is(fillLog(PERSON_LOGIN_ALREADY_EXISTS, USER_LOGIN))));
     }
 
     @Test
@@ -135,15 +121,12 @@ public class RegistryControllerTest extends AbstractControllerTest {
         Credentials credentials = generateCredentials();
         credentials.getAccess().setEmail(email);
 
-        final MvcResult mvcResult = mockMvc.perform(post("/api/registration/register")
+        mockMvc.perform(post("/api/registration/register")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(credentials)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.userMessage", is(fillLog(PERSON_EMAIL_ALREADY_EXISTS, email))))
-                .andReturn();
-
-        System.out.println(mvcResult.getResponse().getContentAsString());
+                .andExpect(jsonPath("$.userMessage", is(fillLog(PERSON_EMAIL_ALREADY_EXISTS, email))));
     }
 
     @Test(dataProvider = "incorrectEmailRegistrationDataProvider")
@@ -151,15 +134,12 @@ public class RegistryControllerTest extends AbstractControllerTest {
         Credentials credentials = generateCredentials();
         credentials.getAccess().setEmail(email);
 
-        final MvcResult mvcResult = mockMvc.perform(post("/api/registration/register")
+        mockMvc.perform(post("/api/registration/register")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(credentials)))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.userMessage", is(fillLog(PERSON_EMAIL_INCORRECT, email))))
-                .andReturn();
-
-        System.out.println(mvcResult.getResponse().getContentAsString());
+                .andExpect(jsonPath("$.userMessage", is(fillLog(PERSON_EMAIL_INCORRECT, email))));
     }
 
     @DataProvider(name = "incorrectAccessRegistrationDataProvider")
@@ -198,6 +178,10 @@ public class RegistryControllerTest extends AbstractControllerTest {
 
     @TestConfiguration
     static class Config {
+
+        @MockBean
+        SpendingSectionsMapper sectionsMapper;
+
         @Bean
         RegisterService sectionService(RegistryMapper registryMapper, SpendingSectionsMapper sectionsMapper,
                                        BCryptPasswordEncoder bCryptPasswordEncoder) {

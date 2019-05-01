@@ -82,10 +82,6 @@ public class TransactionsControllerTest extends AbstractControllerTest {
     @Autowired
     private UserMapper userMapper;
 
-    @MockBean
-    @Autowired
-    private RegistryMapper registryMapper;
-
     @BeforeMethod
     public void prepareTransactionsSuccessfulScenario() {
         TransactionsSearchRs transactionList = generateTransactionsSearchRs(TRANSACTIONS_COUNT, sectionIds, true);
@@ -231,7 +227,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateTransaction())))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.userMessage", is(TRANSACTION_SAVING_ERROR)));
     }
 
@@ -259,7 +255,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.userMessage", is(TRANSACTION_NOT_UPDATED)));
     }
 
@@ -285,7 +281,7 @@ public class TransactionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new TransactionUpdateContainer(1L, generateTransaction("title", "desc")))))
-                .andExpect(status().isBadRequest())
+                .andExpect(status().isInternalServerError())
                 .andExpect(jsonPath("$.userMessage", is(TRANSACTION_NOT_DELETED)));
     }
 
@@ -303,6 +299,10 @@ public class TransactionsControllerTest extends AbstractControllerTest {
 
     @TestConfiguration
     static class Config {
+
+        @MockBean
+        RegistryMapper registryMapper;
+
         @Bean
         TransactionsService transactionsService(TransactionsMapper transactionsMapper, MetricsService metricsService) {
             return new TransactionsServiceImpl(transactionsMapper, metricsService);

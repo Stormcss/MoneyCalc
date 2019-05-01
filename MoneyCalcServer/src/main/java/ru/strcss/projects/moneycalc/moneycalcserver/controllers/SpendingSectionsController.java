@@ -2,6 +2,7 @@ package ru.strcss.projects.moneycalc.moneycalcserver.controllers;
 
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,6 +19,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
 import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation.Validator;
 import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.IncorrectRequestException;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.RequestFailedException;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_EMPTY;
@@ -73,7 +75,7 @@ public class SpendingSectionsController implements AbstractController {
 
         if (!isAdded) {
             log.error("Saving SpendingSection {} for login '{}' has failed", spendingSection, login);
-            throw new IncorrectRequestException(SPENDING_SECTION_SAVING_ERROR);
+            throw new RequestFailedException(HttpStatus.INTERNAL_SERVER_ERROR, SPENDING_SECTION_SAVING_ERROR);
         }
         log.debug("Saved new SpendingSection for login '{}' : {}", login, spendingSection);
 
@@ -100,7 +102,7 @@ public class SpendingSectionsController implements AbstractController {
 
         if (!isUpdateSuccessful) {
             log.error("Updating SpendingSection for login \'{}\' has failed", login);
-            throw new IncorrectRequestException(SPENDING_SECTION_NOT_FOUND);
+            throw new RequestFailedException(HttpStatus.INTERNAL_SERVER_ERROR, SPENDING_SECTION_NOT_FOUND);
         }
 
         log.debug("Updated SpendingSection {}: for login: \'{}\'", updateContainer.getSpendingSection(), login);
@@ -111,10 +113,10 @@ public class SpendingSectionsController implements AbstractController {
     public SpendingSectionsSearchRs deleteSpendingSection(@PathVariable Integer sectionId) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
 
-        Boolean isDeleted = sectionService.deleteSpendingSection(login, sectionId);
+        boolean isDeleted = sectionService.deleteSpendingSection(login, sectionId);
 
         if (!isDeleted) {
-            throw new IncorrectRequestException(SPENDING_SECTION_NOT_DELETED);
+            throw new RequestFailedException(HttpStatus.INTERNAL_SERVER_ERROR, SPENDING_SECTION_NOT_DELETED);
         }
         return sectionService.getSpendingSections(login, false, false, false);
     }
