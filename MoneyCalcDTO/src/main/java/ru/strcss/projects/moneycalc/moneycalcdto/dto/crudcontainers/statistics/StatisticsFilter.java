@@ -15,7 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode(callSuper = false)
 @AllArgsConstructor
-public class FinanceSummaryFilter implements AbstractContainer {
+public class StatisticsFilter implements AbstractContainer {
 
     private LocalDate rangeFrom;
     private LocalDate rangeTo;
@@ -27,7 +27,6 @@ public class FinanceSummaryFilter implements AbstractContainer {
 
         if (rangeFrom == null) reasons.add("rangeFrom is empty");
         if (rangeTo == null) reasons.add("rangeTo is empty");
-        if (sectionIds == null || sectionIds.isEmpty()) reasons.add("sectionIds can not be empty");
 
         return new ValidationResult(reasons.isEmpty(), reasons);
     }
