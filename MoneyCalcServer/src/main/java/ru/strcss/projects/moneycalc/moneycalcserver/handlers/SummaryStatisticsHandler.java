@@ -3,9 +3,9 @@ package ru.strcss.projects.moneycalc.moneycalcserver.handlers;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummarySearchRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.ItemsContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.utils.TodayPositionRange;
 
 import java.time.temporal.ChronoUnit;
@@ -26,13 +26,13 @@ public class SummaryStatisticsHandler {
      */
     private static final int DIGITS = 2;
 
-    public FinanceSummarySearchRs calculateSummaryStatisticsBySection(FinanceSummaryCalculationContainer container) {
+    public ItemsContainer<SummaryBySection> calculateSummaryStatisticsBySection(FinanceSummaryCalculationContainer container) {
 
-        final Map<Integer, FinanceSummaryBySection> statistics = new HashMap<>();
+        final Map<Integer, SummaryBySection> statistics = new HashMap<>();
 
         //Создали мапу
         for (Integer sectionId : container.getSections()) {
-            FinanceSummaryBySection summaryBySection = FinanceSummaryBySection.builder()
+            SummaryBySection summaryBySection = SummaryBySection.builder()
                     .sectionId(sectionId)
                     .moneySpendAll(0d)
                     .build();
@@ -65,7 +65,7 @@ public class SummaryStatisticsHandler {
             financeSummaryBySection.setMoneyLeftAll(budget - financeSummaryBySection.getMoneySpendAll());
             financeSummaryBySection.setSectionName(currentSection.getName());
         });
-        return new FinanceSummarySearchRs(new ArrayList<>(statistics.values()));
+        return new ItemsContainer<>(0L, null, new ArrayList<>(statistics.values()));
     }
 
     private Double getTodayBalance(TodayPositionRange todayPositionRange, Map<Integer, Double> spendTodayBySection,
@@ -83,15 +83,15 @@ public class SummaryStatisticsHandler {
                 .orElseThrow(() -> new InternalError("Holy shit has happened"));
     }
 
-    private void fillMoneySpend(FinanceSummaryCalculationContainer container, Map<Integer, FinanceSummaryBySection> statistics) {
+    private void fillMoneySpend(FinanceSummaryCalculationContainer container, Map<Integer, SummaryBySection> statistics) {
         fillMoneySpend(container, statistics, null);
     }
 
     private void fillMoneySpend(FinanceSummaryCalculationContainer container,
-                                Map<Integer, FinanceSummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
+                                Map<Integer, SummaryBySection> statistics, Map<Integer, Double> spendTodayBySection) {
         container.getTransactions().forEach(transaction -> {
             Integer sectionId = transaction.getSectionId();
-            FinanceSummaryBySection temporary = statistics.get(sectionId);
+            SummaryBySection temporary = statistics.get(sectionId);
 
             temporary.setMoneySpendAll(temporary.getMoneySpendAll() + transaction.getSum());
             if (spendTodayBySection != null && transaction.getDate().isEqual(container.getToday())) {

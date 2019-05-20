@@ -16,10 +16,11 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 public class ItemsContainer<E> {
+    private Long count;
     private BaseStatistics stats;
     private List<E> items;
 
     public static ItemsContainer buildEmpty() {
-        return new ItemsContainer<>(BaseStatistics.buildEmpty(), new ArrayList<>());
+        return new ItemsContainer<>(0L, BaseStatistics.buildEmpty(), new ArrayList<>());
     }
 }

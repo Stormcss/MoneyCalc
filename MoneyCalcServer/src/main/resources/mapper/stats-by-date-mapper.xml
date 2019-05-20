@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="ru.strcss.projects.moneycalc.moneycalcserver.mapper.StatsByDateMapper">
+
+    <resultMap id="getSumMap"
+               type="ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.ItemsContainer"
+               autoMapping="false">
+        <result property="count" column="count"/>
+        <association property="stats"
+                     javaType="ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.BaseStatistics"
+                     autoMapping="true"/>
+        <collection property="items" ofType="ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDate"
+                    autoMapping="true"/>
+    </resultMap>
+    <select id="getSum" resultMap="getSumMap">
+        <![CDATA[
+            select count(*) over () as count, t.date, sum(t.sum), sum(sum(t.sum)) over() as total
+            from "Transactions" t
+                join "User" u on t."userId" = u.id
+                join "Access" a on u."accessId" = a.id
+            where a.login = #{login}
+              and t.date >= #{filter.rangeFrom}
+              and t.date < #{filter.rangeTo}
+            ]]>
+        <if test="filter.sectionIds != null and !filter.sectionIds.isEmpty()">
+            and t."sectionId" IN
+            <foreach item="id" collection="filter.sectionIds" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        group by t.date
+        order by t.date desc;
+    </select>
+
+    <resultMap id="getSumByDateSectionMap"
+               type="ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.ItemsContainer"
+               autoMapping="false">
+        <result property="count" column="count"/>
+        <association property="stats"
+                     javaType="ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.BaseStatistics"
+                     autoMapping="true"/>
+        <collection property="items"
+                    ofType="ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDateSection"
+                    autoMapping="true"/>
+    </resultMap>
+    <select id="getSumByDateSection" resultMap="getSumByDateSectionMap">
+        <![CDATA[
+            select count(*) over () as count, t.date, ss.name, sum(t.sum), sum(sum(t.sum)) over() as total
+            from "Transactions" t
+               join "User" u on t."userId" = u.id
+               join "Access" a on u."accessId" = a.id
+               join "SpendingSection" ss on t."sectionId" = ss."sectionId"
+            where a.login = #{login} and ss."userId" = u.id
+              and t.date >= #{filter.rangeFrom}
+              and t.date < #{filter.rangeTo}
+            ]]>
+        <if test="filter.sectionIds != null and !filter.sectionIds.isEmpty()">
+            and t."sectionId" IN
+            <foreach item="id" collection="filter.sectionIds" open="(" separator="," close=")">
+                #{id}
+            </foreach>
+        </if>
+        group by t.date, ss.name
+        order by t.date desc;
+    </select>
+</mapper>
