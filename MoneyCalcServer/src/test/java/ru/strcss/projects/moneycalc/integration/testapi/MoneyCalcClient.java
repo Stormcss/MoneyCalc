@@ -9,10 +9,10 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.ItemsContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummarySearchRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.StatisticsFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
@@ -22,6 +22,10 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDate;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDateSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SummaryBySection;
 
 public interface MoneyCalcClient {
 
@@ -103,12 +107,20 @@ public interface MoneyCalcClient {
     /**
      * Statistics
      */
-    @POST("/api/stats/summaryBySection")
-    Call<FinanceSummarySearchRs> getFinanceSummaryBySection(@Header("Authorization") String token);
+    @GET("/api/stats/bySection/summary")
+    Call<ItemsContainer<SummaryBySection>> getSummaryBySection(@Header("Authorization") String token);
 
-    @POST("/api/stats/summaryBySection/getFiltered")
-    Call<FinanceSummarySearchRs> getFinanceSummaryBySection(@Header("Authorization") String token,
-                                                            @Body FinanceSummaryFilter getContainer);
+    @POST("/api/stats/bySection/sum")
+    Call<ItemsContainer<SumBySection>> getSumBySection(@Header("Authorization") String token,
+                                                       @Body StatisticsFilter statisticsFilter);
+
+    @POST("/api/stats/byDate/sum")
+    Call<ItemsContainer<SumByDate>> getSumByDate(@Header("Authorization") String token,
+                                                 @Body StatisticsFilter getContainer);
+
+    @POST("/api/stats/byDate/sumBySection")
+    Call<ItemsContainer<SumByDateSection>> getSumByDateSection(@Header("Authorization") String token,
+                                                               @Body StatisticsFilter getContainer);
 
     /**
      * Access

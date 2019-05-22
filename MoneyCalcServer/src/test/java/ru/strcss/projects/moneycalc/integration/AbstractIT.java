@@ -28,7 +28,7 @@ public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    MoneyCalcClient service;
+    public MoneyCalcClient service;
 
     private final String CREATE_SCHEMA_PATH = "dbSchema/createSchema_v1.0.sql";
     private final String DROP_SCHEMA_PATH = "dbSchema/dropSchema_v1.0.sql";

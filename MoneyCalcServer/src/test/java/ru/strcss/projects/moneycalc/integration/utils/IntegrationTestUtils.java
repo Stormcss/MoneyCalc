@@ -15,6 +15,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.testutils.Generator;
@@ -217,4 +218,12 @@ public class IntegrationTestUtils {
         container.setRequiredSections(sectionIds);
         return sendRequest(service.getTransactions(token, container), HttpStatus.OK).body();
     }
+
+    /**
+     * Update settings
+     */
+    public static Settings updateSettings(MoneyCalcClient service, String token, LocalDate periodFrom, LocalDate periodTo) {
+        return sendRequest(service.updateSettings(token, new Settings(periodFrom, periodTo))).body();
+    }
+
 }
