@@ -21,7 +21,7 @@ public class TransactionLegacy implements Serializable {
     /**
      * Person Id - used for linking Person with current Transaction in DB
      */
-    private Integer personId;
+    private Integer userId;
     private Integer sectionId;
     private String date;
     private Integer sum;
