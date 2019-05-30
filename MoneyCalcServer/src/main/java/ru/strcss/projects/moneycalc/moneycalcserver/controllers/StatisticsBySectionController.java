@@ -38,8 +38,9 @@ public class StatisticsBySectionController implements AbstractController {
     }
 
     @PostMapping(value = "/sum")
-    public ItemsContainer<SumBySection> getSum(@RequestBody StatisticsFilter statisticsFilter) throws Exception {
+    public ItemsContainer<SumBySection> getSum(@RequestBody StatisticsFilter statisticsFilter) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.debug("Requested Sum by Section for login \'{}\' with filter - {}", login, statisticsFilter);
 
         ItemsContainer<SumBySection> sumBySection = statisticsService.getSum(login, statisticsFilter);
 

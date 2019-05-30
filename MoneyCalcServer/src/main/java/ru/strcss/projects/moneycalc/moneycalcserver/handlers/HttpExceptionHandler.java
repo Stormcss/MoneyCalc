@@ -55,8 +55,8 @@ public class HttpExceptionHandler {
     }
 
     @ExceptionHandler({Exception.class})
-    public ResponseEntity othersExceptionHandler(Exception e, HttpServletRequest request) {
-        log.error("Other Exception message: {}", e);
+    public ResponseEntity othersExceptionHandler(Exception e) {
+        log.error("Other Exception message:", e);
         ErrorDescription errorDescription = new ErrorDescription();
         errorDescription.setDeveloperMessage(e.toString() + ": " + Arrays.toString(e.getStackTrace()));
         errorDescription.setUserMessage("Внутренняя ошибка MoneyCalcServer");

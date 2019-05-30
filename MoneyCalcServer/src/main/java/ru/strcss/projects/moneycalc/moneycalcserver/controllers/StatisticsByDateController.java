@@ -22,8 +22,9 @@ public class StatisticsByDateController implements AbstractController {
     private final StatisticsByDateService statisticsService;
 
     @PostMapping(value = "/sum")
-    public ItemsContainer<SumByDate> getSum(@RequestBody StatisticsFilter statisticsFilter) throws Exception {
+    public ItemsContainer<SumByDate> getSum(@RequestBody StatisticsFilter statisticsFilter) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.debug("Requested Sum by Date for login \'{}\' with filter - {}", login, statisticsFilter);
 
         ItemsContainer<SumByDate> sumByDate = statisticsService.getSum(login, statisticsFilter);
 
@@ -32,8 +33,9 @@ public class StatisticsByDateController implements AbstractController {
     }
 
     @PostMapping(value = "/sumBySection")
-    public ItemsContainer<SumByDateSection> getSumBySection(@RequestBody StatisticsFilter statisticsFilter) throws Exception {
+    public ItemsContainer<SumByDateSection> getSumBySection(@RequestBody StatisticsFilter statisticsFilter) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
+        log.debug("Requested SumBySection by Date for login \'{}\' with filter - {}", login, statisticsFilter);
 
         ItemsContainer<SumByDateSection> sumByDateSection = statisticsService.getSumByDateSection(login, statisticsFilter);
 

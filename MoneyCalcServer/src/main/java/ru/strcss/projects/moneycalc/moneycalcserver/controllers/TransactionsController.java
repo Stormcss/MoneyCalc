@@ -58,7 +58,6 @@ public class TransactionsController implements AbstractController {
     @GetMapping
     public TransactionsSearchRs getTransactions() throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
-
         TransactionsSearchRs transactions = transactionsService.getTransactions(login, null, true);
 
         log.info("Returning Transactions for login '{}' - {}", login, transactions);
