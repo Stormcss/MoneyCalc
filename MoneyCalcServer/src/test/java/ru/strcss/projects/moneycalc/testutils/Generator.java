@@ -13,6 +13,7 @@ import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.BaseStatistics;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDate;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDateSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SummaryBySection;
 
@@ -247,6 +248,13 @@ public class Generator {
         return generateCountedList(count, value -> {
             LocalDate date = LocalDate.now().minus(value, ChronoUnit.DAYS);
             return new SumByDate(date, BigDecimal.valueOf(value));
+        });
+    }
+
+    public static List<SumByDateSection> generateSumByDateSectionList(int count) {
+        return generateCountedList(count, value -> {
+            LocalDate date = LocalDate.now().minus(value, ChronoUnit.DAYS);
+            return new SumByDateSection(date, "Name" + value, BigDecimal.valueOf(value));
         });
     }
 

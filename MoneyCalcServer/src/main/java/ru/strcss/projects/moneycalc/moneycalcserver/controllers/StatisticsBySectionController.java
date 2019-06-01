@@ -13,7 +13,12 @@ import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.ItemsContain
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.StatisticsFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SummaryBySection;
+import ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.RequestValidation;
+import ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions.IncorrectRequestException;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.StatisticsBySectionService;
+
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.DATE_SEQUENCE_INCORRECT;
+import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.validation.ValidationUtils.isDateSequenceValid;
 
 @Slf4j
 @RestController
@@ -41,6 +46,13 @@ public class StatisticsBySectionController implements AbstractController {
     public ItemsContainer<SumBySection> getSum(@RequestBody StatisticsFilter statisticsFilter) {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("Requested Sum by Section for login \'{}\' with filter - {}", login, statisticsFilter);
+
+        RequestValidation requestValidation = new RequestValidation.Validator(statisticsFilter, "Getting Statistics")
+                .addValidation(() -> isDateSequenceValid(statisticsFilter.getDateFrom(), statisticsFilter.getDateTo()),
+                        () -> DATE_SEQUENCE_INCORRECT)
+                .validate();
+        if (!requestValidation.isValid())
+            throw new IncorrectRequestException(requestValidation.getReason());
 
         ItemsContainer<SumBySection> sumBySection = statisticsService.getSum(login, statisticsFilter);
 

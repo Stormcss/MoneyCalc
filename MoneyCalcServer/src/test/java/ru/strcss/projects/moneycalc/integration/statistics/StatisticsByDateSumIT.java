@@ -47,29 +47,29 @@ public class StatisticsByDateSumIT extends AbstractIT {
 
     @Test
     public void shouldReturnSumWhenSectionsFilterIsEmpty() {
-        LocalDate rangeFrom = generateDateMinus(DAYS, 3);
-        LocalDate rangeTo = generateDatePlus(DAYS, 1);
-        StatisticsFilter statisticsFilter = new StatisticsFilter(rangeFrom, rangeTo, Collections.emptyList());
+        LocalDate dateFrom = generateDateMinus(DAYS, 3);
+        LocalDate dateTo = generateDatePlus(DAYS, 1);
+        StatisticsFilter statisticsFilter = new StatisticsFilter(dateFrom, dateTo, Collections.emptyList());
 
         ItemsContainer<SumByDate> sumByDateItems = sendRequest(service.getSumByDate(token, statisticsFilter)).body();
 
-        verifyCount(sumByDateItems, 4); //only 4 days match the range
-        verifySumAndDate(sumByDateItems, 0, 400, rangeTo.minus(1, DAYS));
-        verifySumAndDate(sumByDateItems, 3, 2200, rangeFrom);
+        verifyCount(sumByDateItems, 4); //only 4 days match the date
+        verifySumAndDate(sumByDateItems, 0, 400, dateTo.minus(1, DAYS));
+        verifySumAndDate(sumByDateItems, 3, 2200, dateFrom);
         verifyOrder(true, sumByDateItems.getItems());
     }
 
     @Test
     public void shouldReturnSumWhenSectionsFilterIsSet() {
-        LocalDate rangeFrom = generateDateMinus(DAYS, 3);
-        LocalDate rangeTo = generateDatePlus(DAYS, 0);
-        StatisticsFilter statisticsFilter = new StatisticsFilter(rangeFrom, rangeTo, Collections.singletonList(2));
+        LocalDate dateFrom = generateDateMinus(DAYS, 3);
+        LocalDate dateTo = generateDatePlus(DAYS, 0);
+        StatisticsFilter statisticsFilter = new StatisticsFilter(dateFrom, dateTo, Collections.singletonList(2));
 
         ItemsContainer<SumByDate> sumByDateItems = sendRequest(service.getSumByDate(token, statisticsFilter)).body();
 
         verifyCount(sumByDateItems, 3);
-        verifySumAndDate(sumByDateItems, 0, 600, rangeTo.minus(1, DAYS));
-        verifySumAndDate(sumByDateItems, 2, 1200, rangeFrom);
+        verifySumAndDate(sumByDateItems, 0, 600, dateTo.minus(1, DAYS));
+        verifySumAndDate(sumByDateItems, 2, 1200, dateFrom);
     }
 
     private void verifySumAndDate(ItemsContainer<SumByDate> sumByDateItems, int position, int sum, LocalDate date) {

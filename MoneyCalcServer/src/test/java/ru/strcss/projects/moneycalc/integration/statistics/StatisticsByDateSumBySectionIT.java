@@ -47,33 +47,33 @@ public class StatisticsByDateSumBySectionIT extends AbstractIT {
 
     @Test
     public void shouldReturnSumBySectionWhenSectionsFilterIsEmpty() {
-        LocalDate rangeFrom = generateDateMinus(DAYS, 3);
-        LocalDate rangeTo = generateDatePlus(DAYS, 1);
-        StatisticsFilter statisticsFilter = new StatisticsFilter(rangeFrom, rangeTo, Collections.emptyList());
+        LocalDate dateFrom = generateDateMinus(DAYS, 3);
+        LocalDate dateTo = generateDatePlus(DAYS, 1);
+        StatisticsFilter statisticsFilter = new StatisticsFilter(dateFrom, dateTo, Collections.emptyList());
 
         ItemsContainer<SumByDateSection> sumByDateItems = sendRequest(service.getSumByDateSection(token, statisticsFilter)).body();
 
         verifyCount(sumByDateItems, 7);
-        verifySumDateAndName(sumByDateItems, 0, 400, rangeTo.minus(1, DAYS), "Еда");
-        verifySumDateAndName(sumByDateItems, 1, 600, rangeTo.minus(2, DAYS), "Еда");
-        verifySumDateAndName(sumByDateItems, 2, 600, rangeTo.minus(2, DAYS), "Свое");
-        verifySumDateAndName(sumByDateItems, 3, 800, rangeTo.minus(3, DAYS), "Еда");
-        verifySumDateAndName(sumByDateItems, 4, 900, rangeTo.minus(3, DAYS), "Свое");
+        verifySumDateAndName(sumByDateItems, 0, 400, dateTo.minus(1, DAYS), "Еда");
+        verifySumDateAndName(sumByDateItems, 1, 600, dateTo.minus(2, DAYS), "Еда");
+        verifySumDateAndName(sumByDateItems, 2, 600, dateTo.minus(2, DAYS), "Свое");
+        verifySumDateAndName(sumByDateItems, 3, 800, dateTo.minus(3, DAYS), "Еда");
+        verifySumDateAndName(sumByDateItems, 4, 900, dateTo.minus(3, DAYS), "Свое");
         verifyOrder(true, sumByDateItems.getItems());
     }
 
     @Test
     public void shouldReturnSumWhenSectionsFilterIsSet() {
-        LocalDate rangeFrom = generateDateMinus(DAYS, 3);
-        LocalDate rangeTo = generateDatePlus(DAYS, 0);
-        StatisticsFilter statisticsFilter = new StatisticsFilter(rangeFrom, rangeTo, Collections.singletonList(2));
+        LocalDate dateFrom = generateDateMinus(DAYS, 3);
+        LocalDate dateTo = generateDatePlus(DAYS, 0);
+        StatisticsFilter statisticsFilter = new StatisticsFilter(dateFrom, dateTo, Collections.singletonList(2));
 
         ItemsContainer<SumByDateSection> sumByDateItems = sendRequest(service.getSumByDateSection(token, statisticsFilter)).body();
 
         verifyCount(sumByDateItems, 3);
-        verifySumDateAndName(sumByDateItems, 0, 600, rangeTo.minus(1, DAYS), "Свое");
-        verifySumDateAndName(sumByDateItems, 1, 900, rangeTo.minus(2, DAYS), "Свое");
-        verifySumDateAndName(sumByDateItems, 2, 1200, rangeTo.minus(3, DAYS), "Свое");
+        verifySumDateAndName(sumByDateItems, 0, 600, dateTo.minus(1, DAYS), "Свое");
+        verifySumDateAndName(sumByDateItems, 1, 900, dateTo.minus(2, DAYS), "Свое");
+        verifySumDateAndName(sumByDateItems, 2, 1200, dateTo.minus(3, DAYS), "Свое");
     }
 
     private void verifySumDateAndName(ItemsContainer<SumByDateSection> sumByDateItems, int position, int sum, LocalDate date, String name) {

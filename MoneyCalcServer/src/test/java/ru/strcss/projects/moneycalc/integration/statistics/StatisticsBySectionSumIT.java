@@ -38,9 +38,9 @@ public class StatisticsBySectionSumIT extends AbstractIT {
 
     @Test
     public void shouldReturnSumWhenSectionsFilterIsEmpty() {
-        LocalDate rangeFrom = generateDateMinus(DAYS, 3);
-        LocalDate rangeTo = generateDatePlus(DAYS, 1);
-        StatisticsFilter statisticsFilter = new StatisticsFilter(rangeFrom, rangeTo, Collections.emptyList());
+        LocalDate dateFrom = generateDateMinus(DAYS, 3);
+        LocalDate dateTo = generateDatePlus(DAYS, 1);
+        StatisticsFilter statisticsFilter = new StatisticsFilter(dateFrom, dateTo, Collections.emptyList());
 
         ItemsContainer<SumBySection> sumBySectionItems = sendRequest(service.getSumBySection(token, statisticsFilter)).body();
 
@@ -52,9 +52,9 @@ public class StatisticsBySectionSumIT extends AbstractIT {
 
     @Test
     public void shouldReturnSumWhenSectionsFilterIsSet() {
-        LocalDate rangeFrom = generateDateMinus(DAYS, 3);
-        LocalDate rangeTo = generateDatePlus(DAYS, 1);
-        StatisticsFilter statisticsFilter = new StatisticsFilter(rangeFrom, rangeTo, Collections.singletonList(2));
+        LocalDate dateFrom = generateDateMinus(DAYS, 3);
+        LocalDate dateTo = generateDatePlus(DAYS, 1);
+        StatisticsFilter statisticsFilter = new StatisticsFilter(dateFrom, dateTo, Collections.singletonList(2));
 
         ItemsContainer<SumBySection> sumBySectionItems = sendRequest(service.getSumBySection(token, statisticsFilter)).body();
 

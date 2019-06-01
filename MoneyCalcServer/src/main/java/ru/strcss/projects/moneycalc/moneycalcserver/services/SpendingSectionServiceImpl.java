@@ -32,7 +32,10 @@ public class SpendingSectionServiceImpl implements SpendingSectionService {
                                                         boolean withRemovedOnly) throws Exception {
         SpendingSectionFilter filter = new SpendingSectionFilter(withNonAdded, withRemoved, withRemovedOnly);
         return metricsService.getTimersStorage().get(TimerType.SPENDING_SECTIONS_GET_TIMER)
-                .recordCallable(() -> sectionsMapper.getSpendingSections(login, filter));
+                .recordCallable(() -> {
+                    SpendingSectionsSearchRs spendingSections = sectionsMapper.getSpendingSections(login, filter);
+                    return spendingSections == null ? SpendingSectionsSearchRs.generateEmpty() : spendingSections;
+                });
     }
 
     @Override

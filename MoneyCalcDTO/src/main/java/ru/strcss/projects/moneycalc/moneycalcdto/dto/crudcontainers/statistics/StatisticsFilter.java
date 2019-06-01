@@ -17,16 +17,16 @@ import java.util.List;
 @AllArgsConstructor
 public class StatisticsFilter implements AbstractContainer {
 
-    private LocalDate rangeFrom;
-    private LocalDate rangeTo;
+    private LocalDate dateFrom;
+    private LocalDate dateTo;
     private List<Integer> sectionIds;
 
     @Override
     public ValidationResult isValid() {
         List<String> reasons = new ArrayList<>();
 
-        if (rangeFrom == null) reasons.add("rangeFrom is empty");
-        if (rangeTo == null) reasons.add("rangeTo is empty");
+        if (dateFrom == null) reasons.add("dateFrom is empty");
+        if (dateTo == null) reasons.add("dateTo is empty");
 
         return new ValidationResult(reasons.isEmpty(), reasons);
     }

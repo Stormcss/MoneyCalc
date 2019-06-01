@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Import;
 import org.springframework.test.context.ContextConfiguration;
 import org.testng.annotations.BeforeMethod;
+import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.ItemsContainer;
@@ -38,8 +39,10 @@ import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.Transact
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
+import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.not;
@@ -170,6 +173,39 @@ public class StatisticsBySectionControllerTest extends AbstractControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.count", is(0)))
                 .andExpect(jsonPath("$.items.length()", is(0)));
+    }
+
+    @Test(dataProvider = "filterMissingFieldsProvider")
+    void shouldReturnErrorWhenFilterHasMissingFields(StatisticsFilter statisticsFilter) throws Exception {
+        mockMvc.perform(post("/api/stats/bySection/sum")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(statisticsFilter)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.userMessage", containsString("Required fields are incorrect:")));
+    }
+
+    @Test
+    void shouldReturnErrorWhenFilterDateSequenceIsIncorrect() throws Exception {
+        LocalDate dateFrom = LocalDate.now();
+        LocalDate dateTo = LocalDate.now().minus(1, ChronoUnit.DAYS);
+        StatisticsFilter statisticsFilter = new StatisticsFilter(dateFrom, dateTo, Collections.emptyList());
+
+        mockMvc.perform(post("/api/stats/bySection/sum")
+                .header("Content-Type", "application/json;charset=UTF-8")
+                .with(user(USER_LOGIN))
+                .content(serializeToJson(statisticsFilter)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.userMessage", is("Incorrect date sequence: dateFrom must be before dateTo")));
+    }
+
+    @DataProvider(name = "filterMissingFieldsProvider")
+    public Object[] filterMissingFieldsProvider() {
+        return new Object[]{
+                new StatisticsFilter(null, null, null),
+                new StatisticsFilter(LocalDate.now(), null, null),
+                new StatisticsFilter(null, LocalDate.now(), null),
+        };
     }
 
     private void resetMocks() {
