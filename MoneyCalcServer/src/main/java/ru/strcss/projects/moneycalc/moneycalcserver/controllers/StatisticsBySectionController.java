@@ -43,7 +43,7 @@ public class StatisticsBySectionController implements AbstractController {
     }
 
     @PostMapping(value = "/sum")
-    public ItemsContainer<SumBySection> getSum(@RequestBody StatisticsFilter statisticsFilter) {
+    public ItemsContainer<SumBySection> getSum(@RequestBody StatisticsFilter statisticsFilter) throws Exception {
         String login = SecurityContextHolder.getContext().getAuthentication().getName();
         log.debug("Requested Sum by Section for login \'{}\' with filter - {}", login, statisticsFilter);
 

@@ -12,6 +12,7 @@ import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.StatisticsFilter;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.handlers.HttpExceptionHandler;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.StatsByDateMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.StatisticsByDateService;
@@ -165,8 +166,8 @@ public class StatisticsByDateControllerTest extends AbstractControllerTest {
     @TestConfiguration
     static class Config {
         @Bean
-        StatisticsByDateService statisticsByDateService(StatsByDateMapper statsMapper) {
-            return new StatisticsByDateService(statsMapper);
+        StatisticsByDateService statisticsByDateService(StatsByDateMapper statsMapper, MetricsService metricsService) {
+            return new StatisticsByDateService(statsMapper, metricsService);
         }
 
         @Bean

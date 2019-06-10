@@ -64,12 +64,13 @@ public class StatisticsBySectionService {
                 .build();
         // TODO: 13.02.2018 should be client's time
 
-        return metricsService.getTimersStorage().get(TimerType.STATS_PROCESS_TIMER)
+        return metricsService.getTimersStorage().get(TimerType.STATS_SUMMARY_BY_SECTION_PROCESS_TIMER)
                 .recordCallable(() -> statisticsHandler.calculateSummaryStatisticsBySection(calculationContainer));
     }
 
-    public ItemsContainer<SumBySection> getSum(String login, StatisticsFilter statisticsFilter) {
-        ItemsContainer<SumBySection> sumBySection = statsMapper.getSum(login, statisticsFilter);
+    public ItemsContainer<SumBySection> getSum(String login, StatisticsFilter statisticsFilter) throws Exception {
+        ItemsContainer<SumBySection> sumBySection = metricsService.getTimersStorage().get(TimerType.STATS_SUM_BY_SECTION_TIMER)
+                .recordCallable(() -> statsMapper.getSum(login, statisticsFilter));
         return sumBySection != null ? sumBySection : ItemsContainer.buildEmpty();
     }
 }
