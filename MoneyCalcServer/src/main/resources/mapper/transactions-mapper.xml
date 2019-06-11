@@ -21,14 +21,16 @@
         <result property="count" column="count"/>
         <association property="stats"
                      javaType="ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsStats"
-                     autoMapping="true"/>
+                     autoMapping="true">
+            <result property="sum" column="statsSum"/>
+        </association>
         <collection property="items" ofType="ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction"
                     autoMapping="true"/>
     </resultMap>
     <select id="getTransactions" resultMap="getTransactionsMap">
         select count(*) over () as count, t.*
         <if test="isStatsRequired == true">
-            ,sum(t.sum) over() as sum,
+            ,sum(t.sum) over() as statsSum,
             min(t.sum) over() as min,
             max(t.sum) over() as max,
             avg(t.sum) over() as avg
