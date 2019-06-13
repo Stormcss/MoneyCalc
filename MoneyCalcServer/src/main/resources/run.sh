@@ -80,7 +80,6 @@ pid() {
     pid=`ps -ef|grep $jar_name|grep $pid|grep -v grep|awk {'print $2'}`
 }
 
-
 case "$1" in
     start)   start ;;
     stop)    stop ;;

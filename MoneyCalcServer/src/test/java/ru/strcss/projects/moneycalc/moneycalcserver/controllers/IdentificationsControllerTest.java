@@ -11,6 +11,7 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
+import ru.strcss.projects.moneycalc.moneycalcserver.handlers.HttpExceptionHandler;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.IdentificationsMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.IdentificationsServiceImpl;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.IdentificationsService;
@@ -28,8 +29,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.ERROR;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.IDENTIFICATIONS_SAVING_ERROR;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateIdentifications;
 import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
@@ -56,8 +55,7 @@ public class IdentificationsControllerTest extends AbstractControllerTest {
         mockMvc.perform(get("/api/identifications")
                 .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(2)));
+                .andExpect(jsonPath("$.[*]", hasSize(2)));
     }
 
     @Test
@@ -67,8 +65,7 @@ public class IdentificationsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateIdentifications())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(2)));
+                .andExpect(jsonPath("$.[*]", hasSize(2)));
     }
 
     @Test
@@ -78,8 +75,7 @@ public class IdentificationsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new Identifications())))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                .andExpect(jsonPath("$.userMessage", stringContainsInOrder(
                         Arrays.asList("Required fields are incorrect", "name is empty")
                 )));
     }
@@ -93,9 +89,8 @@ public class IdentificationsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateIdentifications())))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(IDENTIFICATIONS_SAVING_ERROR)));
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.userMessage", is(IDENTIFICATIONS_SAVING_ERROR)));
     }
 
     @TestConfiguration
@@ -103,6 +98,11 @@ public class IdentificationsControllerTest extends AbstractControllerTest {
         @Bean
         IdentificationsService identificationsService(IdentificationsMapper identificationsMapper) {
             return new IdentificationsServiceImpl(identificationsMapper);
+        }
+
+        @Bean
+        HttpExceptionHandler httpExceptionHandler() {
+            return new HttpExceptionHandler();
         }
     }
 }

@@ -11,9 +11,11 @@ import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.DataProvider;
 import org.testng.annotations.Test;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.BaseTestContextConfiguration;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
+import ru.strcss.projects.moneycalc.moneycalcserver.handlers.HttpExceptionHandler;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.RegistryMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.SpendingSectionsMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.model.dto.SpendingSectionFilter;
@@ -21,7 +23,6 @@ import ru.strcss.projects.moneycalc.moneycalcserver.services.SpendingSectionServ
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.SpendingSectionService;
 
 import java.util.Arrays;
-import java.util.List;
 
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
@@ -40,8 +41,6 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.ERROR;
-import static ru.strcss.projects.moneycalc.moneycalcdto.dto.Status.SUCCESS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_EMPTY;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_ID_NOT_EXISTS;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_NAME_EXISTS;
@@ -50,7 +49,7 @@ import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.Con
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerMessages.SPENDING_SECTION_SAVING_ERROR;
 import static ru.strcss.projects.moneycalc.moneycalcserver.controllers.utils.ControllerUtils.fillLog;
 import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSection;
-import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSectionList;
+import static ru.strcss.projects.moneycalc.testutils.Generator.generateSpendingSectionsSearchRs;
 import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
 
 /**
@@ -63,14 +62,14 @@ import static ru.strcss.projects.moneycalc.testutils.TestUtils.serializeToJson;
 public class SpendingSectionsControllerTest extends AbstractControllerTest {
 
     private final int SECTIONS_COUNT = 5;
-    private List<SpendingSection> sectionListDefault =
-            generateSpendingSectionList(SECTIONS_COUNT, false, false, false);
-    private List<SpendingSection> sectionListWithNonAdded =
-            generateSpendingSectionList(SECTIONS_COUNT, true, false, false);
-    private List<SpendingSection> sectionListWithRemoved =
-            generateSpendingSectionList(SECTIONS_COUNT, false, true, false);
-    private List<SpendingSection> sectionListWithRemovedOnly =
-            generateSpendingSectionList(SECTIONS_COUNT, false, true, true);
+    private SpendingSectionsSearchRs sectionsRsDefault =
+            generateSpendingSectionsSearchRs(SECTIONS_COUNT, false, false, false);
+    private SpendingSectionsSearchRs sectionsRsWithNonAdded =
+            generateSpendingSectionsSearchRs(SECTIONS_COUNT, true, false, false);
+    private SpendingSectionsSearchRs sectionsRsWithRemoved =
+            generateSpendingSectionsSearchRs(SECTIONS_COUNT, false, true, false);
+    private SpendingSectionsSearchRs sectionsRsWithRemovedOnly =
+            generateSpendingSectionsSearchRs(SECTIONS_COUNT, false, true, true);
 
     @MockBean
     @Autowired
@@ -85,12 +84,12 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
         doAnswer(invocation -> {
             SpendingSectionFilter sectionFilter = (SpendingSectionFilter) invocation.getArguments()[1];
             if (sectionFilter.isWithRemovedOnly())
-                return sectionListWithRemovedOnly;
+                return sectionsRsWithRemovedOnly;
             if (sectionFilter.isWithRemoved())
-                return sectionListWithRemoved;
+                return sectionsRsWithRemoved;
             if (sectionFilter.isWithNonAdded())
-                return sectionListWithNonAdded;
-            return sectionListDefault;
+                return sectionsRsWithNonAdded;
+            return sectionsRsDefault;
         }).when(sectionsMapper).getSpendingSections(anyString(), any(SpendingSectionFilter.class));
 
         when(sectionsMapper.updateSpendingSection(anyString(), anyInt(), any(SpendingSection.class)))
@@ -112,10 +111,9 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
         mockMvc.perform(get("/api/spendingSections")
                 .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
-                .andExpect(jsonPath("$.payload[*].isAdded", everyItem(is(true))))
-                .andExpect(jsonPath("$.payload[*].isRemoved", everyItem(is(false))));
+                .andExpect(jsonPath("$.items[*]", hasSize(SECTIONS_COUNT)))
+                .andExpect(jsonPath("$.items[*].isAdded", everyItem(is(true))))
+                .andExpect(jsonPath("$.items[*].isRemoved", everyItem(is(false))));
     }
 
     @Test
@@ -123,11 +121,10 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
         mockMvc.perform(get("/api/spendingSections?withNonAdded=true")
                 .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
-                .andExpect(jsonPath("$.payload[:" + (SECTIONS_COUNT - 1) + "].isAdded", everyItem(is(true))))
-                .andExpect(jsonPath("$.payload[-1].isAdded", is(false)))
-                .andExpect(jsonPath("$.payload[*].isRemoved", everyItem(is(false))));
+                .andExpect(jsonPath("$.items[*]", hasSize(SECTIONS_COUNT)))
+                .andExpect(jsonPath("$.items[:" + (SECTIONS_COUNT - 1) + "].isAdded", everyItem(is(true))))
+                .andExpect(jsonPath("$.items[-1].isAdded", is(false)))
+                .andExpect(jsonPath("$.items[*].isRemoved", everyItem(is(false))));
     }
 
     @Test
@@ -135,11 +132,10 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
         mockMvc.perform(get("/api/spendingSections?withRemoved=true")
                 .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
-                .andExpect(jsonPath("$.payload[:" + (SECTIONS_COUNT - 1) + "].isRemoved", everyItem(is(false))))
-                .andExpect(jsonPath("$.payload[-1].isRemoved", is(true)))
-                .andExpect(jsonPath("$.payload[*].isAdded", everyItem(is(true))));
+                .andExpect(jsonPath("$.items[*]", hasSize(SECTIONS_COUNT)))
+                .andExpect(jsonPath("$.items[:" + (SECTIONS_COUNT - 1) + "].isRemoved", everyItem(is(false))))
+                .andExpect(jsonPath("$.items[-1].isRemoved", is(true)))
+                .andExpect(jsonPath("$.items[*].isAdded", everyItem(is(true))));
     }
 
     @Test
@@ -147,10 +143,9 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
         mockMvc.perform(get("/api/spendingSections?withRemovedOnly=true")
                 .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
-                .andExpect(jsonPath("$.payload[*].isRemoved", everyItem(is(true))))
-                .andExpect(jsonPath("$.payload[*].isAdded", everyItem(is(true))));
+                .andExpect(jsonPath("$.items[*]", hasSize(SECTIONS_COUNT)))
+                .andExpect(jsonPath("$.items[*].isRemoved", everyItem(is(true))))
+                .andExpect(jsonPath("$.items[*].isAdded", everyItem(is(true))));
     }
 
     @Test
@@ -160,8 +155,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateSpendingSection())))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)));
+                .andExpect(jsonPath("$.items[*]", hasSize(SECTIONS_COUNT)));
     }
 
     @Test
@@ -171,8 +165,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection()))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)));
+                .andExpect(jsonPath("$.items[*]", hasSize(SECTIONS_COUNT)));
     }
 
     /**
@@ -182,20 +175,20 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
     void shouldUpdateSpendingSectionWithOldName() throws Exception {
         String sectionName = "name";
 
-        List<SpendingSection> spendingSections = generateSpendingSectionList(5, true, false, false);
-        spendingSections.get(spendingSections.size() - 1).setName(sectionName);
-        Integer sectionId = spendingSections.get(spendingSections.size() - 1).getSectionId();
+        SpendingSectionsSearchRs spendingSectionsRs = generateSpendingSectionsSearchRs(5, true,
+                false, false);
+        spendingSectionsRs.getItems().get(spendingSectionsRs.getItems().size() - 1).setName(sectionName);
+        Integer sectionId = spendingSectionsRs.getItems().get(spendingSectionsRs.getItems().size() - 1).getSectionId();
 
         when(sectionsMapper.getSpendingSections(anyString(), any(SpendingSectionFilter.class)))
-                .thenReturn(spendingSections);
+                .thenReturn(spendingSectionsRs);
 
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(sectionId, generateSpendingSection(sectionName)))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)));
+                .andExpect(jsonPath("$.items[*]", hasSize(SECTIONS_COUNT)));
     }
 
     /**
@@ -211,8 +204,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, spendingSection))))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)));
+                .andExpect(jsonPath("$.items[*]", hasSize(SECTIONS_COUNT)));
     }
 
     @Test
@@ -221,10 +213,9 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.serverStatus", is(SUCCESS.name())))
-                .andExpect(jsonPath("$.payload[*]", hasSize(SECTIONS_COUNT)))
-                .andExpect(jsonPath("$.payload[*].isAdded", everyItem(is(true))))
-                .andExpect(jsonPath("$.payload[*].isRemoved", everyItem(is(false))));
+                .andExpect(jsonPath("$.items[*]", hasSize(SECTIONS_COUNT)))
+                .andExpect(jsonPath("$.items[*].isAdded", everyItem(is(true))))
+                .andExpect(jsonPath("$.items[*].isRemoved", everyItem(is(false))));
     }
 
     @Test(dataProvider = "incorrectSectionAddDataProvider")
@@ -236,8 +227,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(content))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", stringContainsInOrder(
+                .andExpect(jsonPath("$.userMessage", stringContainsInOrder(
                         Arrays.asList("Required fields are incorrect:", expectedHint)
                 )));
     }
@@ -253,8 +243,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateSpendingSection(sectionName))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(fillLog(SPENDING_SECTION_NAME_EXISTS, sectionName))));
+                .andExpect(jsonPath("$.userMessage", is(fillLog(SPENDING_SECTION_NAME_EXISTS, sectionName))));
     }
 
     @Test
@@ -266,9 +255,8 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(generateSpendingSection())))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(SPENDING_SECTION_SAVING_ERROR)));
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.userMessage", is(SPENDING_SECTION_SAVING_ERROR)));
     }
 
     @Test
@@ -282,8 +270,7 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(sectionId, generateSpendingSection()))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(fillLog(SPENDING_SECTION_ID_NOT_EXISTS, String.valueOf(sectionId)))));
+                .andExpect(jsonPath("$.userMessage", is(fillLog(SPENDING_SECTION_ID_NOT_EXISTS, String.valueOf(sectionId)))));
     }
 
     @Test
@@ -293,27 +280,25 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, new SpendingSection()))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(SPENDING_SECTION_EMPTY)));
+                .andExpect(jsonPath("$.userMessage", is(SPENDING_SECTION_EMPTY)));
     }
 
     @Test
     void shouldNotUpdateSpendingSectionWithDisallowedName() throws Exception {
         String sectionName = "name";
 
-        List<SpendingSection> spendingSections = generateSpendingSectionList(5, true, false, false);
-        spendingSections.get(spendingSections.size() - 1).setName(sectionName);
+        SpendingSectionsSearchRs sectionsSearchRs = generateSpendingSectionsSearchRs(5, true, false, false);
+        sectionsSearchRs.getItems().get(sectionsSearchRs.getItems().size() - 1).setName(sectionName);
 
         when(sectionsMapper.getSpendingSections(anyString(), any(SpendingSectionFilter.class)))
-                .thenReturn(spendingSections);
+                .thenReturn(sectionsSearchRs);
 
         mockMvc.perform(put("/api/spendingSections")
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection(sectionName)))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(fillLog(SPENDING_SECTION_NAME_EXISTS, sectionName))));
+                .andExpect(jsonPath("$.userMessage", is(fillLog(SPENDING_SECTION_NAME_EXISTS, sectionName))));
     }
 
     @Test
@@ -325,9 +310,8 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection()))))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(SPENDING_SECTION_NOT_FOUND)));
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.userMessage", is(SPENDING_SECTION_NOT_FOUND)));
     }
 
     @Test
@@ -339,9 +323,8 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
                 .header("Content-Type", "application/json;charset=UTF-8")
                 .with(user(USER_LOGIN))
                 .content(serializeToJson(new SpendingSectionUpdateContainer(1, generateSpendingSection()))))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.serverStatus", is(ERROR.name())))
-                .andExpect(jsonPath("$.message", is(SPENDING_SECTION_NOT_DELETED)));
+                .andExpect(status().isInternalServerError())
+                .andExpect(jsonPath("$.userMessage", is(SPENDING_SECTION_NOT_DELETED)));
     }
 
     @DataProvider(name = "incorrectSectionAddDataProvider")
@@ -363,6 +346,11 @@ public class SpendingSectionsControllerTest extends AbstractControllerTest {
         SpendingSectionService sectionService(SpendingSectionsMapper sectionsMapper, RegistryMapper registryMapper,
                                               MetricsService metricsService) {
             return new SpendingSectionServiceImpl(sectionsMapper, registryMapper, metricsService);
+        }
+
+        @Bean
+        HttpExceptionHandler httpExceptionHandler() {
+            return new HttpExceptionHandler();
         }
     }
 }

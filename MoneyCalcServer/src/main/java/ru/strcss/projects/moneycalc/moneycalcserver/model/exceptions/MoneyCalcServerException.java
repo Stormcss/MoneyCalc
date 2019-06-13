@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcserver.model.dto.exceptions;
+package ru.strcss.projects.moneycalc.moneycalcserver.model.exceptions;
 
 /**
  * Created by Stormcss

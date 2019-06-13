@@ -20,8 +20,11 @@ public enum TimerType {
     SPENDING_SECTION_DELETE_TIMER("MoneyCalc - spendingSectionDeleteTimer", "Время удаления статьи расхода"),
     SETTINGS_GET_TIMER("MoneyCalc - settingsGetTimer", "Время получения настроек"),
     SETTINGS_UPDATE_TIMER("MoneyCalc - settingsUpdateTimer", "Время обновлния настроек"),
-    STATS_FILTERED_PROCESS_TIMER("MoneyCalc - statsFilteredProcessTimer", "Время обработки статистики с фильтром"),
-    STATS_PROCESS_TIMER("MoneyCalc - statsProcessTimer", "Время обработки статистики");
+    STATS_SUM_BY_SECTION_TIMER("MoneyCalc - statsSumBySectionTimer", "Время получения статистики sumBySection"),
+    STATS_SUM_BY_DATE_TIMER("MoneyCalc - statsSumByDateTimer", "Время получения статистики sumByDate"),
+    STATS_SUM_BY_DATE_SECTION_TIMER("MoneyCalc - statsSumByDateSectionTimer", "Время получения статистики sumByDateSection"),
+    STATS_SUMMARY_BY_SECTION_PROCESS_TIMER("MoneyCalc - statsSummaryBySectionProcessTimer",
+            "Время обработки статистики summaryBySection");
     private String name;
     private String description;
 }

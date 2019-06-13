@@ -1,4 +1,4 @@
-package ru.strcss.projects.moneycalc.moneycalcdto.entities;
+package ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics;
 
 import lombok.Builder;
 import lombok.Data;
@@ -7,7 +7,7 @@ import java.io.Serializable;
 
 @Builder
 @Data
-public class FinanceSummaryBySection implements Serializable {
+public class SummaryBySection implements Serializable {
     private Integer sectionId;
     private String sectionName;
     private Double todayBalance;

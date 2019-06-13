@@ -6,8 +6,7 @@ import org.springframework.stereotype.Component;
 import retrofit2.Call;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
@@ -47,9 +46,9 @@ class ServerConnector implements ServerConnectorI {
     }
 
     @Override
-    public List<SpendingSection> saveSpendingSection(String token, SpendingSection spendingSection) {
+    public SpendingSectionsSearchRs saveSpendingSection(String token, SpendingSection spendingSection) {
         try {
-            return service.addSpendingSection(token, spendingSection).execute().body().getPayload();
+            return service.addSpendingSection(token, spendingSection).execute().body();
         } catch (IOException e) {
             throw new MigratorException("Saving SpendingSection has failed", e);
         }
@@ -63,9 +62,9 @@ class ServerConnector implements ServerConnectorI {
     private String registerPerson(Access access) {
         Identifications identifications = new Identifications(null, properties.getName());
         try {
-            MoneyCalcRs<Person> registerResponse = service.registerPerson(new Credentials(access, identifications)).execute().body();
-            if (registerResponse.getServerStatus() != Status.SUCCESS)
-                throw new MigratorException("Registration has failed", new RuntimeException(registerResponse.getMessage()));
+            Response<Person> registerResponse = service.registerPerson(new Credentials(access, identifications)).execute();
+            if (!registerResponse.isSuccessful())
+                throw new MigratorException("Registration has failed", new RuntimeException(registerResponse.message()));
             return service.login(access).execute().headers().get("Authorization");
         } catch (IOException e) {
             throw new MigratorException("Registration has failed!", e);
@@ -73,9 +72,9 @@ class ServerConnector implements ServerConnectorI {
     }
 
     @Override
-    public List<SpendingSection> getSectionsList(String token) {
+    public SpendingSectionsSearchRs getSectionsList(String token) {
         try {
-            return service.getSpendingSections(token).execute().body().getPayload();
+            return service.getSpendingSections(token).execute().body();
         } catch (IOException e) {
             throw new MigratorException("Getting SpendingSection list has failed!", e);
         }
@@ -83,19 +82,19 @@ class ServerConnector implements ServerConnectorI {
 
 
     @Override
-    public Status saveTransactions(String token, List<Transaction> transactionsToAdd, String login) {
+    public boolean saveTransactions(String token, List<Transaction> transactionsToAdd, String login) {
         boolean rollback = false;
 
         List<Transaction> addedTransactions = new ArrayList<>();
 
         for (Transaction transaction : transactionsToAdd) {
             try {
-                MoneyCalcRs<Transaction> response = service.addTransaction(token, transaction).execute().body();
-                if (response == null || response.getServerStatus() != Status.SUCCESS || response.getPayload() == null) {
+                Response<Transaction> response = service.addTransaction(token, transaction).execute();
+                if (!response.isSuccessful() || response.body() == null) {
                     rollback = true;
                     break;
                 } else {
-                    addedTransactions.add(response.getPayload());
+                    addedTransactions.add(response.body());
                 }
             } catch (Exception e) {
                 rollback = true;
@@ -117,6 +116,6 @@ class ServerConnector implements ServerConnectorI {
             );
         }
         log.info("Added {} transactions...", addedTransactions.size());
-        return rollback ? Status.ERROR : Status.SUCCESS;
+        return !rollback;
     }
 }

@@ -19,9 +19,7 @@ import ru.strcss.projects.moneycalc.moneycalcserver.MoneyCalcApplication;
 import java.sql.SQLException;
 import java.time.LocalDate;
 
-@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = {
-        MoneyCalcApplication.class
-})
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT, classes = MoneyCalcApplication.class)
 public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
 
     @LocalServerPort
@@ -30,7 +28,7 @@ public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
     @Autowired
     JdbcTemplate jdbcTemplate;
 
-    MoneyCalcClient service;
+    public MoneyCalcClient service;
 
     private final String CREATE_SCHEMA_PATH = "dbSchema/createSchema_v1.0.sql";
     private final String DROP_SCHEMA_PATH = "dbSchema/dropSchema_v1.0.sql";
@@ -49,7 +47,6 @@ public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
                 .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
                 .create();
 
-        // Setup Retrofit
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://localhost:" + SpringBootPort + "/")
                 .addConverterFactory(GsonConverterFactory.create(gson))

@@ -13,8 +13,7 @@ import org.testng.annotations.BeforeSuite;
 import org.testng.annotations.Test;
 import retrofit2.Response;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.Status;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
@@ -53,7 +52,7 @@ public class MigratorMainTest extends AbstractTestNGSpringContextTests {
     @Autowired
     private FileParser fileParser;
 
-    private List<SpendingSection> spendingSections = new ArrayList<>();
+    private SpendingSectionsSearchRs sectionsSearchRs = new SpendingSectionsSearchRs(0, new ArrayList<>());
 
     private Long lastTransactionId = 0L;
 
@@ -71,7 +70,7 @@ public class MigratorMainTest extends AbstractTestNGSpringContextTests {
 
         ArgumentCaptor<Transaction> transactionCaptor = ArgumentCaptor.forClass(Transaction.class);
 
-        assertEquals(spendingSections.size(), 5);
+        assertEquals(sectionsSearchRs.getItems().size(), 5);
         verify(migrationAPI, times(3)).addSpendingSection(anyString(), any(SpendingSection.class));
         verify(migrationAPI, times(102)).addTransaction(anyString(), transactionCaptor.capture());
 
@@ -84,7 +83,7 @@ public class MigratorMainTest extends AbstractTestNGSpringContextTests {
 
     private void prepareMocks() {
         when(migrationAPI.registerPerson(any(Credentials.class)))
-                .thenReturn(mockedCall(Response.success(new MoneyCalcRs<>(Status.SUCCESS, new Person(), null))));
+                .thenReturn(mockedCall(Response.success(new Person())));
 
         final Headers headers = new Headers.Builder().add("Authorization", "Bearer TEST").build();
         Response<Void> successfulLoginResponse = Response.success(null, headers);
@@ -92,30 +91,34 @@ public class MigratorMainTest extends AbstractTestNGSpringContextTests {
                 .thenReturn(mockedCall(successfulLoginResponse));
 
         when(migrationAPI.getSpendingSections(anyString()))
-                .thenReturn(mockedCall(Response.success(new MoneyCalcRs<>(Status.SUCCESS, spendingSections, null))));
+                .thenReturn(mockedCall(Response.success(sectionsSearchRs)));
 
         when(migrationAPI.registerPerson(any(Credentials.class)))
-                .thenReturn(mockedCall(Response.success(new MoneyCalcRs<>(Status.SUCCESS, new Person(), null))));
+                .thenReturn(mockedCall(Response.success(new Person())));
 
         doAnswer(invocation -> {
             SpendingSection addedSection = (SpendingSection) invocation.getArguments()[1];
-            addedSection.setId(spendingSections.stream().mapToLong(SpendingSection::getSectionId).max().getAsLong() + 1);
-            addedSection.setSectionId(spendingSections.stream().mapToInt(SpendingSection::getSectionId).max().getAsInt() + 1);
-            spendingSections.add(addedSection);
-            return mockedCall(Response.success(new MoneyCalcRs<>(Status.SUCCESS, spendingSections, null)));
+            addedSection.setId(sectionsSearchRs.getItems().stream().mapToLong(SpendingSection::getSectionId)
+                    .max().getAsLong() + 1);
+            addedSection.setSectionId(sectionsSearchRs.getItems().stream().mapToInt(SpendingSection::getSectionId)
+                    .max().getAsInt() + 1);
+            sectionsSearchRs.getItems().add(addedSection);
+            return mockedCall(Response.success(sectionsSearchRs));
         }).when(migrationAPI).addSpendingSection(anyString(), any(SpendingSection.class));
 
         doAnswer(invocation -> {
             Transaction addedTransaction = (Transaction) invocation.getArguments()[1];
             addedTransaction.setId(lastTransactionId + 1);
             lastTransactionId++;
-            return mockedCall(Response.success(new MoneyCalcRs<>(Status.SUCCESS, addedTransaction, null)));
+            return mockedCall(Response.success(addedTransaction));
         }).when(migrationAPI).addTransaction(anyString(), any(Transaction.class));
     }
 
     private void prepareSpendingSections() {
-        spendingSections.add(new SpendingSection(1L, 1L, 1, 1, "Food", true, false, 5000L));
-        spendingSections.add(new SpendingSection(1L, 1L, 2, 2, "Other", true, false, 5000L));
+        sectionsSearchRs.getItems().add(new SpendingSection(1L, 1L, 1, 1, "Food",
+                true, false, 5000L));
+        sectionsSearchRs.getItems().add(new SpendingSection(1L, 1L, 2, 2, "Other",
+                true, false, 5000L));
     }
 
     @TestConfiguration

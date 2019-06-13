@@ -2,19 +2,29 @@ package ru.strcss.projects.moneycalc.testutils;
 
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.FinanceSummaryCalculationContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.ItemsContainer;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsStats;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
-import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.BaseStatistics;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDate;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDateSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SummaryBySection;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.temporal.ChronoUnit;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ThreadLocalRandom;
+import java.util.function.IntFunction;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
@@ -104,21 +114,33 @@ public class Generator {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Generates {@link TransactionsSearchRs} object with required parameters
+     *
+     * @param count      - required objects count
+     * @param sectionIds - desired sectionIds for these Transactions
+     */
+    public static TransactionsSearchRs generateTransactionsSearchRs(int count, List<Integer> sectionIds, boolean isStatsRequired) {
+        List<Transaction> transactions = generateTransactionList(count, sectionIds);
+        TransactionsStats stats = new TransactionsStats(BigDecimal.TEN, BigDecimal.ZERO, BigDecimal.ONE, BigDecimal.TEN);
+        return new TransactionsSearchRs(transactions.size(), isStatsRequired ? stats : null, transactions);
+    }
+
     public static String UUID() {
         return UUID.randomUUID().toString().toUpperCase().replace("-", "");
     }
 
     /**
-     * Generates {@link List} of {@link SpendingSection} objects with required parameters
+     * Generates {@link SpendingSectionsSearchRs} object with required parameters
      *
      * @param count         - required objects count
      * @param isNonAdded    - last list item will have {@code isAdded} field as false
      * @param isRemoved     - last list item will have {@code isRemoved} field as true
      * @param isRemovedOnly - each object will have {@code isRemoved} field as true
      */
-    public static List<SpendingSection> generateSpendingSectionList(int count, boolean isNonAdded,
-                                                                    boolean isRemoved,
-                                                                    boolean isRemovedOnly) {
+    public static SpendingSectionsSearchRs generateSpendingSectionsSearchRs(int count, boolean isNonAdded,
+                                                                            boolean isRemoved,
+                                                                            boolean isRemovedOnly) {
 
         List<SpendingSection> spendingSections = IntStream.range(0, count)
                 .mapToObj(id -> generateSpendingSection(null, id + 1, (long) id, null,
@@ -130,7 +152,7 @@ public class Generator {
         if (isRemoved)
             spendingSections.get(spendingSections.size() - 1).setIsRemoved(true);
 
-        return spendingSections;
+        return new SpendingSectionsSearchRs(spendingSections.size(), spendingSections);
     }
 
     public static SpendingSection generateSpendingSection() {
@@ -168,14 +190,14 @@ public class Generator {
         return spendingSection;
     }
 
-    public static List<FinanceSummaryBySection> generateFinanceSummaryBySectionList(int count){
+    public static List<SummaryBySection> generateFinanceSummaryBySectionList(int count) {
         return IntStream.range(0, count)
                 .mapToObj(Generator::generateFinanceSummaryBySection)
                 .collect(Collectors.toList());
     }
 
-    public static FinanceSummaryBySection generateFinanceSummaryBySection(int sectionId) {
-        return FinanceSummaryBySection.builder()
+    public static SummaryBySection generateFinanceSummaryBySection(int sectionId) {
+        return SummaryBySection.builder()
                 .moneyLeftAll(ThreadLocalRandom.current().nextDouble(0, 1000))
                 .moneySpendAll(ThreadLocalRandom.current().nextDouble(0, 1000))
                 .summaryBalance(ThreadLocalRandom.current().nextDouble(0, 1000))
@@ -212,6 +234,34 @@ public class Generator {
                 .today(LocalDate.now())
                 .transactions(transactionsList)
                 .build();
+    }
+
+    public static <E> ItemsContainer<E> generateItemsContainer(List<E> list) {
+        return new ItemsContainer<>((long) list.size(), new BaseStatistics(), list);
+    }
+
+    public static List<SumBySection> generateSumBySectionList(int count) {
+        return generateCountedList(count, value -> new SumBySection("Name" + value, BigDecimal.valueOf(value)));
+    }
+
+    public static List<SumByDate> generateSumByDateList(int count) {
+        return generateCountedList(count, value -> {
+            LocalDate date = LocalDate.now().minus(value, ChronoUnit.DAYS);
+            return new SumByDate(date, BigDecimal.valueOf(value));
+        });
+    }
+
+    public static List<SumByDateSection> generateSumByDateSectionList(int count) {
+        return generateCountedList(count, value -> {
+            LocalDate date = LocalDate.now().minus(value, ChronoUnit.DAYS);
+            return new SumByDateSection(date, "Name" + value, BigDecimal.valueOf(value));
+        });
+    }
+
+    private static <E> List<E> generateCountedList(int count, IntFunction<? extends E> mapper) {
+        return IntStream.range(0, count)
+                .mapToObj(mapper)
+                .collect(Collectors.toList());
     }
 }
 

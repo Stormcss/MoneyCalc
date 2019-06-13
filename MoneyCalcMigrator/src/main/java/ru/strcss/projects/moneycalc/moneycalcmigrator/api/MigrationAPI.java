@@ -8,13 +8,11 @@ import retrofit2.http.Header;
 import retrofit2.http.POST;
 import retrofit2.http.Path;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
-
-import java.util.List;
 
 public interface MigrationAPI {
 
@@ -22,23 +20,23 @@ public interface MigrationAPI {
     Call<Void> login(@Body Access access);
 
     @POST("/api/registration/register")
-    Call<MoneyCalcRs<Person>> registerPerson(@Body Credentials credentials);
+    Call<Person> registerPerson(@Body Credentials credentials);
 
     /**
      * Settings
      */
     @POST("/api/spendingSections")
-    Call<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@Header("Authorization") String token, @Body SpendingSection spendingSection);
+    Call<SpendingSectionsSearchRs> addSpendingSection(@Header("Authorization") String token, @Body SpendingSection spendingSection);
 
     @GET("/api/spendingSections")
-    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSections(@Header("Authorization") String token);
+    Call<SpendingSectionsSearchRs> getSpendingSections(@Header("Authorization") String token);
 
     /**
      * Transactions
      */
     @POST("/api/transactions")
-    Call<MoneyCalcRs<Transaction>> addTransaction(@Header("Authorization") String token, @Body Transaction transaction);
+    Call<Transaction> addTransaction(@Header("Authorization") String token, @Body Transaction transaction);
 
     @DELETE("/api/transactions/{transactionId}")
-    Call<MoneyCalcRs<Void>> deleteTransaction(@Header("Authorization") String token, @Path(value = "transactionId") Long transactionId);
+    Call<Void> deleteTransaction(@Header("Authorization") String token, @Path(value = "transactionId") Long transactionId);
 }

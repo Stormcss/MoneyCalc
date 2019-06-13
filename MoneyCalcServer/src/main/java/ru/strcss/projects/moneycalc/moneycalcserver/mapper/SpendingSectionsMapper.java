@@ -2,10 +2,9 @@ package ru.strcss.projects.moneycalc.moneycalcserver.mapper;
 
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcserver.model.dto.SpendingSectionFilter;
-
-import java.util.List;
 
 /**
  * Created by Stormcss
@@ -13,7 +12,7 @@ import java.util.List;
  */
 @Mapper
 public interface SpendingSectionsMapper {
-    List<SpendingSection> getSpendingSections(@Param("login") String login, @Param("filter") SpendingSectionFilter filter);
+    SpendingSectionsSearchRs getSpendingSections(@Param("login") String login, @Param("filter") SpendingSectionFilter filter);
 
     Integer addSpendingSection(@Param("userId") Long userId, @Param("section") SpendingSection section);
 

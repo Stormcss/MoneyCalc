@@ -3,13 +3,12 @@ package ru.strcss.projects.moneycalc.moneycalcserver.services;
 import lombok.AllArgsConstructor;
 import org.springframework.stereotype.Service;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.MetricsService;
 import ru.strcss.projects.moneycalc.moneycalcserver.configuration.metrics.TimerType;
 import ru.strcss.projects.moneycalc.moneycalcserver.mapper.TransactionsMapper;
 import ru.strcss.projects.moneycalc.moneycalcserver.services.interfaces.TransactionsService;
-
-import java.util.List;
 
 @Service
 @AllArgsConstructor
@@ -24,9 +23,12 @@ public class TransactionsServiceImpl implements TransactionsService {
     }
 
     @Override
-    public List<Transaction> getTransactions(String login, TransactionsSearchFilter getContainer) throws Exception {
+    public TransactionsSearchRs getTransactions(String login, TransactionsSearchFilter getContainer, boolean isStatsRequired) throws Exception {
         return metricsService.getTimersStorage().get(TimerType.TRANSACTIONS_GET_TIMER)
-                .recordCallable(() -> transactionsMapper.getTransactions(login, getContainer));
+                .recordCallable(() -> {
+                    TransactionsSearchRs transactionsRs = transactionsMapper.getTransactions(login, getContainer, isStatsRequired);
+                    return transactionsRs != null ? transactionsRs : TransactionsSearchRs.generateEmpty();
+                });
     }
 
     @Override

@@ -9,25 +9,28 @@ import retrofit2.http.POST;
 import retrofit2.http.PUT;
 import retrofit2.http.Path;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.Credentials;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.MoneyCalcRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.ItemsContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.settings.SpendingSectionUpdateContainer;
-import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.FinanceSummaryFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.spendingsections.SpendingSectionsSearchRs;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.statistics.StatisticsFilter;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionUpdateContainer;
 import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchFilter;
+import ru.strcss.projects.moneycalc.moneycalcdto.dto.crudcontainers.transactions.TransactionsSearchRs;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Access;
-import ru.strcss.projects.moneycalc.moneycalcdto.entities.FinanceSummaryBySection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Identifications;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Person;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Settings;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.SpendingSection;
 import ru.strcss.projects.moneycalc.moneycalcdto.entities.Transaction;
-
-import java.util.List;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDate;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumByDateSection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SumBySection;
+import ru.strcss.projects.moneycalc.moneycalcdto.entities.statistics.SummaryBySection;
 
 public interface MoneyCalcClient {
 
     @POST("/api/registration/register")
-    Call<MoneyCalcRs<Person>> registerPerson(@Body Credentials credentials);
+    Call<Person> registerPerson(@Body Credentials credentials);
 
     @POST("/login")
     Call<Void> login(@Body Access access);
@@ -36,84 +39,92 @@ public interface MoneyCalcClient {
      * Settings
      */
     @PUT("/api/settings")
-    Call<MoneyCalcRs<Settings>> updateSettings(@Header("Authorization") String token,
-                                               @Body Settings settings);
+    Call<Settings> updateSettings(@Header("Authorization") String token,
+                                  @Body Settings settings);
 
     @GET("/api/settings")
-    Call<MoneyCalcRs<Settings>> getSettings(@Header("Authorization") String token);
+    Call<Settings> getSettings(@Header("Authorization") String token);
 
     /**
      * Spending Section
      */
     @POST("/api/spendingSections")
-    Call<MoneyCalcRs<List<SpendingSection>>> addSpendingSection(@Header("Authorization") String token,
-                                                                @Body SpendingSection spendingSection);
+    Call<SpendingSectionsSearchRs> addSpendingSection(@Header("Authorization") String token,
+                                                      @Body SpendingSection spendingSection);
 
     @PUT("/api/spendingSections")
-    Call<MoneyCalcRs<List<SpendingSection>>> updateSpendingSection(@Header("Authorization") String token,
-                                                                   @Body SpendingSectionUpdateContainer updateContainer);
+    Call<SpendingSectionsSearchRs> updateSpendingSection(@Header("Authorization") String token,
+                                                         @Body SpendingSectionUpdateContainer updateContainer);
 
     @DELETE("/api/spendingSections/{sectionId}")
-    Call<MoneyCalcRs<List<SpendingSection>>> deleteSpendingSection(@Header("Authorization") String token,
-                                                                   @Path("sectionId") Integer sectionId);
+    Call<SpendingSectionsSearchRs> deleteSpendingSection(@Header("Authorization") String token,
+                                                         @Path("sectionId") Integer sectionId);
 
     @GET("/api/spendingSections")
-    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSections(@Header("Authorization") String token);
+    Call<SpendingSectionsSearchRs> getSpendingSections(@Header("Authorization") String token);
 
     @GET("/api/spendingSections?withNonAdded=true")
-    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithNonAdded(@Header("Authorization") String token);
+    Call<SpendingSectionsSearchRs> getSpendingSectionsWithNonAdded(@Header("Authorization") String token);
 
     @GET("/api/spendingSections?withRemoved=true")
-    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemoved(@Header("Authorization") String token);
+    Call<SpendingSectionsSearchRs> getSpendingSectionsWithRemoved(@Header("Authorization") String token);
 
     @GET("/api/spendingSections?withRemovedOnly=true")
-    Call<MoneyCalcRs<List<SpendingSection>>> getSpendingSectionsWithRemovedOnly(@Header("Authorization") String token);
+    Call<SpendingSectionsSearchRs> getSpendingSectionsWithRemovedOnly(@Header("Authorization") String token);
 
     /**
      * Identifications
      */
     @PUT("/api/identifications")
-    Call<MoneyCalcRs<Identifications>> saveIdentifications(@Header("Authorization") String token,
-                                                           @Body Identifications identifications);
+    Call<Identifications> saveIdentifications(@Header("Authorization") String token,
+                                              @Body Identifications identifications);
 
     @GET("/api/identifications")
-    Call<MoneyCalcRs<Identifications>> getIdentifications(@Header("Authorization") String token);
+    Call<Identifications> getIdentifications(@Header("Authorization") String token);
 
     /**
      * Transactions
      */
     @GET("/api/transactions")
-    Call<MoneyCalcRs<List<Transaction>>> getTransactions(@Header("Authorization") String token);
+    Call<TransactionsSearchRs> getTransactions(@Header("Authorization") String token);
 
     @POST("/api/transactions/getFiltered")
-    Call<MoneyCalcRs<List<Transaction>>> getTransactions(@Header("Authorization") String token,
-                                                         @Body TransactionsSearchFilter container);
+    Call<TransactionsSearchRs> getTransactions(@Header("Authorization") String token,
+                                               @Body TransactionsSearchFilter container);
 
     @POST("/api/transactions")
-    Call<MoneyCalcRs<Transaction>> addTransaction(@Header("Authorization") String token,
-                                                  @Body Transaction transaction);
+    Call<Transaction> addTransaction(@Header("Authorization") String token,
+                                     @Body Transaction transaction);
 
     @DELETE("/api/transactions/{transactionId}")
-    Call<MoneyCalcRs<Void>> deleteTransaction(@Header("Authorization") String token,
-                                              @Path("transactionId") Long transactionId);
+    Call<Void> deleteTransaction(@Header("Authorization") String token,
+                                 @Path("transactionId") Long transactionId);
 
     @PUT("/api/transactions")
-    Call<MoneyCalcRs<Transaction>> updateTransaction(@Header("Authorization") String token,
-                                                     @Body TransactionUpdateContainer transactionUpdateContainer);
+    Call<Transaction> updateTransaction(@Header("Authorization") String token,
+                                        @Body TransactionUpdateContainer transactionUpdateContainer);
 
     /**
      * Statistics
      */
-    @POST("/api/stats/summaryBySection")
-    Call<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@Header("Authorization") String token);
+    @GET("/api/stats/bySection/summary")
+    Call<ItemsContainer<SummaryBySection>> getSummaryBySection(@Header("Authorization") String token);
 
-    @POST("/api/stats/summaryBySection/getFiltered")
-    Call<MoneyCalcRs<List<FinanceSummaryBySection>>> getFinanceSummaryBySection(@Header("Authorization") String token,
-                                                                                @Body FinanceSummaryFilter getContainer);
+    @POST("/api/stats/bySection/sum")
+    Call<ItemsContainer<SumBySection>> getSumBySection(@Header("Authorization") String token,
+                                                       @Body StatisticsFilter statisticsFilter);
+
+    @POST("/api/stats/byDate/sum")
+    Call<ItemsContainer<SumByDate>> getSumByDate(@Header("Authorization") String token,
+                                                 @Body StatisticsFilter getContainer);
+
+    @POST("/api/stats/byDate/sumBySection")
+    Call<ItemsContainer<SumByDateSection>> getSumByDateSection(@Header("Authorization") String token,
+                                                               @Body StatisticsFilter getContainer);
 
     /**
      * Access
      */
     @GET("/api/access")
-    Call<MoneyCalcRs<Access>> getAccess(@Header("Authorization") String token);
+    Call<Access> getAccess(@Header("Authorization") String token);
 }
