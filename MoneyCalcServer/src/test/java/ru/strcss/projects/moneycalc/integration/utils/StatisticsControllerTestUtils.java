@@ -32,7 +32,6 @@ public class StatisticsControllerTestUtils {
                 .filter(summaryBySection -> summaryBySection.getSectionId().equals(sectionId))
                 .findFirst()
                 .orElseThrow(() -> new RuntimeException("Not found"));
-//        return responseGetStats.getItems().get(0);
     }
 
     /**

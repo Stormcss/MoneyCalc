@@ -47,7 +47,6 @@ public abstract class AbstractIT extends AbstractTestNGSpringContextTests {
                 .registerTypeAdapter(LocalDate.class, new LocalDateAdapter())
                 .create();
 
-        // Setup Retrofit
         Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl("http://localhost:" + SpringBootPort + "/")
                 .addConverterFactory(GsonConverterFactory.create(gson))
